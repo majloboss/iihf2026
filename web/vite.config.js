@@ -15,8 +15,8 @@ export default defineConfig({
         background_color: '#ffffff',
         display: 'standalone',
         icons: [
-          { src: '/logo.png', sizes: '192x192', type: 'image/png' },
-          { src: '/logo.png', sizes: '512x512', type: 'image/png' }
+          { src: '/favicon.png', sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
+          { src: '/logo.png',    sizes: '512x512', type: 'image/png' }
         ]
       }
     })
