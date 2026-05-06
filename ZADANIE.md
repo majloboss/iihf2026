@@ -147,9 +147,18 @@ Admin môže hodnoty meniť. Predvolený systém:
 ---
 
 ## Notifikácie
-- Implementované: **Push notifikácie (Firebase FCM)** + **Email (SMTP fellow.sk)**
-- Každý typ notifikácie môže hráč **vypnúť v nastaveniach profilu**
-- ❓ Aké udalosti spúšťajú notifikáciu? (napr. 30 min pred zápasom, po zadaní výsledku...)
+- Kanály: **Push (Firebase FCM)** + **Email (SMTP fellow.sk)**
+- Každý hráč si nastavuje notifikácie **samostatne pre každý typ**
+- Pre každý typ možno zapnúť/vypnúť push a email zvlášť
+- Pre časové typy si hráč nastaví **X minút pred zápasom**
+
+| Typ | Popis | Nastaviteľný čas |
+|-----|-------|-----------------|
+| `game_start` | Upozornenie na začiatok zápasu | áno (X min pred) |
+| `untipped_game` | Upozornenie na neopatipovaný zápas | áno (X min pred) |
+| `result_entered` | Admin zadal výsledok zápasu | nie |
+| `group_stage_closed` | Uzavretie základnej časti | nie |
+| `new_games_added` | Pridané nové zápasy na tipovanie (play-off) | nie |
 
 ---
 
@@ -169,8 +178,6 @@ Admin môže hodnoty meniť. Predvolený systém:
 | avatar | VARCHAR(255) | názov súboru avatara na serveri |
 | role | VARCHAR(10) DEFAULT 'user' | 'user' \| 'admin' |
 | fcm_token | VARCHAR(255) | Firebase token pre push notifikácie |
-| notif_push | BOOLEAN DEFAULT TRUE | push notifikácie zapnuté |
-| notif_email | BOOLEAN DEFAULT TRUE | email notifikácie zapnuté |
 | created_at | TIMESTAMP | |
 
 ### iihf.teams (číselník tímov)
@@ -213,6 +220,16 @@ Admin môže hodnoty meniť. Predvolený systém:
 | created_at | TIMESTAMP | |
 | updated_at | TIMESTAMP | |
 | UNIQUE(user_id, game_id) | | jeden tip na zápas |
+
+### iihf.notification_settings
+| Pole | Typ | Popis |
+|------|-----|-------|
+| user_id | FK → users | |
+| notif_type | VARCHAR(30) | game_start \| untipped_game \| result_entered \| group_stage_closed \| new_games_added |
+| push_enabled | BOOLEAN DEFAULT TRUE | |
+| email_enabled | BOOLEAN DEFAULT TRUE | |
+| minutes_before | INT | len pre game_start a untipped_game |
+| PK(user_id, notif_type) | | |
 
 ### iihf.scoring_config (bodovanie — nastavuje admin)
 | Pole | Typ | Popis |

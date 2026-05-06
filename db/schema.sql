@@ -17,8 +17,6 @@ CREATE TABLE iihf.users (
     avatar            VARCHAR(255),                       -- nazov suboru avatara na serveri
     role              VARCHAR(10)  NOT NULL DEFAULT 'user', -- 'user' | 'admin'
     fcm_token         VARCHAR(255),                       -- Firebase Cloud Messaging token
-    notif_push        BOOLEAN      NOT NULL DEFAULT TRUE,  -- push notifikacie zapnute
-    notif_email       BOOLEAN      NOT NULL DEFAULT TRUE,  -- email notifikacie zapnute
     created_at        TIMESTAMP    NOT NULL DEFAULT NOW()
 );
 
@@ -77,6 +75,24 @@ CREATE TABLE iihf.games (
     -- typ zapasu
     game_type_code      VARCHAR(10)  NOT NULL,              -- GROUP_A | GROUP_B | QF | SF | BM | F
     game_type_name      VARCHAR(50)  NOT NULL               -- Skupinova faza - Skupina A/B | Stvrtfinale | Semifinale | O bronz | Finale
+);
+
+-- ============================================================
+-- NOTIFICATION SETTINGS (nastavenia notifikacii per user)
+-- notif_type hodnoty:
+--   game_start        - upozornenie na zaciatok zapasu (X minut pred)
+--   untipped_game     - upozornenie na neopatipovany zapas (X minut pred)
+--   result_entered    - upozornenie pri vlozeni vysledku adminom
+--   group_stage_closed- upozornenie pri uzavreti zakladnej casti
+--   new_games_added   - upozornenie pri pridani novych zapasov na tipovanie
+-- ============================================================
+CREATE TABLE iihf.notification_settings (
+    user_id        INT          REFERENCES iihf.users(id) NOT NULL,
+    notif_type     VARCHAR(30)  NOT NULL,
+    push_enabled   BOOLEAN      NOT NULL DEFAULT TRUE,
+    email_enabled  BOOLEAN      NOT NULL DEFAULT TRUE,
+    minutes_before INT,         -- len pre game_start a untipped_game
+    PRIMARY KEY (user_id, notif_type)
 );
 
 -- ============================================================
