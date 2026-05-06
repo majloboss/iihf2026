@@ -312,7 +312,7 @@ Admin môže hodnoty meniť. Predvolený systém:
 - Komunikuje s PHP REST API backendom
 - **Web Push API** pre push notifikácie v prehliadači
 - Inštalovateľná ako PWA (Add to Home Screen na mobile aj desktop)
-- **URL:** ❓ (napr. iihf2026.fellow.sk)
+- **URL:** https://iihf2026.fellow.sk
 
 ### Obrazovky — bežný hráč
 | Obrazovka | Popis |
@@ -344,7 +344,7 @@ Admin môže hodnoty meniť. Predvolený systém:
 - **Backend:** PHP (REST API) — zdieľaný pre web aj Android
 - **Web:** React + Vite PWA, statický build uploadovaný na fellow.sk
 - **Android:** Kotlin, komunikuje s PHP API
-- **URL:** ❓ (napr. iihf2026.fellow.sk)
+- **URL:** https://iihf2026.fellow.sk
 - **Deploy heslo (FTP):** uložené v GitHub Secrets ako `FTP_PASSWORD`
 
 ### DB schémy v DB-BET
