@@ -345,6 +345,7 @@ Admin môže hodnoty meniť. Predvolený systém:
 - **Web:** React + Vite PWA, statický build uploadovaný na fellow.sk
 - **Android:** Kotlin, komunikuje s PHP API
 - **URL:** ❓ (napr. iihf2026.fellow.sk)
+- **Deploy heslo (FTP):** uložené v GitHub Secrets ako `FTP_PASSWORD`
 
 ### DB schémy v DB-BET
 | Schéma | Obsah |
