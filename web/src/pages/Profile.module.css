@@ -1,9 +1,7 @@
 .wrap {
-    min-height: 100vh;
-    background: #f4f6f9;
     display: flex;
     justify-content: center;
-    padding: 40px 16px;
+    padding: 8px 0 40px;
 }
 
 .card {
@@ -99,6 +97,31 @@ input:focus { border-color: #1a3a6b; }
 }
 .btnDanger:hover:not(:disabled) { background: #e74c3c; }
 .btnDanger:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.avatarRow {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.avatarPreview {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: #e9ecef;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border: 2px solid #ddd;
+}
+
+.avatarPreview img { width: 100%; height: 100%; object-fit: cover; }
+
+.avatarPlaceholder { font-size: 2rem; }
+
+.avatarHint { font-size: 0.78rem; color: #aaa; margin: 6px 0 0; }
 
 .error   { color: #c0392b; font-size: 0.85rem; margin: 0; }
 .success { color: #27ae60; font-size: 0.85rem; margin: 0; }

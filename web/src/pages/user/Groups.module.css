@@ -1,0 +1,183 @@
+.wrap {
+    max-width: 680px;
+    margin: 0 auto;
+}
+
+.topBar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.topBar h2 {
+    color: #1a3a6b;
+    font-size: 1.3rem;
+    margin: 0;
+}
+
+.btnNew {
+    padding: 9px 18px;
+    background: #1a3a6b;
+    color: #fff;
+    border: none;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.15s;
+}
+.btnNew:hover { background: #24519e; }
+
+.createForm {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    padding: 16px;
+    margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.createForm input {
+    padding: 9px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    outline: none;
+    width: 100%;
+    box-sizing: border-box;
+}
+.createForm input:focus { border-color: #1a3a6b; }
+
+.empty { color: #888; text-align: center; margin-top: 40px; }
+
+.list { display: flex; flex-direction: column; gap: 12px; }
+
+.card {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    overflow: hidden;
+}
+
+.cardTop {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.cardInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.groupName {
+    font-weight: 700;
+    font-size: 1rem;
+    color: #1a3a6b;
+    word-break: break-word;
+}
+
+.meta {
+    font-size: 0.8rem;
+    color: #888;
+}
+
+.cardActions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+}
+
+.btn, .btnJoin, .btnLeave, .btnManage, .btnDisband,
+.btnApprove, .btnReject {
+    padding: 7px 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: background 0.15s;
+}
+.btn:disabled, .btnJoin:disabled, .btnLeave:disabled,
+.btnManage:disabled, .btnDisband:disabled,
+.btnApprove:disabled, .btnReject:disabled {
+    opacity: 0.55; cursor: not-allowed;
+}
+
+.btn       { background: #1a3a6b; color: #fff; }
+.btn:hover:not(:disabled) { background: #24519e; }
+
+.btnJoin   { background: #1a3a6b; color: #fff; }
+.btnJoin:hover:not(:disabled) { background: #24519e; }
+
+.btnLeave  { background: #e9ecef; color: #555; }
+.btnLeave:hover:not(:disabled) { background: #dee2e6; }
+
+.btnManage { background: #e9ecef; color: #1a3a6b; font-weight: 600; }
+.btnManage:hover { background: #dee2e6; }
+
+.btnDisband { background: #fce4e4; color: #c0392b; }
+.btnDisband:hover:not(:disabled) { background: #f5c6c6; }
+
+.badgePending {
+    font-size: 0.8rem;
+    color: #e67e22;
+    background: #fef3e2;
+    padding: 4px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+}
+
+.membersPanel {
+    border-top: 1px solid #f0f0f0;
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: #fafafa;
+}
+
+.emptySmall { font-size: 0.85rem; color: #aaa; margin: 0; }
+
+.memberRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 6px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+.memberRow:last-child { border-bottom: none; }
+
+.memberName {
+    font-size: 0.9rem;
+    color: #333;
+}
+.memberName small { color: #aaa; }
+
+.memberActions { display: flex; gap: 6px; }
+
+.btnApprove { background: #d4edda; color: #155724; }
+.btnApprove:hover:not(:disabled) { background: #c3e6cb; }
+
+.btnReject  { background: #fce4e4; color: #c0392b; }
+.btnReject:hover:not(:disabled)  { background: #f5c6c6; }
+
+.badgeAccepted {
+    font-size: 0.8rem;
+    color: #27ae60;
+    background: #eafaf1;
+    padding: 4px 10px;
+    border-radius: 20px;
+}
+
+.error   { color: #c0392b; font-size: 0.85rem; margin: 0; }

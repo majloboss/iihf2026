@@ -1,30 +1,45 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getProfile, updateProfile, changePassword, deleteAccount } from '../api/profile';
+import { getProfile, updateProfile, changePassword, deleteAccount, uploadAvatar } from '../api/profile';
 import styles from './Profile.module.css';
 
 export default function Profile() {
     const { signOut } = useAuth();
     const navigate    = useNavigate();
+    const fileRef     = useRef(null);
 
-    const [form, setForm]   = useState({ first_name: '', last_name: '', email: '', phone: '' });
-    const [pass, setPass]   = useState({ old_password: '', new_password: '', confirm: '' });
+    const [form, setForm]     = useState({ first_name: '', last_name: '', email: '', phone: '' });
+    const [avatar, setAvatar] = useState(null);
+    const [pass, setPass]     = useState({ old_password: '', new_password: '', confirm: '' });
     const [delPass, setDelPass] = useState('');
     const [loading, setLoading] = useState(true);
-    const [msg, setMsg]     = useState({ profile: '', pass: '', del: '' });
-    const [err, setErr]     = useState({ profile: '', pass: '', del: '' });
-    const [busy, setBusy]   = useState('');
+    const [msg, setMsg]       = useState({ profile: '', pass: '', del: '', avatar: '' });
+    const [err, setErr]       = useState({ profile: '', pass: '', del: '', avatar: '' });
+    const [busy, setBusy]     = useState('');
 
     useEffect(() => {
         getProfile().then(d => {
             setForm({ first_name: d.first_name || '', last_name: d.last_name || '', email: d.email || '', phone: d.phone || '' });
+            setAvatar(d.avatar || null);
             setLoading(false);
         });
     }, []);
 
-    const setF  = (k, v) => setForm(f => ({ ...f, [k]: v }));
+    const setF   = (k, v) => setForm(f => ({ ...f, [k]: v }));
     const setPas = (k, v) => setPass(p => ({ ...p, [k]: v }));
+
+    const onAvatarPick = async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        setBusy('avatar'); setErr(er => ({ ...er, avatar: '' })); setMsg(m => ({ ...m, avatar: '' }));
+        try {
+            const data = await uploadAvatar(file);
+            setAvatar(data.avatar);
+            setMsg(m => ({ ...m, avatar: 'Fotka uložená.' }));
+        } catch (ex) { setErr(er => ({ ...er, avatar: ex.message })); }
+        finally { setBusy(''); e.target.value = ''; }
+    };
 
     const saveProfile = async () => {
         setBusy('profile'); setErr(e => ({ ...e, profile: '' })); setMsg(m => ({ ...m, profile: '' }));
@@ -65,6 +80,37 @@ export default function Profile() {
         <div className={styles.wrap}>
             <div className={styles.card}>
                 <h2>Môj profil</h2>
+
+                <section className={styles.section}>
+                    <h3>Profilová fotka</h3>
+                    <div className={styles.avatarRow}>
+                        <div className={styles.avatarPreview}>
+                            {avatar
+                                ? <img src={avatar} alt="avatar" />
+                                : <span className={styles.avatarPlaceholder}>👤</span>
+                            }
+                        </div>
+                        <div>
+                            <button
+                                className={styles.btn}
+                                onClick={() => fileRef.current?.click()}
+                                disabled={busy === 'avatar'}
+                            >
+                                {busy === 'avatar' ? 'Nahrávam…' : 'Zmeniť fotku'}
+                            </button>
+                            <p className={styles.avatarHint}>JPG, PNG, WEBP alebo GIF · max 2 MB</p>
+                        </div>
+                        <input
+                            ref={fileRef}
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp,image/gif"
+                            style={{ display: 'none' }}
+                            onChange={onAvatarPick}
+                        />
+                    </div>
+                    {err.avatar && <p className={styles.error}>{err.avatar}</p>}
+                    {msg.avatar && <p className={styles.success}>{msg.avatar}</p>}
+                </section>
 
                 <section className={styles.section}>
                     <h3>Osobné údaje</h3>

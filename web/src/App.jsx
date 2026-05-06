@@ -6,16 +6,20 @@ import Profile from './pages/Profile';
 import AdminLayout from './pages/admin/AdminLayout';
 import Users from './pages/admin/Users';
 import Invites from './pages/admin/Invites';
+import UserLayout from './pages/user/UserLayout';
+import Groups from './pages/user/Groups';
 
-function PrivateRoute({ children }) {
+function PrivateUserRoute({ children }) {
     const { user } = useAuth();
-    return user ? children : <Navigate to="/login" replace />;
+    if (!user) return <Navigate to="/login" replace />;
+    if (user.role === 'admin') return <Navigate to="/admin/users" replace />;
+    return children;
 }
 
 function PrivateAdminRoute({ children }) {
     const { user } = useAuth();
     if (!user) return <Navigate to="/login" replace />;
-    if (user.role !== 'admin') return <Navigate to="/" replace />;
+    if (user.role !== 'admin') return <Navigate to="/groups" replace />;
     return children;
 }
 
@@ -23,7 +27,7 @@ function HomeRedirect() {
     const { user } = useAuth();
     if (!user) return <Navigate to="/login" replace />;
     if (user.role === 'admin') return <Navigate to="/admin/users" replace />;
-    return <Navigate to="/profile" replace />;
+    return <Navigate to="/groups" replace />;
 }
 
 export default function App() {
@@ -33,7 +37,12 @@ export default function App() {
                 <Routes>
                     <Route path="/login"    element={<Login />} />
                     <Route path="/register" element={<Register />} />
-                    <Route path="/profile"  element={<PrivateRoute><Profile /></PrivateRoute>} />
+
+                    <Route element={<PrivateUserRoute><UserLayout /></PrivateUserRoute>}>
+                        <Route path="/groups"  element={<Groups />} />
+                        <Route path="/profile" element={<Profile />} />
+                    </Route>
+
                     <Route path="/admin" element={
                         <PrivateAdminRoute><AdminLayout /></PrivateAdminRoute>
                     }>
@@ -41,6 +50,7 @@ export default function App() {
                         <Route path="users"   element={<Users />} />
                         <Route path="invites" element={<Invites />} />
                     </Route>
+
                     <Route path="*" element={<HomeRedirect />} />
                 </Routes>
             </BrowserRouter>
