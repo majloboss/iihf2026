@@ -28,6 +28,7 @@ Boduje sa výsledok **riadnej hracej doby (60 minút)** — predĺženie ani sam
 
 ## Platforma
 - Android aplikácia
+- Web aplikácia (hosted na fellow.sk, rovnaká doména ako BookClub a Scrabble)
 
 ---
 
@@ -288,9 +289,12 @@ Admin môže hodnoty meniť. Predvolený systém:
 ---
 
 ## Infraštruktúra
-- **Databáza:** PostgreSQL na hostingu fellow.sk (rovnaký hosting ako BookClub a Scrabble)
-- **Backend:** PHP (REST API)
-- **Android app:** komunikuje s backendom cez API
+- **Hosting:** fellow.sk (rovnaký ako BookClub a Scrabble)
+- **Databáza:** PostgreSQL na fellow.sk
+- **Backend:** PHP (REST API) — zdieľaný pre web aj Android
+- **Web:** vanilla JS SPA na fellow.sk
+- **Android:** Kotlin, komunikuje s PHP API
+- **URL:** ❓ (napr. iihf2026.fellow.sk)
 
 ---
 
