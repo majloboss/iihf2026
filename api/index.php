@@ -19,11 +19,17 @@ $path = preg_replace('#^api/?#', '', $path);
 try {
     match (true) {
         $path === 'v1/auth/login'          => require __DIR__ . '/v1/auth/login.php',
-        $path === 'v1/admin/users'         => require __DIR__ . '/v1/admin/users.php',
+        $path === 'v1/admin/users'          => require __DIR__ . '/v1/admin/users.php',
         $path === 'v1/admin/user-update'   => require __DIR__ . '/v1/admin/user_update.php',
+        $path === 'v1/admin/user-edit'     => require __DIR__ . '/v1/admin/user_edit.php',
+        $path === 'v1/admin/user-password' => require __DIR__ . '/v1/admin/user_password.php',
+        $path === 'v1/admin/user-delete'   => require __DIR__ . '/v1/admin/user_delete.php',
         $path === 'v1/admin/invites'       => require __DIR__ . '/v1/admin/invites.php',
         $path === 'v1/admin/invite-use'    => require __DIR__ . '/v1/auth/invite_use.php',
         $path === 'v1/auth/complete'       => require __DIR__ . '/v1/auth/complete.php',
+        $path === 'v1/profile'             => require __DIR__ . '/v1/profile.php',
+        $path === 'v1/profile-password'    => require __DIR__ . '/v1/profile-password.php',
+        $path === 'v1/profile-delete'      => require __DIR__ . '/v1/profile-delete.php',
         default                            => json_error('Not found', 404)
     };
 } catch (Throwable $e) {

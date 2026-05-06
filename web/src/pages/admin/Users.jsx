@@ -1,14 +1,16 @@
 import { useEffect, useState } from 'react';
-import { getUsers, updateUser } from '../../api/admin';
+import { getUsers, updateUser, deleteUser } from '../../api/admin';
 import { useAuth } from '../../context/AuthContext';
+import UserModal from './UserModal';
 import styles from './Admin.module.css';
 
 export default function Users() {
-    const { user: me }           = useAuth();
-    const [users, setUsers]      = useState([]);
-    const [loading, setLoading]  = useState(true);
-    const [error, setError]      = useState('');
-    const [saving, setSaving]    = useState(null); // id práve ukladaného usera
+    const { user: me }          = useAuth();
+    const [users, setUsers]     = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError]     = useState('');
+    const [saving, setSaving]   = useState(null);
+    const [editing, setEditing] = useState(null);
 
     const load = () => getUsers()
         .then(setUsers)
@@ -22,11 +24,18 @@ export default function Users() {
         try {
             await updateUser(u.id, { [field]: value });
             setUsers(prev => prev.map(x => x.id === u.id ? { ...x, [field]: value } : x));
-        } catch (err) {
-            setError(err.message);
-        } finally {
-            setSaving(null);
-        }
+        } catch (err) { setError(err.message); }
+        finally { setSaving(null); }
+    };
+
+    const remove = async (u) => {
+        if (!confirm(`Zmazať usera „${u.username}"? Táto akcia je nevratná.`)) return;
+        setSaving(u.id);
+        try {
+            await deleteUser(u.id);
+            setUsers(prev => prev.filter(x => x.id !== u.id));
+        } catch (err) { setError(err.message); }
+        finally { setSaving(null); }
     };
 
     if (loading) return <p>Načítavam…</p>;
@@ -50,8 +59,8 @@ export default function Users() {
                 </thead>
                 <tbody>
                     {users.map(u => {
-                        const isSaving = saving === u.id;
-                        const isMe     = me?.user_id === u.id;
+                        const busy = saving === u.id;
+                        const isMe = me?.user_id === u.id;
                         return (
                             <tr key={u.id}>
                                 <td>{u.id}</td>
@@ -66,32 +75,50 @@ export default function Users() {
                                 <td>{u.is_active ? '✅' : '⏳'}</td>
                                 <td>{new Date(u.created_at).toLocaleDateString('sk-SK')}</td>
                                 <td className={styles.actions}>
-                                    {!isMe && (
-                                        <>
-                                            <button
-                                                className={styles.btnSmall}
-                                                disabled={isSaving}
-                                                onClick={() => toggle(u, 'role', u.role === 'admin' ? 'user' : 'admin')}
-                                                title={u.role === 'admin' ? 'Degradovať na usera' : 'Povýšiť na admina'}
-                                            >
-                                                {u.role === 'admin' ? '👤 User' : '🔑 Admin'}
-                                            </button>
-                                            <button
-                                                className={u.is_active ? styles.btnSmallDanger : styles.btnSmall}
-                                                disabled={isSaving}
-                                                onClick={() => toggle(u, 'is_active', !u.is_active)}
-                                            >
-                                                {u.is_active ? 'Deaktivovať' : 'Aktivovať'}
-                                            </button>
-                                        </>
-                                    )}
-                                    {isMe && <span className={styles.unused}>—</span>}
+                                    <button
+                                        className={styles.btnSmall}
+                                        disabled={busy}
+                                        onClick={() => setEditing(u)}
+                                    >✏️ Upraviť</button>
+
+                                    {!isMe && (<>
+                                        <button
+                                            className={styles.btnSmall}
+                                            disabled={busy}
+                                            onClick={() => toggle(u, 'role', u.role === 'admin' ? 'user' : 'admin')}
+                                        >
+                                            {u.role === 'admin' ? '👤 User' : '🔑 Admin'}
+                                        </button>
+                                        <button
+                                            className={u.is_active ? styles.btnSmallWarn : styles.btnSmall}
+                                            disabled={busy}
+                                            onClick={() => toggle(u, 'is_active', !u.is_active)}
+                                        >
+                                            {u.is_active ? 'Deaktivovať' : 'Aktivovať'}
+                                        </button>
+                                        <button
+                                            className={styles.btnSmallDanger}
+                                            disabled={busy}
+                                            onClick={() => remove(u)}
+                                        >🗑️</button>
+                                    </>)}
                                 </td>
                             </tr>
                         );
                     })}
                 </tbody>
             </table>
+
+            {editing && (
+                <UserModal
+                    user={editing}
+                    onClose={() => setEditing(null)}
+                    onSaved={updated => {
+                        setUsers(prev => prev.map(u => u.id === updated.id ? updated : u));
+                        setEditing(null);
+                    }}
+                />
+            )}
         </div>
     );
 }

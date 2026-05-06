@@ -1,0 +1,94 @@
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+}
+
+.modal {
+    background: #fff;
+    border-radius: 12px;
+    padding: 28px;
+    width: 480px;
+    max-width: 95vw;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.header h3 { margin: 0; color: #1a3a6b; font-size: 1.1rem; }
+
+.close {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: #888;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+.close:hover { background: #f0f0f0; }
+
+.section {
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #f0f0f0;
+}
+.section:last-of-type { border-bottom: none; margin-bottom: 0; }
+
+.section h4 { margin: 0 0 12px; color: #555; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; }
+
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.grid label, label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 0.85rem;
+    color: #555;
+}
+
+.grid input, .row input {
+    padding: 8px 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    outline: none;
+}
+.grid input:focus, .row input:focus { border-color: #1a3a6b; }
+
+.row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+.row input { flex: 1; padding: 8px 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.9rem; }
+
+.btn {
+    padding: 8px 18px;
+    background: #1a3a6b;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.88rem;
+    white-space: nowrap;
+}
+.btn:hover:not(:disabled) { background: #24519e; }
+.btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.error   { color: #c0392b; font-size: 0.88rem; margin-top: 8px; }
+.success { color: #27ae60; font-size: 0.88rem; margin-top: 8px; }
