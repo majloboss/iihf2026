@@ -136,7 +136,8 @@ Admin môže hodnoty meniť. Predvolený systém:
 ---
 
 ## Skupiny priateľov
-- Systém podporuje **viac skupín**, na začiatku bude jedna
+- Systém podporuje **viac skupín**, na začiatku bude jedna: **"Priatelia hokeja"**
+- Všetci používatelia budú v tejto skupiny
 - Používateľov do skupiny **pridáva admin** (nie je self-join)
 
 ---
@@ -240,7 +241,7 @@ Admin môže hodnoty meniť. Predvolený systém:
 | updated_by | FK → users | |
 | updated_at | TIMESTAMP | |
 
-### iihf.friend_groups (skupiny priateľov) ❓
+### iihf.friend_groups (skupiny priateľov)
 | Pole | Typ | Popis |
 |------|-----|-------|
 | id | SERIAL PK | |
@@ -249,7 +250,7 @@ Admin môže hodnoty meniť. Predvolený systém:
 | created_by | FK → users | |
 | created_at | TIMESTAMP | |
 
-### iihf.group_members ❓
+### iihf.group_members
 | Pole | Typ | Popis |
 |------|-----|-------|
 | group_id | FK → friend_groups | |

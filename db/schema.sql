@@ -118,7 +118,8 @@ INSERT INTO iihf.scoring_config (key, value) VALUES
     ('correct_goals_per_team', 1);
 
 -- ============================================================
--- FRIEND GROUPS (❓ este nerozhodnute: 1 alebo viac skupin)
+-- FRIEND GROUPS
+-- Zaciatok: jedna skupina "Priatelia hokeja", vsetci users v nej
 -- ============================================================
 CREATE TABLE iihf.friend_groups (
     id          SERIAL PRIMARY KEY,
@@ -127,6 +128,9 @@ CREATE TABLE iihf.friend_groups (
     created_by  INT REFERENCES iihf.users(id),
     created_at  TIMESTAMP    NOT NULL DEFAULT NOW()
 );
+
+INSERT INTO iihf.friend_groups (name, invite_code) VALUES
+    ('Priatelia hokeja', 'IIHF2026');
 
 CREATE TABLE iihf.group_members (
     group_id    INT REFERENCES iihf.friend_groups(id),
