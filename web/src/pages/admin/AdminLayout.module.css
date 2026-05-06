@@ -1,0 +1,60 @@
+.layout {
+    display: flex;
+    min-height: 100vh;
+    background: #f4f6f9;
+}
+
+.sidebar {
+    width: 220px;
+    background: #1a3a6b;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    flex-shrink: 0;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 20px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.15);
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.brand img { width: 36px; }
+
+nav { display: flex; flex-direction: column; padding: 12px 0; flex: 1; }
+
+nav a {
+    display: block;
+    padding: 12px 20px;
+    color: rgba(255,255,255,0.75);
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: background 0.15s, color 0.15s;
+}
+
+nav a:hover { background: rgba(255,255,255,0.1); color: #fff; }
+nav a.active { background: rgba(255,255,255,0.18); color: #fff; font-weight: 600; }
+
+.logout {
+    margin: 16px;
+    padding: 10px;
+    background: rgba(255,255,255,0.12);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.15s;
+}
+.logout:hover { background: rgba(255,255,255,0.22); }
+
+.content {
+    flex: 1;
+    padding: 32px;
+    overflow-y: auto;
+}

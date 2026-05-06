@@ -1,0 +1,49 @@
+name: Deploy to fellow.sk
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: web
+
+      - name: Build
+        run: npm run build
+        working-directory: web
+        env:
+          VITE_API_URL: https://iihf2026.fellow.sk/api
+
+      - name: Deploy web via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ftp.fellow.sk
+          username: iihf2026@fellow.sk
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: web/dist/
+          server-dir: /www/
+
+      - name: Deploy API via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ftp.fellow.sk
+          username: iihf2026@fellow.sk
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: api/
+          server-dir: /www/api/
+          exclude: |
+            config/db.php
