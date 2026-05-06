@@ -90,10 +90,21 @@ Android aplikácia — tipovačka výsledkov MS v ľadovom hokeji 2026 pre skupi
 ---
 
 ## Admin funkcie
+Admin má **samostatnú obrazovku** pre administráciu (oddelenú od bežného UI).
+
+### Správa používateľov
+- Pridanie nového používateľa (username + heslo)
+- Zmena hesla používateľovi
+- ❓ Ďalšie správcovské funkcie používateľov?
+
+### Správa zápasov a výsledkov
 - Zadávanie výsledkov zápasov
-- Nastavenie a úprava bodovacieho systému
+- Manuálne zadanie tipu za používateľa
 - Schválenie tabuľky po skupinovej fáze (s možnosťou korekcie)
 - Generovanie play-off zápasov po schválení
+
+### Nastavenia
+- Úprava bodovacieho systému
 
 ---
 
