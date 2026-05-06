@@ -6,20 +6,28 @@ export default function UserLayout() {
     const { signOut } = useAuth();
     const navigate    = useNavigate();
 
+    const handleLogout = () => { signOut(); navigate('/login'); };
+
     return (
         <div className={styles.layout}>
-            <header className={styles.header}>
+            <aside className={styles.sidebar}>
                 <div className={styles.brand}>
                     <img src="/logo.png" alt="IIHF 2026" />
                     <span>IIHF 2026</span>
                 </div>
-                <nav className={styles.nav}>
-                    <NavLink to="/groups"  className={({ isActive }) => isActive ? styles.active : ''}>👥 Skupiny</NavLink>
-                    <NavLink to="/members" className={({ isActive }) => isActive ? styles.active : ''}>🧑‍🤝‍🧑 Hráči</NavLink>
-                    <NavLink to="/profile" className={({ isActive }) => isActive ? styles.active : ''}>👤 Profil</NavLink>
+                <nav>
+                    <NavLink to="/groups"  className={({ isActive }) => isActive ? styles.active : ''}>
+                        👥 Skupiny
+                    </NavLink>
+                    <NavLink to="/members" className={({ isActive }) => isActive ? styles.active : ''}>
+                        🏒 Hráči
+                    </NavLink>
+                    <NavLink to="/profile" className={({ isActive }) => isActive ? styles.active : ''}>
+                        👤 Profil
+                    </NavLink>
                 </nav>
-                <button className={styles.logout} onClick={() => { signOut(); navigate('/login'); }}>Odhlásiť</button>
-            </header>
+                <button className={styles.logout} onClick={handleLogout}>Odhlásiť</button>
+            </aside>
             <main className={styles.content}>
                 <Outlet />
             </main>
