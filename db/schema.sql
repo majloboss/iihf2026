@@ -6,15 +6,18 @@
 -- USERS
 -- ============================================================
 CREATE TABLE iihf.users (
-    id          SERIAL PRIMARY KEY,
-    username    VARCHAR(50)  NOT NULL UNIQUE,
-    password    VARCHAR(255) NOT NULL,          -- bcrypt hash
-    first_name  VARCHAR(100),
-    last_name   VARCHAR(100),
-    email       VARCHAR(150) UNIQUE,
-    phone       VARCHAR(30),
-    role        VARCHAR(10)  NOT NULL DEFAULT 'user', -- 'user' | 'admin'
-    created_at  TIMESTAMP    NOT NULL DEFAULT NOW()
+    id              SERIAL PRIMARY KEY,
+    username        VARCHAR(50)  NOT NULL UNIQUE,
+    password        VARCHAR(255) NOT NULL,              -- bcrypt hash
+    first_name      VARCHAR(100),
+    last_name       VARCHAR(100),
+    email           VARCHAR(150) UNIQUE,
+    phone           VARCHAR(30),
+    role            VARCHAR(10)  NOT NULL DEFAULT 'user', -- 'user' | 'admin'
+    fcm_token       VARCHAR(255),                       -- Firebase Cloud Messaging token
+    notif_push      BOOLEAN      NOT NULL DEFAULT TRUE,  -- push notifikacie zapnute
+    notif_email     BOOLEAN      NOT NULL DEFAULT TRUE,  -- email notifikacie zapnute
+    created_at      TIMESTAMP    NOT NULL DEFAULT NOW()
 );
 
 -- ============================================================

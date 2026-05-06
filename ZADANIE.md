@@ -13,18 +13,21 @@ Android aplikácia — tipovačka výsledkov MS v ľadovom hokeji 2026 pre skupi
 ## Používatelia
 
 ### Registrácia
+- **Účty vytvára iba admin** (nie je možná samostatná registrácia)
+- Admin nastaví username a heslo, hráč si môže heslo po prihlásení zmeniť
+
 | Pole | Povinné |
 |------|---------|
 | username | áno |
 | password | áno |
 | meno | nie |
 | priezvisko | nie |
-| email | nie |
+| email | nie (potrebný pre email notifikácie) |
 | telefón | nie |
 
 ### Roly
-- **User** — bežný používateľ, tipuje zápasy, sleduje výsledky a poradie
-- **Admin** — zadáva výsledky, spravuje bodovanie, schvaľuje tabuľky, generuje play-off zápasy
+- **User** — tipuje zápasy, sleduje výsledky a poradie
+- **Admin** — vytvára používateľov, zadáva výsledky, spravuje bodovanie, schvaľuje tabuľky, generuje play-off zápasy
 
 ---
 
@@ -110,23 +113,20 @@ Admin môže hodnoty meniť. Predvolený systém:
 ---
 
 ## Skupiny priateľov
-- ❓ Jedna skupina, alebo môže existovať viac skupín?
-- ❓ Ako sa pozýva do skupiny? (link, kód, admin pridáva ručne)
+- Systém podporuje **viac skupín**, na začiatku bude jedna
+- Používateľov do skupiny **pridáva admin** (nie je self-join)
 
 ---
 
-## Ďalšie funkcie
-- ❓ Tabuľka poradia používateľov?
-- ❓ Notifikácie (pripomienka pred zápasom, oznámenie výsledku)?
-- ❓ História tipov?
+## Viditeľnosť tipov
+- Po začatí zápasu (tipovanie uzavreté) sú **tipy všetkých hráčov viditeľné** pre všetkých
 
 ---
 
-## Otvorené otázky
-2. Jedna vs. viac skupín priateľov
-3. Spôsob pozvania do skupiny
-4. Notifikácie
-5. História tipov
+## Notifikácie
+- Implementované: **Push notifikácie (Firebase FCM)** + **Email (SMTP fellow.sk)**
+- Každý typ notifikácie môže hráč **vypnúť v nastaveniach profilu**
+- ❓ Aké udalosti spúšťajú notifikáciu? (napr. 30 min pred zápasom, po zadaní výsledku...)
 
 ---
 
@@ -140,9 +140,12 @@ Admin môže hodnoty meniť. Predvolený systém:
 | password | VARCHAR(255) NOT NULL | bcrypt hash |
 | first_name | VARCHAR(100) | voliteľné |
 | last_name | VARCHAR(100) | voliteľné |
-| email | VARCHAR(150) UNIQUE | voliteľné |
+| email | VARCHAR(150) UNIQUE | voliteľné, potrebný pre email notif. |
 | phone | VARCHAR(30) | voliteľné |
 | role | VARCHAR(10) DEFAULT 'user' | 'user' \| 'admin' |
+| fcm_token | VARCHAR(255) | Firebase token pre push notifikácie |
+| notif_push | BOOLEAN DEFAULT TRUE | push notifikácie zapnuté |
+| notif_email | BOOLEAN DEFAULT TRUE | email notifikácie zapnuté |
 | created_at | TIMESTAMP | |
 
 ### iihf.teams (číselník tímov)
