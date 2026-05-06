@@ -24,26 +24,31 @@ CREATE TABLE iihf.teams (
     team_id    SERIAL PRIMARY KEY,
     team_code  VARCHAR(3)   NOT NULL UNIQUE,   -- FIN, GER, SVK...
     team_name  VARCHAR(100) NOT NULL,
-    group_name  VARCHAR(1)   NOT NULL            -- 'A' | 'B'
+    group_name VARCHAR(1)   NOT NULL,           -- 'A' | 'B'
+    flag_col   INT          NOT NULL,           -- stlpec v sprite sheet: 0-3
+    flag_row   INT          NOT NULL            -- riadok v sprite sheet: 0-1
 );
 
-INSERT INTO iihf.teams (team_code, team_name, group_name) VALUES
-    ('FIN', 'Finland',        'A'),
-    ('GER', 'Germany',        'A'),
-    ('USA', 'United States',  'A'),
-    ('SUI', 'Switzerland',    'A'),
-    ('GBR', 'Great Britain',  'A'),
-    ('AUT', 'Austria',        'A'),
-    ('HUN', 'Hungary',        'A'),
-    ('LAT', 'Latvia',         'A'),
-    ('CAN', 'Canada',         'B'),
-    ('SWE', 'Sweden',         'B'),
-    ('CZE', 'Czech Republic', 'B'),
-    ('DEN', 'Denmark',        'B'),
-    ('SVK', 'Slovakia',       'B'),
-    ('NOR', 'Norway',         'B'),
-    ('ITA', 'Italy',          'B'),
-    ('SLO', 'Slovenia',       'B');
+-- Sprite: team_flags.png, mriezka 4x2 per skupina
+-- Skupina A vlavo, skupina B vpravo
+-- flag_col: 0-3 (zlava), flag_row: 0-1 (zhora)
+INSERT INTO iihf.teams (team_code, team_name, group_name, flag_col, flag_row) VALUES
+    ('USA', 'United States',  'A', 0, 0),
+    ('SUI', 'Switzerland',    'A', 1, 0),
+    ('FIN', 'Finland',        'A', 2, 0),
+    ('GER', 'Germany',        'A', 3, 0),
+    ('LAT', 'Latvia',         'A', 0, 1),
+    ('AUT', 'Austria',        'A', 1, 1),
+    ('HUN', 'Hungary',        'A', 2, 1),
+    ('GBR', 'Great Britain',  'A', 3, 1),
+    ('CAN', 'Canada',         'B', 0, 0),
+    ('SWE', 'Sweden',         'B', 1, 0),
+    ('CZE', 'Czech Republic', 'B', 2, 0),
+    ('DEN', 'Denmark',        'B', 3, 0),
+    ('SVK', 'Slovakia',       'B', 0, 1),
+    ('NOR', 'Norway',         'B', 1, 1),
+    ('SLO', 'Slovenia',       'B', 2, 1),
+    ('ITA', 'Italy',          'B', 3, 1);
 
 -- ============================================================
 -- GAMES (zápasy)
