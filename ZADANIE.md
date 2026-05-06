@@ -176,7 +176,7 @@ Admin môže hodnoty meniť. Predvolený systém:
 ---
 
 ## Notifikácie
-- Kanály: **Push (Firebase FCM)** + **Email (SMTP fellow.sk)**
+- Kanály: **Push** (FCM pre Android, Web Push API pre web) + **Email (SMTP fellow.sk)**
 - Každý hráč si nastavuje notifikácie **samostatne pre každý typ**
 - Pre každý typ možno zapnúť/vypnúť push a email zvlášť
 - Pre časové typy si hráč nastaví **X minút pred zápasom**
@@ -206,7 +206,8 @@ Admin môže hodnoty meniť. Predvolený systém:
 | phone | VARCHAR(30) | voliteľné |
 | avatar | VARCHAR(255) | názov súboru avatara na serveri |
 | role | VARCHAR(10) DEFAULT 'user' | 'user' \| 'admin' |
-| fcm_token | VARCHAR(255) | Firebase token pre push notifikácie |
+| fcm_token | VARCHAR(255) | Firebase FCM token (Android) |
+| web_push_sub | TEXT | Web Push subscription JSON (PWA) |
 | created_at | TIMESTAMP | |
 
 ### iihf.teams (číselník tímov)
@@ -291,9 +292,11 @@ Admin môže hodnoty meniť. Predvolený systém:
 ## Web aplikácia
 
 ### Technológia
-- Vanilla JS SPA (rovnaký štýl ako BookClub a Scrabble)
-- Hosted na fellow.sk
+- **React + Vite** (PWA)
+- Builduje sa na statické súbory (`dist/`), uploaduje sa na fellow.sk
 - Komunikuje s PHP REST API backendom
+- **Web Push API** pre push notifikácie v prehliadači
+- Inštalovateľná ako PWA (Add to Home Screen na mobile aj desktop)
 - **URL:** ❓ (napr. iihf2026.fellow.sk)
 
 ### Obrazovky — bežný hráč
@@ -324,7 +327,7 @@ Admin môže hodnoty meniť. Predvolený systém:
 - **Hosting:** fellow.sk (rovnaký ako BookClub a Scrabble)
 - **Databáza:** PostgreSQL na fellow.sk
 - **Backend:** PHP (REST API) — zdieľaný pre web aj Android
-- **Web:** vanilla JS SPA na fellow.sk
+- **Web:** React + Vite PWA, statický build uploadovaný na fellow.sk
 - **Android:** Kotlin, komunikuje s PHP API
 - **URL:** ❓ (napr. iihf2026.fellow.sk)
 
