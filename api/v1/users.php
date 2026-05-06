@@ -1,16 +1,15 @@
 <?php
 // GET /v1/users        - zoznam vsetkych aktivnych hracov
-// GET /v1/users?id=X   - detail jedneho hraca
+// GET /v1/users?id=X   - detail jedneho hraca (avatar, meno, email, telefon)
 $auth = require_auth();
 if ($method !== 'GET') json_error('Method not allowed', 405);
 
 $pdo = db();
-
-$id = isset($_GET['id']) ? (int)$_GET['id'] : null;
+$id  = isset($_GET['id']) ? (int)$_GET['id'] : null;
 
 if ($id) {
     $stmt = $pdo->prepare("
-        SELECT id, username, first_name, last_name, avatar
+        SELECT id, username, first_name, last_name, avatar, email, phone
         FROM admin.users
         WHERE id = ? AND is_active = TRUE
     ");

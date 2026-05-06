@@ -8,7 +8,6 @@ import Users from './pages/admin/Users';
 import Invites from './pages/admin/Invites';
 import UserLayout from './pages/user/UserLayout';
 import Groups from './pages/user/Groups';
-import Members from './pages/user/Members';
 
 function PrivateUserRoute({ children }) {
     const { user } = useAuth();
@@ -41,7 +40,6 @@ export default function App() {
 
                     <Route element={<PrivateUserRoute><UserLayout /></PrivateUserRoute>}>
                         <Route path="/groups"  element={<Groups />} />
-                        <Route path="/members" element={<Members />} />
                         <Route path="/profile" element={<Profile />} />
                     </Route>
 

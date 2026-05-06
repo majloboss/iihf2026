@@ -1,6 +1,6 @@
 <?php
-// GET /v1/group-members?group_id=X  - len zakladatel
-// POST /v1/group-members  { group_id, user_id, action: 'approve'|'reject' }
+// GET  /v1/group-members?group_id=X  - vsetci prihlaseni pouzivatelia
+// POST /v1/group-members  { group_id, user_id, action: 'approve'|'reject' }  - len zakladatel
 $auth = require_auth();
 $pdo  = db();
 
@@ -11,11 +11,10 @@ $stmt = $pdo->prepare('SELECT created_by FROM admin.friend_groups WHERE id = ?')
 $stmt->execute([$group_id]);
 $group = $stmt->fetch();
 if (!$group) json_error('Skupina neexistuje', 404);
-if ((int)$group['created_by'] !== (int)$auth['user_id']) json_error('Len zakladateľ môže spravovať členov', 403);
 
 if ($method === 'GET') {
     $stmt = $pdo->prepare("
-        SELECT gm.user_id, gm.status, gm.joined_at, u.username, u.first_name, u.last_name
+        SELECT gm.user_id, gm.status, gm.joined_at, u.username, u.first_name, u.last_name, u.avatar
         FROM admin.group_members gm
         JOIN admin.users u ON u.id = gm.user_id
         WHERE gm.group_id = ?
@@ -26,6 +25,8 @@ if ($method === 'GET') {
 }
 
 if ($method === 'POST') {
+    if ((int)$group['created_by'] !== (int)$auth['user_id']) json_error('Len zakladateľ môže spravovať členov', 403);
+
     $body    = json_decode(file_get_contents('php://input'), true);
     $user_id = (int)($body['user_id'] ?? 0);
     $action  = $body['action'] ?? '';

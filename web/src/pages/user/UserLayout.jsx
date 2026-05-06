@@ -16,14 +16,11 @@ export default function UserLayout() {
                     <span>IIHF 2026</span>
                 </div>
                 <nav>
-                    <NavLink to="/groups"  className={({ isActive }) => isActive ? styles.active : ''}>
-                        👥 Skupiny
-                    </NavLink>
-                    <NavLink to="/members" className={({ isActive }) => isActive ? styles.active : ''}>
-                        🏒 Hráči
-                    </NavLink>
                     <NavLink to="/profile" className={({ isActive }) => isActive ? styles.active : ''}>
                         👤 Profil
+                    </NavLink>
+                    <NavLink to="/groups"  className={({ isActive }) => isActive ? styles.active : ''}>
+                        👥 Skupiny
                     </NavLink>
                 </nav>
                 <button className={styles.logout} onClick={handleLogout}>Odhlásiť</button>
