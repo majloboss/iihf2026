@@ -200,21 +200,40 @@ export default function Groups() {
                 <div className={styles.overlay} onClick={() => setUserDetail(null)}>
                     <div className={styles.modal} onClick={e => e.stopPropagation()}>
                         <button className={styles.close} onClick={() => setUserDetail(null)}>✕</button>
-                        {userDetail.loading ? <p>Načítavam…</p> : (
+                        {userDetail.loading ? (
+                            <p className={styles.modalLoading}>Načítavam…</p>
+                        ) : (
                             <>
-                                <Avatar src={userDetail.data.avatar} name={fullName(userDetail.data)} size={80} />
+                                <div className={styles.modalAvatarWrap}>
+                                    <Avatar src={userDetail.data.avatar} name={fullName(userDetail.data)} size={80} />
+                                </div>
                                 <h3 className={styles.modalName}>{fullName(userDetail.data)}</h3>
                                 <p className={styles.modalUsername}>@{userDetail.data.username}</p>
-                                {userDetail.data.email && (
-                                    <a className={styles.modalContact} href={`mailto:${userDetail.data.email}`}>
-                                        📧 {userDetail.data.email}
-                                    </a>
-                                )}
-                                {userDetail.data.phone && (
-                                    <a className={styles.modalContact} href={`tel:${userDetail.data.phone}`}>
-                                        📞 {userDetail.data.phone}
-                                    </a>
-                                )}
+
+                                <div className={styles.modalFields}>
+                                    <div className={styles.modalField}>
+                                        <span className={styles.modalLabel}>Meno</span>
+                                        <span className={styles.modalValue}>{userDetail.data.first_name || '—'}</span>
+                                    </div>
+                                    <div className={styles.modalField}>
+                                        <span className={styles.modalLabel}>Priezvisko</span>
+                                        <span className={styles.modalValue}>{userDetail.data.last_name || '—'}</span>
+                                    </div>
+                                    <div className={styles.modalField}>
+                                        <span className={styles.modalLabel}>Email</span>
+                                        {userDetail.data.email
+                                            ? <a className={styles.modalLink} href={`mailto:${userDetail.data.email}`}>{userDetail.data.email}</a>
+                                            : <span className={styles.modalValue}>—</span>
+                                        }
+                                    </div>
+                                    <div className={styles.modalField}>
+                                        <span className={styles.modalLabel}>Telefón</span>
+                                        {userDetail.data.phone
+                                            ? <a className={styles.modalLink} href={`tel:${userDetail.data.phone}`}>{userDetail.data.phone}</a>
+                                            : <span className={styles.modalValue}>—</span>
+                                        }
+                                    </div>
+                                </div>
                             </>
                         )}
                     </div>
