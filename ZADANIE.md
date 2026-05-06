@@ -113,6 +113,7 @@ Admin má **samostatnú obrazovku** pre administráciu (oddelenú od bežného U
 - Tipujú sa všetky zápasy — skupinová fáza aj play-off
 - Tipovanie uzavreté **5 minút pred začiatkom zápasu**
 - Admin môže tip zadať alebo upraviť manuálne (napr. keď používateľ pošle tip emailom)
+- Hráč tipuje **iba raz** — rovnaký tip platí vo všetkých skupinách, kde je členom
 
 ---
 
