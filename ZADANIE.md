@@ -23,7 +23,7 @@ Android aplikácia — tipovačka výsledkov MS v ľadovom hokeji 2026 pre skupi
 | telefón | nie |
 
 ### Roly
-- **Bežný používateľ** — tipuje zápasy, sleduje výsledky a poradie
+- **User** — bežný používateľ, tipuje zápasy, sleduje výsledky a poradie
 - **Admin** — zadáva výsledky, spravuje bodovanie, schvaľuje tabuľky, generuje play-off zápasy
 
 ---
