@@ -75,20 +75,26 @@ CREATE TABLE iihf.games (
 );
 
 -- ============================================================
--- SCORING CONFIG (admin nastavuje body)
+-- SCORING CONFIG (admin moze menit hodnoty)
+-- Bodovanie za tip presneho vysledku riadnej hracej doby (60 min):
+--   correct_winner_group    = 1  (spravny vitaz alebo remiza, skupinova faza)
+--   correct_winner_playoff  = 3  (spravny vitaz, QF/SF/F/BM)
+--   correct_goals_per_team  = 1  (za kazdy spravne tipovany pocet golov jedneho timu)
+-- Maximum skupinova faza:  1 + 1 + 1 = 3 body
+-- Maximum playoff:         3 + 1 + 1 = 5 bodov
 -- ============================================================
 CREATE TABLE iihf.scoring_config (
     id          SERIAL PRIMARY KEY,
-    key         VARCHAR(50)  NOT NULL UNIQUE,   -- napr. 'exact_score', 'correct_winner'
+    key         VARCHAR(50)  NOT NULL UNIQUE,
     value       INT          NOT NULL,
     updated_by  INT REFERENCES iihf.users(id),
     updated_at  TIMESTAMP    NOT NULL DEFAULT NOW()
 );
 
--- Predvolene hodnoty bodov (❓ upresni admin)
 INSERT INTO iihf.scoring_config (key, value) VALUES
-    ('correct_winner',  2),   -- spravny vitaz
-    ('exact_score',     5);   -- presne skore
+    ('correct_winner_group',   1),
+    ('correct_winner_playoff', 3),
+    ('correct_goals_per_team', 1);
 
 -- ============================================================
 -- FRIEND GROUPS (❓ este nerozhodnute: 1 alebo viac skupin)

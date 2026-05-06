@@ -83,15 +83,28 @@ Android aplikácia — tipovačka výsledkov MS v ľadovom hokeji 2026 pre skupi
 ---
 
 ## Tipovanie
-- ❓ Tipuje sa iba výsledok (kto vyhrá), alebo aj presné skóre?
-- ❓ Tipujú sa všetky zápasy (skupiny aj play-off)?
+- Hráč tipuje **presný výsledok riadnej hracej doby (60 minút)**
+- Tipujú sa všetky zápasy — skupinová fáza aj play-off
 - ❓ Dokedy možno zmeniť tip? (napr. do začiatku zápasu)
 
 ---
 
 ## Bodovanie
-- Systém bodov nastavuje a môže meniť admin
-- ❓ Aký je predvolený bodovací systém?
+Admin môže hodnoty meniť. Predvolený systém:
+
+| Podmienka | Skupinová fáza | Play-off (QF/SF/F/BM) |
+|-----------|---------------|----------------------|
+| Správny víťaz alebo remíza | 1 bod | 3 body |
+| Správny počet gólov domácich | 1 bod | 1 bod |
+| Správny počet gólov hostí | 1 bod | 1 bod |
+| **Maximum** | **3 body** | **5 bodov** |
+
+**Príklady (skupinová fáza):**
+- Skutočnosť: FIN 3:2 GER
+  - Tip FIN 3:2 GER → víťaz ✓ + góly FIN ✓ + góly GER ✓ = **3 body**
+  - Tip FIN 2:1 GER → víťaz ✓ + góly FIN ✗ + góly GER ✗ = **1 bod**
+  - Tip FIN 3:1 GER → víťaz ✓ + góly FIN ✓ + góly GER ✗ = **2 body**
+  - Tip GER 2:1 FIN → víťaz ✗ + góly ✗ + góly ✗ = **0 bodov**
 
 ---
 
@@ -109,14 +122,11 @@ Android aplikácia — tipovačka výsledkov MS v ľadovom hokeji 2026 pre skupi
 ---
 
 ## Otvorené otázky
-1. Tipovanie — výsledok vs. presné skóre
-2. Ktoré zápasy sa tipujú
-3. Deadline na tip
-4. Predvolený bodovací systém
-5. Jedna vs. viac skupín priateľov
-6. Spôsob pozvania do skupiny
-7. Notifikácie
-8. História tipov
+1. Deadline na tip — dokedy možno zmeniť tip pred zápasom?
+2. Jedna vs. viac skupín priateľov
+3. Spôsob pozvania do skupiny
+4. Notifikácie
+5. História tipov
 
 ---
 
@@ -179,7 +189,7 @@ Android aplikácia — tipovačka výsledkov MS v ľadovom hokeji 2026 pre skupi
 | Pole | Typ | Popis |
 |------|-----|-------|
 | id | SERIAL PK | |
-| key | VARCHAR(50) NOT NULL UNIQUE | napr. 'correct_winner', 'exact_score' |
+| key | VARCHAR(50) NOT NULL UNIQUE | 'correct_winner_group' \| 'correct_winner_playoff' \| 'correct_goals_per_team' |
 | value | INT NOT NULL | počet bodov |
 | updated_by | FK → users | |
 | updated_at | TIMESTAMP | |
