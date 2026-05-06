@@ -105,6 +105,18 @@
 
 .actions { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
 
+.btnSmallWarn {
+    padding: 6px 12px;
+    background: #e67e22;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.82rem;
+}
+.btnSmallWarn:hover:not(:disabled) { background: #f39c12; }
+.btnSmallWarn:disabled { opacity: 0.5; cursor: not-allowed; }
+
 .btnSmallDanger {
     padding: 6px 12px;
     background: #c0392b;
