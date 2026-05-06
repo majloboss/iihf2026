@@ -120,6 +120,13 @@ Android aplikácia — tipovačka výsledkov MS v ľadovom hokeji 2026 pre skupi
 
 ---
 
+## Infraštruktúra
+- **Databáza:** PostgreSQL na hostingu fellow.sk (rovnaký hosting ako BookClub a Scrabble)
+- **Backend:** ❓ (zatiaľ neurčené)
+- **Android app:** komunikuje s backendom cez API
+
+---
+
 ## Zdroje
 - Rozpis zápasov: `sources/IIHF2026.pdf` (stav k 12.2.2026)
 
