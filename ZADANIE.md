@@ -13,17 +13,29 @@ Android aplikácia — tipovačka výsledkov MS v ľadovom hokeji 2026 pre skupi
 ## Používatelia
 
 ### Registrácia
-- **Účty vytvára iba admin** (nie je možná samostatná registrácia)
-- Admin nastaví username a heslo, hráč si môže heslo po prihlásení zmeniť
+- **Účty vytvára iba admin** — nastaví username a heslo
+- Hráč sa prihlási a môže si profil upraviť
 
-| Pole | Povinné |
-|------|---------|
-| username | áno |
-| password | áno |
-| meno | nie |
-| priezvisko | nie |
-| email | nie (potrebný pre email notifikácie) |
-| telefón | nie |
+### Profil používateľa (upravuje hráč)
+| Akcia | Podmienka |
+|-------|-----------|
+| Zmena username | iba raz (pri prvom prihlásení alebo kedykoľvek, ale len jedenkrát) |
+| Zmena hesla | kedykoľvek |
+| Nahratie avatara (fotka) | kedykoľvek |
+| Doplnenie / zmena emailu | kedykoľvek |
+| Doplnenie / zmena mobilu | kedykoľvek |
+| Zapnúť / vypnúť push notifikácie | kedykoľvek |
+
+### Polia používateľa
+| Pole | Povinné | Popis |
+|------|---------|-------|
+| username | áno | admin nastaví, hráč môže zmeniť raz |
+| password | áno | admin nastaví, hráč môže meniť |
+| avatar | nie | obrázok profilu, uložený na serveri |
+| meno | nie | |
+| priezvisko | nie | |
+| email | nie | potrebný pre email notifikácie |
+| telefón | nie | |
 
 ### Roly
 - **User** — tipuje zápasy, sleduje výsledky a poradie
@@ -136,12 +148,14 @@ Admin môže hodnoty meniť. Predvolený systém:
 | Pole | Typ | Popis |
 |------|-----|-------|
 | id | SERIAL PK | |
-| username | VARCHAR(50) NOT NULL UNIQUE | |
+| username | VARCHAR(50) NOT NULL UNIQUE | admin nastaví, hráč môže zmeniť raz |
 | password | VARCHAR(255) NOT NULL | bcrypt hash |
+| username_changed | BOOLEAN DEFAULT FALSE | či už hráč zmenil username |
 | first_name | VARCHAR(100) | voliteľné |
 | last_name | VARCHAR(100) | voliteľné |
 | email | VARCHAR(150) UNIQUE | voliteľné, potrebný pre email notif. |
 | phone | VARCHAR(30) | voliteľné |
+| avatar | VARCHAR(255) | názov súboru avatara na serveri |
 | role | VARCHAR(10) DEFAULT 'user' | 'user' \| 'admin' |
 | fcm_token | VARCHAR(255) | Firebase token pre push notifikácie |
 | notif_push | BOOLEAN DEFAULT TRUE | push notifikácie zapnuté |
