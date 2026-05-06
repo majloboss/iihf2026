@@ -1,8 +1,35 @@
 # IIHF2026 — Zadanie aplikácie
 
-> **Legenda stavu implementácie:**
-> - ✅ Implementované v `develop` (nasadené na dev_iihf2026.fellow.sk)
-> - 🔲 Naimplementované
+> **Legenda:** ✅ = hotovo v `develop` &nbsp;|&nbsp; 🔲 = nie je implementované
+
+---
+
+## STAV IMPLEMENTÁCIE — PREHĽAD
+
+### ✅ HOTOVO (develop / dev_iihf2026.fellow.sk)
+- Prihlásenie (JWT)
+- Registrácia cez pozývací link (admin generuje, hráč aktivuje)
+- Môj profil — avatar, meno, priezvisko, email, telefón, zmena hesla, zmazanie účtu
+- Skupiny — vytvorenie, vstup (pending→schválenie), odchod, zrušenie, filter Len moje/Všetky
+- Skupiny — rozbalenie skupiny → zoznam členov, klik na člena → detail (avatar, meno, email, tel)
+- Admin — správa používateľov (zoznam, aktivácia, rola, edit, heslo, zmazanie)
+- Admin — pozývacie linky (generovanie, zoznam)
+- DB schéma — users, invites, friend_groups, group_members, teams, games, scoring_config
+- Deploy pipeline — GitHub Actions → FTP → fellow.sk (dev + prod)
+- PWA — favicon, title, manifest, offline SW
+
+### 🔲 TODO (nie je implementované)
+- Zápasy — zoznam, zobrazenie, tipovanie
+- Detail zápasu — môj tip, tipy ostatných po uzavretí, výsledok
+- Poradie — tabuľka v skupinách + celkové
+- Dashboard — najbližšie zápasy, posledné výsledky, skrátené poradie
+- Zmena username (iba raz)
+- Notifikácie — push (Web + FCM) + email
+- Admin — zadávanie výsledkov zápasov
+- Admin — schválenie tabuľky po skupinovej fáze
+- Admin — generovanie play-off zápasov
+- Admin — nastavenia bodovacieho systému
+- Android aplikácia (Kotlin)
 
 ---
 
