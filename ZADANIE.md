@@ -122,7 +122,7 @@ Android aplikácia — tipovačka výsledkov MS v ľadovom hokeji 2026 pre skupi
 
 ## Infraštruktúra
 - **Databáza:** PostgreSQL na hostingu fellow.sk (rovnaký hosting ako BookClub a Scrabble)
-- **Backend:** ❓ (zatiaľ neurčené)
+- **Backend:** PHP (REST API)
 - **Android app:** komunikuje s backendom cez API
 
 ---
