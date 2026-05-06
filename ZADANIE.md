@@ -325,11 +325,18 @@ Admin môže hodnoty meniť. Predvolený systém:
 
 ## Infraštruktúra
 - **Hosting:** fellow.sk (rovnaký ako BookClub a Scrabble)
-- **Databáza:** PostgreSQL na fellow.sk
+- **Databáza:** PostgreSQL — `DB-BET` na fellow.sk
 - **Backend:** PHP (REST API) — zdieľaný pre web aj Android
 - **Web:** React + Vite PWA, statický build uploadovaný na fellow.sk
 - **Android:** Kotlin, komunikuje s PHP API
 - **URL:** ❓ (napr. iihf2026.fellow.sk)
+
+### DB schémy v DB-BET
+| Schéma | Obsah |
+|--------|-------|
+| `admin` | users, friend_groups, group_members, notification_settings, schema_versions — zdieľané pre všetky budúce turnaje |
+| `iihf2026` | teams, games, scoring_config, tips — špecifické pre IIHF 2026 |
+| `public` | zatiaľ prázdne |
 
 ---
 
