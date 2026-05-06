@@ -1,7 +1,28 @@
 # IIHF2026 — Zadanie aplikácie
 
 ## Prehľad
-Android aplikácia — tipovačka výsledkov MS v ľadovom hokeji 2026 pre skupinu priateľov.
+Android aplikácia — tipovačka výsledkov MS v ľadovom hokeji 2026.
+
+### Ako funguje tipovačka
+Hráč pred každým zápasom (najneskôr 5 minút pred výkopom) zadá tip na presný výsledok riadnej hracej doby (60 minút). Po skončení zápasu systém automaticky vypočíta body podľa toho, ako presne hráč tipoval. Hráči súťažia v skupinách priateľov a sledujú svoje poradie v rámci každej skupiny.
+
+### Pravidlá udeľovania bodov
+Boduje sa výsledok **riadnej hracej doby (60 minút)** — predĺženie ani samostatné nájazdy sa do tipu nezapočítavajú.
+
+| Podmienka | Skupinová fáza | Play-off (QF / SF / Finále / O bronz) |
+|-----------|:--------------:|:-------------------------------------:|
+| Správny víťaz alebo remíza | 1 bod | 3 body |
+| Správny počet gólov domácich | 1 bod | 1 bod |
+| Správny počet gólov hostí | 1 bod | 1 bod |
+| **Maximum za zápas** | **3 body** | **5 bodov** |
+
+**Príklady (skupinová fáza, skutočnosť FIN 3:2 GER):**
+| Tip | Body | Dôvod |
+|-----|:----:|-------|
+| FIN 3:2 GER | 3 | víťaz ✓, góly FIN ✓, góly GER ✓ |
+| FIN 3:1 GER | 2 | víťaz ✓, góly FIN ✓, góly GER ✗ |
+| FIN 2:1 GER | 1 | víťaz ✓, góly FIN ✗, góly GER ✗ |
+| GER 2:1 FIN | 0 | víťaz ✗ |
 
 ---
 
@@ -137,9 +158,14 @@ Admin môže hodnoty meniť. Predvolený systém:
 ---
 
 ## Skupiny priateľov
-- Systém podporuje **viac skupín**, na začiatku bude jedna: **"Priatelia hokeja"**
-- Všetci používatelia budú v tejto skupiny
-- Používateľov do skupiny **pridáva admin** (nie je self-join)
+- **Každý hráč môže vytvoriť skupinu** — stáva sa jej správcom (group admin)
+- Názov skupiny musí byť **unikátny** a je viditeľný pre všetkých hráčov
+- Hráč si prehliadne zoznam skupín a môže **požiadať o vstup**
+- Group admin žiadosť **schváli** — po schválení už hráča nemôže vyhodiť
+- Hráč môže skupinu **sám opustiť** kedykoľvek
+- Skupinu môže vymazať **iba jej zakladateľ**
+- Hráč môže byť členom **viacerých skupín**
+- Hráč tipuje **iba raz** — rovnaký tip sa použije vo všetkých jeho skupinách
 
 ---
 
@@ -242,13 +268,12 @@ Admin môže hodnoty meniť. Predvolený systém:
 | updated_by | FK → users | |
 | updated_at | TIMESTAMP | |
 
-### iihf.friend_groups (skupiny priateľov)
+### iihf.friend_groups
 | Pole | Typ | Popis |
 |------|-----|-------|
 | id | SERIAL PK | |
-| name | VARCHAR(100) NOT NULL | názov skupiny |
-| invite_code | VARCHAR(20) NOT NULL UNIQUE | kód na pozvanie |
-| created_by | FK → users | |
+| name | VARCHAR(100) NOT NULL UNIQUE | názov skupiny (unikátny, verejne viditeľný) |
+| created_by | FK → users | zakladateľ = group admin |
 | created_at | TIMESTAMP | |
 
 ### iihf.group_members
@@ -256,6 +281,7 @@ Admin môže hodnoty meniť. Predvolený systém:
 |------|-----|-------|
 | group_id | FK → friend_groups | |
 | user_id | FK → users | |
+| status | VARCHAR(10) DEFAULT 'pending' | 'pending' \| 'approved' |
 | joined_at | TIMESTAMP | |
 | PK(group_id, user_id) | | |
 

@@ -119,23 +119,23 @@ INSERT INTO iihf.scoring_config (key, value) VALUES
 
 -- ============================================================
 -- FRIEND GROUPS
--- Zaciatok: jedna skupina "Priatelia hokeja", vsetci users v nej
+-- Skupinu moze vytvorit kazdy hrac, stava sa jej group adminom.
+-- Nazov skupiny je unikatny a viditelny pre vsetkych.
+-- Vstup cez ziadost (status pending -> approved).
+-- Zakladatel moze skupinu vymazat, clenov uz vyhodit nemoze.
 -- ============================================================
 CREATE TABLE iihf.friend_groups (
     id          SERIAL PRIMARY KEY,
-    name        VARCHAR(100) NOT NULL,
-    invite_code VARCHAR(20)  NOT NULL UNIQUE,
+    name        VARCHAR(100) NOT NULL UNIQUE,
     created_by  INT REFERENCES iihf.users(id),
     created_at  TIMESTAMP    NOT NULL DEFAULT NOW()
 );
 
-INSERT INTO iihf.friend_groups (name, invite_code) VALUES
-    ('Priatelia hokeja', 'IIHF2026');
-
 CREATE TABLE iihf.group_members (
-    group_id    INT REFERENCES iihf.friend_groups(id),
-    user_id     INT REFERENCES iihf.users(id),
-    joined_at   TIMESTAMP NOT NULL DEFAULT NOW(),
+    group_id    INT         REFERENCES iihf.friend_groups(id),
+    user_id     INT         REFERENCES iihf.users(id),
+    status      VARCHAR(10) NOT NULL DEFAULT 'pending', -- 'pending' | 'approved'
+    joined_at   TIMESTAMP   NOT NULL DEFAULT NOW(),
     PRIMARY KEY (group_id, user_id)
 );
 
