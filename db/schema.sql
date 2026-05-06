@@ -18,16 +18,16 @@ CREATE TABLE iihf.users (
 );
 
 -- ============================================================
--- TEAMS
+-- STATES (číselník štátov)
 -- ============================================================
-CREATE TABLE iihf.teams (
-    id          SERIAL PRIMARY KEY,
-    code        VARCHAR(3)  NOT NULL UNIQUE,    -- FIN, GER, SVK...
-    name        VARCHAR(100) NOT NULL,
-    group_name  VARCHAR(1)  NOT NULL            -- 'A' | 'B'
+CREATE TABLE iihf.states (
+    state_id    SERIAL PRIMARY KEY,
+    state_code  VARCHAR(3)   NOT NULL UNIQUE,   -- FIN, GER, SVK...
+    state_name  VARCHAR(100) NOT NULL,
+    group_name  VARCHAR(1)   NOT NULL            -- 'A' | 'B'
 );
 
-INSERT INTO iihf.teams (code, name, group_name) VALUES
+INSERT INTO iihf.states (state_code, state_name, group_name) VALUES
     ('FIN', 'Finland',        'A'),
     ('GER', 'Germany',        'A'),
     ('USA', 'United States',  'A'),
@@ -53,8 +53,8 @@ CREATE TABLE iihf.games (
     game_number     INT          NOT NULL UNIQUE,       -- 1..64
     phase           VARCHAR(20)  NOT NULL,              -- 'preliminary' | 'quarterfinal' | 'semifinal' | 'bronze' | 'final'
     group_name      VARCHAR(1),                         -- 'A' | 'B' | NULL pre playoff
-    home_team_id    INT REFERENCES iihf.teams(id),     -- NULL kym sa nezna (playoff)
-    away_team_id    INT REFERENCES iihf.teams(id),     -- NULL kym sa nezna (playoff)
+    home_team_id    INT REFERENCES iihf.states(state_id),  -- NULL kym sa nezna (playoff)
+    away_team_id    INT REFERENCES iihf.states(state_id),  -- NULL kym sa nezna (playoff)
     start_time      TIMESTAMP    NOT NULL,
     venue           VARCHAR(100) NOT NULL,
     home_score      INT,                                -- NULL = este neodohrany
