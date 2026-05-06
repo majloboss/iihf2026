@@ -135,20 +135,20 @@ Android aplikácia — tipovačka výsledkov MS v ľadovom hokeji 2026 pre skupi
 | role | VARCHAR(10) DEFAULT 'user' | 'user' \| 'admin' |
 | created_at | TIMESTAMP | |
 
-### iihf.states (číselník štátov)
+### iihf.teams (číselník tímov)
 | Pole | Typ | Popis |
 |------|-----|-------|
-| state_id | SERIAL PK | |
-| state_code | VARCHAR(3) NOT NULL UNIQUE | FIN, GER, SVK... |
-| state_name | VARCHAR(100) NOT NULL | Finland, Germany... |
+| team_id | SERIAL PK | |
+| team_code | VARCHAR(3) NOT NULL UNIQUE | FIN, GER, SVK... |
+| team_name | VARCHAR(100) NOT NULL | Finland, Germany... |
 | group_name | VARCHAR(1) NOT NULL | 'A' \| 'B' |
 
 ### iihf.games (zápasy)
 | Pole | Typ | Popis |
 |------|-----|-------|
 | game_id | INT PK | číslo zápasu z PDF (1–64) |
-| home_team_id | FK → states | NULL kým sa nevie (playoff) |
-| away_team_id | FK → states | NULL kým sa nevie (playoff) |
+| home_team_id | FK → teams | NULL kým sa nevie (playoff) |
+| away_team_id | FK → teams | NULL kým sa nevie (playoff) |
 | start_time | TIMESTAMP NOT NULL | dátum a čas zápasu |
 | venue | VARCHAR(100) NOT NULL | miesto konania |
 | tips_open | BOOLEAN DEFAULT TRUE | tipovanie otvorené/zatvorené |

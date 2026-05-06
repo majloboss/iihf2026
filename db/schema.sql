@@ -20,14 +20,14 @@ CREATE TABLE iihf.users (
 -- ============================================================
 -- STATES (číselník štátov)
 -- ============================================================
-CREATE TABLE iihf.states (
-    state_id    SERIAL PRIMARY KEY,
-    state_code  VARCHAR(3)   NOT NULL UNIQUE,   -- FIN, GER, SVK...
-    state_name  VARCHAR(100) NOT NULL,
+CREATE TABLE iihf.teams (
+    team_id    SERIAL PRIMARY KEY,
+    team_code  VARCHAR(3)   NOT NULL UNIQUE,   -- FIN, GER, SVK...
+    team_name  VARCHAR(100) NOT NULL,
     group_name  VARCHAR(1)   NOT NULL            -- 'A' | 'B'
 );
 
-INSERT INTO iihf.states (state_code, state_name, group_name) VALUES
+INSERT INTO iihf.teams (team_code, team_name, group_name) VALUES
     ('FIN', 'Finland',        'A'),
     ('GER', 'Germany',        'A'),
     ('USA', 'United States',  'A'),
@@ -50,8 +50,8 @@ INSERT INTO iihf.states (state_code, state_name, group_name) VALUES
 -- ============================================================
 CREATE TABLE iihf.games (
     game_id             INT          PRIMARY KEY,           -- cislo zapasu z PDF: 1..64
-    home_team_id        INT          REFERENCES iihf.states(state_id),  -- NULL kym sa nezna (playoff)
-    away_team_id        INT          REFERENCES iihf.states(state_id),  -- NULL kym sa nezna (playoff)
+    home_team_id        INT          REFERENCES iihf.teams(team_id),  -- NULL kym sa nezna (playoff)
+    away_team_id        INT          REFERENCES iihf.teams(team_id),  -- NULL kym sa nezna (playoff)
     start_time          TIMESTAMP    NOT NULL,
     venue               VARCHAR(100) NOT NULL,
     tips_open           BOOLEAN      NOT NULL DEFAULT TRUE,  -- TRUE = tipovanie otvorene
