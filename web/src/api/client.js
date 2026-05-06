@@ -1,5 +1,17 @@
 const BASE = import.meta.env.VITE_API_URL ?? '/api';
 
+export async function apiUpload(path, formData) {
+    const token = localStorage.getItem('token');
+    const res = await fetch(`${BASE}/${path}`, {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+    });
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.error ?? 'Chyba servera');
+    return json.data;
+}
+
 export async function apiFetch(path, options = {}) {
     const token = localStorage.getItem('token');
     const res = await fetch(`${BASE}/${path}`, {

@@ -30,6 +30,11 @@ try {
         $path === 'v1/profile'             => require __DIR__ . '/v1/profile.php',
         $path === 'v1/profile-password'    => require __DIR__ . '/v1/profile-password.php',
         $path === 'v1/profile-delete'      => require __DIR__ . '/v1/profile-delete.php',
+        $path === 'v1/profile-avatar'      => require __DIR__ . '/v1/profile-avatar.php',
+        $path === 'v1/groups'              => require __DIR__ . '/v1/groups.php',
+        $path === 'v1/group-join'          => require __DIR__ . '/v1/group-join.php',
+        $path === 'v1/group-leave'         => require __DIR__ . '/v1/group-leave.php',
+        $path === 'v1/group-members'       => require __DIR__ . '/v1/group-members.php',
         default                            => json_error('Not found', 404)
     };
 } catch (Throwable $e) {
