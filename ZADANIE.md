@@ -323,6 +323,7 @@ Admin môže hodnoty meniť. Predvolený systém:
 | **Detail zápasu** | Tip hráča, po uzavretí tipy všetkých hráčov, výsledok |
 | **Poradie** | Tabuľka poradia v rámci skupiny, celkové poradie |
 | **Skupiny** | Zoznam skupín, žiadosť o vstup, vytvorenie skupiny |
+| **Hráči** | Zoznam všetkých registrovaných hráčov, klik = detail profilu (avatar, meno, username) |
 | **Môj profil** | Zmena username (raz), hesla, avatara, emailu, mobilu, notifikácie |
 
 ### Obrazovky — admin
@@ -361,4 +362,4 @@ Admin môže hodnoty meniť. Predvolený systém:
 
 ---
 
-*Posledná aktualizácia: 2026-05-06*
+*Posledná aktualizácia: 2026-05-07*

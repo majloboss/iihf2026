@@ -15,6 +15,7 @@ export default function UserLayout() {
                 </div>
                 <nav className={styles.nav}>
                     <NavLink to="/groups"  className={({ isActive }) => isActive ? styles.active : ''}>👥 Skupiny</NavLink>
+                    <NavLink to="/members" className={({ isActive }) => isActive ? styles.active : ''}>🧑‍🤝‍🧑 Hráči</NavLink>
                     <NavLink to="/profile" className={({ isActive }) => isActive ? styles.active : ''}>👤 Profil</NavLink>
                 </nav>
                 <button className={styles.logout} onClick={() => { signOut(); navigate('/login'); }}>Odhlásiť</button>
