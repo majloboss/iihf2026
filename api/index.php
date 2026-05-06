@@ -20,6 +20,7 @@ try {
     match (true) {
         $path === 'v1/auth/login'          => require __DIR__ . '/v1/auth/login.php',
         $path === 'v1/admin/users'         => require __DIR__ . '/v1/admin/users.php',
+        $path === 'v1/admin/user-update'   => require __DIR__ . '/v1/admin/user_update.php',
         $path === 'v1/admin/invites'       => require __DIR__ . '/v1/admin/invites.php',
         $path === 'v1/admin/invite-use'    => require __DIR__ . '/v1/auth/invite_use.php',
         $path === 'v1/auth/complete'       => require __DIR__ . '/v1/auth/complete.php',

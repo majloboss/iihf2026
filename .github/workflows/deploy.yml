@@ -2,7 +2,7 @@ name: Deploy to fellow.sk
 
 on:
   push:
-    branches: [main]
+    branches: [main, develop]
   workflow_dispatch:
 
 jobs:
@@ -27,7 +27,7 @@ jobs:
         run: npm run build
         working-directory: web
         env:
-          VITE_API_URL: https://iihf2026.fellow.sk/api
+          VITE_API_URL: ${{ github.ref_name == 'main' && 'https://iihf2026.fellow.sk' || 'https://dev_iihf2026.fellow.sk' }}/api
 
       - name: Deploy web via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
@@ -36,8 +36,8 @@ jobs:
           username: ftp.fellow.sk
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: web/dist/
-          server-dir: /sub/iihf2026/
-          state-name: .ftp-deploy-sync-web.json
+          server-dir: ${{ github.ref_name == 'main' && '/sub/iihf2026/' || '/sub/dev_iihf2026/' }}
+          state-name: ${{ github.ref_name == 'main' && '.ftp-deploy-sync-web.json' || '.ftp-deploy-sync-dev-web.json' }}
           exclude: |
             **/.git*
             **/.git*/**
@@ -49,8 +49,8 @@ jobs:
           username: ftp.fellow.sk
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: api/
-          server-dir: /sub/iihf2026/api/
-          state-name: .ftp-deploy-sync-api.json
+          server-dir: ${{ github.ref_name == 'main' && '/sub/iihf2026/api/' || '/sub/dev_iihf2026/api/' }}
+          state-name: ${{ github.ref_name == 'main' && '.ftp-deploy-sync-api.json' || '.ftp-deploy-sync-dev-api.json' }}
           exclude: |
             **/.git*
             **/.git*/**
