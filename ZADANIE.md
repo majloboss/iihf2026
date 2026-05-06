@@ -35,8 +35,10 @@ Boduje sa výsledok **riadnej hracej doby (60 minút)** — predĺženie ani sam
 ## Používatelia
 
 ### Registrácia
-- **Účty vytvára iba admin** — nastaví username a heslo
-- Hráč sa prihlási a môže si profil upraviť
+- **Účty vytvára iba admin** — zadá username a email hráča
+- Systém zašle hráčovi **registračný link** na email
+- Hráč cez link nastaví heslo a aktivuje účet
+- Po aktivácii si môže upraviť profil
 
 ### Profil používateľa (upravuje hráč)
 | Akcia | Podmienka |
@@ -52,7 +54,8 @@ Boduje sa výsledok **riadnej hracej doby (60 minút)** — predĺženie ani sam
 | Pole | Povinné | Popis |
 |------|---------|-------|
 | username | áno | admin nastaví, hráč môže zmeniť raz |
-| password | áno | admin nastaví, hráč môže meniť |
+| email | áno | admin zadá — na tento email ide registračný link |
+| password | nastaví hráč | hráč nastaví pri aktivácii cez link |
 | avatar | nie | obrázok profilu, uložený na serveri |
 | meno | nie | |
 | priezvisko | nie | |
@@ -206,6 +209,8 @@ Admin môže hodnoty meniť. Predvolený systém:
 | phone | VARCHAR(30) | voliteľné |
 | avatar | VARCHAR(255) | názov súboru avatara na serveri |
 | role | VARCHAR(10) DEFAULT 'user' | 'user' \| 'admin' |
+| is_active | BOOLEAN DEFAULT FALSE | TRUE po aktivácii cez registračný link |
+| reg_token | VARCHAR(100) UNIQUE | registračný token (NULL po aktivácii) |
 | fcm_token | VARCHAR(255) | Firebase FCM token (Android) |
 | web_push_sub | TEXT | Web Push subscription JSON (PWA) |
 | created_at | TIMESTAMP | |

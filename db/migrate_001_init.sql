@@ -26,6 +26,8 @@ CREATE TABLE admin.users (
     phone             VARCHAR(30),
     avatar            VARCHAR(255),                       -- nazov suboru avatara na serveri
     role              VARCHAR(10)  NOT NULL DEFAULT 'user', -- 'user' | 'admin'
+    is_active         BOOLEAN      NOT NULL DEFAULT FALSE, -- TRUE po aktivacii cez reg. link
+    reg_token         VARCHAR(100) UNIQUE,               -- registracny token (NULL po aktivacii)
     fcm_token         VARCHAR(255),                       -- Firebase FCM token (Android)
     web_push_sub      TEXT,                               -- Web Push subscription JSON (PWA)
     created_at        TIMESTAMP    NOT NULL DEFAULT NOW()
