@@ -288,6 +288,38 @@ Admin môže hodnoty meniť. Predvolený systém:
 
 ---
 
+## Web aplikácia
+
+### Technológia
+- Vanilla JS SPA (rovnaký štýl ako BookClub a Scrabble)
+- Hosted na fellow.sk
+- Komunikuje s PHP REST API backendom
+- **URL:** ❓ (napr. iihf2026.fellow.sk)
+
+### Obrazovky — bežný hráč
+| Obrazovka | Popis |
+|-----------|-------|
+| **Prihlásenie** | Login formulár |
+| **Dashboard** | Najbližšie zápasy, posledné výsledky, skrátené poradie |
+| **Zápasy** | Zoznam všetkých zápasov, zadávanie tipov, zobrazenie výsledkov |
+| **Detail zápasu** | Tip hráča, po uzavretí tipy všetkých hráčov, výsledok |
+| **Poradie** | Tabuľka poradia v rámci skupiny, celkové poradie |
+| **Skupiny** | Zoznam skupín, žiadosť o vstup, vytvorenie skupiny |
+| **Môj profil** | Zmena username (raz), hesla, avatara, emailu, mobilu, notifikácie |
+
+### Obrazovky — admin
+| Obrazovka | Popis |
+|-----------|-------|
+| **Správa používateľov** | Pridanie usera, zmena hesla |
+| **Zadanie výsledku** | Výsledok riadnej hracej doby + konečný výsledok |
+| **Schválenie tabuľky** | Kontrola a schválenie po skupinovej fáze |
+| **Nastavenia bodovanie** | Úprava scoring_config hodnôt |
+
+### Responzívnosť
+- Primárne desktop, ale použiteľné aj na mobile
+
+---
+
 ## Infraštruktúra
 - **Hosting:** fellow.sk (rovnaký ako BookClub a Scrabble)
 - **Databáza:** PostgreSQL na fellow.sk
