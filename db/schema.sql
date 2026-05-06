@@ -119,14 +119,17 @@ CREATE TABLE iihf.group_members (
 -- ❓ este nerozhodnute: len vitaz alebo aj presne skore
 -- Zatial dizajn pre presne skore (pokryje obe moznosti)
 -- ============================================================
+-- Tip mozno menit do 5 minut pred zapasom (tips_open v games).
+-- Admin moze tip zadat/upravit manualne aj po uzavreti (entered_by_admin = TRUE).
 CREATE TABLE iihf.tips (
-    id              SERIAL PRIMARY KEY,
-    user_id         INT REFERENCES iihf.users(id)  NOT NULL,
-    game_id         INT REFERENCES iihf.games(id)  NOT NULL,
-    home_score_tip  INT          NOT NULL,
-    away_score_tip  INT          NOT NULL,
-    points_earned   INT,                            -- NULL kym zapas nie je odohrane
-    created_at      TIMESTAMP    NOT NULL DEFAULT NOW(),
-    updated_at      TIMESTAMP    NOT NULL DEFAULT NOW(),
-    UNIQUE (user_id, game_id)                       -- jeden tip na zapas
+    id                SERIAL PRIMARY KEY,
+    user_id           INT REFERENCES iihf.users(id)  NOT NULL,
+    game_id           INT REFERENCES iihf.games(id)  NOT NULL,
+    home_score_tip    INT       NOT NULL,
+    away_score_tip    INT       NOT NULL,
+    points_earned     INT,                           -- NULL kym zapas nie je odohrane
+    entered_by_admin  BOOLEAN   NOT NULL DEFAULT FALSE,
+    created_at        TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at        TIMESTAMP NOT NULL DEFAULT NOW(),
+    UNIQUE (user_id, game_id)                        -- jeden tip na zapas
 );

@@ -85,7 +85,8 @@ Android aplikácia — tipovačka výsledkov MS v ľadovom hokeji 2026 pre skupi
 ## Tipovanie
 - Hráč tipuje **presný výsledok riadnej hracej doby (60 minút)**
 - Tipujú sa všetky zápasy — skupinová fáza aj play-off
-- ❓ Dokedy možno zmeniť tip? (napr. do začiatku zápasu)
+- Tipovanie uzavreté **5 minút pred začiatkom zápasu**
+- Admin môže tip zadať alebo upraviť manuálne (napr. keď používateľ pošle tip emailom)
 
 ---
 
@@ -122,7 +123,6 @@ Admin môže hodnoty meniť. Predvolený systém:
 ---
 
 ## Otvorené otázky
-1. Deadline na tip — dokedy možno zmeniť tip pred zápasom?
 2. Jedna vs. viac skupín priateľov
 3. Spôsob pozvania do skupiny
 4. Notifikácie
@@ -181,6 +181,7 @@ Admin môže hodnoty meniť. Predvolený systém:
 | home_score_tip | INT NOT NULL | tip skóre domáci |
 | away_score_tip | INT NOT NULL | tip skóre hostia |
 | points_earned | INT | NULL kým zápas nie je odohraný |
+| entered_by_admin | BOOLEAN DEFAULT FALSE | admin zadal tip manuálne za používateľa |
 | created_at | TIMESTAMP | |
 | updated_at | TIMESTAMP | |
 | UNIQUE(user_id, game_id) | | jeden tip na zápas |
