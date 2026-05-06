@@ -26,11 +26,27 @@ CREATE TABLE admin.users (
     phone             VARCHAR(30),
     avatar            VARCHAR(255),                       -- nazov suboru avatara na serveri
     role              VARCHAR(10)  NOT NULL DEFAULT 'user', -- 'user' | 'admin'
-    is_active         BOOLEAN      NOT NULL DEFAULT FALSE, -- TRUE po aktivacii cez reg. link
-    reg_token         VARCHAR(100) UNIQUE,               -- registracny token (NULL po aktivacii)
+    is_active         BOOLEAN      NOT NULL DEFAULT FALSE, -- TRUE po nastaveni username+hesla
     fcm_token         VARCHAR(255),                       -- Firebase FCM token (Android)
     web_push_sub      TEXT,                               -- Web Push subscription JSON (PWA)
     created_at        TIMESTAMP    NOT NULL DEFAULT NOW()
+);
+
+-- ============================================================
+-- ADMIN.INVITES
+-- Admin vygeneruje pozyvaci link (token), zdieli ho lubovolne
+-- (WhatsApp, email, SMS...). Po kliknuti sa vytvori placeholder
+-- user iihf2026_<invite_id>, ktory musi nastavit username+heslo.
+-- ============================================================
+CREATE SEQUENCE admin.seq_invite START 1;
+
+CREATE TABLE admin.invites (
+    id            INT          PRIMARY KEY DEFAULT nextval('admin.seq_invite'),
+    invite_token  VARCHAR(100) NOT NULL UNIQUE,  -- URL token (nahodny retazec)
+    created_by    INT          REFERENCES admin.users(id),
+    created_at    TIMESTAMP    NOT NULL DEFAULT NOW(),
+    used_at       TIMESTAMP,                     -- NULL = este nepouzity
+    user_id       INT          REFERENCES admin.users(id)  -- NULL = este nepouzity
 );
 
 -- ============================================================

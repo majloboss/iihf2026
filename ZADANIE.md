@@ -34,11 +34,13 @@ Boduje sa výsledok **riadnej hracej doby (60 minút)** — predĺženie ani sam
 
 ## Používatelia
 
-### Registrácia
-- **Účty vytvára iba admin** — zadá username a email hráča
-- Systém zašle hráčovi **registračný link** na email
-- Hráč cez link nastaví heslo a aktivuje účet
-- Po aktivácii si môže upraviť profil
+### Registrácia cez pozývací link
+1. Admin vygeneruje pozývací link v administrácii
+2. Link zdieľa ľubovoľne — WhatsApp, email, SMS...
+3. Hráč klikne na link → systém vytvorí placeholder účet s username `iihf2026_<InviteID>`
+4. Hráč musí **povinne** nastaviť vlastný username a heslo
+5. Po nastavení sa účet aktivuje (`is_active = TRUE`)
+- Email nie je povinný pri registrácii (hráč ho môže doplniť v profile)
 
 ### Profil používateľa (upravuje hráč)
 | Akcia | Podmienka |
@@ -53,9 +55,8 @@ Boduje sa výsledok **riadnej hracej doby (60 minút)** — predĺženie ani sam
 ### Polia používateľa
 | Pole | Povinné | Popis |
 |------|---------|-------|
-| username | áno | admin nastaví, hráč môže zmeniť raz |
-| email | áno | admin zadá — na tento email ide registračný link |
-| password | nastaví hráč | hráč nastaví pri aktivácii cez link |
+| username | áno | placeholder `iihf2026_<ID>`, hráč musí zmeniť pri aktivácii |
+| password | áno | hráč nastaví pri aktivácii |
 | avatar | nie | obrázok profilu, uložený na serveri |
 | meno | nie | |
 | priezvisko | nie | |
@@ -209,8 +210,7 @@ Admin môže hodnoty meniť. Predvolený systém:
 | phone | VARCHAR(30) | voliteľné |
 | avatar | VARCHAR(255) | názov súboru avatara na serveri |
 | role | VARCHAR(10) DEFAULT 'user' | 'user' \| 'admin' |
-| is_active | BOOLEAN DEFAULT FALSE | TRUE po aktivácii cez registračný link |
-| reg_token | VARCHAR(100) UNIQUE | registračný token (NULL po aktivácii) |
+| is_active | BOOLEAN DEFAULT FALSE | TRUE po nastavení username + hesla |
 | fcm_token | VARCHAR(255) | Firebase FCM token (Android) |
 | web_push_sub | TEXT | Web Push subscription JSON (PWA) |
 | created_at | TIMESTAMP | |
@@ -275,7 +275,17 @@ Admin môže hodnoty meniť. Predvolený systém:
 | updated_by | FK → users | |
 | updated_at | TIMESTAMP | |
 
-### iihf.friend_groups
+### admin.invites
+| Pole | Typ | Popis |
+|------|-----|-------|
+| id | INT PK (SEQ_INVITE) | InviteID — použije sa v placeholder username |
+| invite_token | VARCHAR(100) UNIQUE | náhodný URL token |
+| created_by | FK → users | admin ktorý vygeneroval link |
+| created_at | TIMESTAMP | |
+| used_at | TIMESTAMP | NULL = link ešte nepoužitý |
+| user_id | FK → users | NULL = ešte nepoužitý, po kliknutí = vytvorený user |
+
+### admin.friend_groups
 | Pole | Typ | Popis |
 |------|-----|-------|
 | id | SERIAL PK | |
