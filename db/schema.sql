@@ -49,17 +49,28 @@ INSERT INTO iihf.states (state_code, state_name, group_name) VALUES
 -- GAMES (zápasy)
 -- ============================================================
 CREATE TABLE iihf.games (
-    id              SERIAL PRIMARY KEY,
-    game_number     INT          NOT NULL UNIQUE,       -- 1..64
-    phase           VARCHAR(20)  NOT NULL,              -- 'preliminary' | 'quarterfinal' | 'semifinal' | 'bronze' | 'final'
-    group_name      VARCHAR(1),                         -- 'A' | 'B' | NULL pre playoff
-    home_team_id    INT REFERENCES iihf.states(state_id),  -- NULL kym sa nezna (playoff)
-    away_team_id    INT REFERENCES iihf.states(state_id),  -- NULL kym sa nezna (playoff)
-    start_time      TIMESTAMP    NOT NULL,
-    venue           VARCHAR(100) NOT NULL,
-    home_score      INT,                                -- NULL = este neodohrany
-    away_score      INT,                                -- NULL = este neodohrany
-    status          VARCHAR(15)  NOT NULL DEFAULT 'scheduled' -- 'scheduled' | 'finished'
+    game_id             INT          PRIMARY KEY,           -- cislo zapasu z PDF: 1..64
+    home_team_id        INT          REFERENCES iihf.states(state_id),  -- NULL kym sa nezna (playoff)
+    away_team_id        INT          REFERENCES iihf.states(state_id),  -- NULL kym sa nezna (playoff)
+    start_time          TIMESTAMP    NOT NULL,
+    venue               VARCHAR(100) NOT NULL,
+    tips_open           BOOLEAN      NOT NULL DEFAULT TRUE,  -- TRUE = tipovanie otvorene
+
+    -- vysledok riadnej hracej doby
+    home_score_regular  INT,                                -- NULL = este neodohrany
+    away_score_regular  INT,
+
+    -- konecny vysledok (moze sa lisit od riadnej doby pri predlzeni/samostatnych nakopoch)
+    home_score_final    INT,
+    away_score_final    INT,
+    home_points         INT,                                -- body do tabulky pre domacich
+    away_points         INT,                                -- body do tabulky pre hostí
+
+    result_approved     BOOLEAN      NOT NULL DEFAULT FALSE, -- admin schvalil vysledok
+
+    -- typ zapasu
+    game_type_code      VARCHAR(10)  NOT NULL,              -- GROUP_A | GROUP_B | QF | SF | BM | F
+    game_type_name      VARCHAR(50)  NOT NULL               -- Skupinova faza - Skupina A/B | Stvrtfinale | Semifinale | O bronz | Finale
 );
 
 -- ============================================================

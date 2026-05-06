@@ -120,6 +120,89 @@ Android aplikácia — tipovačka výsledkov MS v ľadovom hokeji 2026 pre skupi
 
 ---
 
+## Návrh databázových tabuliek
+
+### iihf.users
+| Pole | Typ | Popis |
+|------|-----|-------|
+| id | SERIAL PK | |
+| username | VARCHAR(50) NOT NULL UNIQUE | |
+| password | VARCHAR(255) NOT NULL | bcrypt hash |
+| first_name | VARCHAR(100) | voliteľné |
+| last_name | VARCHAR(100) | voliteľné |
+| email | VARCHAR(150) UNIQUE | voliteľné |
+| phone | VARCHAR(30) | voliteľné |
+| role | VARCHAR(10) DEFAULT 'user' | 'user' \| 'admin' |
+| created_at | TIMESTAMP | |
+
+### iihf.states (číselník štátov)
+| Pole | Typ | Popis |
+|------|-----|-------|
+| state_id | SERIAL PK | |
+| state_code | VARCHAR(3) NOT NULL UNIQUE | FIN, GER, SVK... |
+| state_name | VARCHAR(100) NOT NULL | Finland, Germany... |
+| group_name | VARCHAR(1) NOT NULL | 'A' \| 'B' |
+
+### iihf.games (zápasy)
+| Pole | Typ | Popis |
+|------|-----|-------|
+| game_id | INT PK | číslo zápasu z PDF (1–64) |
+| home_team_id | FK → states | NULL kým sa nevie (playoff) |
+| away_team_id | FK → states | NULL kým sa nevie (playoff) |
+| start_time | TIMESTAMP NOT NULL | dátum a čas zápasu |
+| venue | VARCHAR(100) NOT NULL | miesto konania |
+| tips_open | BOOLEAN DEFAULT TRUE | tipovanie otvorené/zatvorené |
+| home_score_regular | INT | skóre domáci — riadna hracia doba |
+| away_score_regular | INT | skóre hostia — riadna hracia doba |
+| home_score_final | INT | konečné skóre domáci |
+| away_score_final | INT | konečné skóre hostia |
+| home_points | INT | body do tabuľky — domáci |
+| away_points | INT | body do tabuľky — hostia |
+| result_approved | BOOLEAN DEFAULT FALSE | výsledok schválený adminom |
+| game_type_code | VARCHAR(10) NOT NULL | GROUP_A \| GROUP_B \| QF \| SF \| BM \| F |
+| game_type_name | VARCHAR(50) NOT NULL | Skupinová fáza A/B \| Štvrťfinále \| Semifinále \| O bronz \| Finále |
+
+### iihf.tips (tipy používateľov)
+| Pole | Typ | Popis |
+|------|-----|-------|
+| id | SERIAL PK | |
+| user_id | FK → users NOT NULL | |
+| game_id | FK → games NOT NULL | |
+| home_score_tip | INT NOT NULL | tip skóre domáci |
+| away_score_tip | INT NOT NULL | tip skóre hostia |
+| points_earned | INT | NULL kým zápas nie je odohraný |
+| created_at | TIMESTAMP | |
+| updated_at | TIMESTAMP | |
+| UNIQUE(user_id, game_id) | | jeden tip na zápas |
+
+### iihf.scoring_config (bodovanie — nastavuje admin)
+| Pole | Typ | Popis |
+|------|-----|-------|
+| id | SERIAL PK | |
+| key | VARCHAR(50) NOT NULL UNIQUE | napr. 'correct_winner', 'exact_score' |
+| value | INT NOT NULL | počet bodov |
+| updated_by | FK → users | |
+| updated_at | TIMESTAMP | |
+
+### iihf.friend_groups (skupiny priateľov) ❓
+| Pole | Typ | Popis |
+|------|-----|-------|
+| id | SERIAL PK | |
+| name | VARCHAR(100) NOT NULL | názov skupiny |
+| invite_code | VARCHAR(20) NOT NULL UNIQUE | kód na pozvanie |
+| created_by | FK → users | |
+| created_at | TIMESTAMP | |
+
+### iihf.group_members ❓
+| Pole | Typ | Popis |
+|------|-----|-------|
+| group_id | FK → friend_groups | |
+| user_id | FK → users | |
+| joined_at | TIMESTAMP | |
+| PK(group_id, user_id) | | |
+
+---
+
 ## Infraštruktúra
 - **Databáza:** PostgreSQL na hostingu fellow.sk (rovnaký hosting ako BookClub a Scrabble)
 - **Backend:** PHP (REST API)
