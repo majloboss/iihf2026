@@ -13,15 +13,26 @@
 
 .topActions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 
-.filterLabel {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 0.88rem;
-    color: #555;
+.btnFilter, .btnFilterActive {
+    padding: 7px 14px;
+    border-radius: 7px;
     cursor: pointer;
-    user-select: none;
+    font-size: 0.88rem;
+    transition: background 0.15s, color 0.15s;
+    white-space: nowrap;
 }
+.btnFilter {
+    background: #e9ecef;
+    color: #555;
+    border: 1px solid #dee2e6;
+}
+.btnFilter:hover { background: #dee2e6; }
+.btnFilterActive {
+    background: #1a3a6b;
+    color: #fff;
+    border: 1px solid #1a3a6b;
+}
+.btnFilterActive:hover { background: #24519e; }
 
 .btnNew {
     padding: 8px 16px;

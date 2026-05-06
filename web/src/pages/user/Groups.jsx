@@ -97,14 +97,13 @@ export default function Groups() {
     return (
         <div className={styles.wrap}>
             <div className={styles.topBar}>
-                <h2>Skupiny priateľov</h2>
+                <h2>Skupiny</h2>
                 <div className={styles.topActions}>
-                    <label className={styles.filterLabel}>
-                        <input type="checkbox" checked={myOnly} onChange={e => setMyOnly(e.target.checked)} />
-                        Iba moje skupiny
-                    </label>
+                    <button className={myOnly ? styles.btnFilterActive : styles.btnFilter} onClick={() => setMyOnly(f => !f)}>
+                        {myOnly ? 'Len moje' : 'Všetky'}
+                    </button>
                     <button className={styles.btnNew} onClick={() => { setCreating(c => !c); setCreateErr(''); setNewName(''); }}>
-                        {creating ? 'Zrušiť' : '+ Nová skupina'}
+                        {creating ? 'Zrušiť' : 'Nová skupina'}
                     </button>
                 </div>
             </div>
