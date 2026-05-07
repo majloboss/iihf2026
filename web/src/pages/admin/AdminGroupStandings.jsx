@@ -46,10 +46,10 @@ function GroupTable({ phase, teams, finalized, onMove }) {
                             <td className={gsStyles.pts}>{t.pts}</td>
                             <td className={styles.moveCell}>
                                 <button className={styles.btnMove} onClick={() => move(i, -1)}
-                                    disabled={i === 0 || teams[i - 1].pts !== t.pts}
+                                    disabled={finalized || i === 0 || teams[i - 1].pts !== t.pts}
                                     title="Posunúť hore">▲</button>
                                 <button className={styles.btnMove} onClick={() => move(i, 1)}
-                                    disabled={i === teams.length - 1 || teams[i + 1].pts !== t.pts}
+                                    disabled={finalized || i === teams.length - 1 || teams[i + 1].pts !== t.pts}
                                     title="Posunúť dole">▼</button>
                             </td>
                         </tr>
