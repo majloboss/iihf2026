@@ -67,15 +67,12 @@ if ($method === 'POST') {
     json_ok(['synced' => true]);
 
 } elseif ($method === 'PUT') {
-    // Manual edit of a single team's row
+    // Only rank and finalized flag can be changed — stats are always from computed results
     $body = json_decode(file_get_contents('php://input'), true);
     if (!isset($body['phase'], $body['team'])) json_error('Missing phase/team', 400);
 
-    $fields = ['rank','gp','w','d','l','gf','ga','pts'];
     $sets = []; $params = ['phase'=>$body['phase'], 'team'=>$body['team']];
-    foreach ($fields as $f) {
-        if (isset($body[$f])) { $sets[] = "$f=:$f"; $params[$f] = (int)$body[$f]; }
-    }
+    if (isset($body['rank']))      { $sets[] = "rank=:rank";           $params['rank']      = (int)$body['rank']; }
     if (isset($body['finalized'])) { $sets[] = "finalized=:finalized"; $params['finalized'] = (bool)$body['finalized']; }
     if (empty($sets)) json_error('Nothing to update', 400);
 

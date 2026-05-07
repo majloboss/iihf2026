@@ -5,53 +5,16 @@ import styles from './AdminGroupStandings.module.css';
 import gsStyles from '../user/GroupStandings.module.css';
 
 const FLAG_URL = code => `/flags/team_flag_${code?.toLowerCase()}.png`;
-const FIELDS = ['rank','gp','w','d','l','gf','ga','pts'];
 
-function EditRow({ team, row, onSave, onCancel }) {
-    const [vals, setVals] = useState({ ...row });
-    const set = (f, v) => setVals(p => ({ ...p, [f]: v === '' ? '' : parseInt(v) || 0 }));
-
-    return (
-        <tr className={styles.editRow}>
-            <td><input type="number" min="1" max="16" value={vals.rank} onChange={e => set('rank', e.target.value)} className={styles.numIn} style={{width:40}} /></td>
-            <td>
-                <div className={gsStyles.teamCell}>
-                    <img src={FLAG_URL(team)} className={gsStyles.flag} alt="" onError={e => e.target.style.display='none'} />
-                    {team}
-                </div>
-            </td>
-            {['gp','w','d','l'].map(f => (
-                <td key={f}><input type="number" min="0" max="56" value={vals[f]} onChange={e => set(f, e.target.value)} className={styles.numIn} /></td>
-            ))}
-            <td>
-                <span className={styles.goalsCell}>
-                    <input type="number" min="0" max="999" value={vals.gf} onChange={e => set('gf', e.target.value)} className={styles.numIn} />
-                    :
-                    <input type="number" min="0" max="999" value={vals.ga} onChange={e => set('ga', e.target.value)} className={styles.numIn} />
-                </span>
-            </td>
-            <td>{vals.gf - vals.ga}</td>
-            <td><input type="number" min="0" max="999" value={vals.pts} onChange={e => set('pts', e.target.value)} className={styles.numIn} /></td>
-            <td>
-                <button className={styles.btnOk} onClick={() => onSave(vals)}>✓</button>
-                <button className={styles.btnCancel} onClick={onCancel}>✕</button>
-            </td>
-        </tr>
-    );
-}
-
-function GroupTable({ phase, teams, finalized, onTeamSave }) {
-    const [editTeam, setEditTeam] = useState(null);
+function GroupTable({ phase, teams, finalized, onMove }) {
     const [saving, setSaving] = useState(false);
 
-    const handleSave = async (team, vals) => {
+    const move = async (idx, dir) => {
+        const swapIdx = idx + dir;
+        if (swapIdx < 0 || swapIdx >= teams.length) return;
         setSaving(true);
         try {
-            await updateGroupStanding({ phase, team, ...vals });
-            onTeamSave(phase, team, vals);
-            setEditTeam(null);
-        } catch (e) {
-            alert(e.message);
+            await onMove(phase, idx, swapIdx);
         } finally { setSaving(false); }
     };
 
@@ -73,34 +36,25 @@ function GroupTable({ phase, teams, finalized, onTeamSave }) {
                     </tr>
                 </thead>
                 <tbody>
-                    {teams.map((t) => {
-                        if (editTeam === t.team) {
-                            return (
-                                <EditRow key={t.team} team={t.team} row={t}
-                                    onSave={vals => handleSave(t.team, vals)}
-                                    onCancel={() => setEditTeam(null)} />
-                            );
-                        }
-                        const qi = t.rank - 1;
-                        return (
-                            <tr key={t.team} className={qi < 4 ? (qi === 3 ? gsStyles['last-qualified'] : gsStyles.qualified) : ''}>
-                                <td className={gsStyles.left}><span className={gsStyles.rank}>{t.rank}.</span></td>
-                                <td className={gsStyles.left}>
-                                    <div className={gsStyles.teamCell}>
-                                        <img src={FLAG_URL(t.team)} className={gsStyles.flag} alt="" onError={e => e.target.style.display='none'} />
-                                        {t.team}
-                                    </div>
-                                </td>
-                                <td>{t.gp}</td><td>{t.w}</td><td>{t.d}</td><td>{t.l}</td>
-                                <td>{t.gf}:{t.ga}</td>
-                                <td className={t.gd > 0 ? gsStyles.pos : t.gd < 0 ? gsStyles.neg : ''}>{t.gd > 0 ? '+' : ''}{t.gd}</td>
-                                <td className={gsStyles.pts}>{t.pts}</td>
-                                <td>
-                                    <button className={styles.btnEdit} onClick={() => setEditTeam(t.team)} disabled={saving}>✎</button>
-                                </td>
-                            </tr>
-                        );
-                    })}
+                    {teams.map((t, i) => (
+                        <tr key={t.team} className={i < 4 ? (i === 3 ? gsStyles['last-qualified'] : gsStyles.qualified) : ''}>
+                            <td className={gsStyles.left}><span className={gsStyles.rank}>{i + 1}.</span></td>
+                            <td className={gsStyles.left}>
+                                <div className={gsStyles.teamCell}>
+                                    <img src={FLAG_URL(t.team)} className={gsStyles.flag} alt="" onError={e => e.target.style.display='none'} />
+                                    {t.team}
+                                </div>
+                            </td>
+                            <td>{t.gp}</td><td>{t.w}</td><td>{t.d}</td><td>{t.l}</td>
+                            <td>{t.gf}:{t.ga}</td>
+                            <td className={t.gd > 0 ? gsStyles.pos : t.gd < 0 ? gsStyles.neg : ''}>{t.gd > 0 ? '+' : ''}{t.gd}</td>
+                            <td className={gsStyles.pts}>{t.pts}</td>
+                            <td className={styles.moveCell}>
+                                <button className={styles.btnMove} onClick={() => move(i, -1)} disabled={saving || i === 0} title="Posunúť hore">▲</button>
+                                <button className={styles.btnMove} onClick={() => move(i, 1)} disabled={saving || i === teams.length - 1} title="Posunúť dole">▼</button>
+                            </td>
+                        </tr>
+                    ))}
                 </tbody>
             </table>
         </div>
@@ -108,11 +62,11 @@ function GroupTable({ phase, teams, finalized, onTeamSave }) {
 }
 
 export default function AdminGroupStandings() {
-    const [data,     setData]     = useState(null);
-    const [loading,  setLoading]  = useState(true);
-    const [error,    setError]    = useState('');
-    const [syncing,  setSyncing]  = useState(false);
-    const [msg,      setMsg]      = useState('');
+    const [data,    setData]    = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error,   setError]   = useState('');
+    const [syncing, setSyncing] = useState(false);
+    const [msg,     setMsg]     = useState('');
 
     const load = useCallback(() => {
         setLoading(true);
@@ -147,8 +101,7 @@ export default function AdminGroupStandings() {
     const handleFinalize = async (phase) => {
         setSyncing(true); setMsg('');
         try {
-            const teams = data[phase] || [];
-            for (const t of teams) {
+            for (const t of (data[phase] || [])) {
                 await updateGroupStanding({ phase, team: t.team, finalized: true });
             }
             setMsg(`✓ Skupina ${phase} finalizovaná`);
@@ -157,22 +110,26 @@ export default function AdminGroupStandings() {
         finally { setSyncing(false); }
     };
 
-    const handleTeamSave = (phase, team, vals) => {
-        setData(prev => ({
-            ...prev,
-            [phase]: prev[phase].map(t => t.team === team
-                ? { ...t, ...vals, gd: vals.gf - vals.ga }
-                : t
-            ).sort((a, b) => a.rank - b.rank)
-        }));
-    };
+    const handleMove = useCallback(async (phase, fromIdx, toIdx) => {
+        const teams = [...(data[phase] || [])];
+        const a = teams[fromIdx];
+        const b = teams[toIdx];
+        // Swap ranks in DB
+        await updateGroupStanding({ phase, team: a.team, rank: toIdx + 1 });
+        await updateGroupStanding({ phase, team: b.team, rank: fromIdx + 1 });
+        // Update local state
+        const updated = [...teams];
+        updated[fromIdx] = { ...b, rank: fromIdx + 1 };
+        updated[toIdx]   = { ...a, rank: toIdx + 1 };
+        setData(prev => ({ ...prev, [phase]: updated }));
+    }, [data]);
 
     if (loading) return <p>Načítavam…</p>;
     if (error)   return <p style={{color:'red'}}>Chyba: {error}</p>;
     if (!data)   return null;
 
-    const isFinalized = (ph) => data[ph]?.some(t => t.finalized);
-    const hasStored   = (ph) => (data[ph]?.length || 0) > 0;
+    const isFinalized = ph => data[ph]?.some(t => t.finalized);
+    const hasStored   = ph => (data[ph]?.length || 0) > 0;
 
     return (
         <div>
@@ -198,8 +155,8 @@ export default function AdminGroupStandings() {
             </div>
             {msg && <p className={styles.msg}>{msg}</p>}
             <div className={gsStyles.wrap}>
-                <GroupTable phase="A" teams={data.A || []} finalized={isFinalized('A')} onTeamSave={handleTeamSave} />
-                <GroupTable phase="B" teams={data.B || []} finalized={isFinalized('B')} onTeamSave={handleTeamSave} />
+                <GroupTable phase="A" teams={data.A || []} finalized={isFinalized('A')} onMove={handleMove} />
+                <GroupTable phase="B" teams={data.B || []} finalized={isFinalized('B')} onMove={handleMove} />
             </div>
         </div>
     );

@@ -66,50 +66,20 @@
     font-weight: 500;
 }
 
-.btnEdit {
+.moveCell {
+    white-space: nowrap;
+}
+
+.btnMove {
     background: none;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    padding: 2px 7px;
-    cursor: pointer;
-    font-size: 0.8rem;
-    color: #555;
-}
-.btnEdit:hover { background: #f0f7ff; border-color: #1a3a6b; color: #1a3a6b; }
-
-.editRow td { background: #fffbe6; }
-
-.numIn {
-    width: 36px;
-    padding: 2px 4px;
-    border: 1px solid #ccc;
+    border: 1px solid #ddd;
     border-radius: 3px;
-    font-size: 0.82rem;
-    text-align: center;
-}
-
-.goalsCell {
-    display: inline-flex;
-    align-items: center;
-    gap: 2px;
-}
-
-.btnOk {
-    background: #28a745;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    padding: 3px 7px;
+    padding: 1px 5px;
     cursor: pointer;
-    font-size: 0.8rem;
-    margin-right: 3px;
+    font-size: 0.7rem;
+    color: #555;
+    line-height: 1.4;
 }
-.btnCancel {
-    background: #dc3545;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    padding: 3px 7px;
-    cursor: pointer;
-    font-size: 0.8rem;
-}
+.btnMove:hover:not(:disabled) { background: #f0f7ff; border-color: #1a3a6b; color: #1a3a6b; }
+.btnMove:disabled { opacity: 0.25; cursor: default; }
+.btnMove + .btnMove { margin-left: 2px; }
