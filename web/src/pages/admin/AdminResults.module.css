@@ -1,0 +1,70 @@
+.tdNum  { width: 40px; text-align: center; color: #888; font-size: 0.85rem; }
+
+.tdTeams {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    white-space: nowrap;
+}
+
+.flag { width: 24px; height: 17px; object-fit: contain; border-radius: 2px; }
+.vs   { color: #aaa; font-size: 0.8rem; font-weight: 400; margin: 0 4px; }
+.tbd  { color: #bbb; font-style: italic; font-size: 0.85rem; }
+
+.tdStatus { width: 150px; }
+
+.statusSelect {
+    padding: 5px 8px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    background: #fafafa;
+    width: 100%;
+}
+
+.tdScore { width: 130px; }
+
+.scoreInputs {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.scoreIn {
+    width: 48px;
+    padding: 5px 6px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 700;
+    text-align: center;
+}
+.scoreIn::-webkit-outer-spin-button,
+.scoreIn::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+.noScore { color: #ccc; }
+
+.tdSave { white-space: nowrap; }
+
+.btnSave {
+    padding: 5px 14px;
+    background: #1a3a6b;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: background 0.15s;
+}
+.btnSave:hover:not(:disabled) { background: #24519e; }
+.btnSave:disabled { opacity: 0.45; cursor: default; }
+
+.ok     { color: #28a745; font-weight: 700; margin-left: 8px; }
+.errMsg { color: #dc3545; font-size: 0.78rem; margin-left: 6px; }
+
+.rowLive td     { background: #fff8f0; }
+.rowFinished td { background: #f0fff4; }

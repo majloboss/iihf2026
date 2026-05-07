@@ -7,6 +7,7 @@ import AdminLayout from './pages/admin/AdminLayout';
 import Users from './pages/admin/Users';
 import Invites from './pages/admin/Invites';
 import AdminGames from './pages/admin/AdminGames';
+import AdminResults from './pages/admin/AdminResults';
 import UserLayout from './pages/user/UserLayout';
 import Groups from './pages/user/Groups';
 import Games from './pages/user/Games';
@@ -53,6 +54,7 @@ export default function App() {
                         <Route path="users"   element={<Users />} />
                         <Route path="invites" element={<Invites />} />
                         <Route path="games"   element={<AdminGames />} />
+                        <Route path="results" element={<AdminResults />} />
                     </Route>
 
                     <Route path="*" element={<HomeRedirect />} />
