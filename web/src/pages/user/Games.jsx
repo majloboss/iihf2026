@@ -172,24 +172,30 @@ export default function Games() {
             {Object.entries(byDate).map(([date, dayGames]) => (
                 <div key={date} className={styles.dayGroup}>
                     <div className={styles.dayHeader}>{date}</div>
-                    {dayGames.map(g => (
-                        <div key={g.id} className={`${styles.card} ${g.status === 'finished' ? styles.cardFinished : ''}`}>
+                    {dayGames.map(g => {
+                        const now = Date.now();
+                        const es  = g.status === 'finished' ? 'finished'
+                                  : new Date(g.starts_at).getTime() <= now ? 'live'
+                                  : 'scheduled';
+                        return (
+                        <div key={g.id} className={`${styles.card} ${es === 'finished' ? styles.cardFinished : es === 'live' ? styles.cardLive : ''}`}>
                             <div className={styles.cardTop}>
                                 <span className={styles.phase}>{PHASE_LABEL[g.phase] || g.phase} • Zápas {g.game_number}</span>
                                 <span className={styles.time}>{new Date(g.starts_at).toLocaleTimeString('sk-SK', { hour: '2-digit', minute: '2-digit' })}</span>
                             </div>
                             <div className={styles.matchRow}>
-                                <TeamBlock code={g.team1} score={g.status === 'finished' ? g.score1 : null} isLeft />
+                                <TeamBlock code={g.team1} score={es === 'finished' ? g.score1 : null} isLeft />
                                 <div className={styles.vs}>
-                                    {g.status === 'live' ? <span className={styles.live}>LIVE</span> : 'vs'}
+                                    {es === 'live' ? <span className={styles.live}>LIVE</span> : 'vs'}
                                 </div>
-                                <TeamBlock code={g.team2} score={g.status === 'finished' ? g.score2 : null} />
+                                <TeamBlock code={g.team2} score={es === 'finished' ? g.score2 : null} />
                             </div>
                             <div className={styles.venue}>{g.venue}</div>
                             <TipInput game={g} onSaved={handleSaved} />
                             <GroupTips gameId={g.id} />
                         </div>
-                    ))}
+                        );
+                    })}
                 </div>
             ))}
 
