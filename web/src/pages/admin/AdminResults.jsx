@@ -1,42 +1,58 @@
 import { useState, useEffect } from 'react';
 import { getGames } from '../../api/games';
 import { updateGame } from '../../api/admin';
-import styles from './Admin.module.css';
-import rStyles from './AdminResults.module.css';
+import gStyles from '../user/Games.module.css';
+import styles from './AdminResults.module.css';
 
-const FLAG_URL = code => `/flags/team_flag_${code?.toLowerCase()}.png`;
+const PHASE_LABEL = { A: 'Skupina A', B: 'Skupina B', QF: 'Štvrťfinále', SF: 'Semifinále', BRONZE: 'O bronz', GOLD: 'Finále' };
+const FLAG_URL    = code => `/flags/team_flag_${code?.toLowerCase()}.png`;
 
-const STATUS_LABEL  = { scheduled: 'Plánovaný', live: 'Prebieha', finished: 'Odohraný' };
-const STATUS_COLOR  = { scheduled: '#888', live: '#dc3545', finished: '#28a745' };
+function autoStatus(game) {
+    const now = Date.now();
+    const start = new Date(game.starts_at).getTime();
+    if (game.status === 'finished') return 'finished';
+    if (game.status === 'live')     return 'live';
+    if (now >= start)               return 'started';   // started but not yet marked
+    return 'scheduled';
+}
 
-function ResultRow({ game: initGame }) {
+function TeamBlock({ code, isLeft }) {
+    return (
+        <div className={`${gStyles.team} ${isLeft ? gStyles.teamLeft : gStyles.teamRight}`}>
+            {code
+                ? <><img className={gStyles.flag} src={FLAG_URL(code)} alt={code} onError={e => e.target.style.display='none'} /><span className={gStyles.teamCode}>{code}</span></>
+                : <span className={gStyles.teamCode}>TBD</span>}
+        </div>
+    );
+}
+
+function ResultCard({ game: initGame }) {
     const [game,   setGame]   = useState(initGame);
-    const [status, setStatus] = useState(initGame.status);
     const [s1,     setS1]     = useState(initGame.score1 != null ? String(initGame.score1) : '');
     const [s2,     setS2]     = useState(initGame.score2 != null ? String(initGame.score2) : '');
+    const [status, setStatus] = useState(initGame.status);
     const [saving, setSaving] = useState(false);
     const [saved,  setSaved]  = useState(false);
     const [err,    setErr]    = useState('');
 
-    const dirty = status !== game.status ||
-                  s1 !== (game.score1 != null ? String(game.score1) : '') ||
-                  s2 !== (game.score2 != null ? String(game.score2) : '');
-
-    const showScore = status === 'live' || status === 'finished';
+    const computed = autoStatus({ ...game, status });
+    const started  = computed !== 'scheduled';
+    const canEdit  = status === 'finished';
+    const dirty    = status !== game.status ||
+                     (canEdit && (s1 !== (game.score1 != null ? String(game.score1) : '') ||
+                                  s2 !== (game.score2 != null ? String(game.score2) : '')));
 
     const save = async () => {
+        if (canEdit && (s1 === '' || s2 === '')) { setErr('Zadaj oba góly'); return; }
         setSaving(true); setErr(''); setSaved(false);
         try {
             await updateGame(game.id, {
                 status,
-                score1: showScore && s1 !== '' ? parseInt(s1) : null,
-                score2: showScore && s2 !== '' ? parseInt(s2) : null,
+                score1: canEdit ? parseInt(s1) : null,
+                score2: canEdit ? parseInt(s2) : null,
             });
-            setGame(g => ({
-                ...g, status,
-                score1: showScore && s1 !== '' ? parseInt(s1) : null,
-                score2: showScore && s2 !== '' ? parseInt(s2) : null,
-            }));
+            const updated = { ...game, status, score1: canEdit ? parseInt(s1) : null, score2: canEdit ? parseInt(s2) : null };
+            setGame(updated);
             setSaved(true);
             setTimeout(() => setSaved(false), 2000);
         } catch (e) { setErr(e.message); }
@@ -44,42 +60,53 @@ function ResultRow({ game: initGame }) {
     };
 
     return (
-        <tr className={status === 'finished' ? rStyles.rowFinished : status === 'live' ? rStyles.rowLive : ''}>
-            <td className={rStyles.tdNum}>{game.game_number}</td>
-            <td className={rStyles.tdTeams}>
-                {game.team1
-                    ? <><img className={rStyles.flag} src={FLAG_URL(game.team1)} alt="" onError={e => e.target.style.display='none'} />{game.team1}</>
-                    : <span className={rStyles.tbd}>TBD</span>}
-                <span className={rStyles.vs}>vs</span>
-                {game.team2
-                    ? <>{game.team2}<img className={rStyles.flag} src={FLAG_URL(game.team2)} alt="" onError={e => e.target.style.display='none'} /></>
-                    : <span className={rStyles.tbd}>TBD</span>}
-            </td>
-            <td className={rStyles.tdStatus}>
-                <select value={status} onChange={e => setStatus(e.target.value)} className={rStyles.statusSelect}
-                    style={{ color: STATUS_COLOR[status] }}>
-                    <option value="scheduled">Plánovaný</option>
-                    <option value="live">Prebieha</option>
-                    <option value="finished">Odohraný</option>
-                </select>
-            </td>
-            <td className={rStyles.tdScore}>
-                {showScore
-                    ? <div className={rStyles.scoreInputs}>
-                        <input type="number" min="0" max="30" value={s1} onChange={e => setS1(e.target.value)} className={rStyles.scoreIn} />
-                        <span>:</span>
-                        <input type="number" min="0" max="30" value={s2} onChange={e => setS2(e.target.value)} className={rStyles.scoreIn} />
-                      </div>
-                    : <span className={rStyles.noScore}>—</span>}
-            </td>
-            <td className={rStyles.tdSave}>
-                <button className={rStyles.btnSave} onClick={save} disabled={saving || !dirty}>
-                    {saving ? '…' : 'Uložiť'}
-                </button>
-                {saved && <span className={rStyles.ok}>✓</span>}
-                {err   && <span className={rStyles.errMsg}>{err}</span>}
-            </td>
-        </tr>
+        <div className={`${gStyles.card} ${status === 'finished' ? gStyles.cardFinished : ''} ${status === 'live' ? styles.cardLive : ''}`}>
+            <div className={gStyles.cardTop}>
+                <span className={gStyles.phase}>{PHASE_LABEL[game.phase] || game.phase} • Zápas {game.game_number}</span>
+                <span className={gStyles.time}>{new Date(game.starts_at).toLocaleTimeString('sk-SK', { hour:'2-digit', minute:'2-digit' })}</span>
+            </div>
+
+            <div className={gStyles.matchRow}>
+                <TeamBlock code={game.team1} isLeft />
+                <div className={gStyles.vs}>
+                    {status === 'live'
+                        ? <span className={gStyles.live}>LIVE</span>
+                        : status === 'finished' && game.score1 != null
+                            ? <span className={styles.result}>{game.score1}:{game.score2}</span>
+                            : 'vs'}
+                </div>
+                <TeamBlock code={game.team2} />
+            </div>
+
+            <div className={gStyles.venue}>{game.venue}</div>
+
+            {started && (
+                <div className={styles.editRow}>
+                    <select
+                        value={status}
+                        onChange={e => setStatus(e.target.value)}
+                        className={styles.statusSel}
+                        style={{ color: status === 'finished' ? '#28a745' : status === 'live' ? '#dc3545' : '#888' }}>
+                        <option value="scheduled">Plánovaný</option>
+                        <option value="live">Prebieha</option>
+                        <option value="finished">Odohraný</option>
+                    </select>
+
+                    {canEdit && (
+                        <div className={styles.scoreBox}>
+                            <input type="number" min="0" max="30" value={s1} onChange={e => setS1(e.target.value)} className={styles.scoreIn} />
+                            <span className={styles.colon}>:</span>
+                            <input type="number" min="0" max="30" value={s2} onChange={e => setS2(e.target.value)} className={styles.scoreIn} />
+                        </div>
+                    )}
+
+                    <button className={styles.btnSave} onClick={save} disabled={saving || !dirty}>
+                        {saving ? '…' : saved ? '✓ Uložené' : 'Uložiť'}
+                    </button>
+                    {err && <span className={styles.errMsg}>{err}</span>}
+                </div>
+            )}
+        </div>
     );
 }
 
@@ -98,44 +125,43 @@ export default function AdminResults() {
     const now      = Date.now();
     const filtered = games.filter(g => {
         if (filter === 'all')      return true;
-        if (filter === 'active')   return g.status !== 'scheduled' || new Date(g.starts_at).getTime() <= now;
+        if (filter === 'active')   return new Date(g.starts_at).getTime() <= now || g.status !== 'scheduled';
         if (filter === 'live')     return g.status === 'live';
         if (filter === 'finished') return g.status === 'finished';
         return true;
+    });
+
+    const byDate = {};
+    filtered.forEach(g => {
+        const d = new Date(g.starts_at).toLocaleDateString('sk-SK', { weekday:'long', day:'2-digit', month:'2-digit', year:'numeric' });
+        if (!byDate[d]) byDate[d] = [];
+        byDate[d].push(g);
     });
 
     if (loading) return <p>Načítavam…</p>;
     if (error)   return <p style={{color:'red'}}>Chyba: {error}</p>;
 
     return (
-        <div>
-            <div className={styles.header}>
+        <div className={gStyles.wrap} style={{maxWidth:680}}>
+            <div className={gStyles.topBar}>
                 <h2>Výsledky</h2>
-                <div style={{ display:'flex', gap:'6px' }}>
-                    {[['active','Aktívne'], ['live','Prebiehajúce'], ['finished','Odohranné'], ['all','Všetky']].map(([v,l]) => (
+                <div className={gStyles.filters}>
+                    {[['active','Aktívne'],['live','Prebiehajúce'],['finished','Odohranné'],['all','Všetky']].map(([v,l]) => (
                         <button key={v}
-                            className={filter === v ? styles.btn : styles.btnSmall}
+                            className={filter === v ? gStyles.btnFilterActive : gStyles.btnFilter}
                             onClick={() => setFilter(v)}>{l}</button>
                     ))}
                 </div>
             </div>
 
-            {filtered.length === 0
-                ? <p style={{color:'#aaa',marginTop:20}}>Žiadne zápasy</p>
-                : <table className={styles.table}>
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Zápas</th>
-                            <th>Stav</th>
-                            <th>Skóre</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {filtered.map(g => <ResultRow key={g.id} game={g} />)}
-                    </tbody>
-                  </table>}
+            {Object.keys(byDate).length === 0
+                ? <p className={gStyles.empty}>Žiadne zápasy</p>
+                : Object.entries(byDate).map(([date, dayGames]) => (
+                    <div key={date} className={gStyles.dayGroup}>
+                        <div className={gStyles.dayHeader}>{date}</div>
+                        {dayGames.map(g => <ResultCard key={g.id} game={g} />)}
+                    </div>
+                ))}
         </div>
     );
 }

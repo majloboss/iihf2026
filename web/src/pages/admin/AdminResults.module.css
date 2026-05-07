@@ -1,41 +1,39 @@
-.tdNum  { width: 40px; text-align: center; color: #888; font-size: 0.85rem; }
+.cardLive { border-left: 3px solid #dc3545; }
 
-.tdTeams {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-weight: 600;
-    font-size: 0.95rem;
-    white-space: nowrap;
+.result {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #28a745;
 }
 
-.flag { width: 24px; height: 17px; object-fit: contain; border-radius: 2px; }
-.vs   { color: #aaa; font-size: 0.8rem; font-weight: 400; margin: 0 4px; }
-.tbd  { color: #bbb; font-style: italic; font-size: 0.85rem; }
+.editRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #f0f0f0;
+    flex-wrap: wrap;
+}
 
-.tdStatus { width: 150px; }
-
-.statusSelect {
-    padding: 5px 8px;
+.statusSel {
+    padding: 5px 10px;
     border: 1px solid #ddd;
     border-radius: 6px;
     font-size: 0.85rem;
     font-weight: 600;
     cursor: pointer;
     background: #fafafa;
-    width: 100%;
 }
 
-.tdScore { width: 130px; }
-
-.scoreInputs {
+.scoreBox {
     display: flex;
     align-items: center;
     gap: 6px;
 }
 
 .scoreIn {
-    width: 48px;
+    width: 52px;
     padding: 5px 6px;
     border: 1px solid #ddd;
     border-radius: 6px;
@@ -46,25 +44,20 @@
 .scoreIn::-webkit-outer-spin-button,
 .scoreIn::-webkit-inner-spin-button { -webkit-appearance: none; }
 
-.noScore { color: #ccc; }
-
-.tdSave { white-space: nowrap; }
+.colon { font-weight: 700; font-size: 1rem; }
 
 .btnSave {
-    padding: 5px 14px;
+    padding: 5px 16px;
     background: #1a3a6b;
     color: #fff;
     border: none;
     border-radius: 6px;
     cursor: pointer;
-    font-size: 0.85rem;
+    font-size: 0.88rem;
     transition: background 0.15s;
+    white-space: nowrap;
 }
 .btnSave:hover:not(:disabled) { background: #24519e; }
 .btnSave:disabled { opacity: 0.45; cursor: default; }
 
-.ok     { color: #28a745; font-weight: 700; margin-left: 8px; }
-.errMsg { color: #dc3545; font-size: 0.78rem; margin-left: 6px; }
-
-.rowLive td     { background: #fff8f0; }
-.rowFinished td { background: #f0fff4; }
+.errMsg { color: #dc3545; font-size: 0.8rem; }
