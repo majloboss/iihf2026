@@ -64,7 +64,14 @@ function GroupTips({ gameId }) {
             try {
                 const data = await getGameTips(gameId);
                 setGroups(data);
-            } catch (e) { setErr(e.message); }
+            } catch (e) {
+                if (e.message && e.message.includes('začiatku')) {
+                    setGroups([]);
+                    setErr('Tipy skupín budú viditeľné po začiatku zápasu.');
+                } else {
+                    setErr(e.message);
+                }
+            }
             finally { setLoading(false); }
         }
         setOpen(o => !o);
@@ -178,7 +185,7 @@ export default function Games() {
                             </div>
                             <div className={styles.venue}>{g.venue}</div>
                             <TipInput game={g} onSaved={handleSaved} />
-                            {(g.status === 'finished' || g.status === 'live') && <GroupTips gameId={g.id} />}
+                            <GroupTips gameId={g.id} />
                         </div>
                     ))}
                 </div>

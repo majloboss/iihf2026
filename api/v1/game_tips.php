@@ -14,7 +14,7 @@ $game = $pdo->prepare('SELECT status FROM iihf2026.games WHERE id = ?');
 $game->execute([$game_id]);
 $g = $game->fetch();
 if (!$g) json_error('Zápas neexistuje', 404);
-if ($g['status'] === 'scheduled') json_error('Tipy sú dostupné až po začatí zápasu', 403);
+if ($g['status'] === 'scheduled') json_error('Tipy skupín budú viditeľné po začiatku zápasu.', 403);
 
 $stmt = $pdo->prepare("
     SELECT

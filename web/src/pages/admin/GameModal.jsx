@@ -13,17 +13,17 @@ const TEAMS = [
     { code: 'ITA', name: 'Italy' },      { code: 'SLO', name: 'Slovenia' },
 ];
 
-function toLocalDateTimeInputs(isoUtc) {
+function toUtcDateTimeInputs(isoUtc) {
     if (!isoUtc) return { date: '', time: '' };
     const d = new Date(isoUtc);
     const pad = n => String(n).padStart(2, '0');
-    const date = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
-    const time = `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    const date = `${d.getUTCFullYear()}-${pad(d.getUTCMonth()+1)}-${pad(d.getUTCDate())}`;
+    const time = `${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`;
     return { date, time };
 }
 
 export default function GameModal({ game, onClose, onSaved }) {
-    const { date: initDate, time: initTime } = toLocalDateTimeInputs(game.starts_at);
+    const { date: initDate, time: initTime } = toUtcDateTimeInputs(game.starts_at);
     const [date,   setDate]   = useState(initDate);
     const [time,   setTime]   = useState(initTime);
     const [team1,  setTeam1]  = useState(game.team1 || '');
