@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getGames } from '../../api/games';
 import { saveTip, getGameTips } from '../../api/tips';
+import GroupStandings from './GroupStandings';
 import styles from './Games.module.css';
 
-const PHASE_LABEL = { A: 'Skupina A', B: 'Skupina B', QF: 'Štvrťfinále', SF: 'Semifinále', BRONZE: 'O bronz', GOLD: 'Finále' };
+const PHASE_LABEL = { A: 'Skupina A', B: 'Skupina B', standings: 'Tabuľky', QF: 'Štvrťfinále', SF: 'Semifinále', BRONZE: 'O bronz', GOLD: 'Finále' };
 const FLAG_URL = (code) => `/flags/team_flag_${code?.toLowerCase()}.png`;
 
 function TeamBlock({ code, score, isLeft }) {
@@ -141,8 +142,8 @@ export default function Games() {
         setGames(prev => prev.map(g => g.id === gameId ? { ...g, tip1: t1, tip2: t2 } : g));
     }, []);
 
-    const phases = ['all', 'A', 'B', 'QF', 'SF', 'BRONZE', 'GOLD'];
-    const filtered = phase === 'all' ? games : games.filter(g => g.phase === phase);
+    const phases = ['all', 'A', 'B', 'standings', 'QF', 'SF', 'BRONZE', 'GOLD'];
+    const filtered = (phase === 'all' || phase === 'standings') ? games : games.filter(g => g.phase === phase);
 
     // Group by date
     const byDate = {};
@@ -169,7 +170,9 @@ export default function Games() {
                 </div>
             </div>
 
-            {Object.entries(byDate).map(([date, dayGames]) => (
+            {phase === 'standings' && <GroupStandings />}
+
+            {phase !== 'standings' && Object.entries(byDate).map(([date, dayGames]) => (
                 <div key={date} className={styles.dayGroup}>
                     <div className={styles.dayHeader}>{date}</div>
                     {dayGames.map(g => {
@@ -199,7 +202,7 @@ export default function Games() {
                 </div>
             ))}
 
-            {filtered.length === 0 && <p className={styles.empty}>Žiadne zápasy</p>}
+            {phase !== 'standings' && filtered.length === 0 && <p className={styles.empty}>Žiadne zápasy</p>}
         </div>
     );
 }

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getGames } from '../../api/games';
 import { updateGame, getAdminGameTips, recalcPoints } from '../../api/admin';
+import GroupStandings from '../user/GroupStandings';
 import gStyles from '../user/Games.module.css';
 import styles from './AdminResults.module.css';
 
@@ -161,8 +162,8 @@ function ResultCard({ game: initGame }) {
     );
 }
 
-const PHASES = ['all', 'A', 'B', 'QF', 'SF', 'BRONZE', 'GOLD'];
-const PHASE_FILTER_LABEL = { all: 'Všetky', A: 'Sk. A', B: 'Sk. B', QF: 'Štvrťf.', SF: 'Semif.', BRONZE: 'Bronz', GOLD: 'Finále' };
+const PHASES = ['all', 'A', 'B', 'standings', 'QF', 'SF', 'BRONZE', 'GOLD'];
+const PHASE_FILTER_LABEL = { all: 'Všetky', A: 'Sk. A', B: 'Sk. B', standings: 'Tabuľky', QF: 'Štvrťf.', SF: 'Semif.', BRONZE: 'Bronz', GOLD: 'Finále' };
 
 export default function AdminResults() {
     const [games,     setGames]     = useState([]);
@@ -187,7 +188,7 @@ export default function AdminResults() {
             .catch(e   => { setError(e.message); setLoading(false); });
     }, []);
 
-    const filtered = phase === 'all' ? games : games.filter(g => g.phase === phase);
+    const filtered = (phase === 'all' || phase === 'standings') ? games : games.filter(g => g.phase === phase);
 
     const byDate = {};
     filtered.forEach(g => {
@@ -219,14 +220,16 @@ export default function AdminResults() {
             </div>
             {recalcMsg && <p style={{fontSize:'0.85rem',color: recalcMsg.startsWith('✓') ? '#28a745' : '#dc3545', margin:'4px 0 8px'}}>{recalcMsg}</p>}
 
-            {Object.keys(byDate).length === 0
+            {phase === 'standings' && <GroupStandings />}
+
+            {phase !== 'standings' && (Object.keys(byDate).length === 0
                 ? <p className={gStyles.empty}>Žiadne zápasy</p>
                 : Object.entries(byDate).map(([date, dayGames]) => (
                     <div key={date} className={gStyles.dayGroup}>
                         <div className={gStyles.dayHeader}>{date}</div>
                         {dayGames.map(g => <ResultCard key={g.id} game={g} />)}
                     </div>
-                ))}
+                )))}
         </div>
     );
 }
