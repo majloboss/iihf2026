@@ -53,7 +53,48 @@ foreach (['score1', 'score2'] as $f) {
 
 if (empty($sets)) json_error('Nič na uloženie', 400);
 
-$affected = db()->prepare('UPDATE iihf2026.games SET ' . implode(', ', $sets) . ' WHERE id = :id')
-                ->execute($params);
+$pdo = db();
+$pdo->prepare('UPDATE iihf2026.games SET ' . implode(', ', $sets) . ' WHERE id = :id')
+    ->execute($params);
+
+// Prepočítaj body ak admin uzavrel zápas s výsledkom
+$finishing = isset($body['status']) && $body['status'] === 'finished'
+          && array_key_exists('score1', $body) && $body['score1'] !== null && $body['score1'] !== ''
+          && array_key_exists('score2', $body) && $body['score2'] !== null && $body['score2'] !== '';
+
+if ($finishing) {
+    $stmt = $pdo->prepare("SELECT phase, score1, score2 FROM iihf2026.games WHERE id = ?");
+    $stmt->execute([$game_id]);
+    $game = $stmt->fetch();
+
+    if ($game && $game['score1'] !== null && $game['score2'] !== null) {
+        $s1 = (int)$game['score1'];
+        $s2 = (int)$game['score2'];
+        $is_playoff = in_array($game['phase'], ['QF', 'SF', 'BRONZE', 'GOLD']);
+
+        $cfg = [];
+        $rows = $pdo->query("SELECT key, value FROM iihf2026.scoring_config")->fetchAll();
+        foreach ($rows as $r) $cfg[$r['key']] = (int)$r['value'];
+        $winner_pts = $is_playoff ? ($cfg['correct_winner_playoff'] ?? 3) : ($cfg['correct_winner_group'] ?? 1);
+        $goals_pts  = $cfg['correct_goals_per_team'] ?? 1;
+
+        $real_winner = $s1 > $s2 ? 1 : ($s1 < $s2 ? -1 : 0);
+
+        $tips = $pdo->prepare("SELECT id, tip1, tip2 FROM iihf2026.tips WHERE game_id = ?");
+        $tips->execute([$game_id]);
+        $upd = $pdo->prepare("UPDATE iihf2026.tips SET points = ? WHERE id = ?");
+
+        foreach ($tips->fetchAll() as $t) {
+            $t1 = (int)$t['tip1'];
+            $t2 = (int)$t['tip2'];
+            $pts = 0;
+            $tip_winner = $t1 > $t2 ? 1 : ($t1 < $t2 ? -1 : 0);
+            if ($tip_winner === $real_winner) $pts += $winner_pts;
+            if ($t1 === $s1) $pts += $goals_pts;
+            if ($t2 === $s2) $pts += $goals_pts;
+            $upd->execute([$pts, $t['id']]);
+        }
+    }
+}
 
 json_ok(['saved' => true]);
