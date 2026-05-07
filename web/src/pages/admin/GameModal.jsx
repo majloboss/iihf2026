@@ -13,14 +13,18 @@ const TEAMS = [
     { code: 'ITA', name: 'Italy' },      { code: 'SLO', name: 'Slovenia' },
 ];
 
+const SELECT_STYLE = { padding:'8px 10px', border:'1px solid #ddd', borderRadius:'6px', fontSize:'0.9rem' };
+const INPUT_STYLE  = { padding:'8px 10px', border:'1px solid #ddd', borderRadius:'6px', fontSize:'0.9rem', width:'100%', boxSizing:'border-box' };
+
 function toLocalDateTimeInputs(iso) {
     if (!iso) return { date: '', time: '' };
     const d = new Date(iso);
     if (isNaN(d)) return { date: '', time: '' };
     const pad = n => String(n).padStart(2, '0');
-    const date = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
-    const time = `${pad(d.getHours())}:${pad(d.getMinutes())}`;
-    return { date, time };
+    return {
+        date: `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`,
+        time: `${pad(d.getHours())}:${pad(d.getMinutes())}`,
+    };
 }
 
 export default function GameModal({ game, onClose, onSaved }) {
@@ -30,9 +34,14 @@ export default function GameModal({ game, onClose, onSaved }) {
     const [team1,  setTeam1]  = useState(game.team1 || '');
     const [team2,  setTeam2]  = useState(game.team2 || '');
     const [venue,  setVenue]  = useState(game.venue || '');
+    const [status, setStatus] = useState(game.status || 'scheduled');
+    const [score1, setScore1] = useState(game.score1 != null ? String(game.score1) : '');
+    const [score2, setScore2] = useState(game.score2 != null ? String(game.score2) : '');
     const [saving, setSaving] = useState(false);
     const [error,  setError]  = useState('');
     const [success, setSuccess] = useState('');
+
+    const showScore = status === 'live' || status === 'finished';
 
     const save = async () => {
         setSaving(true); setError(''); setSuccess('');
@@ -43,9 +52,21 @@ export default function GameModal({ game, onClose, onSaved }) {
                 team1: team1 || null,
                 team2: team2 || null,
                 venue,
+                status,
+                score1: showScore && score1 !== '' ? parseInt(score1) : null,
+                score2: showScore && score2 !== '' ? parseInt(score2) : null,
             });
             setSuccess('Uložené.');
-            onSaved({ ...game, starts_at: starts_at ?? game.starts_at, team1: team1||null, team2: team2||null, venue });
+            onSaved({
+                ...game,
+                starts_at: starts_at ?? game.starts_at,
+                team1: team1 || null,
+                team2: team2 || null,
+                venue,
+                status,
+                score1: showScore && score1 !== '' ? parseInt(score1) : null,
+                score2: showScore && score2 !== '' ? parseInt(score2) : null,
+            });
         } catch (e) { setError(e.message); }
         finally { setSaving(false); }
     };
@@ -54,7 +75,7 @@ export default function GameModal({ game, onClose, onSaved }) {
         <div className={styles.overlay} onClick={e => e.target === e.currentTarget && onClose()}>
             <div className={styles.modal}>
                 <div className={styles.header}>
-                    <h3>Zápas #{game.game_number}</h3>
+                    <h3>Zápas #{game.game_number} – {game.team1 || 'TBD'} vs {game.team2 || 'TBD'}</h3>
                     <button className={styles.close} onClick={onClose}>✕</button>
                 </div>
 
@@ -62,10 +83,10 @@ export default function GameModal({ game, onClose, onSaved }) {
                     <h4>Dátum a čas</h4>
                     <div className={styles.grid}>
                         <label>Dátum
-                            <input type="date" value={date} onChange={e => setDate(e.target.value)} />
+                            <input type="date" value={date} onChange={e => setDate(e.target.value)} style={SELECT_STYLE} />
                         </label>
                         <label>Čas
-                            <input type="time" value={time} onChange={e => setTime(e.target.value)} />
+                            <input type="time" value={time} onChange={e => setTime(e.target.value)} style={SELECT_STYLE} />
                         </label>
                     </div>
                 </div>
@@ -74,13 +95,13 @@ export default function GameModal({ game, onClose, onSaved }) {
                     <h4>Tímy</h4>
                     <div className={styles.grid}>
                         <label>Tím 1
-                            <select value={team1} onChange={e => setTeam1(e.target.value)} style={{padding:'8px 10px',border:'1px solid #ddd',borderRadius:'6px',fontSize:'0.9rem'}}>
+                            <select value={team1} onChange={e => setTeam1(e.target.value)} style={SELECT_STYLE}>
                                 <option value="">TBD</option>
                                 {TEAMS.map(t => <option key={t.code} value={t.code}>{t.code} – {t.name}</option>)}
                             </select>
                         </label>
                         <label>Tím 2
-                            <select value={team2} onChange={e => setTeam2(e.target.value)} style={{padding:'8px 10px',border:'1px solid #ddd',borderRadius:'6px',fontSize:'0.9rem'}}>
+                            <select value={team2} onChange={e => setTeam2(e.target.value)} style={SELECT_STYLE}>
                                 <option value="">TBD</option>
                                 {TEAMS.map(t => <option key={t.code} value={t.code}>{t.code} – {t.name}</option>)}
                             </select>
@@ -89,9 +110,31 @@ export default function GameModal({ game, onClose, onSaved }) {
                 </div>
 
                 <div className={styles.section}>
+                    <h4>Stav</h4>
+                    <div className={styles.grid}>
+                        <label>Status
+                            <select value={status} onChange={e => setStatus(e.target.value)} style={SELECT_STYLE}>
+                                <option value="scheduled">scheduled</option>
+                                <option value="live">live</option>
+                                <option value="finished">finished</option>
+                            </select>
+                        </label>
+                        {showScore && <>
+                            <label>{team1 || 'Tím 1'} – góly
+                                <input type="number" min="0" max="30" value={score1}
+                                    onChange={e => setScore1(e.target.value)} style={SELECT_STYLE} />
+                            </label>
+                            <label>{team2 || 'Tím 2'} – góly
+                                <input type="number" min="0" max="30" value={score2}
+                                    onChange={e => setScore2(e.target.value)} style={SELECT_STYLE} />
+                            </label>
+                        </>}
+                    </div>
+                </div>
+
+                <div className={styles.section}>
                     <h4>Miesto</h4>
-                    <input value={venue} onChange={e => setVenue(e.target.value)}
-                        style={{width:'100%',padding:'8px 10px',border:'1px solid #ddd',borderRadius:'6px',fontSize:'0.9rem',boxSizing:'border-box'}} />
+                    <input value={venue} onChange={e => setVenue(e.target.value)} style={INPUT_STYLE} />
                 </div>
 
                 <button className={styles.btn} onClick={save} disabled={saving}>

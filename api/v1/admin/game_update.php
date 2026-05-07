@@ -38,6 +38,19 @@ if (array_key_exists('venue', $body)) {
     $params[':venue'] = trim($body['venue']) ?: null;
 }
 
+if (array_key_exists('status', $body)) {
+    if (!in_array($body['status'], ['scheduled', 'live', 'finished'], true)) json_error('Neplatný status', 400);
+    $sets[] = 'status = :status';
+    $params[':status'] = $body['status'];
+}
+
+foreach (['score1', 'score2'] as $f) {
+    if (array_key_exists($f, $body)) {
+        $sets[] = "$f = :$f";
+        $params[":$f"] = $body[$f] !== null && $body[$f] !== '' ? (int)$body[$f] : null;
+    }
+}
+
 if (empty($sets)) json_error('Nič na uloženie', 400);
 
 $affected = db()->prepare('UPDATE iihf2026.games SET ' . implode(', ', $sets) . ' WHERE id = :id')
