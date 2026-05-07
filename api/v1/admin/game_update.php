@@ -72,11 +72,12 @@ if ($finishing) {
         $s2 = (int)$game['score2'];
         $is_playoff = in_array($game['phase'], ['QF', 'SF', 'BRONZE', 'GOLD']);
 
-        $cfg = [];
-        $rows = $pdo->query("SELECT key, value FROM iihf2026.scoring_config")->fetchAll();
-        foreach ($rows as $r) $cfg[$r['key']] = (int)$r['value'];
-        $winner_pts = $is_playoff ? ($cfg['correct_winner_playoff'] ?? 3) : ($cfg['correct_winner_group'] ?? 1);
-        $goals_pts  = $cfg['correct_goals_per_team'] ?? 1;
+        $sc = $pdo->prepare("SELECT pts_winner, pts_goals1, pts_goals2 FROM iihf2026.scoring_config WHERE phase = ?");
+        $sc->execute([$game['phase']]);
+        $cfg = $sc->fetch() ?: ['pts_winner' => ($is_playoff ? 3 : 1), 'pts_goals1' => 1, 'pts_goals2' => 1];
+        $winner_pts = (int)$cfg['pts_winner'];
+        $goals1_pts = (int)$cfg['pts_goals1'];
+        $goals2_pts = (int)$cfg['pts_goals2'];
 
         $real_winner = $s1 > $s2 ? 1 : ($s1 < $s2 ? -1 : 0);
 
@@ -90,8 +91,8 @@ if ($finishing) {
             $pts = 0;
             $tip_winner = $t1 > $t2 ? 1 : ($t1 < $t2 ? -1 : 0);
             if ($tip_winner === $real_winner) $pts += $winner_pts;
-            if ($t1 === $s1) $pts += $goals_pts;
-            if ($t2 === $s2) $pts += $goals_pts;
+            if ($t1 === $s1) $pts += $goals1_pts;
+            if ($t2 === $s2) $pts += $goals2_pts;
             $upd->execute([$pts, $t['id']]);
         }
     }
