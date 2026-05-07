@@ -192,7 +192,7 @@ export default function Games() {
                             </div>
                             <div className={styles.venue}>{g.venue}</div>
                             <TipInput game={g} onSaved={handleSaved} />
-                            <GroupTips gameId={g.id} />
+                            {es !== 'scheduled' && <GroupTips gameId={g.id} />}
                         </div>
                         );
                     })}
