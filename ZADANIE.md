@@ -16,12 +16,13 @@
 - Admin — pozývacie linky (generovanie, zoznam)
 - Admin — správa zápasov (úprava dátumu/času, tímov, miesta, stavu a skóre)
 - Admin — zadávanie výsledkov (dedikovaná obrazovka, inline, kartový layout, efektívny stav live/finished)
-- Admin — Skupiny — prehľad poradia všetkých skupín (premenované z Tabuľky)
+- Admin — Skupiny — prehľad poradia všetkých skupín (tipovačkové poradie hráčov per skupina)
 - Admin — Nástroje — test setup (dátumy, výsledky, tipy len pre role=user)
 - Výpočet bodov — automaticky po zadaní výsledku adminom; aj hromadný prepočet
-- Tabuľky poradia — per skupina, breakdown 3-2-1-0, tiebreak
-- Skupinové tabuľky (A, B) — live výpočet z výsledkov; admin môže synchronizovať do DB, manuálne editovať a finalizovať
-- Filter "Tabuľky" v Zápasoch (user) aj Výsledkoch (admin) — zobrazí tabuľky skupín A a B
+- Tabuľky poradia tipujúcich — per skupina, breakdown 3-2-1-0, tiebreak
+- Skupinové tabuľky A, B — filter "Tabuľky" v menu Zápasy (user) aj Výsledky (admin)
+- Skupinové tabuľky — live výpočet z výsledkov; po skončení ZČ admin: Synchronizovať → upraviť poradie (len pri rovnosti bodov, ▲/▼) → Finalizovať
+- Skupinové tabuľky — po finalizácii sa ukladá do DB (group_standings), šípky sa zamknú
 - DB schéma — users, invites, friend_groups, group_members, teams, games, tips, scoring_config, group_standings
 - Deploy pipeline — GitHub Actions → FTP → fellow.sk (dev + prod)
 - PWA — favicon, title, manifest, offline SW
@@ -33,8 +34,7 @@
 - Dashboard — najbližšie zápasy, posledné výsledky, skrátené poradie
 - Zmena username (iba raz)
 - Notifikácie — push (Web + FCM) + email
-- Admin — generovanie play-off zápasov po schválení tabuľky
-- Admin — generovanie play-off zápasov
+- Admin — generovanie play-off zápasov (po finalizácii skupinových tabuliek)
 - Admin — nastavenia bodovacieho systému
 - Android aplikácia (Kotlin)
 
@@ -422,4 +422,4 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 
 ---
 
-*Posledná aktualizácia: 2026-05-08 (v1.59)*
+*Posledná aktualizácia: 2026-05-08 (v1.64)*
