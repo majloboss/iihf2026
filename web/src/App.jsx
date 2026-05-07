@@ -8,9 +8,12 @@ import Users from './pages/admin/Users';
 import Invites from './pages/admin/Invites';
 import AdminGames from './pages/admin/AdminGames';
 import AdminResults from './pages/admin/AdminResults';
+import AdminStandings from './pages/admin/AdminStandings';
+import AdminTools from './pages/admin/AdminTools';
 import UserLayout from './pages/user/UserLayout';
 import Groups from './pages/user/Groups';
 import Games from './pages/user/Games';
+import Standings from './pages/user/Standings';
 
 function PrivateUserRoute({ children }) {
     const { user } = useAuth();
@@ -42,9 +45,10 @@ export default function App() {
                     <Route path="/register" element={<Register />} />
 
                     <Route element={<PrivateUserRoute><UserLayout /></PrivateUserRoute>}>
-                        <Route path="/games"   element={<Games />} />
-                        <Route path="/groups"  element={<Groups />} />
-                        <Route path="/profile" element={<Profile />} />
+                        <Route path="/games"     element={<Games />} />
+                        <Route path="/groups"    element={<Groups />} />
+                        <Route path="/standings" element={<Standings />} />
+                        <Route path="/profile"   element={<Profile />} />
                     </Route>
 
                     <Route path="/admin" element={
@@ -53,8 +57,10 @@ export default function App() {
                         <Route index          element={<Navigate to="users" replace />} />
                         <Route path="users"   element={<Users />} />
                         <Route path="invites" element={<Invites />} />
-                        <Route path="games"   element={<AdminGames />} />
-                        <Route path="results" element={<AdminResults />} />
+                        <Route path="games"     element={<AdminGames />} />
+                        <Route path="results"   element={<AdminResults />} />
+                        <Route path="standings" element={<AdminStandings />} />
+                        <Route path="tools"     element={<AdminTools />} />
                     </Route>
 
                     <Route path="*" element={<HomeRedirect />} />

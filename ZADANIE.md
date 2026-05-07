@@ -1,12 +1,12 @@
 # IIHF2026 — Zadanie aplikácie
 
-> **Legenda:** ✅ = hotovo v `develop` &nbsp;|&nbsp; 🔲 = nie je implementované
+> **Legenda:** 🟠 = hotovo v `develop`, pripravené na deploy &nbsp;|&nbsp; 🔲 = nie je implementované
 
 ---
 
 ## STAV IMPLEMENTÁCIE — PREHĽAD
 
-### ✅ HOTOVO (develop / dev_iihf2026.fellow.sk)
+### 🟠 PRIPRAVENÉ NA DEPLOY (develop / dev_iihf2026.fellow.sk)
 - Prihlásenie (JWT)
 - Registrácia cez pozývací link (admin generuje, hráč aktivuje)
 - Môj profil — avatar, meno, priezvisko, email, telefón, zmena hesla, zmazanie účtu
@@ -15,7 +15,11 @@
 - Admin — správa používateľov (zoznam, aktivácia, rola, edit, heslo, zmazanie)
 - Admin — pozývacie linky (generovanie, zoznam)
 - Admin — správa zápasov (úprava dátumu/času, tímov, miesta, stavu a skóre)
-- Admin — zadávanie výsledkov (dedikovaná obrazovka, inline, kartový layout)
+- Admin — zadávanie výsledkov (dedikovaná obrazovka, inline, kartový layout, efektívny stav live/finished)
+- Admin — Tabuľky — prehľad poradia všetkých skupín
+- Admin — Nástroje — test setup (dátumy, výsledky, tipy)
+- Výpočet bodov — automaticky po zadaní výsledku adminom; aj hromadný prepočet
+- Tabuľky poradia — per skupina, breakdown 3-2-1-0, tiebreak
 - DB schéma — users, invites, friend_groups, group_members, teams, games, tips, scoring_config
 - Deploy pipeline — GitHub Actions → FTP → fellow.sk (dev + prod)
 - PWA — favicon, title, manifest, offline SW
@@ -24,8 +28,6 @@
 - Tipy skupín — po začiatku zápasu viditeľné tipy členov všetkých skupín, v ktorých som
 
 ### 🔲 TODO (nie je implementované)
-- Výpočet bodov — po zadaní výsledku adminom
-- Poradie — tabuľka v skupinách + celkové
 - Dashboard — najbližšie zápasy, posledné výsledky, skrátené poradie
 - Zmena username (iba raz)
 - Notifikácie — push (Web + FCM) + email

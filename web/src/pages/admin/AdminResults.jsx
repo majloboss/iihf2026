@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getGames } from '../../api/games';
-import { updateGame, getAdminGameTips } from '../../api/admin';
+import { updateGame, getAdminGameTips, recalcPoints } from '../../api/admin';
 import gStyles from '../user/Games.module.css';
 import styles from './AdminResults.module.css';
 
@@ -102,6 +102,7 @@ function ResultCard({ game: initGame }) {
             setGame(g => ({ ...g, status, score1: canEdit ? parseInt(s1) : null, score2: canEdit ? parseInt(s2) : null }));
             setSaved(true);
             setTimeout(() => setSaved(false), 2000);
+            if (open) { setOpen(false); setTimeout(() => setOpen(true), 100); }
         } catch (e) { setErr(e.message); }
         finally { setSaving(false); }
     };
@@ -160,11 +161,25 @@ function ResultCard({ game: initGame }) {
     );
 }
 
+const PHASES = ['all', 'A', 'B', 'QF', 'SF', 'BRONZE', 'GOLD'];
+const PHASE_FILTER_LABEL = { all: 'Všetky', A: 'Sk. A', B: 'Sk. B', QF: 'Štvrťf.', SF: 'Semif.', BRONZE: 'Bronz', GOLD: 'Finále' };
+
 export default function AdminResults() {
-    const [games,   setGames]   = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error,   setError]   = useState('');
-    const [filter,  setFilter]  = useState('active');
+    const [games,     setGames]     = useState([]);
+    const [loading,   setLoading]   = useState(true);
+    const [error,     setError]     = useState('');
+    const [phase,     setPhase]     = useState('all');
+    const [recalcing, setRecalcing] = useState(false);
+    const [recalcMsg, setRecalcMsg] = useState('');
+
+    const handleRecalc = async () => {
+        setRecalcing(true); setRecalcMsg('');
+        try {
+            const r = await recalcPoints();
+            setRecalcMsg(`✓ Prepočítané: ${r.games_processed} zápasov, ${r.tips_updated} tipov`);
+        } catch (e) { setRecalcMsg(`Chyba: ${e.message}`); }
+        finally { setRecalcing(false); }
+    };
 
     useEffect(() => {
         getGames()
@@ -172,14 +187,7 @@ export default function AdminResults() {
             .catch(e   => { setError(e.message); setLoading(false); });
     }, []);
 
-    const filtered = games.filter(g => {
-        const es = effectiveStatus(g);
-        if (filter === 'all')      return true;
-        if (filter === 'active')   return es !== 'scheduled';
-        if (filter === 'live')     return es === 'live';
-        if (filter === 'finished') return es === 'finished';
-        return true;
-    });
+    const filtered = phase === 'all' ? games : games.filter(g => g.phase === phase);
 
     const byDate = {};
     filtered.forEach(g => {
@@ -195,14 +203,21 @@ export default function AdminResults() {
         <div className={gStyles.wrap} style={{maxWidth:700}}>
             <div className={gStyles.topBar}>
                 <h2>Výsledky</h2>
-                <div className={gStyles.filters}>
-                    {[['active','Aktívne'],['live','Prebiehajúce'],['finished','Odohranné'],['all','Všetky']].map(([v,l]) => (
-                        <button key={v}
-                            className={filter === v ? gStyles.btnFilterActive : gStyles.btnFilter}
-                            onClick={() => setFilter(v)}>{l}</button>
-                    ))}
+                <div style={{display:'flex',alignItems:'center',gap:'8px',flexWrap:'wrap'}}>
+                    <div className={gStyles.filters}>
+                        {PHASES.map(p => (
+                            <button key={p}
+                                className={phase === p ? gStyles.btnFilterActive : gStyles.btnFilter}
+                                onClick={() => setPhase(p)}>{PHASE_FILTER_LABEL[p]}</button>
+                        ))}
+                    </div>
+                    <button className={styles.btnSave} onClick={handleRecalc} disabled={recalcing}
+                        style={{whiteSpace:'nowrap'}}>
+                        {recalcing ? '…' : '↺ Prepočítať body'}
+                    </button>
                 </div>
             </div>
+            {recalcMsg && <p style={{fontSize:'0.85rem',color: recalcMsg.startsWith('✓') ? '#28a745' : '#dc3545', margin:'4px 0 8px'}}>{recalcMsg}</p>}
 
             {Object.keys(byDate).length === 0
                 ? <p className={gStyles.empty}>Žiadne zápasy</p>

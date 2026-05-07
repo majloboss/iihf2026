@@ -19,3 +19,4 @@ export const updateGame      = (game_id, data) => apiFetch('v1/admin/game-update
     method: 'POST', body: JSON.stringify({ game_id, ...data })
 });
 export const getAdminGameTips = (game_id) => apiFetch(`v1/admin/game-tips?game_id=${game_id}`);
+export const recalcPoints     = () => apiFetch('v1/admin/recalc-points', { method: 'POST' });
