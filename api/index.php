@@ -44,7 +44,10 @@ try {
         $path === 'v1/games'               => require __DIR__ . '/v1/games.php',
         $path === 'v1/tips'                => require __DIR__ . '/v1/tips.php',
         $path === 'v1/standings'           => require __DIR__ . '/v1/standings.php',
-        $path === 'v1/admin/standings'     => require __DIR__ . '/v1/admin/standings.php',
+        $path === 'v1/group-standings'     => require __DIR__ . '/v1/group_standings.php',
+        $path === 'v1/admin/standings'           => require __DIR__ . '/v1/admin/standings.php',
+        str_starts_with($path, 'v1/admin/group-standings') => require __DIR__ . '/v1/admin/group_standings.php',
+        $path === 'v1/admin/run-migration'               => require __DIR__ . '/v1/admin/run_migration.php',
         default                            => json_error('Not found', 404)
     };
 } catch (Throwable $e) {

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getGames } from '../../api/games';
 import { updateGame, getAdminGameTips, recalcPoints } from '../../api/admin';
-import GroupStandings from '../user/GroupStandings';
+import AdminGroupStandings from './AdminGroupStandings';
 import gStyles from '../user/Games.module.css';
 import styles from './AdminResults.module.css';
 
@@ -220,7 +220,7 @@ export default function AdminResults() {
             </div>
             {recalcMsg && <p style={{fontSize:'0.85rem',color: recalcMsg.startsWith('✓') ? '#28a745' : '#dc3545', margin:'4px 0 8px'}}>{recalcMsg}</p>}
 
-            {phase === 'standings' && <GroupStandings />}
+            {phase === 'standings' && <AdminGroupStandings />}
 
             {phase !== 'standings' && (Object.keys(byDate).length === 0
                 ? <p className={gStyles.empty}>Žiadne zápasy</p>
