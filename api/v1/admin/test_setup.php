@@ -136,7 +136,7 @@ foreach ($playoff_dates as $phase => $dates) {
 }
 
 // ── 4. Tipy — len skupinová fáza ─────────────────────────────────────────────
-$users      = $pdo->query("SELECT id FROM admin.users WHERE is_active=TRUE")->fetchAll(PDO::FETCH_COLUMN);
+$users      = $pdo->query("SELECT id FROM admin.users WHERE is_active=TRUE AND role='user'")->fetchAll(PDO::FETCH_COLUMN);
 $group_only = $pdo->query("SELECT id,score1,score2 FROM iihf2026.games WHERE phase IN ('A','B') AND score1 IS NOT NULL ORDER BY id")->fetchAll();
 
 $pdo->exec("DELETE FROM iihf2026.tips");
