@@ -14,13 +14,14 @@
 - Skupiny — rozbalenie skupiny → zoznam členov, klik na člena → detail (avatar, meno, email, tel)
 - Admin — správa používateľov (zoznam, aktivácia, rola, edit, heslo, zmazanie)
 - Admin — pozývacie linky (generovanie, zoznam)
-- DB schéma — users, invites, friend_groups, group_members, teams, games, scoring_config
+- DB schéma — users, invites, friend_groups, group_members, teams, games, tips, scoring_config
 - Deploy pipeline — GitHub Actions → FTP → fellow.sk (dev + prod)
 - PWA — favicon, title, manifest, offline SW
+- Zápasy — zoznam všetkých 64 zápasov, vlajky tímov, filter podľa fázy, grupovanie podľa dátumu
+- Tipovanie — zadanie presného skóre, uzavretie 5 min pred začiatkom, editácia tipa
 
 ### 🔲 TODO (nie je implementované)
-- Zápasy — zoznam, zobrazenie, tipovanie
-- Detail zápasu — môj tip, tipy ostatných po uzavretí, výsledok
+- Detail zápasu — tipy ostatných po uzavretí, výsledok
 - Poradie — tabuľka v skupinách + celkové
 - Dashboard — najbližšie zápasy, posledné výsledky, skrátené poradie
 - Zmena username (iba raz)
