@@ -3,8 +3,14 @@
 
 CREATE SCHEMA IF NOT EXISTS iihf2026;
 
+-- Resetuj tabulky (bezpecne pre prazdnu DB pred turnajom)
+DROP TABLE IF EXISTS iihf2026.tips CASCADE;
+DROP TABLE IF EXISTS iihf2026.scoring_config CASCADE;
+DROP TABLE IF EXISTS iihf2026.games CASCADE;
+DROP TABLE IF EXISTS iihf2026.teams CASCADE;
+
 -- Teams
-CREATE TABLE IF NOT EXISTS iihf2026.teams (
+CREATE TABLE iihf2026.teams (
     code   VARCHAR(3) PRIMARY KEY,
     name   VARCHAR(60) NOT NULL,
     group_letter CHAR(1) NOT NULL  -- 'A' or 'B'
@@ -17,10 +23,8 @@ INSERT INTO iihf2026.teams (code, name, group_letter) VALUES
   ('CAN','Canada','B'),('SWE','Sweden','B'),('CZE','Czech Republic','B'),
   ('DEN','Denmark','B'),('SVK','Slovakia','B'),('NOR','Norway','B'),
   ('ITA','Italy','B'),('SLO','Slovenia','B')
-ON CONFLICT (code) DO NOTHING;
-
 -- Games
-CREATE TABLE IF NOT EXISTS iihf2026.games (
+CREATE TABLE iihf2026.games (
     id          SERIAL PRIMARY KEY,
     game_number INTEGER NOT NULL UNIQUE,
     phase       VARCHAR(8) NOT NULL,  -- 'A','B','QF','SF','BRONZE','GOLD'
@@ -114,10 +118,10 @@ INSERT INTO iihf2026.games (game_number, phase, team1, team2, starts_at, venue) 
 -- SUN 31 MAY — Finals
 (63,'BRONZE',NULL,NULL,'2026-05-31 13:20+00','Zurich / Swiss Life Arena'),
 (64,'GOLD',NULL,NULL,'2026-05-31 18:20+00','Zurich / Swiss Life Arena')
-ON CONFLICT (game_number) DO NOTHING;
+;
 
 -- Tips
-CREATE TABLE IF NOT EXISTS iihf2026.tips (
+CREATE TABLE iihf2026.tips (
     id         SERIAL PRIMARY KEY,
     user_id    INTEGER NOT NULL REFERENCES admin.users(id) ON DELETE CASCADE,
     game_id    INTEGER NOT NULL REFERENCES iihf2026.games(id),
@@ -130,7 +134,7 @@ CREATE TABLE IF NOT EXISTS iihf2026.tips (
 );
 
 -- Scoring config
-CREATE TABLE IF NOT EXISTS iihf2026.scoring_config (
+CREATE TABLE iihf2026.scoring_config (
     phase      VARCHAR(8) PRIMARY KEY,
     pts_winner SMALLINT NOT NULL DEFAULT 1,
     pts_goals1 SMALLINT NOT NULL DEFAULT 1,
@@ -140,4 +144,4 @@ CREATE TABLE IF NOT EXISTS iihf2026.scoring_config (
 INSERT INTO iihf2026.scoring_config (phase, pts_winner, pts_goals1, pts_goals2) VALUES
   ('A',1,1,1),('B',1,1,1),
   ('QF',3,1,1),('SF',3,1,1),('BRONZE',3,1,1),('GOLD',3,1,1)
-ON CONFLICT (phase) DO NOTHING;
+;
