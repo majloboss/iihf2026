@@ -13,7 +13,7 @@ function GroupTable({ group, currentUserId }) {
                         <th>#</th>
                         <th>Hráč</th>
                         <th className={styles.right}>Body</th>
-                        <th className={styles.right}>Tipy</th>
+                        <th className={styles.right}>3-2-1-0</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -31,7 +31,7 @@ function GroupTable({ group, currentUserId }) {
                                 </div>
                             </td>
                             <td className={`${styles.right} ${styles.pts}`}>{m.total_points}</td>
-                            <td className={`${styles.right} ${styles.tipsCount}`}>{m.scored_tips}</td>
+                            <td className={`${styles.right} ${styles.tipsCount}`}>{m.pts3}-{m.pts2}-{m.pts1}-{m.pts0}</td>
                         </tr>
                     ))}
                 </tbody>
