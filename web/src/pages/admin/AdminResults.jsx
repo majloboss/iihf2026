@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getGames } from '../../api/games';
-import { updateGame, getAdminGameTips } from '../../api/admin';
+import { updateGame, getAdminGameTips, recalcPoints } from '../../api/admin';
 import gStyles from '../user/Games.module.css';
 import styles from './AdminResults.module.css';
 
@@ -164,10 +164,21 @@ const PHASES = ['all', 'A', 'B', 'QF', 'SF', 'BRONZE', 'GOLD'];
 const PHASE_FILTER_LABEL = { all: 'Všetky', A: 'Sk. A', B: 'Sk. B', QF: 'Štvrťf.', SF: 'Semif.', BRONZE: 'Bronz', GOLD: 'Finále' };
 
 export default function AdminResults() {
-    const [games,   setGames]   = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error,   setError]   = useState('');
-    const [phase,   setPhase]   = useState('all');
+    const [games,     setGames]     = useState([]);
+    const [loading,   setLoading]   = useState(true);
+    const [error,     setError]     = useState('');
+    const [phase,     setPhase]     = useState('all');
+    const [recalcing, setRecalcing] = useState(false);
+    const [recalcMsg, setRecalcMsg] = useState('');
+
+    const handleRecalc = async () => {
+        setRecalcing(true); setRecalcMsg('');
+        try {
+            const r = await recalcPoints();
+            setRecalcMsg(`✓ Prepočítané: ${r.games_processed} zápasov, ${r.tips_updated} tipov`);
+        } catch (e) { setRecalcMsg(`Chyba: ${e.message}`); }
+        finally { setRecalcing(false); }
+    };
 
     useEffect(() => {
         getGames()
@@ -191,14 +202,21 @@ export default function AdminResults() {
         <div className={gStyles.wrap} style={{maxWidth:700}}>
             <div className={gStyles.topBar}>
                 <h2>Výsledky</h2>
-                <div className={gStyles.filters}>
-                    {PHASES.map(p => (
-                        <button key={p}
-                            className={phase === p ? gStyles.btnFilterActive : gStyles.btnFilter}
-                            onClick={() => setPhase(p)}>{PHASE_FILTER_LABEL[p]}</button>
-                    ))}
+                <div style={{display:'flex',alignItems:'center',gap:'8px',flexWrap:'wrap'}}>
+                    <div className={gStyles.filters}>
+                        {PHASES.map(p => (
+                            <button key={p}
+                                className={phase === p ? gStyles.btnFilterActive : gStyles.btnFilter}
+                                onClick={() => setPhase(p)}>{PHASE_FILTER_LABEL[p]}</button>
+                        ))}
+                    </div>
+                    <button className={styles.btnSave} onClick={handleRecalc} disabled={recalcing}
+                        style={{whiteSpace:'nowrap'}}>
+                        {recalcing ? '…' : '↺ Prepočítať body'}
+                    </button>
                 </div>
             </div>
+            {recalcMsg && <p style={{fontSize:'0.85rem',color: recalcMsg.startsWith('✓') ? '#28a745' : '#dc3545', margin:'4px 0 8px'}}>{recalcMsg}</p>}
 
             {Object.keys(byDate).length === 0
                 ? <p className={gStyles.empty}>Žiadne zápasy</p>
