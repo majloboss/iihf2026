@@ -86,7 +86,7 @@ function GroupTips({ gameId }) {
                 <div className={styles.groupTips}>
                     {loading && <div className={styles.tipsLoading}>Načítavam…</div>}
                     {err     && <div className={styles.tipsErr}>{err}</div>}
-                    {groups && groups.length === 0 && (
+                    {groups && groups.length === 0 && !err && (
                         <div className={styles.tipsLoading}>Nie si v žiadnej skupine</div>
                     )}
                     {groups && groups.map(g => (
