@@ -5,6 +5,12 @@ import styles from './Admin.module.css';
 
 const PHASE_LABEL = { A: 'Sk. A', B: 'Sk. B', QF: 'Štvrťf.', SF: 'Semif.', BRONZE: 'Bronz', GOLD: 'Finále' };
 
+function effectiveStatus(g) {
+    if (g.status === 'finished') return 'finished';
+    if (Date.now() >= new Date(g.starts_at).getTime()) return 'live';
+    return 'scheduled';
+}
+
 function formatLocal(iso) {
     if (!iso) return '—';
     const d = new Date(iso);
@@ -73,7 +79,7 @@ export default function AdminGames() {
                             <td>{g.team1 || <span style={{color:'#aaa'}}>TBD</span>}</td>
                             <td>{g.team2 || <span style={{color:'#aaa'}}>TBD</span>}</td>
                             <td style={{fontSize:'0.82rem',maxWidth:'160px',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{g.venue}</td>
-                            <td><span className={g.status === 'finished' ? styles.badgeAdmin : styles.badge}>{g.status}</span></td>
+                            <td><span className={effectiveStatus(g) === 'finished' ? styles.badgeAdmin : effectiveStatus(g) === 'live' ? styles.badgeLive : styles.badge}>{effectiveStatus(g)}</span></td>
                             <td>
                                 <button className={styles.btnSmall} onClick={() => setEditing(g)}>Upraviť</button>
                             </td>
