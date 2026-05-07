@@ -14,19 +14,21 @@
 - Skupiny — rozbalenie skupiny → zoznam členov, klik na člena → detail (avatar, meno, email, tel)
 - Admin — správa používateľov (zoznam, aktivácia, rola, edit, heslo, zmazanie)
 - Admin — pozývacie linky (generovanie, zoznam)
+- Admin — správa zápasov (úprava dátumu/času, tímov, miesta, stavu a skóre)
+- Admin — zadávanie výsledkov (dedikovaná obrazovka, inline, kartový layout)
 - DB schéma — users, invites, friend_groups, group_members, teams, games, tips, scoring_config
 - Deploy pipeline — GitHub Actions → FTP → fellow.sk (dev + prod)
 - PWA — favicon, title, manifest, offline SW
 - Zápasy — zoznam všetkých 64 zápasov, vlajky tímov, filter podľa fázy, grupovanie podľa dátumu
 - Tipovanie — zadanie presného skóre, uzavretie 5 min pred začiatkom, editácia tipa
+- Tipy skupín — po začiatku zápasu viditeľné tipy členov všetkých skupín, v ktorých som
 
 ### 🔲 TODO (nie je implementované)
-- Detail zápasu — tipy ostatných po uzavretí, výsledok
+- Výpočet bodov — po zadaní výsledku adminom
 - Poradie — tabuľka v skupinách + celkové
 - Dashboard — najbližšie zápasy, posledné výsledky, skrátené poradie
 - Zmena username (iba raz)
 - Notifikácie — push (Web + FCM) + email
-- Admin — zadávanie výsledkov zápasov
 - Admin — schválenie tabuľky po skupinovej fáze
 - Admin — generovanie play-off zápasov
 - Admin — nastavenia bodovacieho systému
@@ -167,8 +169,12 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 - ✅ Generovanie pozývacieho linku
 - ✅ Zobrazenie zoznamu linkov (použité / nepoužité)
 
-### Správa zápasov a výsledkov 🔲
-- 🔲 Zadávanie výsledkov zápasov
+### Správa zápasov a výsledkov
+- ✅ Úprava zápasu — dátum/čas (lokálny), tímy, miesto
+- ✅ Zadávanie výsledkov — dedikovaná obrazovka `/admin/results`, inline bez modálu
+- ✅ Životný cyklus zápasu: `scheduled` → `live` → `finished` + skóre; **admin mení manuálne**
+  - ⚠️ Systém nevie kedy zápas skončí — pozná len čas začiatku. Admin musí zápas uzavrieť a zapísať výsledok ručne.
+- 🔲 Výpočet bodov tipujúcich po zadaní výsledku
 - 🔲 Manuálne zadanie tipu za používateľa
 - 🔲 Schválenie tabuľky po skupinovej fáze (s možnosťou korekcie)
 - 🔲 Generovanie play-off zápasov po schválení
@@ -357,7 +363,8 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 |-----------|-------|------|
 | **Správa používateľov** | Zoznam, aktivácia, zmena roly, edit, heslo, zmazanie | ✅ |
 | **Pozývacie linky** | Generovanie a zobrazenie pozývacích linkov | ✅ |
-| **Zadanie výsledku** | Výsledok riadnej doby + konečný výsledok | 🔲 |
+| **Zápasy** | Zoznam a úprava zápasov (dátum, čas, tímy, miesto) | ✅ |
+| **Zadanie výsledku** | Výsledok riadnej doby; stav mení admin manuálne | ✅ |
 | **Schválenie tabuľky** | Kontrola a schválenie po skupinovej fáze | 🔲 |
 | **Nastavenia bodovanie** | Úprava scoring_config hodnôt | 🔲 |
 
@@ -410,4 +417,4 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 
 ---
 
-*Posledná aktualizácia: 2026-05-07*
+*Posledná aktualizácia: 2026-05-07 (v2)*
