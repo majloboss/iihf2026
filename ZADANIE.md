@@ -20,7 +20,9 @@
 - Admin — Nástroje — test setup (dátumy, výsledky, tipy len pre role=user)
 - Výpočet bodov — automaticky po zadaní výsledku adminom; aj hromadný prepočet
 - Tabuľky poradia — per skupina, breakdown 3-2-1-0, tiebreak
-- DB schéma — users, invites, friend_groups, group_members, teams, games, tips, scoring_config
+- Skupinové tabuľky (A, B) — live výpočet z výsledkov; admin môže synchronizovať do DB, manuálne editovať a finalizovať
+- Filter "Tabuľky" v Zápasoch (user) aj Výsledkoch (admin) — zobrazí tabuľky skupín A a B
+- DB schéma — users, invites, friend_groups, group_members, teams, games, tips, scoring_config, group_standings
 - Deploy pipeline — GitHub Actions → FTP → fellow.sk (dev + prod)
 - PWA — favicon, title, manifest, offline SW
 - Zápasy — zoznam všetkých 64 zápasov, vlajky tímov, filter podľa fázy, grupovanie podľa dátumu
@@ -31,7 +33,7 @@
 - Dashboard — najbližšie zápasy, posledné výsledky, skrátené poradie
 - Zmena username (iba raz)
 - Notifikácie — push (Web + FCM) + email
-- Admin — schválenie tabuľky po skupinovej fáze
+- Admin — generovanie play-off zápasov po schválení tabuľky
 - Admin — generovanie play-off zápasov
 - Admin — nastavenia bodovacieho systému
 - Android aplikácia (Kotlin)
@@ -420,4 +422,4 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 
 ---
 
-*Posledná aktualizácia: 2026-05-07 (v2)*
+*Posledná aktualizácia: 2026-05-08 (v1.59)*
