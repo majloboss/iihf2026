@@ -61,10 +61,13 @@ function formatDate(iso) {
 export default function Games() {
     const [games, setGames] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
     const [phase, setPhase] = useState('all');
 
     useEffect(() => {
-        getGames().then(data => { setGames(data); setLoading(false); }).catch(() => setLoading(false));
+        getGames()
+            .then(data => { setGames(data); setLoading(false); })
+            .catch(e => { setError(e.message || 'Chyba API'); setLoading(false); });
     }, []);
 
     const handleSaved = useCallback((gameId, t1, t2) => {
@@ -83,6 +86,7 @@ export default function Games() {
     });
 
     if (loading) return <div className={styles.wrap}><p>Načítavam…</p></div>;
+    if (error) return <div className={styles.wrap}><p style={{color:'red'}}>Chyba: {error}</p></div>;
 
     return (
         <div className={styles.wrap}>
