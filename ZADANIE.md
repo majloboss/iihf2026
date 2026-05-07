@@ -58,7 +58,8 @@ Boduje sa výsledok **riadnej hracej doby (60 minút)** — predĺženie ani sam
 | FIN 3:2 GER | 3 | víťaz ✓, góly FIN ✓, góly GER ✓ |
 | FIN 3:1 GER | 2 | víťaz ✓, góly FIN ✓, góly GER ✗ |
 | FIN 2:1 GER | 1 | víťaz ✓, góly FIN ✗, góly GER ✗ |
-| FIN 1:2 GER | 0 | víťaz ✗ |
+| FIN 1:2 GER | 1 | víťaz ✗, góly FIN ✗, góly GER ✓ |
+| FIN 0:1 GER | 0 | víťaz ✗, góly FIN ✗, góly GER ✗ |
 
 ---
 
