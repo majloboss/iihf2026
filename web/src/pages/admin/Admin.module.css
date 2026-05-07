@@ -46,6 +46,15 @@
     font-weight: 600;
 }
 
+.badgeLive {
+    background: #fdecea;
+    color: #dc3545;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
 .header {
     display: flex;
     justify-content: space-between;
@@ -104,6 +113,18 @@
 .unused { color: #aaa; font-style: italic; }
 
 .actions { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+
+.btnSmallWarn {
+    padding: 6px 12px;
+    background: #e67e22;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.82rem;
+}
+.btnSmallWarn:hover:not(:disabled) { background: #f39c12; }
+.btnSmallWarn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .btnSmallDanger {
     padding: 6px 12px;

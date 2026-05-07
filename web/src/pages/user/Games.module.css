@@ -1,0 +1,180 @@
+.wrap { max-width: 700px; margin: 0 auto; }
+
+.topBar {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+.topBar h2 { color: #1a3a6b; font-size: 1.3rem; margin: 0; }
+
+.filters { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.btnFilter, .btnFilterActive {
+    padding: 5px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    border: 1px solid #dee2e6;
+    transition: background 0.15s;
+}
+.btnFilter { background: #e9ecef; color: #555; }
+.btnFilter:hover { background: #dee2e6; }
+.btnFilterActive { background: #1a3a6b; color: #fff; border-color: #1a3a6b; }
+
+.dayGroup { margin-bottom: 28px; }
+.dayHeader {
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #1a3a6b;
+    padding: 6px 0 8px;
+    border-bottom: 2px solid #e9ecef;
+    margin-bottom: 10px;
+}
+
+.card {
+    background: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.06);
+}
+.cardFinished { border-left: 3px solid #28a745; }
+.cardLive     { border-left: 3px solid #dc3545; }
+
+.cardTop {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+.phase { font-size: 0.75rem; color: #888; }
+.time  { font-size: 0.8rem; font-weight: 600; color: #555; }
+
+.matchRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 8px;
+}
+
+.team {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+}
+.teamLeft  { justify-content: flex-end; }
+.teamRight { justify-content: flex-start; }
+
+.flag { width: 28px; height: 20px; object-fit: contain; border-radius: 2px; }
+.teamCode { font-size: 1.05rem; font-weight: 700; color: #1a3a6b; letter-spacing: 0.05em; }
+.score { font-size: 1.4rem; font-weight: 700; color: #222; min-width: 24px; text-align: center; }
+
+.vs {
+    font-size: 0.85rem;
+    color: #aaa;
+    font-weight: 600;
+    min-width: 36px;
+    text-align: center;
+}
+.live {
+    background: #dc3545;
+    color: #fff;
+    font-size: 0.7rem;
+    padding: 2px 5px;
+    border-radius: 4px;
+    animation: blink 1.2s infinite;
+}
+@keyframes blink { 0%,100% { opacity:1 } 50% { opacity:0.4 } }
+
+.venue { font-size: 0.75rem; color: #aaa; text-align: center; margin-bottom: 10px; }
+
+.tipForm {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+.tipScore {
+    width: 52px;
+    text-align: center;
+    padding: 5px;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 600;
+}
+.tipScore::-webkit-outer-spin-button,
+.tipScore::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+.btnTip {
+    background: #1a3a6b;
+    color: #fff;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.88rem;
+}
+.btnTip:hover:not(:disabled) { background: #152e56; }
+.btnTip:disabled { opacity: 0.6; cursor: default; }
+
+.tipDone {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-weight: 700;
+    font-size: 1rem;
+    color: #28a745;
+}
+.pts { background: #d4edda; color: #155724; padding: 2px 7px; border-radius: 10px; font-size: 0.82rem; }
+.tipClosed { text-align: center; font-size: 0.8rem; color: #aaa; }
+.tipErr { color: #dc3545; font-size: 0.8rem; }
+.empty { color: #aaa; text-align: center; margin-top: 40px; }
+
+.showTipsBtn {
+    display: block;
+    width: 100%;
+    margin-top: 10px;
+    padding: 5px 0;
+    background: none;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.78rem;
+    color: #888;
+    transition: background 0.15s;
+}
+.showTipsBtn:hover { background: #f8f9fa; color: #555; }
+
+.groupTips { margin-top: 12px; }
+
+.groupSection { margin-bottom: 12px; }
+
+.groupName {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #1a3a6b;
+    margin-bottom: 5px;
+}
+
+.tipsTable { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+.tipsTable td { padding: 4px 6px; border-bottom: 1px solid #f0f0f0; }
+.tipsTable tr:last-child td { border-bottom: none; }
+
+.tipsTableMe td { font-weight: 700; background: #f0f4ff; }
+
+.tipScore2 { font-weight: 700; color: #222; }
+.tipNoTip { color: #bbb; font-style: italic; }
+.tipPts { color: #28a745; font-size: 0.75rem; padding-left: 4px; }
+.tipsLoading { text-align: center; color: #aaa; font-size: 0.8rem; padding: 8px 0; }
+.tipsErr { color: #dc3545; font-size: 0.78rem; text-align: center; margin-top: 6px; }

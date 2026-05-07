@@ -1,14 +1,12 @@
 # IIHF2026 — Zadanie aplikácie
 
-> **Legenda stavu implementácie:**
-> - 🟠 = hotovo, **pripravené na deploy do produkcie** (nasadené na dev_iihf2026.fellow.sk)
-> - 🔲 = nie je implementované
+> **Legenda:** ✅ = hotovo v `develop` &nbsp;|&nbsp; 🔲 = nie je implementované
 
 ---
 
 ## STAV IMPLEMENTÁCIE — PREHĽAD
 
-### 🟠 PRIPRAVENÉ NA DEPLOY DO PRODUKCIE
+### ✅ HOTOVO (develop / dev_iihf2026.fellow.sk)
 - Prihlásenie (JWT)
 - Registrácia cez pozývací link (admin generuje, hráč aktivuje)
 - Môj profil — avatar, meno, priezvisko, email, telefón, zmena hesla, zmazanie účtu
@@ -16,18 +14,21 @@
 - Skupiny — rozbalenie skupiny → zoznam členov, klik na člena → detail (avatar, meno, email, tel)
 - Admin — správa používateľov (zoznam, aktivácia, rola, edit, heslo, zmazanie)
 - Admin — pozývacie linky (generovanie, zoznam)
-- DB schéma — users, invites, friend_groups, group_members, teams, games, scoring_config
+- Admin — správa zápasov (úprava dátumu/času, tímov, miesta, stavu a skóre)
+- Admin — zadávanie výsledkov (dedikovaná obrazovka, inline, kartový layout)
+- DB schéma — users, invites, friend_groups, group_members, teams, games, tips, scoring_config
 - Deploy pipeline — GitHub Actions → FTP → fellow.sk (dev + prod)
 - PWA — favicon, title, manifest, offline SW
+- Zápasy — zoznam všetkých 64 zápasov, vlajky tímov, filter podľa fázy, grupovanie podľa dátumu
+- Tipovanie — zadanie presného skóre, uzavretie 5 min pred začiatkom, editácia tipa
+- Tipy skupín — po začiatku zápasu viditeľné tipy členov všetkých skupín, v ktorých som
 
 ### 🔲 TODO (nie je implementované)
-- Zápasy — zoznam, zobrazenie, tipovanie
-- Detail zápasu — môj tip, tipy ostatných po uzavretí, výsledok
+- Výpočet bodov — po zadaní výsledku adminom
 - Poradie — tabuľka v skupinách + celkové
 - Dashboard — najbližšie zápasy, posledné výsledky, skrátené poradie
 - Zmena username (iba raz)
 - Notifikácie — push (Web + FCM) + email
-- Admin — zadávanie výsledkov zápasov
 - Admin — schválenie tabuľky po skupinovej fáze
 - Admin — generovanie play-off zápasov
 - Admin — nastavenia bodovacieho systému
@@ -57,19 +58,20 @@ Boduje sa výsledok **riadnej hracej doby (60 minút)** — predĺženie ani sam
 | FIN 3:2 GER | 3 | víťaz ✓, góly FIN ✓, góly GER ✓ |
 | FIN 3:1 GER | 2 | víťaz ✓, góly FIN ✓, góly GER ✗ |
 | FIN 2:1 GER | 1 | víťaz ✓, góly FIN ✗, góly GER ✗ |
-| GER 2:1 FIN | 0 | víťaz ✗ |
+| FIN 1:2 GER | 1 | víťaz ✗, góly FIN ✗, góly GER ✓ |
+| FIN 0:1 GER | 0 | víťaz ✗, góly FIN ✗, góly GER ✗ |
 
 ---
 
 ## Platforma
-- 🟠 Web aplikácia — React + Vite PWA, hosted na fellow.sk
+- ✅ Web aplikácia — React + Vite PWA, hosted na fellow.sk
 - 🔲 Android aplikácia — Kotlin
 
 ---
 
 ## Používatelia
 
-### Registrácia cez pozývací link 🟠
+### Registrácia cez pozývací link ✅
 1. Admin vygeneruje pozývací link v administrácii
 2. Link zdieľa ľubovoľne — WhatsApp, email, SMS...
 3. Hráč klikne na link → systém vytvorí placeholder účet s username `iihf2026_<InviteID>`
@@ -81,15 +83,15 @@ Boduje sa výsledok **riadnej hracej doby (60 minút)** — predĺženie ani sam
 | Akcia | Podmienka | Stav |
 |-------|-----------|------|
 | Zmena username | iba raz | 🔲 |
-| Zmena hesla | kedykoľvek | 🟠 |
-| Nahratie avatara (fotka) | kedykoľvek | 🟠 |
-| Doplnenie / zmena mena, priezviska | kedykoľvek | 🟠 |
-| Doplnenie / zmena emailu | kedykoľvek | 🟠 |
-| Doplnenie / zmena mobilu | kedykoľvek | 🟠 |
-| Zmazanie účtu | kedykoľvek (vyžaduje heslo) | 🟠 |
+| Zmena hesla | kedykoľvek | ✅ |
+| Nahratie avatara (fotka) | kedykoľvek | ✅ |
+| Doplnenie / zmena mena, priezviska | kedykoľvek | ✅ |
+| Doplnenie / zmena emailu | kedykoľvek | ✅ |
+| Doplnenie / zmena mobilu | kedykoľvek | ✅ |
+| Zmazanie účtu | kedykoľvek (vyžaduje heslo) | ✅ |
 | Zapnúť / vypnúť push notifikácie | kedykoľvek | 🔲 |
 
-### Polia používateľa 🟠
+### Polia používateľa ✅
 | Pole | Povinné | Popis |
 |------|---------|-------|
 | username | áno | placeholder `iihf2026_<ID>`, hráč musí zmeniť pri aktivácii |
@@ -100,7 +102,7 @@ Boduje sa výsledok **riadnej hracej doby (60 minút)** — predĺženie ani sam
 | email | nie | potrebný pre email notifikácie |
 | telefón | nie | |
 
-### Roly 🟠
+### Roly ✅
 - **User** — tipuje zápasy, sleduje výsledky a poradie
 - **Admin** — vytvára používateľov, zadáva výsledky, spravuje bodovanie, schvaľuje tabuľky, generuje play-off zápasy
 
@@ -128,7 +130,7 @@ Boduje sa výsledok **riadnej hracej doby (60 minút)** — predĺženie ani sam
 
 ## Zápasy
 
-### Skupinová fáza (Games 1–56) 🟠 DB
+### Skupinová fáza (Games 1–56) ✅ DB
 - Zápasy sú fixné, dané vopred
 - Načítané zo súboru `sources/IIHF2026.pdf` do tabuľky `iihf2026.games`
 - Dátumy: 15.–26. mája 2026
@@ -156,20 +158,24 @@ Boduje sa výsledok **riadnej hracej doby (60 minút)** — predĺženie ani sam
 
 Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 
-### Správa používateľov 🟠
-- 🟠 Zobrazenie zoznamu všetkých používateľov
-- 🟠 Aktivácia / deaktivácia účtu
-- 🟠 Zmena roly (user ↔ admin)
-- 🟠 Úprava údajov používateľa
-- 🟠 Zmena hesla používateľovi
-- 🟠 Zmazanie používateľa
+### Správa používateľov ✅
+- ✅ Zobrazenie zoznamu všetkých používateľov
+- ✅ Aktivácia / deaktivácia účtu
+- ✅ Zmena roly (user ↔ admin)
+- ✅ Úprava údajov používateľa
+- ✅ Zmena hesla používateľovi
+- ✅ Zmazanie používateľa
 
-### Správa pozývacích linkov 🟠
-- 🟠 Generovanie pozývacieho linku
-- 🟠 Zobrazenie zoznamu linkov (použité / nepoužité)
+### Správa pozývacích linkov ✅
+- ✅ Generovanie pozývacieho linku
+- ✅ Zobrazenie zoznamu linkov (použité / nepoužité)
 
-### Správa zápasov a výsledkov 🔲
-- 🔲 Zadávanie výsledkov zápasov
+### Správa zápasov a výsledkov
+- ✅ Úprava zápasu — dátum/čas (lokálny), tímy, miesto
+- ✅ Zadávanie výsledkov — dedikovaná obrazovka `/admin/results`, inline bez modálu
+- ✅ Životný cyklus zápasu: `scheduled` → `live` → `finished` + skóre; **admin mení manuálne**
+  - ⚠️ Systém nevie kedy zápas skončí — pozná len čas začiatku. Admin musí zápas uzavrieť a zapísať výsledok ručne.
+- 🔲 Výpočet bodov tipujúcich po zadaní výsledku
 - 🔲 Manuálne zadanie tipu za používateľa
 - 🔲 Schválenie tabuľky po skupinovej fáze (s možnosťou korekcie)
 - 🔲 Generovanie play-off zápasov po schválení
@@ -188,17 +194,17 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 
 ---
 
-## Skupiny priateľov 🟠
-- 🟠 Každý hráč môže vytvoriť skupinu — stáva sa jej zakladateľom
-- 🟠 Názov skupiny musí byť unikátny a je viditeľný pre všetkých
-- 🟠 Hráč si prehliadne zoznam skupín a môže požiadať o vstup (status `pending`)
-- 🟠 Zakladateľ žiadosť schváli alebo odmietne
-- 🟠 Hráč môže skupinu sám opustiť kedykoľvek
-- 🟠 Skupinu môže vymazať iba jej zakladateľ
-- 🟠 Hráč môže byť členom viacerých skupín
-- 🟠 Klik na skupinu → rozbalí sa zoznam členov s avatarmi
-- 🟠 Klik na člena → detail profilu (avatar, meno, email, telefón)
-- 🟠 Filter „Len moje" / „Všetky"
+## Skupiny priateľov ✅
+- ✅ Každý hráč môže vytvoriť skupinu — stáva sa jej zakladateľom
+- ✅ Názov skupiny musí byť unikátny a je viditeľný pre všetkých
+- ✅ Hráč si prehliadne zoznam skupín a môže požiadať o vstup (status `pending`)
+- ✅ Zakladateľ žiadosť schváli alebo odmietne
+- ✅ Hráč môže skupinu sám opustiť kedykoľvek
+- ✅ Skupinu môže vymazať iba jej zakladateľ
+- ✅ Hráč môže byť členom viacerých skupín
+- ✅ Klik na skupinu → rozbalí sa zoznam členov s avatarmi
+- ✅ Klik na člena → detail profilu (avatar, meno, email, telefón)
+- ✅ Filter „Len moje" / „Všetky"
 - 🔲 Hráč tipuje iba raz — rovnaký tip sa použije vo všetkých jeho skupinách
 
 ---
@@ -222,9 +228,9 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 
 ---
 
-## Databázové tabuľky 🟠
+## Databázové tabuľky ✅
 
-### admin.users 🟠
+### admin.users
 | Pole | Typ | Popis |
 |------|-----|-------|
 | id | SERIAL PK | |
@@ -242,7 +248,7 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 | web_push_sub | TEXT | Web Push subscription JSON |
 | created_at | TIMESTAMP | |
 
-### admin.invites 🟠
+### admin.invites ✅
 | Pole | Typ | Popis |
 |------|-----|-------|
 | id | INT PK (SEQ) | InviteID v placeholder username |
@@ -252,7 +258,7 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 | used_at | TIMESTAMP | NULL = nepoužitý |
 | user_id | FK → users | NULL = nepoužitý |
 
-### admin.friend_groups 🟠
+### admin.friend_groups ✅
 | Pole | Typ | Popis |
 |------|-----|-------|
 | id | SERIAL PK | |
@@ -260,7 +266,7 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 | created_by | FK → users | zakladateľ |
 | created_at | TIMESTAMP | |
 
-### admin.group_members 🟠
+### admin.group_members ✅
 | Pole | Typ | Popis |
 |------|-----|-------|
 | group_id | FK → friend_groups | |
@@ -269,7 +275,7 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 | joined_at | TIMESTAMP | |
 | PK(group_id, user_id) | | |
 
-### iihf2026.teams 🟠
+### iihf2026.teams ✅
 | Pole | Typ | Popis |
 |------|-----|-------|
 | team_id | SERIAL PK | |
@@ -277,7 +283,7 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 | team_name | VARCHAR(100) NOT NULL | |
 | group_name | VARCHAR(1) NOT NULL | `A` \| `B` |
 
-### iihf2026.games 🟠
+### iihf2026.games ✅
 | Pole | Typ | Popis |
 |------|-----|-------|
 | game_id | INT PK | číslo zápasu z PDF (1–64) |
@@ -310,7 +316,7 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 | updated_at | TIMESTAMP | |
 | UNIQUE(user_id, game_id) | | jeden tip na zápas |
 
-### iihf2026.scoring_config 🟠 DB
+### iihf2026.scoring_config ✅ DB
 | Pole | Typ | Popis |
 |------|-----|-------|
 | id | SERIAL PK | |
@@ -333,7 +339,7 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 
 ## Web aplikácia
 
-### Technológia 🟠
+### Technológia ✅
 - React + Vite PWA
 - PHP REST API backend (`api/`)
 - PostgreSQL cez PDO
@@ -344,10 +350,10 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 ### Obrazovky — bežný hráč
 | Obrazovka | Popis | Stav |
 |-----------|-------|------|
-| **Prihlásenie** | Login formulár | 🟠 |
-| **Registrácia** | Cez pozývací link (invite token) | 🟠 |
-| **Môj profil** | Avatar, meno, email, telefón, zmena hesla, zmazanie účtu | 🟠 |
-| **Skupiny** | Zoznam skupín, filter, collapse/expand, detail člena | 🟠 |
+| **Prihlásenie** | Login formulár | ✅ |
+| **Registrácia** | Cez pozývací link (invite token) | ✅ |
+| **Môj profil** | Avatar, meno, email, telefón, zmena hesla, zmazanie účtu | ✅ |
+| **Skupiny** | Zoznam skupín, filter Len moje/Všetky, collapse/expand, detail člena | ✅ |
 | **Zápasy** | Zoznam všetkých zápasov, zadávanie tipov, výsledky | 🔲 |
 | **Detail zápasu** | Tip hráča, po uzavretí tipy všetkých, výsledok | 🔲 |
 | **Poradie** | Tabuľka poradia v skupinách + celkové poradie | 🔲 |
@@ -356,37 +362,38 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 ### Obrazovky — admin
 | Obrazovka | Popis | Stav |
 |-----------|-------|------|
-| **Správa používateľov** | Zoznam, aktivácia, zmena roly, edit, heslo, zmazanie | 🟠 |
-| **Pozývacie linky** | Generovanie a zobrazenie pozývacích linkov | 🟠 |
-| **Zadanie výsledku** | Výsledok riadnej doby + konečný výsledok | 🔲 |
+| **Správa používateľov** | Zoznam, aktivácia, zmena roly, edit, heslo, zmazanie | ✅ |
+| **Pozývacie linky** | Generovanie a zobrazenie pozývacích linkov | ✅ |
+| **Zápasy** | Zoznam a úprava zápasov (dátum, čas, tímy, miesto) | ✅ |
+| **Zadanie výsledku** | Výsledok riadnej doby; stav mení admin manuálne | ✅ |
 | **Schválenie tabuľky** | Kontrola a schválenie po skupinovej fáze | 🔲 |
 | **Nastavenia bodovanie** | Úprava scoring_config hodnôt | 🔲 |
 
 ### API endpointy
 | Endpoint | Metóda | Popis | Stav |
 |----------|--------|-------|------|
-| `v1/auth/login` | POST | Prihlásenie, vracia JWT | 🟠 |
-| `v1/auth/complete` | POST | Aktivácia účtu cez invite | 🟠 |
-| `v1/admin/invite-use` | POST | Použitie invite tokenu | 🟠 |
-| `v1/profile` | GET/POST | Čítanie a uloženie profilu | 🟠 |
-| `v1/profile-avatar` | POST | Nahranie avatara | 🟠 |
-| `v1/profile-password` | POST | Zmena hesla | 🟠 |
-| `v1/profile-delete` | POST | Zmazanie účtu | 🟠 |
-| `v1/groups` | GET/POST/DELETE | Zoznam, vytvorenie, zrušenie skupiny | 🟠 |
-| `v1/group-join` | POST | Žiadosť o vstup do skupiny | 🟠 |
-| `v1/group-leave` | POST | Opustenie skupiny | 🟠 |
-| `v1/group-members` | GET/POST | Členovia skupiny, schválenie/odmietnutie | 🟠 |
-| `v1/users` | GET | Zoznam hráčov / detail hráča | 🟠 |
-| `v1/admin/users` | GET | Zoznam všetkých používateľov (admin) | 🟠 |
-| `v1/admin/user-update` | POST | Aktivácia/deaktivácia, zmena roly | 🟠 |
-| `v1/admin/user-edit` | POST | Úprava údajov používateľa | 🟠 |
-| `v1/admin/user-password` | POST | Zmena hesla používateľovi | 🟠 |
-| `v1/admin/user-delete` | POST | Zmazanie používateľa | 🟠 |
-| `v1/admin/invites` | GET/POST | Zoznam a generovanie invite linkov | 🟠 |
+| `v1/auth/login` | POST | Prihlásenie, vracia JWT | ✅ |
+| `v1/auth/complete` | POST | Aktivácia účtu cez invite | ✅ |
+| `v1/admin/invite-use` | POST | Použitie invite tokenu | ✅ |
+| `v1/profile` | GET/POST | Čítanie a uloženie profilu | ✅ |
+| `v1/profile-avatar` | POST | Nahranie avatara | ✅ |
+| `v1/profile-password` | POST | Zmena hesla | ✅ |
+| `v1/profile-delete` | POST | Zmazanie účtu | ✅ |
+| `v1/groups` | GET/POST/DELETE | Zoznam, vytvorenie, zrušenie skupiny | ✅ |
+| `v1/group-join` | POST | Žiadosť o vstup do skupiny | ✅ |
+| `v1/group-leave` | POST | Opustenie skupiny | ✅ |
+| `v1/group-members` | GET/POST | Členovia skupiny, schválenie/odmietnutie | ✅ |
+| `v1/users` | GET | Zoznam hráčov / detail hráča | ✅ |
+| `v1/admin/users` | GET | Zoznam všetkých používateľov (admin) | ✅ |
+| `v1/admin/user-update` | POST | Aktivácia/deaktivácia, zmena roly | ✅ |
+| `v1/admin/user-edit` | POST | Úprava údajov používateľa | ✅ |
+| `v1/admin/user-password` | POST | Zmena hesla používateľovi | ✅ |
+| `v1/admin/user-delete` | POST | Zmazanie používateľa | ✅ |
+| `v1/admin/invites` | GET/POST | Zoznam a generovanie invite linkov | ✅ |
 
 ---
 
-## Infraštruktúra 🟠
+## Infraštruktúra ✅
 - **Hosting:** fellow.sk
 - **Databáza:** PostgreSQL — `DB-BET` na fellow.sk
 - **Backend:** PHP REST API (`api/`) — zdieľaný pre web aj Android
@@ -411,4 +418,4 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 
 ---
 
-*Posledná aktualizácia: 2026-05-07*
+*Posledná aktualizácia: 2026-05-07 (v2)*
