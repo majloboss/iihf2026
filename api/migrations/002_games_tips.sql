@@ -22,7 +22,7 @@ INSERT INTO iihf2026.teams (code, name, group_letter) VALUES
   ('HUN','Hungary','A'),('LAT','Latvia','A'),
   ('CAN','Canada','B'),('SWE','Sweden','B'),('CZE','Czech Republic','B'),
   ('DEN','Denmark','B'),('SVK','Slovakia','B'),('NOR','Norway','B'),
-  ('ITA','Italy','B'),('SLO','Slovenia','B')
+  ('ITA','Italy','B'),('SLO','Slovenia','B');
 -- Games
 CREATE TABLE iihf2026.games (
     id          SERIAL PRIMARY KEY,
