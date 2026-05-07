@@ -5,7 +5,7 @@ $auth = require_auth();
 
 if ($method === 'GET') {
     $stmt = db()->prepare(
-        'SELECT id, username, first_name, last_name, email, phone, role, created_at
+        'SELECT id, username, first_name, last_name, email, phone, role, avatar, created_at
          FROM admin.users WHERE id = ?'
     );
     $stmt->execute([$auth['user_id']]);

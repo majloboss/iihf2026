@@ -14,7 +14,11 @@ $sets   = [];
 $params = [':id' => $game_id];
 
 if (array_key_exists('starts_at', $body)) {
-    $dt = DateTime::createFromFormat('Y-m-d\TH:i', $body['starts_at'], new DateTimeZone('UTC'));
+    try {
+        $dt = new DateTime($body['starts_at']);
+    } catch (Exception $e) {
+        json_error('Neplatný formát dátumu', 400);
+    }
     if (!$dt) json_error('Neplatný formát dátumu', 400);
     $sets[] = 'starts_at = :starts_at';
     $params[':starts_at'] = $dt->format('Y-m-d H:i:sP');

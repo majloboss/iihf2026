@@ -13,17 +13,18 @@ const TEAMS = [
     { code: 'ITA', name: 'Italy' },      { code: 'SLO', name: 'Slovenia' },
 ];
 
-function toUtcDateTimeInputs(isoUtc) {
-    if (!isoUtc) return { date: '', time: '' };
-    const d = new Date(isoUtc);
+function toLocalDateTimeInputs(iso) {
+    if (!iso) return { date: '', time: '' };
+    const d = new Date(iso);
+    if (isNaN(d)) return { date: '', time: '' };
     const pad = n => String(n).padStart(2, '0');
-    const date = `${d.getUTCFullYear()}-${pad(d.getUTCMonth()+1)}-${pad(d.getUTCDate())}`;
-    const time = `${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`;
+    const date = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+    const time = `${pad(d.getHours())}:${pad(d.getMinutes())}`;
     return { date, time };
 }
 
 export default function GameModal({ game, onClose, onSaved }) {
-    const { date: initDate, time: initTime } = toUtcDateTimeInputs(game.starts_at);
+    const { date: initDate, time: initTime } = toLocalDateTimeInputs(game.starts_at);
     const [date,   setDate]   = useState(initDate);
     const [time,   setTime]   = useState(initTime);
     const [team1,  setTeam1]  = useState(game.team1 || '');
@@ -36,7 +37,7 @@ export default function GameModal({ game, onClose, onSaved }) {
     const save = async () => {
         setSaving(true); setError(''); setSuccess('');
         try {
-            const starts_at = date && time ? `${date}T${time}` : undefined;
+            const starts_at = date && time ? new Date(`${date}T${time}`).toISOString() : undefined;
             await updateGame(game.id, {
                 starts_at,
                 team1: team1 || null,
@@ -44,7 +45,7 @@ export default function GameModal({ game, onClose, onSaved }) {
                 venue,
             });
             setSuccess('Uložené.');
-            onSaved({ ...game, starts_at: starts_at ? new Date(`${date}T${time}:00Z`).toISOString() : game.starts_at, team1: team1||null, team2: team2||null, venue });
+            onSaved({ ...game, starts_at: starts_at ?? game.starts_at, team1: team1||null, team2: team2||null, venue });
         } catch (e) { setError(e.message); }
         finally { setSaving(false); }
     };
@@ -58,12 +59,12 @@ export default function GameModal({ game, onClose, onSaved }) {
                 </div>
 
                 <div className={styles.section}>
-                    <h4>Dátum a čas (UTC)</h4>
+                    <h4>Dátum a čas</h4>
                     <div className={styles.grid}>
                         <label>Dátum
                             <input type="date" value={date} onChange={e => setDate(e.target.value)} />
                         </label>
-                        <label>Čas (UTC)
+                        <label>Čas
                             <input type="time" value={time} onChange={e => setTime(e.target.value)} />
                         </label>
                     </div>

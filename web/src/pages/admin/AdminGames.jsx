@@ -5,11 +5,11 @@ import styles from './Admin.module.css';
 
 const PHASE_LABEL = { A: 'Sk. A', B: 'Sk. B', QF: 'Štvrťf.', SF: 'Semif.', BRONZE: 'Bronz', GOLD: 'Finále' };
 
-function formatUtc(iso) {
+function formatLocal(iso) {
     if (!iso) return '—';
     const d = new Date(iso);
     const pad = n => String(n).padStart(2, '0');
-    return `${d.getUTCFullYear()}-${pad(d.getUTCMonth()+1)}-${pad(d.getUTCDate())} ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())} UTC`;
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
 export default function AdminGames() {
@@ -69,7 +69,7 @@ export default function AdminGames() {
                         <tr key={g.id}>
                             <td>{g.game_number}</td>
                             <td><span className={styles.badge}>{PHASE_LABEL[g.phase] || g.phase}</span></td>
-                            <td>{formatUtc(g.starts_at)}</td>
+                            <td>{formatLocal(g.starts_at)}</td>
                             <td>{g.team1 || <span style={{color:'#aaa'}}>TBD</span>}</td>
                             <td>{g.team2 || <span style={{color:'#aaa'}}>TBD</span>}</td>
                             <td style={{fontSize:'0.82rem',maxWidth:'160px',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{g.venue}</td>
