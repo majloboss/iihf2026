@@ -29,7 +29,7 @@ export default function AdminLayout() {
                         ⚽ Výsledky
                     </NavLink>
                     <NavLink to="/admin/standings" className={({ isActive }) => isActive ? styles.active : ''}>
-                        🏆 Tabuľky
+                        🏆 Skupiny
                     </NavLink>
                     <NavLink to="/admin/tools" className={({ isActive }) => isActive ? styles.active : ''}>
                         🔧 Nástroje
