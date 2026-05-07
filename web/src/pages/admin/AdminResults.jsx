@@ -160,11 +160,14 @@ function ResultCard({ game: initGame }) {
     );
 }
 
+const PHASES = ['all', 'A', 'B', 'QF', 'SF', 'BRONZE', 'GOLD'];
+const PHASE_FILTER_LABEL = { all: 'Všetky', A: 'Sk. A', B: 'Sk. B', QF: 'Štvrťf.', SF: 'Semif.', BRONZE: 'Bronz', GOLD: 'Finále' };
+
 export default function AdminResults() {
     const [games,   setGames]   = useState([]);
     const [loading, setLoading] = useState(true);
     const [error,   setError]   = useState('');
-    const [filter,  setFilter]  = useState('active');
+    const [phase,   setPhase]   = useState('all');
 
     useEffect(() => {
         getGames()
@@ -172,14 +175,7 @@ export default function AdminResults() {
             .catch(e   => { setError(e.message); setLoading(false); });
     }, []);
 
-    const filtered = games.filter(g => {
-        const es = effectiveStatus(g);
-        if (filter === 'all')      return true;
-        if (filter === 'active')   return es !== 'scheduled';
-        if (filter === 'live')     return es === 'live';
-        if (filter === 'finished') return es === 'finished';
-        return true;
-    });
+    const filtered = phase === 'all' ? games : games.filter(g => g.phase === phase);
 
     const byDate = {};
     filtered.forEach(g => {
@@ -196,10 +192,10 @@ export default function AdminResults() {
             <div className={gStyles.topBar}>
                 <h2>Výsledky</h2>
                 <div className={gStyles.filters}>
-                    {[['active','Aktívne'],['live','Prebiehajúce'],['finished','Odohranné'],['all','Všetky']].map(([v,l]) => (
-                        <button key={v}
-                            className={filter === v ? gStyles.btnFilterActive : gStyles.btnFilter}
-                            onClick={() => setFilter(v)}>{l}</button>
+                    {PHASES.map(p => (
+                        <button key={p}
+                            className={phase === p ? gStyles.btnFilterActive : gStyles.btnFilter}
+                            onClick={() => setPhase(p)}>{PHASE_FILTER_LABEL[p]}</button>
                     ))}
                 </div>
             </div>
