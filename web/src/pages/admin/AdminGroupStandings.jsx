@@ -105,8 +105,9 @@ export default function AdminGroupStandings() {
     const handleFinalize = async (phase) => {
         setSyncing(true); setMsg('');
         try {
-            for (const t of (data[phase] || [])) {
-                await updateGroupStanding({ phase, team: t.team, finalized: true });
+            const teams = data[phase] || [];
+            for (let i = 0; i < teams.length; i++) {
+                await updateGroupStanding({ phase, team: teams[i].team, rank: i + 1, finalized: true });
             }
             setMsg(`✓ Skupina ${phase} finalizovaná`);
             load();
