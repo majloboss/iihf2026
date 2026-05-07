@@ -1,5 +1,21 @@
 .cardLive { border-left: 3px solid #dc3545; }
 
+.cardHead {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2px;
+}
+
+.cardMeta { font-size: 0.75rem; color: #888; }
+
+.cardVenue {
+    font-size: 0.72rem;
+    color: #bbb;
+    text-align: center;
+    margin-bottom: 8px;
+}
+
 .result {
     font-size: 1.4rem;
     font-weight: 700;
@@ -26,11 +42,7 @@
     background: #fafafa;
 }
 
-.scoreBox {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
+.scoreBox { display: flex; align-items: center; gap: 6px; }
 
 .scoreIn {
     width: 52px;
@@ -44,7 +56,7 @@
 .scoreIn::-webkit-outer-spin-button,
 .scoreIn::-webkit-inner-spin-button { -webkit-appearance: none; }
 
-.colon { font-weight: 700; font-size: 1rem; }
+.colon { font-weight: 700; }
 
 .btnSave {
     padding: 5px 16px;
@@ -54,10 +66,75 @@
     border-radius: 6px;
     cursor: pointer;
     font-size: 0.88rem;
-    transition: background 0.15s;
     white-space: nowrap;
+    transition: background 0.15s;
 }
 .btnSave:hover:not(:disabled) { background: #24519e; }
 .btnSave:disabled { opacity: 0.45; cursor: default; }
 
 .errMsg { color: #dc3545; font-size: 0.8rem; }
+
+/* Tips panel */
+.toggleTips {
+    display: block;
+    width: 100%;
+    margin-top: 10px;
+    padding: 5px 0;
+    background: none;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.78rem;
+    color: #888;
+    transition: background 0.15s;
+}
+.toggleTips:hover { background: #f8f9fa; color: #555; }
+
+.tipsLoading, .tipsEmpty { text-align: center; color: #aaa; font-size: 0.8rem; padding: 8px 0; }
+.tipsErr { color: #dc3545; font-size: 0.78rem; padding: 6px 0; }
+
+.tipsTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+    font-size: 0.83rem;
+}
+.tipsTable th {
+    text-align: left;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    color: #aaa;
+    letter-spacing: 0.04em;
+    padding: 4px 6px;
+    border-bottom: 1px solid #f0f0f0;
+}
+.tipsTable td { padding: 5px 6px; border-bottom: 1px solid #f8f8f8; }
+.tipsTable tr:last-child td { border-bottom: none; }
+
+.tipUser {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+.tipAvatar {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+.tipAvatarPh {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #d0d8e8;
+    color: #1a3a6b;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.72rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+.tipScore { font-weight: 700; color: #222; }
+.tipPts   { color: #28a745; font-weight: 600; }

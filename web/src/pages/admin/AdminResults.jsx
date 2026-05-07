@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getGames } from '../../api/games';
-import { updateGame } from '../../api/admin';
+import { updateGame, getAdminGameTips } from '../../api/admin';
 import gStyles from '../user/Games.module.css';
 import styles from './AdminResults.module.css';
 
@@ -13,6 +13,12 @@ function effectiveStatus(game) {
     return 'scheduled';
 }
 
+function formatDateTime(iso) {
+    const d = new Date(iso);
+    return d.toLocaleDateString('sk-SK', { weekday: 'short', day: '2-digit', month: '2-digit' })
+        + ' ' + d.toLocaleTimeString('sk-SK', { hour: '2-digit', minute: '2-digit' });
+}
+
 function TeamBlock({ code, isLeft }) {
     return (
         <div className={`${gStyles.team} ${isLeft ? gStyles.teamLeft : gStyles.teamRight}`}>
@@ -20,6 +26,50 @@ function TeamBlock({ code, isLeft }) {
                 ? <><img className={gStyles.flag} src={FLAG_URL(code)} alt={code} onError={e => e.target.style.display='none'} /><span className={gStyles.teamCode}>{code}</span></>
                 : <span className={gStyles.teamCode}>TBD</span>}
         </div>
+    );
+}
+
+function TipsPanel({ gameId }) {
+    const [tips,    setTips]    = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [err,     setErr]     = useState('');
+
+    useEffect(() => {
+        setLoading(true);
+        getAdminGameTips(gameId)
+            .then(setTips)
+            .catch(e => setErr(e.message))
+            .finally(() => setLoading(false));
+    }, [gameId]);
+
+    if (loading) return <div className={styles.tipsLoading}>Načítavam tipy…</div>;
+    if (err)     return <div className={styles.tipsErr}>{err}</div>;
+    if (!tips || tips.length === 0) return <div className={styles.tipsEmpty}>Žiadne tipy</div>;
+
+    return (
+        <table className={styles.tipsTable}>
+            <thead>
+                <tr>
+                    <th>Hráč</th>
+                    <th>Tip</th>
+                    <th>Body</th>
+                </tr>
+            </thead>
+            <tbody>
+                {tips.map(t => (
+                    <tr key={t.user_id}>
+                        <td className={styles.tipUser}>
+                            {t.avatar
+                                ? <img src={t.avatar} className={styles.tipAvatar} alt="" />
+                                : <span className={styles.tipAvatarPh}>{t.username[0].toUpperCase()}</span>}
+                            {t.username}
+                        </td>
+                        <td className={styles.tipScore}>{t.tip1 != null ? `${t.tip1}:${t.tip2}` : '—'}</td>
+                        <td className={styles.tipPts}>{t.points != null ? `+${t.points}b` : '—'}</td>
+                    </tr>
+                ))}
+            </tbody>
+        </table>
     );
 }
 
@@ -32,6 +82,7 @@ function ResultCard({ game: initGame }) {
     const [saving, setSaving] = useState(false);
     const [saved,  setSaved]  = useState(false);
     const [err,    setErr]    = useState('');
+    const [open,   setOpen]   = useState(false);
 
     const started = initEff !== 'scheduled';
     const canEdit = status === 'finished';
@@ -48,8 +99,7 @@ function ResultCard({ game: initGame }) {
                 score1: canEdit ? parseInt(s1) : null,
                 score2: canEdit ? parseInt(s2) : null,
             });
-            const updated = { ...game, status, score1: canEdit ? parseInt(s1) : null, score2: canEdit ? parseInt(s2) : null };
-            setGame(updated);
+            setGame(g => ({ ...g, status, score1: canEdit ? parseInt(s1) : null, score2: canEdit ? parseInt(s2) : null }));
             setSaved(true);
             setTimeout(() => setSaved(false), 2000);
         } catch (e) { setErr(e.message); }
@@ -57,12 +107,15 @@ function ResultCard({ game: initGame }) {
     };
 
     return (
-        <div className={`${gStyles.card} ${status === 'finished' ? gStyles.cardFinished : ''} ${status === 'live' ? styles.cardLive : ''}`}>
-            <div className={gStyles.cardTop}>
-                <span className={gStyles.phase}>{PHASE_LABEL[game.phase] || game.phase} • Zápas {game.game_number}</span>
-                <span className={gStyles.time}>{new Date(game.starts_at).toLocaleTimeString('sk-SK', { hour:'2-digit', minute:'2-digit' })}</span>
+        <div className={`${gStyles.card} ${status === 'finished' ? gStyles.cardFinished : status === 'live' ? styles.cardLive : ''}`}>
+            {/* Header: skupina, číslo, dátum+čas */}
+            <div className={styles.cardHead}>
+                <span className={styles.cardMeta}>{PHASE_LABEL[game.phase] || game.phase} • Zápas {game.game_number}</span>
+                <span className={styles.cardMeta}>{formatDateTime(game.starts_at)}</span>
             </div>
+            <div className={styles.cardVenue}>{game.venue}</div>
 
+            {/* Zápas */}
             <div className={gStyles.matchRow}>
                 <TeamBlock code={game.team1} isLeft />
                 <div className={gStyles.vs}>
@@ -75,20 +128,15 @@ function ResultCard({ game: initGame }) {
                 <TeamBlock code={game.team2} />
             </div>
 
-            <div className={gStyles.venue}>{game.venue}</div>
-
+            {/* Editácia stavu a skóre */}
             {started && (
                 <div className={styles.editRow}>
-                    <select
-                        value={status}
-                        onChange={e => setStatus(e.target.value)}
-                        className={styles.statusSel}
+                    <select value={status} onChange={e => setStatus(e.target.value)} className={styles.statusSel}
                         style={{ color: status === 'finished' ? '#28a745' : status === 'live' ? '#dc3545' : '#888' }}>
                         <option value="scheduled">Plánovaný</option>
                         <option value="live">Prebieha</option>
                         <option value="finished">Odohraný</option>
                     </select>
-
                     {canEdit && (
                         <div className={styles.scoreBox}>
                             <input type="number" min="0" max="30" value={s1} onChange={e => setS1(e.target.value)} className={styles.scoreIn} />
@@ -96,13 +144,18 @@ function ResultCard({ game: initGame }) {
                             <input type="number" min="0" max="30" value={s2} onChange={e => setS2(e.target.value)} className={styles.scoreIn} />
                         </div>
                     )}
-
                     <button className={styles.btnSave} onClick={save} disabled={saving || !dirty}>
-                        {saving ? '…' : saved ? '✓ Uložené' : 'Uložiť'}
+                        {saving ? '…' : saved ? '✓' : 'Uložiť'}
                     </button>
                     {err && <span className={styles.errMsg}>{err}</span>}
                 </div>
             )}
+
+            {/* Tipy všetkých hráčov */}
+            <button className={styles.toggleTips} onClick={() => setOpen(o => !o)}>
+                {open ? '▲ Skryť tipy' : '▼ Tipy hráčov'}
+            </button>
+            {open && <TipsPanel gameId={game.id} />}
         </div>
     );
 }
@@ -139,7 +192,7 @@ export default function AdminResults() {
     if (error)   return <p style={{color:'red'}}>Chyba: {error}</p>;
 
     return (
-        <div className={gStyles.wrap} style={{maxWidth:680}}>
+        <div className={gStyles.wrap} style={{maxWidth:700}}>
             <div className={gStyles.topBar}>
                 <h2>Výsledky</h2>
                 <div className={gStyles.filters}>
