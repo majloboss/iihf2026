@@ -15,3 +15,6 @@ export const deleteUser    = (id) => apiFetch('v1/admin/user-delete', {
 });
 export const getInvites   = () => apiFetch('v1/admin/invites');
 export const createInvite = () => apiFetch('v1/admin/invites', { method: 'POST' });
+export const updateGame   = (game_id, data) => apiFetch('v1/admin/game-update', {
+    method: 'POST', body: JSON.stringify({ game_id, ...data })
+});

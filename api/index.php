@@ -36,6 +36,7 @@ try {
         $path === 'v1/group-leave'         => require __DIR__ . '/v1/group-leave.php',
         $path === 'v1/group-members'       => require __DIR__ . '/v1/group-members.php',
         $path === 'v1/users'               => require __DIR__ . '/v1/users.php',
+        $path === 'v1/admin/game-update'   => require __DIR__ . '/v1/admin/game_update.php',
         $path === 'v1/games'               => require __DIR__ . '/v1/games.php',
         $path === 'v1/tips'                => require __DIR__ . '/v1/tips.php',
         default                            => json_error('Not found', 404)

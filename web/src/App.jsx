@@ -6,6 +6,7 @@ import Profile from './pages/Profile';
 import AdminLayout from './pages/admin/AdminLayout';
 import Users from './pages/admin/Users';
 import Invites from './pages/admin/Invites';
+import AdminGames from './pages/admin/AdminGames';
 import UserLayout from './pages/user/UserLayout';
 import Groups from './pages/user/Groups';
 import Games from './pages/user/Games';
@@ -51,6 +52,7 @@ export default function App() {
                         <Route index          element={<Navigate to="users" replace />} />
                         <Route path="users"   element={<Users />} />
                         <Route path="invites" element={<Invites />} />
+                        <Route path="games"   element={<AdminGames />} />
                     </Route>
 
                     <Route path="*" element={<HomeRedirect />} />

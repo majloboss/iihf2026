@@ -22,6 +22,9 @@ export default function AdminLayout() {
                     <NavLink to="/admin/invites" className={({ isActive }) => isActive ? styles.active : ''}>
                         🔗 Pozývací linky
                     </NavLink>
+                    <NavLink to="/admin/games" className={({ isActive }) => isActive ? styles.active : ''}>
+                        🏒 Zápasy
+                    </NavLink>
                 </nav>
                 <button className={styles.logout} onClick={handleLogout}>Odhlásiť</button>
             </aside>
