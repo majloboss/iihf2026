@@ -137,3 +137,43 @@
 .tipClosed { text-align: center; font-size: 0.8rem; color: #aaa; }
 .tipErr { color: #dc3545; font-size: 0.8rem; }
 .empty { color: #aaa; text-align: center; margin-top: 40px; }
+
+.showTipsBtn {
+    display: block;
+    width: 100%;
+    margin-top: 10px;
+    padding: 5px 0;
+    background: none;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.78rem;
+    color: #888;
+    transition: background 0.15s;
+}
+.showTipsBtn:hover { background: #f8f9fa; color: #555; }
+
+.groupTips { margin-top: 12px; }
+
+.groupSection { margin-bottom: 12px; }
+
+.groupName {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #1a3a6b;
+    margin-bottom: 5px;
+}
+
+.tipsTable { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+.tipsTable td { padding: 4px 6px; border-bottom: 1px solid #f0f0f0; }
+.tipsTable tr:last-child td { border-bottom: none; }
+
+.tipsTableMe td { font-weight: 700; background: #f0f4ff; }
+
+.tipScore2 { font-weight: 700; color: #222; }
+.tipNoTip { color: #bbb; font-style: italic; }
+.tipPts { color: #28a745; font-size: 0.75rem; padding-left: 4px; }
+.tipsLoading { text-align: center; color: #aaa; font-size: 0.8rem; padding: 8px 0; }
+.tipsErr { color: #dc3545; font-size: 0.78rem; text-align: center; margin-top: 6px; }

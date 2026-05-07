@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getGames } from '../../api/games';
-import { saveTip } from '../../api/tips';
+import { saveTip, getGameTips } from '../../api/tips';
 import styles from './Games.module.css';
 
 const PHASE_LABEL = { A: 'Skupina A', B: 'Skupina B', QF: 'Štvrťfinále', SF: 'Semifinále', BRONZE: 'O bronz', GOLD: 'Finále' };
@@ -49,6 +49,64 @@ function TipInput({ game, onSaved }) {
             <button onClick={save} disabled={saving} className={styles.btnTip}>{saving ? '…' : (game.tip1 != null ? 'Zmeniť' : 'Tipovať')}</button>
             {err && <span className={styles.tipErr}>{err}</span>}
         </div>
+    );
+}
+
+function GroupTips({ gameId }) {
+    const [open,    setOpen]    = useState(false);
+    const [groups,  setGroups]  = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [err,     setErr]     = useState('');
+
+    const toggle = async () => {
+        if (!open && groups === null) {
+            setLoading(true);
+            try {
+                const data = await getGameTips(gameId);
+                setGroups(data);
+            } catch (e) { setErr(e.message); }
+            finally { setLoading(false); }
+        }
+        setOpen(o => !o);
+    };
+
+    return (
+        <>
+            <button className={styles.showTipsBtn} onClick={toggle}>
+                {open ? '▲ Skryť tipy skupín' : '▼ Tipy skupín'}
+            </button>
+            {open && (
+                <div className={styles.groupTips}>
+                    {loading && <div className={styles.tipsLoading}>Načítavam…</div>}
+                    {err     && <div className={styles.tipsErr}>{err}</div>}
+                    {groups && groups.length === 0 && (
+                        <div className={styles.tipsLoading}>Nie si v žiadnej skupine</div>
+                    )}
+                    {groups && groups.map(g => (
+                        <div key={g.group_id} className={styles.groupSection}>
+                            <div className={styles.groupName}>{g.group_name}</div>
+                            <table className={styles.tipsTable}>
+                                <tbody>
+                                    {g.members.map(m => (
+                                        <tr key={m.user_id} className={m.is_me ? styles.tipsTableMe : ''}>
+                                            <td>{m.username}{m.is_me ? ' (ty)' : ''}</td>
+                                            <td>
+                                                {m.tip1 != null
+                                                    ? <span className={styles.tipScore2}>{m.tip1}:{m.tip2}</span>
+                                                    : <span className={styles.tipNoTip}>—</span>}
+                                            </td>
+                                            <td>
+                                                {m.points != null && <span className={styles.tipPts}>+{m.points}b</span>}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    ))}
+                </div>
+            )}
+        </>
     );
 }
 
@@ -120,6 +178,7 @@ export default function Games() {
                             </div>
                             <div className={styles.venue}>{g.venue}</div>
                             <TipInput game={g} onSaved={handleSaved} />
+                            {(g.status === 'finished' || g.status === 'live') && <GroupTips gameId={g.id} />}
                         </div>
                     ))}
                 </div>
