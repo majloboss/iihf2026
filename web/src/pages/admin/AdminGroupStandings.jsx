@@ -7,15 +7,10 @@ import gsStyles from '../user/GroupStandings.module.css';
 const FLAG_URL = code => `/flags/team_flag_${code?.toLowerCase()}.png`;
 
 function GroupTable({ phase, teams, finalized, onMove }) {
-    const [saving, setSaving] = useState(false);
-
-    const move = async (idx, dir) => {
+    const move = (idx, dir) => {
         const swapIdx = idx + dir;
         if (swapIdx < 0 || swapIdx >= teams.length) return;
-        setSaving(true);
-        try {
-            await onMove(phase, idx, swapIdx);
-        } finally { setSaving(false); }
+        onMove(phase, idx, swapIdx);
     };
 
     return (
@@ -51,10 +46,10 @@ function GroupTable({ phase, teams, finalized, onMove }) {
                             <td className={gsStyles.pts}>{t.pts}</td>
                             <td className={styles.moveCell}>
                                 <button className={styles.btnMove} onClick={() => move(i, -1)}
-                                    disabled={saving || i === 0 || teams[i - 1].pts !== t.pts}
+                                    disabled={i === 0 || teams[i - 1].pts !== t.pts}
                                     title="Posunúť hore">▲</button>
                                 <button className={styles.btnMove} onClick={() => move(i, 1)}
-                                    disabled={saving || i === teams.length - 1 || teams[i + 1].pts !== t.pts}
+                                    disabled={i === teams.length - 1 || teams[i + 1].pts !== t.pts}
                                     title="Posunúť dole">▼</button>
                             </td>
                         </tr>
@@ -115,19 +110,13 @@ export default function AdminGroupStandings() {
         finally { setSyncing(false); }
     };
 
-    const handleMove = useCallback(async (phase, fromIdx, toIdx) => {
-        const teams = [...(data[phase] || [])];
-        const a = teams[fromIdx];
-        const b = teams[toIdx];
-        // Swap ranks in DB
-        await updateGroupStanding({ phase, team: a.team, rank: toIdx + 1 });
-        await updateGroupStanding({ phase, team: b.team, rank: fromIdx + 1 });
-        // Update local state
-        const updated = [...teams];
-        updated[fromIdx] = { ...b, rank: fromIdx + 1 };
-        updated[toIdx]   = { ...a, rank: toIdx + 1 };
-        setData(prev => ({ ...prev, [phase]: updated }));
-    }, [data]);
+    const handleMove = useCallback((phase, fromIdx, toIdx) => {
+        setData(prev => {
+            const teams = [...(prev[phase] || [])];
+            [teams[fromIdx], teams[toIdx]] = [teams[toIdx], teams[fromIdx]];
+            return { ...prev, [phase]: teams };
+        });
+    }, []);
 
     if (loading) return <p>Načítavam…</p>;
     if (error)   return <p style={{color:'red'}}>Chyba: {error}</p>;
