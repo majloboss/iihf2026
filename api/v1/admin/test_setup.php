@@ -130,13 +130,13 @@ foreach ($playoff_dates as $phase => $dates) {
     $games = $pdo->query("SELECT id FROM iihf2026.games WHERE phase='$phase' ORDER BY game_number")->fetchAll(PDO::FETCH_COLUMN);
     foreach ($games as $i => $gid) {
         $dt = $dates[$i] ?? end($dates);
-        $pdo->prepare("UPDATE iihf2026.games SET starts_at=?,status='scheduled',score1=NULL,score2=NULL WHERE id=?")
+        $pdo->prepare("UPDATE iihf2026.games SET starts_at=?,status='scheduled',team1=NULL,team2=NULL,score1=NULL,score2=NULL WHERE id=?")
             ->execute([$dt, $gid]);
     }
 }
 
 // ── 4. Tipy — len skupinová fáza ─────────────────────────────────────────────
-$users      = $pdo->query("SELECT id FROM admin.users WHERE is_active=TRUE")->fetchAll(PDO::FETCH_COLUMN);
+$users      = $pdo->query("SELECT id FROM admin.users WHERE is_active=TRUE AND role='user'")->fetchAll(PDO::FETCH_COLUMN);
 $group_only = $pdo->query("SELECT id,score1,score2 FROM iihf2026.games WHERE phase IN ('A','B') AND score1 IS NOT NULL ORDER BY id")->fetchAll();
 
 $pdo->exec("DELETE FROM iihf2026.tips");
