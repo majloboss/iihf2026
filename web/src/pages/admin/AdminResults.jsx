@@ -7,12 +7,9 @@ import styles from './AdminResults.module.css';
 const PHASE_LABEL = { A: 'Skupina A', B: 'Skupina B', QF: 'Štvrťfinále', SF: 'Semifinále', BRONZE: 'O bronz', GOLD: 'Finále' };
 const FLAG_URL    = code => `/flags/team_flag_${code?.toLowerCase()}.png`;
 
-function autoStatus(game) {
-    const now = Date.now();
-    const start = new Date(game.starts_at).getTime();
+function effectiveStatus(game) {
     if (game.status === 'finished') return 'finished';
-    if (game.status === 'live')     return 'live';
-    if (now >= start)               return 'started';   // started but not yet marked
+    if (Date.now() >= new Date(game.starts_at).getTime()) return 'live';
     return 'scheduled';
 }
 
@@ -27,20 +24,20 @@ function TeamBlock({ code, isLeft }) {
 }
 
 function ResultCard({ game: initGame }) {
+    const initEff  = effectiveStatus(initGame);
     const [game,   setGame]   = useState(initGame);
     const [s1,     setS1]     = useState(initGame.score1 != null ? String(initGame.score1) : '');
     const [s2,     setS2]     = useState(initGame.score2 != null ? String(initGame.score2) : '');
-    const [status, setStatus] = useState(initGame.status);
+    const [status, setStatus] = useState(initEff);
     const [saving, setSaving] = useState(false);
     const [saved,  setSaved]  = useState(false);
     const [err,    setErr]    = useState('');
 
-    const computed = autoStatus({ ...game, status });
-    const started  = computed !== 'scheduled';
-    const canEdit  = status === 'finished';
-    const dirty    = status !== game.status ||
-                     (canEdit && (s1 !== (game.score1 != null ? String(game.score1) : '') ||
-                                  s2 !== (game.score2 != null ? String(game.score2) : '')));
+    const started = initEff !== 'scheduled';
+    const canEdit = status === 'finished';
+    const dirty   = status !== effectiveStatus(game) ||
+                    (canEdit && (s1 !== (game.score1 != null ? String(game.score1) : '') ||
+                                 s2 !== (game.score2 != null ? String(game.score2) : '')));
 
     const save = async () => {
         if (canEdit && (s1 === '' || s2 === '')) { setErr('Zadaj oba góly'); return; }
@@ -122,12 +119,12 @@ export default function AdminResults() {
             .catch(e   => { setError(e.message); setLoading(false); });
     }, []);
 
-    const now      = Date.now();
     const filtered = games.filter(g => {
+        const es = effectiveStatus(g);
         if (filter === 'all')      return true;
-        if (filter === 'active')   return new Date(g.starts_at).getTime() <= now || g.status !== 'scheduled';
-        if (filter === 'live')     return g.status === 'live';
-        if (filter === 'finished') return g.status === 'finished';
+        if (filter === 'active')   return es !== 'scheduled';
+        if (filter === 'live')     return es === 'live';
+        if (filter === 'finished') return es === 'finished';
         return true;
     });
 
