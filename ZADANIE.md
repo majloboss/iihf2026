@@ -16,8 +16,8 @@
 - Admin — pozývacie linky (generovanie, zoznam)
 - Admin — správa zápasov (úprava dátumu/času, tímov, miesta, stavu a skóre)
 - Admin — zadávanie výsledkov (dedikovaná obrazovka, inline, kartový layout, efektívny stav live/finished)
-- Admin — Skupiny — prehľad poradia všetkých skupín
-- Admin — Nástroje — test setup (dátumy, výsledky, tipy)
+- Admin — Skupiny — prehľad poradia všetkých skupín (premenované z Tabuľky)
+- Admin — Nástroje — test setup (dátumy, výsledky, tipy len pre role=user)
 - Výpočet bodov — automaticky po zadaní výsledku adminom; aj hromadný prepočet
 - Tabuľky poradia — per skupina, breakdown 3-2-1-0, tiebreak
 - DB schéma — users, invites, friend_groups, group_members, teams, games, tips, scoring_config
@@ -26,10 +26,6 @@
 - Zápasy — zoznam všetkých 64 zápasov, vlajky tímov, filter podľa fázy, grupovanie podľa dátumu
 - Tipovanie — zadanie presného skóre, uzavretie 5 min pred začiatkom, editácia tipa
 - Tipy skupín — po začiatku zápasu viditeľné tipy členov všetkých skupín, v ktorých som
-
-### 🟠 V DEVELOP (dev_iihf2026.fellow.sk, čaká na deploy)
-- Test setup: playoff hry bez priradených tímov (admin nastaví)
-- Admin navigácia: sekcia Tabuľky premenovaná na Skupiny
 
 ### 🔲 TODO (nie je implementované)
 - Dashboard — najbližšie zápasy, posledné výsledky, skrátené poradie
