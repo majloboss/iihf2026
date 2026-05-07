@@ -9,6 +9,7 @@ import Invites from './pages/admin/Invites';
 import AdminGames from './pages/admin/AdminGames';
 import AdminResults from './pages/admin/AdminResults';
 import AdminStandings from './pages/admin/AdminStandings';
+import AdminTools from './pages/admin/AdminTools';
 import UserLayout from './pages/user/UserLayout';
 import Groups from './pages/user/Groups';
 import Games from './pages/user/Games';
@@ -59,6 +60,7 @@ export default function App() {
                         <Route path="games"     element={<AdminGames />} />
                         <Route path="results"   element={<AdminResults />} />
                         <Route path="standings" element={<AdminStandings />} />
+                        <Route path="tools"     element={<AdminTools />} />
                     </Route>
 
                     <Route path="*" element={<HomeRedirect />} />
