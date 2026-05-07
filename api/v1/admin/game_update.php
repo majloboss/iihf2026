@@ -57,44 +57,38 @@ $pdo = db();
 $pdo->prepare('UPDATE iihf2026.games SET ' . implode(', ', $sets) . ' WHERE id = :id')
     ->execute($params);
 
-// Prepočítaj body ak admin uzavrel zápas s výsledkom
-$finishing = isset($body['status']) && $body['status'] === 'finished'
-          && array_key_exists('score1', $body) && $body['score1'] !== null && $body['score1'] !== ''
-          && array_key_exists('score2', $body) && $body['score2'] !== null && $body['score2'] !== '';
+// Po každom uložení skontroluj aktuálny stav v DB a prepočítaj body ak je finished + skóre
+$stmt = $pdo->prepare("SELECT phase, status, score1, score2 FROM iihf2026.games WHERE id = ?");
+$stmt->execute([$game_id]);
+$game = $stmt->fetch();
 
-if ($finishing) {
-    $stmt = $pdo->prepare("SELECT phase, score1, score2 FROM iihf2026.games WHERE id = ?");
-    $stmt->execute([$game_id]);
-    $game = $stmt->fetch();
+if ($game && $game['status'] === 'finished' && $game['score1'] !== null && $game['score2'] !== null) {
+    $s1 = (int)$game['score1'];
+    $s2 = (int)$game['score2'];
+    $is_playoff = in_array($game['phase'], ['QF', 'SF', 'BRONZE', 'GOLD']);
 
-    if ($game && $game['score1'] !== null && $game['score2'] !== null) {
-        $s1 = (int)$game['score1'];
-        $s2 = (int)$game['score2'];
-        $is_playoff = in_array($game['phase'], ['QF', 'SF', 'BRONZE', 'GOLD']);
+    $sc = $pdo->prepare("SELECT pts_winner, pts_goals1, pts_goals2 FROM iihf2026.scoring_config WHERE phase = ?");
+    $sc->execute([$game['phase']]);
+    $cfg = $sc->fetch() ?: ['pts_winner' => ($is_playoff ? 3 : 1), 'pts_goals1' => 1, 'pts_goals2' => 1];
+    $winner_pts = (int)$cfg['pts_winner'];
+    $goals1_pts = (int)$cfg['pts_goals1'];
+    $goals2_pts = (int)$cfg['pts_goals2'];
 
-        $sc = $pdo->prepare("SELECT pts_winner, pts_goals1, pts_goals2 FROM iihf2026.scoring_config WHERE phase = ?");
-        $sc->execute([$game['phase']]);
-        $cfg = $sc->fetch() ?: ['pts_winner' => ($is_playoff ? 3 : 1), 'pts_goals1' => 1, 'pts_goals2' => 1];
-        $winner_pts = (int)$cfg['pts_winner'];
-        $goals1_pts = (int)$cfg['pts_goals1'];
-        $goals2_pts = (int)$cfg['pts_goals2'];
+    $real_winner = $s1 > $s2 ? 1 : ($s1 < $s2 ? -1 : 0);
 
-        $real_winner = $s1 > $s2 ? 1 : ($s1 < $s2 ? -1 : 0);
+    $tips = $pdo->prepare("SELECT id, tip1, tip2 FROM iihf2026.tips WHERE game_id = ?");
+    $tips->execute([$game_id]);
+    $upd = $pdo->prepare("UPDATE iihf2026.tips SET points = ? WHERE id = ?");
 
-        $tips = $pdo->prepare("SELECT id, tip1, tip2 FROM iihf2026.tips WHERE game_id = ?");
-        $tips->execute([$game_id]);
-        $upd = $pdo->prepare("UPDATE iihf2026.tips SET points = ? WHERE id = ?");
-
-        foreach ($tips->fetchAll() as $t) {
-            $t1 = (int)$t['tip1'];
-            $t2 = (int)$t['tip2'];
-            $pts = 0;
-            $tip_winner = $t1 > $t2 ? 1 : ($t1 < $t2 ? -1 : 0);
-            if ($tip_winner === $real_winner) $pts += $winner_pts;
-            if ($t1 === $s1) $pts += $goals1_pts;
-            if ($t2 === $s2) $pts += $goals2_pts;
-            $upd->execute([$pts, $t['id']]);
-        }
+    foreach ($tips->fetchAll() as $t) {
+        $t1 = (int)$t['tip1'];
+        $t2 = (int)$t['tip2'];
+        $pts = 0;
+        $tip_winner = $t1 > $t2 ? 1 : ($t1 < $t2 ? -1 : 0);
+        if ($tip_winner === $real_winner) $pts += $winner_pts;
+        if ($t1 === $s1) $pts += $goals1_pts;
+        if ($t2 === $s2) $pts += $goals2_pts;
+        $upd->execute([$pts, $t['id']]);
     }
 }
 

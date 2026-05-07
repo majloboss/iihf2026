@@ -102,6 +102,7 @@ function ResultCard({ game: initGame }) {
             setGame(g => ({ ...g, status, score1: canEdit ? parseInt(s1) : null, score2: canEdit ? parseInt(s2) : null }));
             setSaved(true);
             setTimeout(() => setSaved(false), 2000);
+            if (open) { setOpen(false); setTimeout(() => setOpen(true), 100); }
         } catch (e) { setErr(e.message); }
         finally { setSaving(false); }
     };
