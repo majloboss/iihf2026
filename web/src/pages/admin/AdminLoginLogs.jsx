@@ -47,6 +47,7 @@ export default function AdminLoginLogs() {
                                 <th>Čas</th>
                                 <th>Používateľ</th>
                                 <th>Rola</th>
+                                <th>Env</th>
                                 <th>IP</th>
                                 <th>Zariadenie</th>
                             </tr>
@@ -57,6 +58,11 @@ export default function AdminLoginLogs() {
                                     <td className={styles.mono}>{fmt(r.logged_at)}</td>
                                     <td><strong>{r.username}</strong></td>
                                     <td>{r.role === 'admin' ? '🔑 admin' : '👤 user'}</td>
+                                    <td>
+                                        <span className={r.env === 'develop' ? styles.badgeDev : styles.badgeProd}>
+                                            {r.env ?? 'main'}
+                                        </span>
+                                    </td>
                                     <td className={styles.mono}>{r.ip_address ?? '—'}</td>
                                     <td className={styles.small}>{UA_SHORT(r.user_agent)}</td>
                                 </tr>

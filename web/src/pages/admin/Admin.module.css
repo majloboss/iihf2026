@@ -174,3 +174,12 @@
     color: #333;
 }
 .btnMore:hover { background: #dee2e6; }
+
+.badgeProd {
+    background: #d4edda; color: #155724;
+    padding: 2px 8px; border-radius: 10px; font-size: 0.78rem; font-weight: 600;
+}
+.badgeDev {
+    background: #fff3cd; color: #856404;
+    padding: 2px 8px; border-radius: 10px; font-size: 0.78rem; font-weight: 600;
+}

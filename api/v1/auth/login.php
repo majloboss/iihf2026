@@ -30,10 +30,12 @@ $token = jwt_create([
 
 // Log login
 try {
-    db()->prepare("INSERT INTO admin.login_logs (user_id, username, ip_address, user_agent) VALUES (?,?,?,?)")
+    $env = str_contains($_SERVER['HTTP_HOST'] ?? '', 'dev_') ? 'develop' : 'main';
+    db()->prepare("INSERT INTO admin.login_logs (user_id, username, ip_address, user_agent, env) VALUES (?,?,?,?,?)")
        ->execute([$user['id'], $username,
                   $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? null,
-                  $_SERVER['HTTP_USER_AGENT'] ?? null]);
+                  $_SERVER['HTTP_USER_AGENT'] ?? null,
+                  $env]);
 } catch (Exception $e) { /* non-fatal */ }
 
 json_ok(['token' => $token, 'role' => $user['role'], 'username_changed' => (bool)$user['username_changed']]);
