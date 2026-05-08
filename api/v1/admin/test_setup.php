@@ -93,12 +93,12 @@ if ($action === 'group') {
         }
     }
 
-    // Reset playoff — scheduled, no teams/scores
+    // Reset playoff — scheduled, no teams/scores (placeholder dates)
     $qf_base  = (clone $today)->modify('+1 day');
-    $sf_base  = (clone $today)->modify('+3 days');
-    $fin_base = (clone $today)->modify('+5 days');
+    $sf_base  = (clone $today)->modify('+2 days');
+    $fin_base = (clone $today)->modify('+3 days');
     $pld = ['QF'=>[], 'SF'=>[], 'BRONZE'=>[], 'GOLD'=>[]];
-    for ($i=0;$i<4;$i++) $pld['QF'][]   = (clone $qf_base)->modify('+' . ($i < 2 ? 0 : 1) . ' days')->format('Y-m-d') . ($i % 2 === 0 ? 'T16:15:00+00:00' : 'T20:15:00+00:00');
+    for ($i=0;$i<4;$i++) $pld['QF'][]   = $qf_base->format('Y-m-d') . ($i % 2 === 0 ? 'T16:15:00+00:00' : 'T20:15:00+00:00');
     for ($i=0;$i<2;$i++) $pld['SF'][]   = $sf_base->format('Y-m-d') . ($i === 0 ? 'T16:15:00+00:00' : 'T20:15:00+00:00');
     $pld['BRONZE'][] = $fin_base->format('Y-m-d') . 'T16:15:00+00:00';
     $pld['GOLD'][]   = $fin_base->format('Y-m-d') . 'T20:15:00+00:00';
@@ -167,7 +167,8 @@ function gen_tips_for_phase(PDO $pdo, string $phase, array $users, array $sc_cfg
 
 // ── ACTION: qf ───────────────────────────────────────────────────────────────
 if ($action === 'qf') {
-    $start  = (new DateTime('now UTC'))->modify('+2 hours');
+    // Dnes, ~1 hod po aktuálnom čase, 2h rozostupy
+    $start  = (new DateTime('now UTC'))->modify('+1 hour');
     $qf_ids = $pdo->query("SELECT id FROM iihf2026.games WHERE phase='QF' ORDER BY game_number")->fetchAll(PDO::FETCH_COLUMN);
     foreach ($qf_ids as $i => $gid) {
         $dt = (clone $start)->modify('+' . ($i * 2) . ' hours');
@@ -179,10 +180,11 @@ if ($action === 'qf') {
 
 // ── ACTION: sf ───────────────────────────────────────────────────────────────
 if ($action === 'sf') {
-    $last_qf  = $pdo->query("SELECT MAX(starts_at) FROM iihf2026.games WHERE phase='QF'")->fetchColumn();
-    $last_day = $last_qf ? (new DateTime($last_qf))->format('Y-m-d') : null;
-    $start    = playoff_start($last_day);
-    $sf_ids   = $pdo->query("SELECT id FROM iihf2026.games WHERE phase='SF' ORDER BY game_number")->fetchAll(PDO::FETCH_COLUMN);
+    // Nasledujúci deň, rovnaký čas ako now+1h, 2h rozostupy
+    $base  = (new DateTime('now UTC'))->modify('+1 hour');
+    $start = (new DateTime('today UTC'))->modify('+1 day');
+    $start->setTime((int)$base->format('H'), (int)$base->format('i'));
+    $sf_ids = $pdo->query("SELECT id FROM iihf2026.games WHERE phase='SF' ORDER BY game_number")->fetchAll(PDO::FETCH_COLUMN);
     foreach ($sf_ids as $i => $gid) {
         $dt = (clone $start)->modify('+' . ($i * 2) . ' hours');
         $pdo->prepare("UPDATE iihf2026.games SET starts_at=? WHERE id=?")->execute([$dt->format('Y-m-d H:i:sP'), $gid]);
@@ -193,10 +195,11 @@ if ($action === 'sf') {
 
 // ── ACTION: final ─────────────────────────────────────────────────────────────
 if ($action === 'final') {
-    $last_sf  = $pdo->query("SELECT MAX(starts_at) FROM iihf2026.games WHERE phase='SF'")->fetchColumn();
-    $last_day = $last_sf ? (new DateTime($last_sf))->format('Y-m-d') : null;
-    $start    = playoff_start($last_day);
-    $fin_ids  = $pdo->query("SELECT id,phase FROM iihf2026.games WHERE phase IN ('BRONZE','GOLD') ORDER BY game_number")->fetchAll();
+    // Pozajtra, rovnaký čas ako now+1h, 2h rozostupy
+    $base  = (new DateTime('now UTC'))->modify('+1 hour');
+    $start = (new DateTime('today UTC'))->modify('+2 days');
+    $start->setTime((int)$base->format('H'), (int)$base->format('i'));
+    $fin_ids = $pdo->query("SELECT id,phase FROM iihf2026.games WHERE phase IN ('BRONZE','GOLD') ORDER BY game_number")->fetchAll();
     foreach ($fin_ids as $i => $g) {
         $dt = (clone $start)->modify('+' . ($i * 2) . ' hours');
         $pdo->prepare("UPDATE iihf2026.games SET starts_at=? WHERE id=?")->execute([$dt->format('Y-m-d H:i:sP'), $g['id']]);

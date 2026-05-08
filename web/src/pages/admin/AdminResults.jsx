@@ -54,6 +54,7 @@ function TipsPanel({ gameId }) {
                     <th>Hráč</th>
                     <th>Tip</th>
                     <th>Body</th>
+                    <th>Čas tipu</th>
                 </tr>
             </thead>
             <tbody>
@@ -67,6 +68,7 @@ function TipsPanel({ gameId }) {
                         </td>
                         <td className={styles.tipScore}>{t.tip1 != null ? `${t.tip1}:${t.tip2}` : '—'}</td>
                         <td className={styles.tipPts}>{t.points != null ? `+${t.points}b` : '—'}</td>
+                        <td className={styles.tipTime}>{t.updated_at ? new Date(t.updated_at).toLocaleString('sk-SK') : '—'}</td>
                     </tr>
                 ))}
             </tbody>

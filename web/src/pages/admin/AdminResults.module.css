@@ -138,3 +138,4 @@
 }
 .tipScore { font-weight: 700; color: #222; }
 .tipPts   { color: #28a745; font-weight: 600; }
+.tipTime  { color: #888; font-size: 0.8rem; white-space: nowrap; }
