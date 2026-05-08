@@ -25,7 +25,7 @@ function TipInput({ game, onSaved }) {
     const [saving, setSaving] = useState(false);
     const [err, setErr] = useState('');
 
-    const canTip = game.status === 'scheduled' && new Date() < new Date(new Date(game.starts_at).getTime() - 5 * 60000);
+    const canTip = game.status === 'scheduled' && game.team1 && game.team2 && new Date() < new Date(new Date(game.starts_at).getTime() - 5 * 60000);
 
     const save = async () => {
         if (v1 === '' || v2 === '') { setErr('Zadaj oba skóre'); return; }

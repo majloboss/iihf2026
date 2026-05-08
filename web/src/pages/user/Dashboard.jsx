@@ -168,7 +168,7 @@ function GameCard({ game, onTipClick, onGroupTipsClick }) {
     const finished  = game.status === 'finished';
     const live      = game.status === 'live';
     const scheduled = game.status === 'scheduled';
-    const canTip    = scheduled && new Date() < new Date(new Date(game.starts_at).getTime() - 5 * 60000);
+    const canTip    = scheduled && game.team1 && game.team2 && new Date() < new Date(new Date(game.starts_at).getTime() - 5 * 60000);
     const date      = new Date(game.starts_at);
     const timeStr   = date.toLocaleString('sk-SK', { day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' });
 
