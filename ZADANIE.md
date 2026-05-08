@@ -32,9 +32,11 @@
 - Tipovanie — zadanie presného skóre, uzavretie 5 min pred začiatkom, editácia tipa
 - Tipy skupín — po začiatku zápasu viditeľné tipy členov všetkých skupín, v ktorých som
 
+### ✅ Hotovo (nedávno doplnené)
+- Admin — priradenie tímov do play-off zápasov — manuálne cez Admin → Zápasy (úprava team1/team2 pre hry 57–64)
+
 ### 🔲 TODO (nie je implementované)
 - Dashboard — najbližšie zápasy, posledné výsledky, skrátené poradie
-- Admin — manuálne priradenie tímov do play-off zápasov (QF, SF, Bronz, Finále)
 - Mobilná optimalizácia — responzívne zobrazenie všetkých stránok na mobile bez horizontálneho scrollovania
 - Notifikácie — push (Web + FCM) + email
 - Admin — nastavenia bodovacieho systému

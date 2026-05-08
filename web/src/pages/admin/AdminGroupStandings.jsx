@@ -102,7 +102,9 @@ export default function AdminGroupStandings() {
         try {
             const teams = data[phase] || [];
             for (let i = 0; i < teams.length; i++) {
-                await updateGroupStanding({ phase, team: teams[i].team, rank: i + 1, finalized: true });
+                const t = teams[i];
+                await updateGroupStanding({ phase, team: t.team, rank: i + 1, finalized: true,
+                    gp: t.gp, w: t.w, d: t.d, l: t.l, gf: t.gf, ga: t.ga, pts: t.pts });
             }
             // Ihneď zakáž šípky — nečakaj na load()
             setData(prev => ({
