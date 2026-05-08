@@ -13,8 +13,13 @@ export const setUserPassword = (id, new_password) => apiFetch('v1/admin/user-pas
 export const deleteUser    = (id) => apiFetch('v1/admin/user-delete', {
     method: 'POST', body: JSON.stringify({ id })
 });
-export const getInvites   = () => apiFetch('v1/admin/invites');
-export const createInvite = () => apiFetch('v1/admin/invites', { method: 'POST' });
+export const getInvites        = () => apiFetch('v1/admin/invites');
+export const createInvite      = (sent_to) => apiFetch('v1/admin/invites', {
+    method: 'POST', body: JSON.stringify({ sent_to })
+});
+export const updateInviteSentTo = (id, sent_to) => apiFetch('v1/admin/invites', {
+    method: 'PUT', body: JSON.stringify({ id, sent_to })
+});
 export const updateGame      = (game_id, data) => apiFetch('v1/admin/game-update', {
     method: 'POST', body: JSON.stringify({ game_id, ...data })
 });

@@ -112,6 +112,13 @@
 
 .unused { color: #aaa; font-style: italic; }
 
+.inlineInput {
+    padding: 4px 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
+
 .actions { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
 
 .btnSmallWarn {
