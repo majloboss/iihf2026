@@ -56,21 +56,25 @@ export default function UserLayout() {
                 <Outlet />
             </main>
             <nav className={styles.bottomNav}>
-                <NavLink to="/dashboard" className={({ isActive }) => isActive ? styles.active : ''}>
-                    <span className={styles.bottomNavIcon}>🏠</span>Prehľad
-                </NavLink>
-                <NavLink to="/games"     className={({ isActive }) => isActive ? styles.active : ''}>
-                    <span className={styles.bottomNavIcon}>🏒</span>Zápasy
-                </NavLink>
-                <NavLink to="/tabulky"   className={({ isActive }) => isActive ? styles.active : ''}>
-                    <span className={styles.bottomNavIcon}>📊</span>Tabuľky
-                </NavLink>
-                <NavLink to="/standings" className={({ isActive }) => isActive ? styles.active : ''}>
-                    <span className={styles.bottomNavIcon}>👥</span>Skupiny
-                </NavLink>
-                <NavLink to="/profile"   className={({ isActive }) => isActive ? styles.active : ''}>
-                    <span className={styles.bottomNavIcon}>👤</span>Profil
-                </NavLink>
+                <div className={styles.bottomNavRow}>
+                    <NavLink to="/dashboard" className={({ isActive }) => isActive ? styles.active : ''}>
+                        <span className={styles.bottomNavIcon}>🏠</span>Prehľad
+                    </NavLink>
+                    <NavLink to="/games"     className={({ isActive }) => isActive ? styles.active : ''}>
+                        <span className={styles.bottomNavIcon}>🏒</span>Zápasy
+                    </NavLink>
+                    <NavLink to="/tabulky"   className={({ isActive }) => isActive ? styles.active : ''}>
+                        <span className={styles.bottomNavIcon}>📊</span>Tabuľky
+                    </NavLink>
+                </div>
+                <div className={styles.bottomNavRow}>
+                    <NavLink to="/standings" className={({ isActive }) => isActive ? styles.active : ''}>
+                        <span className={styles.bottomNavIcon}>👥</span>Skupiny
+                    </NavLink>
+                    <NavLink to="/profile"   className={({ isActive }) => isActive ? styles.active : ''}>
+                        <span className={styles.bottomNavIcon}>👤</span>Profil
+                    </NavLink>
+                </div>
             </nav>
         </div>
     );
