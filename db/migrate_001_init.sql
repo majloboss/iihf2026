@@ -22,7 +22,7 @@ CREATE TABLE admin.users (
     username_changed  BOOLEAN      NOT NULL DEFAULT FALSE, -- username mozno zmenit iba raz
     first_name        VARCHAR(100),
     last_name         VARCHAR(100),
-    email             VARCHAR(150) UNIQUE,
+    email             VARCHAR(150),
     phone             VARCHAR(30),
     avatar            VARCHAR(255),                       -- nazov suboru avatara na serveri
     role              VARCHAR(10)  NOT NULL DEFAULT 'user', -- 'user' | 'admin'
