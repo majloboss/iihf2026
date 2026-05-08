@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getProfile, updateProfile, changePassword, deleteAccount, uploadAvatar } from '../api/profile';
+import Groups from './user/Groups';
 import styles from './Profile.module.css';
 
 export default function Profile() {
@@ -9,6 +10,7 @@ export default function Profile() {
     const navigate    = useNavigate();
     const fileRef     = useRef(null);
 
+    const [tab, setTab]       = useState('profil');
     const [form, setForm]     = useState({ first_name: '', last_name: '', email: '', phone: '' });
     const [avatar, setAvatar] = useState(null);
     const [pass, setPass]     = useState({ old_password: '', new_password: '', confirm: '' });
@@ -79,91 +81,98 @@ export default function Profile() {
     return (
         <div className={styles.wrap}>
             <div className={styles.card}>
-                <h2>Môj profil</h2>
+                <div className={styles.tabs}>
+                    <button className={tab === 'profil'  ? styles.tabActive : styles.tab} onClick={() => setTab('profil')}>👤 Profil</button>
+                    <button className={tab === 'skupiny' ? styles.tabActive : styles.tab} onClick={() => setTab('skupiny')}>👥 Skupiny</button>
+                </div>
 
-                <section className={styles.section}>
-                    <h3>Profilová fotka</h3>
-                    <div className={styles.avatarRow}>
-                        <div className={styles.avatarPreview}>
-                            {avatar
-                                ? <img src={avatar} alt="avatar" />
-                                : <span className={styles.avatarPlaceholder}>👤</span>
-                            }
+                {tab === 'skupiny' && <div className={styles.tabContent}><Groups /></div>}
+
+                {tab === 'profil' && <>
+                    <section className={styles.section}>
+                        <h3>Profilová fotka</h3>
+                        <div className={styles.avatarRow}>
+                            <div className={styles.avatarPreview}>
+                                {avatar
+                                    ? <img src={avatar} alt="avatar" />
+                                    : <span className={styles.avatarPlaceholder}>👤</span>
+                                }
+                            </div>
+                            <div>
+                                <button
+                                    className={styles.btn}
+                                    onClick={() => fileRef.current?.click()}
+                                    disabled={busy === 'avatar'}
+                                >
+                                    {busy === 'avatar' ? 'Nahrávam…' : 'Zmeniť fotku'}
+                                </button>
+                                <p className={styles.avatarHint}>JPG, PNG, WEBP alebo GIF · max 2 MB</p>
+                            </div>
+                            <input
+                                ref={fileRef}
+                                type="file"
+                                accept="image/jpeg,image/png,image/webp,image/gif"
+                                style={{ display: 'none' }}
+                                onChange={onAvatarPick}
+                            />
                         </div>
-                        <div>
-                            <button
-                                className={styles.btn}
-                                onClick={() => fileRef.current?.click()}
-                                disabled={busy === 'avatar'}
-                            >
-                                {busy === 'avatar' ? 'Nahrávam…' : 'Zmeniť fotku'}
-                            </button>
-                            <p className={styles.avatarHint}>JPG, PNG, WEBP alebo GIF · max 2 MB</p>
+                        {err.avatar && <p className={styles.error}>{err.avatar}</p>}
+                        {msg.avatar && <p className={styles.success}>{msg.avatar}</p>}
+                    </section>
+
+                    <section className={styles.section}>
+                        <h3>Osobné údaje</h3>
+                        <div className={styles.grid}>
+                            <label>Meno
+                                <input value={form.first_name} onChange={e => setF('first_name', e.target.value)} />
+                            </label>
+                            <label>Priezvisko
+                                <input value={form.last_name} onChange={e => setF('last_name', e.target.value)} />
+                            </label>
+                            <label>Email
+                                <input type="email" value={form.email} onChange={e => setF('email', e.target.value)} />
+                            </label>
+                            <label>Telefón
+                                <input value={form.phone} onChange={e => setF('phone', e.target.value)} />
+                            </label>
                         </div>
-                        <input
-                            ref={fileRef}
-                            type="file"
-                            accept="image/jpeg,image/png,image/webp,image/gif"
-                            style={{ display: 'none' }}
-                            onChange={onAvatarPick}
-                        />
-                    </div>
-                    {err.avatar && <p className={styles.error}>{err.avatar}</p>}
-                    {msg.avatar && <p className={styles.success}>{msg.avatar}</p>}
-                </section>
-
-                <section className={styles.section}>
-                    <h3>Osobné údaje</h3>
-                    <div className={styles.grid}>
-                        <label>Meno
-                            <input value={form.first_name} onChange={e => setF('first_name', e.target.value)} />
-                        </label>
-                        <label>Priezvisko
-                            <input value={form.last_name} onChange={e => setF('last_name', e.target.value)} />
-                        </label>
-                        <label>Email
-                            <input type="email" value={form.email} onChange={e => setF('email', e.target.value)} />
-                        </label>
-                        <label>Telefón
-                            <input value={form.phone} onChange={e => setF('phone', e.target.value)} />
-                        </label>
-                    </div>
-                    {err.profile && <p className={styles.error}>{err.profile}</p>}
-                    {msg.profile && <p className={styles.success}>{msg.profile}</p>}
-                    <button className={styles.btn} onClick={saveProfile} disabled={busy === 'profile'}>
-                        {busy === 'profile' ? 'Ukladám…' : 'Uložiť'}
-                    </button>
-                </section>
-
-                <section className={styles.section}>
-                    <h3>Zmeniť heslo</h3>
-                    <label>Aktuálne heslo
-                        <input type="password" value={pass.old_password} onChange={e => setPas('old_password', e.target.value)} />
-                    </label>
-                    <label>Nové heslo
-                        <input type="password" value={pass.new_password} onChange={e => setPas('new_password', e.target.value)} />
-                    </label>
-                    <label>Potvrdiť nové heslo
-                        <input type="password" value={pass.confirm} onChange={e => setPas('confirm', e.target.value)} />
-                    </label>
-                    {err.pass && <p className={styles.error}>{err.pass}</p>}
-                    {msg.pass && <p className={styles.success}>{msg.pass}</p>}
-                    <button className={styles.btn} onClick={savePassword} disabled={busy === 'pass'}>
-                        {busy === 'pass' ? 'Mením…' : 'Zmeniť heslo'}
-                    </button>
-                </section>
-
-                <section className={styles.sectionDanger}>
-                    <h3>Zmazať účet</h3>
-                    <p>Pre potvrdenie zadaj svoje heslo:</p>
-                    <div className={styles.row}>
-                        <input type="password" value={delPass} onChange={e => setDelPass(e.target.value)} placeholder="Heslo" />
-                        <button className={styles.btnDanger} onClick={doDelete} disabled={busy === 'del'}>
-                            Zmazať účet
+                        {err.profile && <p className={styles.error}>{err.profile}</p>}
+                        {msg.profile && <p className={styles.success}>{msg.profile}</p>}
+                        <button className={styles.btn} onClick={saveProfile} disabled={busy === 'profile'}>
+                            {busy === 'profile' ? 'Ukladám…' : 'Uložiť'}
                         </button>
-                    </div>
-                    {err.del && <p className={styles.error}>{err.del}</p>}
-                </section>
+                    </section>
+
+                    <section className={styles.section}>
+                        <h3>Zmeniť heslo</h3>
+                        <label>Aktuálne heslo
+                            <input type="password" value={pass.old_password} onChange={e => setPas('old_password', e.target.value)} />
+                        </label>
+                        <label>Nové heslo
+                            <input type="password" value={pass.new_password} onChange={e => setPas('new_password', e.target.value)} />
+                        </label>
+                        <label>Potvrdiť nové heslo
+                            <input type="password" value={pass.confirm} onChange={e => setPas('confirm', e.target.value)} />
+                        </label>
+                        {err.pass && <p className={styles.error}>{err.pass}</p>}
+                        {msg.pass && <p className={styles.success}>{msg.pass}</p>}
+                        <button className={styles.btn} onClick={savePassword} disabled={busy === 'pass'}>
+                            {busy === 'pass' ? 'Mením…' : 'Zmeniť heslo'}
+                        </button>
+                    </section>
+
+                    <section className={styles.sectionDanger}>
+                        <h3>Zmazať účet</h3>
+                        <p>Pre potvrdenie zadaj svoje heslo:</p>
+                        <div className={styles.row}>
+                            <input type="password" value={delPass} onChange={e => setDelPass(e.target.value)} placeholder="Heslo" />
+                            <button className={styles.btnDanger} onClick={doDelete} disabled={busy === 'del'}>
+                                Zmazať účet
+                            </button>
+                        </div>
+                        {err.del && <p className={styles.error}>{err.del}</p>}
+                    </section>
+                </>}
             </div>
         </div>
     );

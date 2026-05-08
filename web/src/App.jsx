@@ -12,8 +12,8 @@ import AdminStandings from './pages/admin/AdminStandings';
 import AdminGroupStandings from './pages/admin/AdminGroupStandings';
 import AdminTools from './pages/admin/AdminTools';
 import UserLayout from './pages/user/UserLayout';
-import Groups from './pages/user/Groups';
 import Games from './pages/user/Games';
+import GroupStandings from './pages/user/GroupStandings';
 import Standings from './pages/user/Standings';
 import Pravidla from './pages/user/Pravidla';
 
@@ -48,7 +48,8 @@ export default function App() {
 
                     <Route element={<PrivateUserRoute><UserLayout /></PrivateUserRoute>}>
                         <Route path="/games"     element={<Games />} />
-                        <Route path="/groups"    element={<Groups />} />
+                        <Route path="/tabulky"   element={<GroupStandings />} />
+                        <Route path="/groups"    element={<Navigate to="/profile" replace />} />
                         <Route path="/standings" element={<Standings />} />
                         <Route path="/profile"   element={<Profile />} />
                         <Route path="/pravidla"  element={<Pravidla />} />

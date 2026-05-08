@@ -8,11 +8,43 @@
     background: #fff;
     border-radius: 12px;
     box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-    padding: 32px;
-    width: 560px;
+    padding: 0;
+    width: 700px;
     max-width: 100%;
     height: fit-content;
 }
+
+.tabs {
+    display: flex;
+    border-bottom: 2px solid #f0f0f0;
+    padding: 0 24px;
+}
+
+.tab, .tabActive {
+    padding: 14px 20px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #aaa;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: color 0.15s;
+}
+
+.tabActive {
+    color: #1a3a6b;
+    border-bottom-color: #1a3a6b;
+}
+
+.tab:hover { color: #555; }
+
+.tabContent { padding: 20px 24px; }
+
+.card > section,
+.card > .section,
+.card > .sectionDanger { padding: 24px 32px; }
 
 .card h2 { color: #1a3a6b; margin-bottom: 24px; font-size: 1.4rem; }
 
