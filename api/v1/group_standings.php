@@ -18,7 +18,7 @@ if (!empty($stored)) {
             'gf'   => (int)$r['gf'], 'ga' => (int)$r['ga'],
             'gd'   => (int)$r['gf'] - (int)$r['ga'],
             'pts'  => (int)$r['pts'],
-            'finalized' => (bool)$r['finalized'],
+            'finalized' => $r['finalized'] === 't' || $r['finalized'] === true || $r['finalized'] === 1 || $r['finalized'] === '1',
         ];
     }
     json_ok($result);
