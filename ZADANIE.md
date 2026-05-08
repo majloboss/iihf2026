@@ -34,8 +34,9 @@
 
 ### 🔲 TODO (nie je implementované)
 - Dashboard — najbližšie zápasy, posledné výsledky, skrátené poradie
-- Notifikácie — push (Web + FCM) + email
 - Admin — manuálne priradenie tímov do play-off zápasov (QF, SF, Bronz, Finále)
+- Mobilná optimalizácia — responzívne zobrazenie všetkých stránok na mobile bez horizontálneho scrollovania
+- Notifikácie — push (Web + FCM) + email
 - Admin — nastavenia bodovacieho systému
 - Android aplikácia (Kotlin)
 
