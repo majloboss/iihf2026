@@ -57,9 +57,9 @@ if ($method === 'POST') {
         $stmt->execute([
             ':uid'   => $uid,
             ':type'  => $type,
-            ':en'    => (bool)($item['enabled']       ?? false),
-            ':email' => (bool)($item['email_enabled'] ?? false),
-            ':push'  => (bool)($item['push_enabled']  ?? false),
+            ':en'    => ($item['enabled']       ?? false) ? 'true' : 'false',
+            ':email' => ($item['email_enabled'] ?? false) ? 'true' : 'false',
+            ':push'  => ($item['push_enabled']  ?? false) ? 'true' : 'false',
             ':min'   => $TYPES[$type]['timed'] ? (int)($item['minutes_before'] ?? 30) : null,
         ]);
     }
