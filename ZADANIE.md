@@ -51,8 +51,14 @@
   - Automaticky aktualizuje skóre + stav zápasov + prepočíta body tipujúcich
   - Free plán API-Sports: aktivuje sa od 15.5.2026 keď turnaj začne ako "current" sezóna
 
+### 🟠 V develop (čaká na deploy do main)
+- Notifikácie — záložka v Profile, nastavenia per typ (email/push/čas); API endpoint + DB migrácia 009
+  - `untipped_game`, `game_start`, `result_entered`, `group_stage_closed`, `new_games_added`
+  - Push a email odosielanie zatiaľ nie je implementované — len UI nastavení
+
 ### 🔲 TODO (nie je implementované)
-- Notifikácie — push (Web + FCM) + email
+- Notifikácie — faktické odosielanie push (Web Push API) + email (SMTP)
+- Notifikácie — cron job na fellow.sk pre scheduled odosielanie
 - Admin — nastavenia bodovacieho systému
 - Android aplikácia (Kotlin)
 
@@ -354,7 +360,7 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 | updated_by | FK → users | |
 | updated_at | TIMESTAMP | |
 
-### admin.notification_settings 🔲
+### admin.notification_settings 🟠
 | Pole | Typ | Popis |
 |------|-----|-------|
 | user_id | FK → users | |
@@ -447,4 +453,4 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 
 ---
 
-*Posledná aktualizácia: 2026-05-08 (v1.97)*
+*Posledná aktualizácia: 2026-05-08 (v1.98)*
