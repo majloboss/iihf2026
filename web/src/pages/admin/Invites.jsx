@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getInvites, createInvite, updateInviteSentTo } from '../../api/admin';
+import UserModal from './UserModal';
 import styles from './Admin.module.css';
 
 function CopyBtn({ text }) {
@@ -60,6 +61,7 @@ export default function Invites() {
     const [generating, setGen]        = useState(false);
     const [sentTo,     setSentTo]     = useState('');
     const [error,      setError]      = useState('');
+    const [editUser,   setEditUser]   = useState(null);
 
     const load = () => getInvites()
         .then(setInvites)
@@ -127,12 +129,27 @@ export default function Invites() {
                                     ? new Date(i.used_at).toLocaleString('sk-SK')
                                     : <span className={styles.unused}>Nepoužitý</span>}
                                 </td>
-                                <td>{i.used_by_username || '—'}</td>
+                                <td>
+                                    {i.used_by_username
+                                        ? <span
+                                            onClick={() => setEditUser({ id: i.used_by_id, username: i.used_by_username, first_name: i.first_name, last_name: i.last_name, email: i.email, phone: i.phone })}
+                                            style={{ cursor: 'pointer', color: '#0d6efd', textDecoration: 'underline' }}
+                                          >{i.used_by_username}</span>
+                                        : '—'}
+                                </td>
                                 <td><CopyBtn text={i.link} /></td>
                             </tr>
                         ))}
                     </tbody>
                 </table>
+            )}
+
+            {editUser && (
+                <UserModal
+                    user={editUser}
+                    onClose={() => setEditUser(null)}
+                    onSaved={() => setEditUser(null)}
+                />
             )}
         </div>
     );

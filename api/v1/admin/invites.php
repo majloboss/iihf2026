@@ -8,7 +8,9 @@ $pdo  = db();
 if ($method === 'GET') {
     $rows = $pdo->query(
         "SELECT i.id, i.invite_token, i.sent_to, i.created_at, i.used_at,
-                u.username AS used_by_username
+                i.user_id AS used_by_id,
+                u.username AS used_by_username,
+                u.first_name, u.last_name, u.email, u.phone
          FROM admin.invites i
          LEFT JOIN admin.users u ON u.id = i.user_id
          ORDER BY i.created_at DESC"
