@@ -80,28 +80,51 @@ function ResultCard({ game: initGame }) {
     const [game,   setGame]   = useState(initGame);
     const [s1,     setS1]     = useState(initGame.score1 != null ? String(initGame.score1) : '');
     const [s2,     setS2]     = useState(initGame.score2 != null ? String(initGame.score2) : '');
+    const [f1,     setF1]     = useState(initGame.final1 != null ? String(initGame.final1) : '');
+    const [f2,     setF2]     = useState(initGame.final2 != null ? String(initGame.final2) : '');
     const [status, setStatus] = useState(initEff);
     const [saving, setSaving] = useState(false);
     const [saved,  setSaved]  = useState(false);
     const [err,    setErr]    = useState('');
     const [open,   setOpen]   = useState(false);
 
-    const started = initEff !== 'scheduled';
-    const canEdit = status === 'finished';
-    const dirty   = status !== effectiveStatus(game) ||
-                    (canEdit && (s1 !== (game.score1 != null ? String(game.score1) : '') ||
-                                 s2 !== (game.score2 != null ? String(game.score2) : '')));
+    const started   = initEff !== 'scheduled';
+    const canEdit   = status === 'finished';
+    const isDrawReg = canEdit && s1 !== '' && s2 !== '' && parseInt(s1) === parseInt(s2);
+
+    const handleS1 = (v) => {
+        setS1(v);
+        if (v !== '' && s2 !== '' && parseInt(v) === parseInt(s2)) {
+            if (f1 === '') setF1(v);
+            if (f2 === '') setF2(s2);
+        }
+    };
+    const handleS2 = (v) => {
+        setS2(v);
+        if (s1 !== '' && v !== '' && parseInt(s1) === parseInt(v)) {
+            if (f1 === '') setF1(s1);
+            if (f2 === '') setF2(v);
+        }
+    };
+
+    const dirty = status !== effectiveStatus(game) ||
+        (canEdit && (s1 !== (game.score1 != null ? String(game.score1) : '') ||
+                     s2 !== (game.score2 != null ? String(game.score2) : '') ||
+                     f1 !== (game.final1 != null ? String(game.final1) : '') ||
+                     f2 !== (game.final2 != null ? String(game.final2) : '')));
 
     const save = async () => {
         if (canEdit && (s1 === '' || s2 === '')) { setErr('Zadaj oba góly'); return; }
+        if (isDrawReg && (f1 === '' || f2 === '')) { setErr('Zadaj konečný výsledok (po predĺžení)'); return; }
+        if (isDrawReg && parseInt(f1) === parseInt(f2)) { setErr('Konečný výsledok nemôže byť remíza'); return; }
         setSaving(true); setErr(''); setSaved(false);
+        const ns1 = canEdit ? parseInt(s1) : null;
+        const ns2 = canEdit ? parseInt(s2) : null;
+        const nf1 = isDrawReg ? parseInt(f1) : null;
+        const nf2 = isDrawReg ? parseInt(f2) : null;
         try {
-            await updateGame(game.id, {
-                status,
-                score1: canEdit ? parseInt(s1) : null,
-                score2: canEdit ? parseInt(s2) : null,
-            });
-            setGame(g => ({ ...g, status, score1: canEdit ? parseInt(s1) : null, score2: canEdit ? parseInt(s2) : null }));
+            await updateGame(game.id, { status, score1: ns1, score2: ns2, final1: nf1, final2: nf2 });
+            setGame(g => ({ ...g, status, score1: ns1, score2: ns2, final1: nf1, final2: nf2 }));
             setSaved(true);
             setTimeout(() => setSaved(false), 2000);
             if (open) { setOpen(false); setTimeout(() => setOpen(true), 100); }
@@ -125,7 +148,11 @@ function ResultCard({ game: initGame }) {
                     {status === 'live'
                         ? <span className={gStyles.live}>LIVE</span>
                         : status === 'finished' && game.score1 != null
-                            ? <span className={styles.result}>{game.score1}:{game.score2}</span>
+                            ? <span className={styles.result}>
+                                {game.final1 != null && game.score1 === game.score2
+                                    ? <>{game.final1}:{game.final2} <span className={styles.resultOT}>(predĺženie)</span></>
+                                    : <>{game.score1}:{game.score2}</>}
+                              </span>
                             : 'vs'}
                 </div>
                 <TeamBlock code={game.team2} />
@@ -133,24 +160,38 @@ function ResultCard({ game: initGame }) {
 
             {/* Editácia stavu a skóre */}
             {started && (
-                <div className={styles.editRow}>
-                    <select value={status} onChange={e => setStatus(e.target.value)} className={styles.statusSel}
-                        style={{ color: status === 'finished' ? '#28a745' : status === 'live' ? '#dc3545' : '#888' }}>
-                        <option value="scheduled">Plánovaný</option>
-                        <option value="live">Prebieha</option>
-                        <option value="finished">Odohraný</option>
-                    </select>
-                    {canEdit && (
-                        <div className={styles.scoreBox}>
-                            <input type="number" min="0" max="30" value={s1} onChange={e => setS1(e.target.value)} className={styles.scoreIn} />
-                            <span className={styles.colon}>:</span>
-                            <input type="number" min="0" max="30" value={s2} onChange={e => setS2(e.target.value)} className={styles.scoreIn} />
+                <div className={styles.editBlock}>
+                    <div className={styles.editRow}>
+                        <select value={status} onChange={e => setStatus(e.target.value)} className={styles.statusSel}
+                            style={{ color: status === 'finished' ? '#28a745' : status === 'live' ? '#dc3545' : '#888' }}>
+                            <option value="scheduled">Plánovaný</option>
+                            <option value="live">Prebieha</option>
+                            <option value="finished">Odohraný</option>
+                        </select>
+                        {canEdit && (
+                            <div className={styles.scoreBox}>
+                                <input type="number" min="0" max="30" value={s1} onChange={e => handleS1(e.target.value)} className={styles.scoreIn} />
+                                <span className={styles.colon}>:</span>
+                                <input type="number" min="0" max="30" value={s2} onChange={e => handleS2(e.target.value)} className={styles.scoreIn} />
+                                <span className={styles.scoreLabel}>60 min</span>
+                            </div>
+                        )}
+                        <button className={styles.btnSave} onClick={save} disabled={saving || !dirty}>
+                            {saving ? '…' : saved ? '✓' : 'Uložiť'}
+                        </button>
+                        {err && <span className={styles.errMsg}>{err}</span>}
+                    </div>
+                    {isDrawReg && (
+                        <div className={styles.editRowOT}>
+                            <span className={styles.otLabel}>Predĺženie / SO</span>
+                            <div className={styles.scoreBox}>
+                                <input type="number" min="0" max="30" value={f1} onChange={e => setF1(e.target.value)} className={`${styles.scoreIn} ${styles.scoreInOT}`} />
+                                <span className={styles.colon}>:</span>
+                                <input type="number" min="0" max="30" value={f2} onChange={e => setF2(e.target.value)} className={`${styles.scoreIn} ${styles.scoreInOT}`} />
+                                <span className={styles.scoreLabel}>konečný</span>
+                            </div>
                         </div>
                     )}
-                    <button className={styles.btnSave} onClick={save} disabled={saving || !dirty}>
-                        {saving ? '…' : saved ? '✓' : 'Uložiť'}
-                    </button>
-                    {err && <span className={styles.errMsg}>{err}</span>}
                 </div>
             )}
 
