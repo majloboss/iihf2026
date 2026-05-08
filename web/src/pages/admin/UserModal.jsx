@@ -41,7 +41,13 @@ export default function UserModal({ user, onClose, onSaved }) {
         <div className={styles.overlay} onClick={e => e.target === e.currentTarget && onClose()}>
             <div className={styles.modal}>
                 <div className={styles.header}>
-                    <h3>Upraviť: {user.username}</h3>
+                    <div className={styles.headerLeft}>
+                        {user.avatar
+                            ? <img className={styles.avatar} src={user.avatar} alt={user.username} />
+                            : <div className={styles.avatarFallback}>{(user.username || '?')[0].toUpperCase()}</div>
+                        }
+                        <h3>Upraviť: {user.username}</h3>
+                    </div>
                     <button className={styles.close} onClick={onClose}>✕</button>
                 </div>
 
