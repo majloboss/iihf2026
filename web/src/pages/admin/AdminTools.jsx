@@ -14,6 +14,9 @@ export default function AdminTools() {
     const [results,  setResults]  = useState({});
     const [errors,   setErrors]   = useState({});
     const [confirm,  setConfirm]  = useState(null); // 'init' | 'reset' | null
+    const [syncRes,  setSyncRes]  = useState(null);
+    const [syncErr,  setSyncErr]  = useState('');
+    const [syncing,  setSyncing]  = useState(false);
 
     const run = async (action) => {
         setConfirm(null);
@@ -33,11 +36,39 @@ export default function AdminTools() {
         }
     };
 
-    const busy = running !== null;
+    const busy = running !== null || syncing;
+
+    const syncScores = async () => {
+        setSyncing(true); setSyncRes(null); setSyncErr('');
+        try {
+            const r = await apiFetch('v1/admin/sync-scores', { method: 'POST' });
+            setSyncRes(r);
+        } catch (e) { setSyncErr(e.message); }
+        finally { setSyncing(false); }
+    };
 
     return (
         <div style={{ maxWidth: 600, padding: 24 }}>
             <h2>Nástroje</h2>
+
+            {/* ── Sync výsledkov z API-Sports ─────────────────────────── */}
+            <div className={styles.card} style={{ padding: 20, marginTop: 16, borderLeft: '4px solid #1a3a6b' }}>
+                <h3 style={{ margin: '0 0 4px', fontSize: '1rem', color: '#1a3a6b' }}>🌐 Sync výsledkov (API-Sports)</h3>
+                <p style={{ margin: '0 0 12px', fontSize: '0.82rem', color: '#666' }}>
+                    Stiahne dnešné výsledky z API-Sports a aktualizuje skóre + stav zápasov.
+                    Dostupné od 15.5.2026 keď turnaj začne.
+                </p>
+                <button className={styles.btn} onClick={syncScores} disabled={busy}>
+                    {syncing ? 'Sťahujem…' : '↓ Sync výsledkov'}
+                </button>
+                {syncErr && <p style={{ color: '#dc3545', marginTop: 8, fontSize: '0.85rem' }}>{syncErr}</p>}
+                {syncRes && (
+                    <div style={{ background: '#f0f5ff', border: '1px solid #1a3a6b', borderRadius: 6, padding: '8px 12px', fontSize: '0.85rem', marginTop: 8 }}>
+                        <div>📅 Dátum: <strong>{syncRes.date}</strong> | Stiahnutých: <strong>{syncRes.fetched}</strong> | Aktualizovaných: <strong>{syncRes.updated}</strong></div>
+                        {syncRes.log?.map((l, i) => <div key={i} style={{ marginLeft: 8, marginTop: 2 }}>{l}</div>)}
+                    </div>
+                )}
+            </div>
 
             {/* ── Generovanie testovacích dát ─────────────────────────── */}
             <div className={styles.card} style={{ padding: 20, marginTop: 16 }}>
