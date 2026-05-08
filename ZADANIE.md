@@ -72,6 +72,13 @@ Boduje sa výsledok **riadnej hracej doby (60 minút)** — predĺženie ani sam
 - ✅ Web aplikácia — React + Vite PWA, hosted na fellow.sk
 - 🔲 Android aplikácia — Kotlin
 
+### Poznámka — časové pásma
+Systém je timezone-safe:
+- `starts_at` je uložený ako UTC timestamp
+- Uzávierka tipovania sa kontroluje na serveri (UTC porovnanie) — nezávisí od klienta
+- Frontend zobrazuje časy v **lokálnom čase browsera** (`toLocaleString`) — používateľ v inom časovom pásme uvidí správny lokálny čas zápasu
+- Prepínanie live/finished stavu funguje na absolútnych epoch timestampoch → timezone-safe
+
 ---
 
 ## Používatelia
