@@ -94,6 +94,41 @@ export default function Pravidla() {
                 <p>Hráči súťažia v skupinách priateľov. Poradie určuje celkový počet bodov zo všetkých tipovaných zápasov.</p>
                 <p>Pri rovnosti bodov rozhoduje počet tipov s plným počtom bodov (3 resp. 5), potom počet tipov s 2 bodmi, atď.</p>
             </div>
+
+            <div className={styles.card}>
+                <h3 className={styles.cardTitle}>Skupiny priateľov</h3>
+                <div className={styles.steps}>
+                    <div className={styles.step}>
+                        <span className={styles.stepNum}>1</span>
+                        <div>
+                            <strong>Vytvor skupinu</strong>
+                            <p>V sekcii Skupiny klikni na <em>Vytvoriť skupinu</em> a zadaj jej názov. Staneš sa zakladateľom.</p>
+                        </div>
+                    </div>
+                    <div className={styles.step}>
+                        <span className={styles.stepNum}>2</span>
+                        <div>
+                            <strong>Pozvi priateľov</strong>
+                            <p>Zdieľaj názov skupiny. Ostatní hráči si ju nájdu v zozname a požiadajú o vstup.</p>
+                        </div>
+                    </div>
+                    <div className={styles.step}>
+                        <span className={styles.stepNum}>3</span>
+                        <div>
+                            <strong>Schváľ žiadosti</strong>
+                            <p>Ako zakladateľ uvidíš čakajúce žiadosti a každú môžeš schváliť alebo odmietnuť.</p>
+                        </div>
+                    </div>
+                    <div className={styles.step}>
+                        <span className={styles.stepNum}>4</span>
+                        <div>
+                            <strong>Sleduj poradie</strong>
+                            <p>V sekcii Tabuľky vidíš poradie všetkých svojich skupín. Môžeš byť členom viacerých skupín naraz.</p>
+                        </div>
+                    </div>
+                </div>
+                <p className={styles.note}>Skupinu môže zrušiť iba jej zakladateľ. Kedykoľvek môžeš skupinu opustiť sám.</p>
+            </div>
         </div>
     );
 }

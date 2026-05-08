@@ -76,6 +76,47 @@
 .pts1 { font-weight: 700; color: #f59e0b; }
 .pts0 { font-weight: 700; color: #aaa; }
 
+.steps {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.step {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+}
+
+.stepNum {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #1a3a6b;
+    color: #fff;
+    font-size: 0.82rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1px;
+}
+
+.step > div strong {
+    display: block;
+    font-size: 0.9rem;
+    color: #1a3a6b;
+    margin-bottom: 2px;
+}
+
+.step > div p {
+    margin: 0 !important;
+    font-size: 0.85rem !important;
+    color: #555 !important;
+}
+
 .note {
     margin-top: 10px !important;
     font-size: 0.8rem !important;
