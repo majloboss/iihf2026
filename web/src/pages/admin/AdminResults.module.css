@@ -35,34 +35,21 @@
     flex-wrap: wrap;
 }
 
-.editRowOT {
+.otCheck {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-top: 8px;
-    padding: 7px 10px;
-    background: #fff8e1;
-    border: 1px dashed #ffc107;
-    border-radius: 6px;
-    flex-wrap: wrap;
-}
-
-.otLabel {
-    font-size: 0.78rem;
-    font-weight: 600;
-    color: #e67e00;
+    gap: 5px;
+    font-size: 0.82rem;
+    color: #555;
+    cursor: pointer;
     white-space: nowrap;
 }
 
-.scoreLabel {
-    font-size: 0.72rem;
-    color: #aaa;
-    white-space: nowrap;
-}
-
-.scoreInOT {
-    border-color: #ffc107;
-    background: #fffdf0;
+.otCheck input[type="checkbox"] {
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+    accent-color: #1a3a6b;
 }
 
 .resultOT {
