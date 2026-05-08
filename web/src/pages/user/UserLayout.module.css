@@ -30,9 +30,10 @@
 
 .brand img { width: 36px; }
 
-nav { display: flex; flex-direction: column; padding: 12px 0; }
+/* scoped to sidebar so it doesn't conflict with bottomNav */
+.sidebar nav { display: flex; flex-direction: column; padding: 12px 0; }
 
-nav a {
+.sidebar nav a {
     display: block;
     padding: 12px 20px;
     color: rgba(255,255,255,0.75);
@@ -41,8 +42,8 @@ nav a {
     transition: background 0.15s, color 0.15s;
 }
 
-nav a:hover { background: rgba(255,255,255,0.1); color: #fff; }
-nav a.active { background: rgba(255,255,255,0.18); color: #fff; font-weight: 600; }
+.sidebar nav a:hover { background: rgba(255,255,255,0.1); color: #fff; }
+.sidebar nav a.active { background: rgba(255,255,255,0.18); color: #fff; font-weight: 600; }
 
 .userInfo {
     display: flex;
@@ -102,12 +103,12 @@ nav a.active { background: rgba(255,255,255,0.18); color: #fff; font-weight: 600
     overflow-y: auto;
 }
 
-/* ── Mobile ── */
-@media (max-width: 700px) {
+/* ── Mobile (max 900px) ── */
+@media (max-width: 900px) {
     .sidebar { display: none; }
 
     .content {
-        padding: 16px 12px 120px; /* bottom padding for 2-row nav bar */
+        padding: 16px 12px 120px;
     }
 
     .bottomNav {
@@ -134,18 +135,18 @@ nav a.active { background: rgba(255,255,255,0.18); color: #fff; font-weight: 600
         font-size: 0.65rem;
         gap: 4px;
         transition: color 0.15s, background 0.15s;
+        box-sizing: border-box;
     }
 
-    /* 4th and 5th item → second row, 50% each */
     .bottomNav a:nth-child(4),
     .bottomNav a:nth-child(5) { width: 50%; }
 
-    .bottomNav a:hover { background: rgba(255,255,255,0.08); }
+    .bottomNav a:hover  { background: rgba(255,255,255,0.08); }
     .bottomNav a.active { color: #fff; background: rgba(255,255,255,0.15); }
 
     .bottomNavIcon { font-size: 1.4rem; line-height: 1; }
 }
 
-@media (min-width: 701px) {
+@media (min-width: 901px) {
     .bottomNav { display: none; }
 }
