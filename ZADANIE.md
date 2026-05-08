@@ -17,7 +17,7 @@
 - Admin — správa zápasov (úprava dátumu/času, tímov, miesta, stavu a skóre)
 - Admin — zadávanie výsledkov (dedikovaná obrazovka, inline, kartový layout, efektívny stav live/finished)
 - Admin — Skupiny — prehľad poradia všetkých skupín (tipovačkové poradie hráčov per skupina)
-- Admin — Nástroje — test setup (dátumy, výsledky, tipy len pre role=user)
+- Admin — Nástroje — test setup: 4 tlačidlá (Základná skupina / QF / SF / Finále+Bronz), každé generuje dátumy, výsledky a tipy pre danú fázu
 - Výpočet bodov — automaticky po zadaní výsledku adminom; aj hromadný prepočet
 - Tabuľky poradia tipujúcich — per skupina, breakdown 3-2-1-0, tiebreak
 - Skupinové tabuľky A, B — filter "Tabuľky" v menu Zápasy (user) aj Výsledky (admin)
@@ -418,4 +418,4 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 
 ---
 
-*Posledná aktualizácia: 2026-05-09 (v1.65)*
+*Posledná aktualizácia: 2026-05-09 (v1.66)*
