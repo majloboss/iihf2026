@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { getGames } from '../../api/games';
 import { saveTip, getGameTips } from '../../api/tips';
 import GroupStandings from './GroupStandings';
@@ -131,12 +131,22 @@ export default function Games() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [phase, setPhase] = useState('all');
+    const scrollRef = useRef(null);
 
     useEffect(() => {
         getGames()
             .then(data => { setGames(data); setLoading(false); })
             .catch(e => { setError(e.message || 'Chyba API'); setLoading(false); });
     }, []);
+
+    // Auto-scroll to today / nearest upcoming day after initial load
+    useEffect(() => {
+        if (!games.length || !scrollRef.current) return;
+        const timer = setTimeout(() => {
+            scrollRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 150);
+        return () => clearTimeout(timer);
+    }, [games]);
 
     const handleSaved = useCallback((gameId, t1, t2) => {
         setGames(prev => prev.map(g => g.id === gameId ? { ...g, tip1: t1, tip2: t2 } : g));
@@ -156,6 +166,13 @@ export default function Games() {
     if (loading) return <div className={styles.wrap}><p>Načítavam…</p></div>;
     if (error) return <div className={styles.wrap}><p style={{color:'red'}}>Chyba: {error}</p></div>;
 
+    // Find first day >= today for auto-scroll
+    const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
+    const targetDate = Object.keys(byDate).find(dk => {
+        const d = new Date(byDate[dk][0].starts_at); d.setHours(0, 0, 0, 0);
+        return d >= todayStart;
+    });
+
     return (
         <div className={styles.wrap}>
             <div className={styles.topBar}>
@@ -173,7 +190,7 @@ export default function Games() {
             {phase === 'standings' && <GroupStandings />}
 
             {phase !== 'standings' && Object.entries(byDate).map(([date, dayGames]) => (
-                <div key={date} className={styles.dayGroup}>
+                <div key={date} className={styles.dayGroup} ref={date === targetDate ? scrollRef : null}>
                     <div className={styles.dayHeader}>{date}</div>
                     {dayGames.map(g => {
                         const now = Date.now();
