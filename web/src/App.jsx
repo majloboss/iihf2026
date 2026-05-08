@@ -9,6 +9,7 @@ import Invites from './pages/admin/Invites';
 import AdminGames from './pages/admin/AdminGames';
 import AdminResults from './pages/admin/AdminResults';
 import AdminStandings from './pages/admin/AdminStandings';
+import AdminGroupStandings from './pages/admin/AdminGroupStandings';
 import AdminTools from './pages/admin/AdminTools';
 import UserLayout from './pages/user/UserLayout';
 import Groups from './pages/user/Groups';
@@ -58,8 +59,9 @@ export default function App() {
                         <Route path="users"   element={<Users />} />
                         <Route path="invites" element={<Invites />} />
                         <Route path="games"     element={<AdminGames />} />
-                        <Route path="results"   element={<AdminResults />} />
-                        <Route path="standings" element={<AdminStandings />} />
+                        <Route path="results"        element={<AdminResults />} />
+                        <Route path="group-standings" element={<AdminGroupStandings />} />
+                        <Route path="standings"      element={<AdminStandings />} />
                         <Route path="tools"     element={<AdminTools />} />
                     </Route>
 
