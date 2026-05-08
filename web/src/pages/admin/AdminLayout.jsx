@@ -28,6 +28,9 @@ export default function AdminLayout() {
                     <NavLink to="/admin/results" className={({ isActive }) => isActive ? styles.active : ''}>
                         ⚽ Výsledky
                     </NavLink>
+                    <NavLink to="/admin/group-standings" className={({ isActive }) => isActive ? styles.active : ''}>
+                        📊 Tabuľky
+                    </NavLink>
                     <NavLink to="/admin/standings" className={({ isActive }) => isActive ? styles.active : ''}>
                         🏆 Skupiny
                     </NavLink>

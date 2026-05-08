@@ -16,7 +16,7 @@
 - Admin — pozývacie linky (generovanie, zoznam, komu bol poslaný, Kopírovať URL per riadok, editácia poznámky)
 - Admin — správa zápasov (úprava dátumu/času, tímov, miesta, stavu a skóre)
 - Admin — zadávanie výsledkov (dedikovaná obrazovka, inline, kartový layout, efektívny stav live/finished)
-- Admin — Skupiny — prehľad poradia všetkých skupín (tipovačkové poradie hráčov per skupina)
+- Admin — Tabuľky — samostatná stránka v hlavnom menu; skupinové poradie, sync, finalizácia
 - Admin — Nástroje — test setup: 4 tlačidlá (Základná skupina / QF / SF / Finále+Bronz), každé generuje dátumy a tipy; playoff len pre hry kde admin nastavil tímy
 - Admin — Nástroje — Inicializácia systému: vymaže userov/tipy/linky/skupiny/tabuľky, zápasy zostanú
 - Admin — Nástroje — Spustenie súťaže: vymaže tipy/tabuľky, obnoví pôvodný rozvrh z PDF, useri/skupiny/linky zostávajú
@@ -431,4 +431,4 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 
 ---
 
-*Posledná aktualizácia: 2026-05-09 (v1.67)*
+*Posledná aktualizácia: 2026-05-08 (v1.81)*
