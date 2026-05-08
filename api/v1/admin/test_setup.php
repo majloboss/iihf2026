@@ -230,8 +230,6 @@ if ($action === 'init') {
 if ($action === 'reset') {
     $pdo->exec("DELETE FROM iihf2026.tips");
     $pdo->exec("DELETE FROM iihf2026.group_standings");
-    $pdo->exec("DELETE FROM admin.group_members");
-    $pdo->exec("DELETE FROM admin.friend_groups");
 
     // Pôvodný rozvrh z PDF (migration 002)
     $orig = [
