@@ -45,7 +45,7 @@ if ($method === 'POST') {
         ON CONFLICT (phase, team) DO UPDATE SET
             rank=EXCLUDED.rank, gp=EXCLUDED.gp, w=EXCLUDED.w, d=EXCLUDED.d,
             l=EXCLUDED.l, gf=EXCLUDED.gf, ga=EXCLUDED.ga, pts=EXCLUDED.pts,
-            finalized=FALSE, updated_at=NOW()
+            finalized=iihf2026.group_standings.finalized, updated_at=NOW()
     ");
 
     foreach (['A', 'B'] as $ph) {
@@ -67,18 +67,30 @@ if ($method === 'POST') {
     json_ok(['synced' => true]);
 
 } elseif ($method === 'PUT') {
-    // Only rank and finalized flag can be changed — stats are always from computed results
+    // UPSERT — funguje aj keď riadok ešte neexistuje (nebola spustená sync)
     $body = json_decode(file_get_contents('php://input'), true);
     if (!isset($body['phase'], $body['team'])) json_error('Missing phase/team', 400);
 
-    $sets = []; $params = ['phase'=>$body['phase'], 'team'=>$body['team']];
-    if (isset($body['rank']))      { $sets[] = "rank=:rank";           $params['rank']      = (int)$body['rank']; }
-    if (isset($body['finalized'])) { $sets[] = "finalized=:finalized"; $params['finalized'] = (bool)$body['finalized']; }
-    if (empty($sets)) json_error('Nothing to update', 400);
-
-    $sets[] = "updated_at=NOW()";
-    $pdo->prepare("UPDATE iihf2026.group_standings SET " . implode(',', $sets) . " WHERE phase=:phase AND team=:team")
-        ->execute($params);
+    $pdo->prepare("
+        INSERT INTO iihf2026.group_standings (phase, team, rank, gp, w, d, l, gf, ga, pts, finalized, updated_at)
+        VALUES (:phase,:team,:rank,:gp,:w,:d,:l,:gf,:ga,:pts,:finalized,NOW())
+        ON CONFLICT (phase, team) DO UPDATE SET
+            rank=EXCLUDED.rank, gp=EXCLUDED.gp, w=EXCLUDED.w, d=EXCLUDED.d,
+            l=EXCLUDED.l, gf=EXCLUDED.gf, ga=EXCLUDED.ga, pts=EXCLUDED.pts,
+            finalized=EXCLUDED.finalized, updated_at=NOW()
+    ")->execute([
+        'phase'     => $body['phase'],
+        'team'      => $body['team'],
+        'rank'      => (int)($body['rank'] ?? 1),
+        'gp'        => (int)($body['gp']   ?? 0),
+        'w'         => (int)($body['w']    ?? 0),
+        'd'         => (int)($body['d']    ?? 0),
+        'l'         => (int)($body['l']    ?? 0),
+        'gf'        => (int)($body['gf']   ?? 0),
+        'ga'        => (int)($body['ga']   ?? 0),
+        'pts'       => (int)($body['pts']  ?? 0),
+        'finalized' => (bool)($body['finalized'] ?? false),
+    ]);
 
     json_ok(['updated' => true]);
 
