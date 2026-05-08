@@ -135,7 +135,16 @@ export default function Games() {
 
     useEffect(() => {
         getGames()
-            .then(data => { setGames(data); setLoading(false); })
+            .then(data => {
+                setGames(data);
+                setLoading(false);
+                // Auto-select active phase: live first, then nearest upcoming, else 'all'
+                const live = data.find(g => g.status === 'live');
+                if (live) { setPhase(live.phase); return; }
+                const now = Date.now();
+                const next = data.find(g => g.status === 'scheduled' && new Date(g.starts_at).getTime() > now);
+                if (next) setPhase(next.phase);
+            })
             .catch(e => { setError(e.message || 'Chyba API'); setLoading(false); });
     }, []);
 
