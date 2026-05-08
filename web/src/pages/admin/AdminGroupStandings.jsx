@@ -104,6 +104,11 @@ export default function AdminGroupStandings() {
             for (let i = 0; i < teams.length; i++) {
                 await updateGroupStanding({ phase, team: teams[i].team, rank: i + 1, finalized: true });
             }
+            // Ihneď zakáž šípky — nečakaj na load()
+            setData(prev => ({
+                ...prev,
+                [phase]: (prev[phase] || []).map((t, i) => ({ ...t, rank: i + 1, finalized: true })),
+            }));
             setMsg(`✓ Skupina ${phase} finalizovaná`);
             load();
         } catch (e) { setMsg('Chyba: ' + e.message); }
