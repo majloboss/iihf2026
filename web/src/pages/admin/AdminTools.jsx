@@ -61,8 +61,8 @@ export default function AdminTools() {
             <div className={styles.card} style={{ padding: 20, marginTop: 12, borderLeft: '4px solid #28a745' }}>
                 <h3 style={{ margin: '0 0 4px', fontSize: '1rem', color: '#28a745' }}>▶ Spustenie súťaže</h3>
                 <p style={{ margin: '0 0 12px', fontSize: '0.82rem', color: '#666' }}>
-                    Vymaže <strong>tipy, skupiny a tabuľky</strong>, obnoví pôvodný rozvrh zápasov z PDF.
-                    Useri a pozývacie linky zostávajú. <strong>Nezvratné!</strong>
+                    Vymaže <strong>tipy a tabuľky</strong>, obnoví pôvodný rozvrh zápasov z PDF.
+                    Useri, skupiny a pozývacie linky zostávajú. <strong>Nezvratné!</strong>
                 </p>
                 {confirm === 'reset'
                     ? <ConfirmInline
