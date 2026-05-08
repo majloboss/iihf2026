@@ -26,14 +26,14 @@ export default function UserLayout() {
                     <NavLink to="/games"     className={({ isActive }) => isActive ? styles.active : ''}>
                         🏒 Zápasy
                     </NavLink>
-                    <NavLink to="/groups"    className={({ isActive }) => isActive ? styles.active : ''}>
-                        👥 Skupiny
-                    </NavLink>
                     <NavLink to="/standings" className={({ isActive }) => isActive ? styles.active : ''}>
                         🏆 Tabuľky
                     </NavLink>
                     <NavLink to="/profile"   className={({ isActive }) => isActive ? styles.active : ''}>
                         👤 Profil
+                    </NavLink>
+                    <NavLink to="/groups"    className={({ isActive }) => isActive ? styles.active : ''}>
+                        👥 Skupiny
                     </NavLink>
                 </nav>
                 {profile && (
