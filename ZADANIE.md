@@ -32,7 +32,6 @@
 
 ### 🔲 TODO (nie je implementované)
 - Dashboard — najbližšie zápasy, posledné výsledky, skrátené poradie
-- Zmena username (iba raz)
 - Notifikácie — push (Web + FCM) + email
 - Admin — generovanie play-off zápasov (po finalizácii skupinových tabuliek)
 - Admin — nastavenia bodovacieho systému
@@ -86,7 +85,6 @@ Boduje sa výsledok **riadnej hracej doby (60 minút)** — predĺženie ani sam
 ### Profil používateľa
 | Akcia | Podmienka | Stav |
 |-------|-----------|------|
-| Zmena username | iba raz | 🔲 |
 | Zmena hesla | kedykoľvek | ✅ |
 | Nahratie avatara (fotka) | kedykoľvek | ✅ |
 | Doplnenie / zmena mena, priezviska | kedykoľvek | ✅ |
