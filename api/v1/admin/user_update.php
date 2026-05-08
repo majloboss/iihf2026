@@ -9,6 +9,13 @@ if (!$id) json_error('Chýba id', 400);
 
 $pdo = db();
 
+// Exkluzívny admin (username='admin') je chránený pred zmenou roly a deaktiváciou
+$target = $pdo->prepare('SELECT username FROM admin.users WHERE id = ?');
+$target->execute([$id]);
+if (($target->fetchColumn() === 'admin') && (isset($body['role']) || isset($body['is_active']))) {
+    json_error('Exkluzívny admin nemôže byť zmenený', 403);
+}
+
 // Len povolené polia
 $sets = [];
 $params = [':id' => $id];

@@ -9,6 +9,11 @@ if (!$id) json_error('Chýba id', 400);
 
 if ($id === (int)$auth['user_id']) json_error('Nemôžeš zmazať sám seba', 403);
 
-db()->prepare('DELETE FROM admin.users WHERE id = ?')->execute([$id]);
+$pdo = db();
+$uname = $pdo->prepare('SELECT username FROM admin.users WHERE id = ?');
+$uname->execute([$id]);
+if ($uname->fetchColumn() === 'admin') json_error('Exkluzívny admin nemôže byť zmazaný', 403);
+
+$pdo->prepare('DELETE FROM admin.users WHERE id = ?')->execute([$id]);
 
 json_ok(['deleted' => true]);

@@ -59,8 +59,9 @@ export default function Users() {
                 </thead>
                 <tbody>
                     {users.map(u => {
-                        const busy = saving === u.id;
-                        const isMe = me?.user_id === u.id;
+                        const busy        = saving === u.id;
+                        const isMe        = me?.user_id === u.id;
+                        const isExclusive = u.username === 'admin';
                         return (
                             <tr key={u.id}>
                                 <td>{u.id}</td>
@@ -81,7 +82,8 @@ export default function Users() {
                                         onClick={() => setEditing(u)}
                                     >✏️ Upraviť</button>
 
-                                    {!isMe && (<>
+                                    {/* Zmena roly: nie pre exkluzívneho admina */}
+                                    {!isExclusive && (
                                         <button
                                             className={styles.btnSmall}
                                             disabled={busy}
@@ -89,6 +91,10 @@ export default function Users() {
                                         >
                                             {u.role === 'admin' ? '👤 User' : '🔑 Admin'}
                                         </button>
+                                    )}
+
+                                    {/* Deaktivovať/zmazať: nie pre seba ani exkluzívneho admina */}
+                                    {!isMe && !isExclusive && (<>
                                         <button
                                             className={u.is_active ? styles.btnSmallWarn : styles.btnSmall}
                                             disabled={busy}
