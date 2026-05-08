@@ -255,6 +255,62 @@
 .modalLoading { color: #aaa; text-align: center; padding: 20px; }
 .modalErr     { color: #c0392b; font-size: 0.85rem; padding: 10px 0; }
 
+/* Tip modal */
+.tipModalDate { font-size: 0.8rem; color: #888; margin: 0 0 16px; text-align: center; }
+.tipModalOk   { color: #28a745; font-weight: 700; text-align: center; padding: 20px 0; font-size: 1rem; }
+.tipModalErr  { color: #c0392b; font-size: 0.82rem; text-align: center; margin: 8px 0 0; }
+
+.tipModalForm { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+
+.tipModalInputs {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    justify-content: center;
+}
+
+.tipTeamLabel {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #1a3a6b;
+    min-width: 50px;
+}
+.tipTeamRight { flex-direction: row-reverse; }
+
+.tipInput {
+    width: 60px;
+    height: 52px;
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-align: center;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    outline: none;
+    color: #1a3a6b;
+}
+.tipInput:focus { border-color: #1a3a6b; }
+
+.tipSep { font-size: 1.4rem; font-weight: 700; color: #aaa; }
+
+.tipModalBtn {
+    padding: 12px 32px;
+    background: #1a3a6b;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    max-width: 260px;
+}
+.tipModalBtn:hover:not(:disabled) { background: #24519e; }
+.tipModalBtn:disabled { opacity: 0.6; cursor: not-allowed; }
+
 .tipsGroup { margin-bottom: 16px; }
 .tipsGroupName {
     font-size: 0.72rem;
