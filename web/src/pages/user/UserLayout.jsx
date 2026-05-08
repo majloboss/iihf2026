@@ -74,6 +74,9 @@ export default function UserLayout() {
                     <NavLink to="/profile"   className={({ isActive }) => isActive ? styles.active : ''}>
                         <span className={styles.bottomNavIcon}>👤</span>Profil
                     </NavLink>
+                    <NavLink to="/pravidla"  className={({ isActive }) => isActive ? styles.active : ''}>
+                        <span className={styles.bottomNavIcon}>📋</span>Pravidlá
+                    </NavLink>
                 </div>
             </nav>
         </div>
