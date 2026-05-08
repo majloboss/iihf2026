@@ -7,59 +7,43 @@
 ## STAV IMPLEMENTÁCIE — PREHĽAD
 
 ### ✅ V PRODUKCII (main / iihf2026.fellow.sk)
-- Prihlásenie (JWT)
-- Registrácia cez pozývací link (admin generuje, hráč aktivuje)
-- Môj profil — avatar, meno, priezvisko, email, telefón, zmena hesla, zmazanie účtu
+
+**Používateľská časť**
+- Prihlásenie (JWT) + registrácia cez pozývací link
+- Profil — avatar, meno, priezvisko, email, telefón, zmena hesla, zmazanie účtu
+- Profil — záložky: Profil / Skupiny / Notifikácie
 - Skupiny — vytvorenie, vstup (pending→schválenie), odchod, zrušenie, filter Len moje/Všetky
-- Skupiny — rozbalenie skupiny → zoznam členov, klik na člena → detail (avatar, meno, email, tel)
-- Admin — správa používateľov (zoznam, aktivácia, rola, edit, heslo, zmazanie)
-- Admin — pozývacie linky (generovanie, zoznam, komu bol poslaný, Kopírovať URL per riadok, editácia poznámky)
-- Admin — správa zápasov (úprava dátumu/času, tímov, miesta, stavu a skóre)
-- Admin — zadávanie výsledkov (dedikovaná obrazovka, inline, kartový layout, efektívny stav live/finished)
-- Admin — Tabuľky — samostatná stránka v hlavnom menu; skupinové poradie, sync, finalizácia
-- Admin — Nástroje — test setup: 4 tlačidlá (Základná skupina / QF / SF / Finále+Bronz), každé generuje dátumy a tipy; playoff len pre hry kde admin nastavil tímy
-- Admin — Nástroje — Inicializácia systému: vymaže userov/tipy/linky/skupiny/tabuľky, zápasy zostanú
-- Admin — Nástroje — Spustenie súťaže: vymaže tipy/tabuľky, obnoví pôvodný rozvrh z PDF, useri/skupiny/linky zostávajú
-- Výpočet bodov — automaticky po zadaní výsledku adminom; aj hromadný prepočet
-- Tabuľky poradia tipujúcich — per skupina, breakdown 3-2-1-0, tiebreak
-- Skupinové tabuľky A, B — filter "Tabuľky" v menu Zápasy (user) aj Výsledky (admin)
-- Skupinové tabuľky — live výpočet z výsledkov; po skončení ZČ admin: Synchronizovať → upraviť poradie (len pri rovnosti bodov, ▲/▼) → Finalizovať
-- Skupinové tabuľky — po finalizácii sa ukladá do DB (group_standings), šípky sa zamknú
-- DB schéma — users, invites, friend_groups, group_members, teams, games, tips, scoring_config, group_standings
-- Deploy pipeline — GitHub Actions → FTP → fellow.sk (dev + prod)
-- PWA — favicon, title, manifest, offline SW
-- Zápasy — zoznam všetkých 64 zápasov, vlajky tímov, filter podľa fázy, grupovanie podľa dátumu
-- Tipovanie — zadanie presného skóre, uzavretie 5 min pred začiatkom, editácia tipa
-- Tipy skupín — po začiatku zápasu viditeľné tipy členov všetkých skupín, v ktorých som
-
-### ✅ Hotovo (nedávno doplnené)
-- Admin — priradenie tímov do play-off zápasov — manuálne cez Admin → Zápasy (úprava team1/team2 pre hry 57–64)
-- Dashboard — najbližšie zápasy (s tipom/bez tipu), posledné výsledky, poradie v skupinách
+- Skupiny — rozbalenie → zoznam členov s avatarmi, klik na člena → detail
+- Zápasy — zoznam 64 zápasov, vlajky, filter podľa fázy, grupovanie podľa dátumu
+- Zápasy — auto-scroll na dnešný deň, auto-výber aktívnej fázy (live → najbližší)
+- Tipovanie — presné skóre, uzavretie 5 min pred zápasom, editácia; TBD zápasy netipovateľné
+- Tipy skupín — po začiatku zápasu viditeľné tipy všetkých členov skupín
+- Tabuľky poradia — per skupina, breakdown 3-2-1-0, tiebreak
+- Skupinové tabuľky A/B — live výpočet + finalizácia adminom
+- Dashboard — najbližšie zápasy (s tipom/bez), posledné výsledky, skrátené poradie
 - Dashboard — klik na nadchádzajúci zápas → modal na zadanie/zmenu tipu
-- Dashboard — klik na live/finished zápas → modal s tipmi všetkých členov skupín
-- Dashboard — zápasy bez priradených tímov (TBD) nie sú tipovateľné
+- Dashboard — klik na live/finished → modal s tipmi členov skupín
+- Pravidlá — stránka s bodovacou tabuľkou a príkladmi
+- Notifikácie (nastavenia) — záložka v Profile; per typ: email/push/čas pred zápasom
 - Mobilná optimalizácia — bottom nav 2 riadky (3+3), sidebar skrytý pod 900px
-- Pravidlá — stránka s bodovacou tabuľkou a príkladmi skupiny aj play-off
-- Skupiny (Profil) — záložky Profil / Skupiny v obrazovke Profil
-- Skupinové tabuľky A/B — opravená finalizácia (UPSERT, zachovanie finalized pri sync, live fallback pre nefinalizované skupiny)
-- Zápasy — automatický výber aktívnej fázy pri otvorení (live → najbližší scheduled)
-- Zápasy — auto-scroll na dnešný / najbližší deň so zápasmi
+- PWA — manifest, offline SW, favicon
 
-### ✅ Hotovo (nedávno doplnené)
-- Admin — logovanie prihlásení (čas, user, rola, env main/develop, IP, zariadenie); Admin → Prihlásenia
-- Admin — Sync výsledkov z API-Sports (liga 111, IIHF WC, sezóna 2026); Admin → Nástroje → Sync výsledkov
-  - Automaticky aktualizuje skóre + stav zápasov + prepočíta body tipujúcich
-  - Free plán API-Sports: aktivuje sa od 15.5.2026 keď turnaj začne ako "current" sezóna
-
-### 🟠 V develop (čaká na deploy do main)
-- Notifikácie — záložka v Profile, nastavenia per typ (email/push/čas); API endpoint + DB migrácia 009
-  - `untipped_game`, `game_start`, `result_entered`, `group_stage_closed`, `new_games_added`
-  - Push a email odosielanie zatiaľ nie je implementované — len UI nastavení
+**Admin časť**
+- Správa používateľov — zoznam, aktivácia, rola, edit, heslo, zmazanie
+- Pozývacie linky — generovanie, zoznam, sent_to, kopírovanie URL
+- Správa zápasov — dátum/čas, tímy (vrátane play-off 57–64), miesto, stav, skóre
+- Zadávanie výsledkov — dedikovaná obrazovka `/admin/results`, inline, kartový layout
+- Skupinové tabuľky — sync, úprava poradia pri rovnosti bodov, finalizácia
+- Výpočet bodov — automaticky po výsledku + hromadný prepočet
+- Nástroje — generovanie test dát (skupina/QF/SF/Finále), Spustenie súťaže, Inicializácia
+- Prihlásenia — log všetkých prihlásení (čas, user, rola, env main/develop, IP, zariadenie)
+- Sync výsledkov — API-Sports (liga 111, sezóna 2026); aktualizuje skóre + stav + prepočíta body
+  - ⚠️ Free plán: aktivuje sa od 15.5.2026 keď turnaj začne
 
 ### 🔲 TODO (nie je implementované)
-- Notifikácie — faktické odosielanie push (Web Push API) + email (SMTP)
-- Notifikácie — cron job na fellow.sk pre scheduled odosielanie
-- Admin — nastavenia bodovacieho systému
+- Notifikácie — faktické odosielanie push (Web Push API) + email (SMTP fellow.sk)
+- Notifikácie — cron job na fellow.sk pre scheduled odosielanie (X min pred zápasom)
+- Admin — nastavenia bodovacieho systému (úprava scoring_config)
 - Android aplikácia (Kotlin)
 
 ---
@@ -387,21 +371,22 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 |-----------|-------|------|
 | **Prihlásenie** | Login formulár | ✅ |
 | **Registrácia** | Cez pozývací link (invite token) | ✅ |
-| **Môj profil** | Avatar, meno, email, telefón, zmena hesla, zmazanie účtu | ✅ |
-| **Skupiny** | Zoznam skupín, filter Len moje/Všetky, collapse/expand, detail člena | ✅ |
-| **Zápasy** | Zoznam všetkých zápasov, zadávanie tipov, výsledky | 🔲 |
-| **Detail zápasu** | Tip hráča, po uzavretí tipy všetkých, výsledok | 🔲 |
-| **Poradie** | Tabuľka poradia v skupinách + celkové poradie | 🔲 |
-| **Dashboard** | Najbližšie zápasy, posledné výsledky, skrátené poradie | 🔲 |
+| **Dashboard** | Najbližšie zápasy s tipom, posledné výsledky, skrátené poradie | ✅ |
+| **Zápasy** | 64 zápasov, filter fázy, tipovanie, skupinové tabuľky | ✅ |
+| **Tabuľky** | Poradie tipujúcich per skupina | ✅ |
+| **Môj profil** | Avatar, údaje, heslo, zmazanie; záložky Profil/Skupiny/Notifikácie | ✅ |
+| **Pravidlá** | Bodovacia tabuľka s príkladmi | ✅ |
 
 ### Obrazovky — admin
 | Obrazovka | Popis | Stav |
 |-----------|-------|------|
 | **Správa používateľov** | Zoznam, aktivácia, zmena roly, edit, heslo, zmazanie | ✅ |
-| **Pozývacie linky** | Generovanie a zobrazenie pozývacích linkov | ✅ |
+| **Pozývacie linky** | Generovanie, zoznam, sent_to, kopírovanie URL | ✅ |
 | **Zápasy** | Zoznam a úprava zápasov (dátum, čas, tímy, miesto) | ✅ |
-| **Zadanie výsledku** | Výsledok riadnej doby; stav mení admin manuálne | ✅ |
-| **Schválenie tabuľky** | Kontrola a schválenie po skupinovej fáze | 🔲 |
+| **Zadanie výsledku** | Inline zadávanie skóre + stavu; prepočet bodov | ✅ |
+| **Skupinové tabuľky** | Sync, úprava poradia, finalizácia | ✅ |
+| **Nástroje** | Test dáta, spustenie súťaže, inicializácia, sync API-Sports | ✅ |
+| **Prihlásenia** | Log prihlásení (čas, user, rola, env, IP, zariadenie) | ✅ |
 | **Nastavenia bodovanie** | Úprava scoring_config hodnôt | 🔲 |
 
 ### API endpointy
@@ -414,17 +399,32 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 | `v1/profile-avatar` | POST | Nahranie avatara | ✅ |
 | `v1/profile-password` | POST | Zmena hesla | ✅ |
 | `v1/profile-delete` | POST | Zmazanie účtu | ✅ |
+| `v1/notifications` | GET/POST | Nastavenia notifikácií per používateľ | ✅ |
 | `v1/groups` | GET/POST/DELETE | Zoznam, vytvorenie, zrušenie skupiny | ✅ |
 | `v1/group-join` | POST | Žiadosť o vstup do skupiny | ✅ |
 | `v1/group-leave` | POST | Opustenie skupiny | ✅ |
 | `v1/group-members` | GET/POST | Členovia skupiny, schválenie/odmietnutie | ✅ |
 | `v1/users` | GET | Zoznam hráčov / detail hráča | ✅ |
-| `v1/admin/users` | GET | Zoznam všetkých používateľov (admin) | ✅ |
+| `v1/games` | GET | Zoznam zápasov s tipmi | ✅ |
+| `v1/tips` | POST | Uloženie tipu | ✅ |
+| `v1/game-tips` | GET | Tipy členov skupín pre daný zápas | ✅ |
+| `v1/standings` | GET | Poradie tipujúcich | ✅ |
+| `v1/group-standings` | GET | Skupinové tabuľky A/B | ✅ |
+| `v1/admin/users` | GET | Zoznam všetkých používateľov | ✅ |
 | `v1/admin/user-update` | POST | Aktivácia/deaktivácia, zmena roly | ✅ |
 | `v1/admin/user-edit` | POST | Úprava údajov používateľa | ✅ |
 | `v1/admin/user-password` | POST | Zmena hesla používateľovi | ✅ |
 | `v1/admin/user-delete` | POST | Zmazanie používateľa | ✅ |
 | `v1/admin/invites` | GET/POST | Zoznam a generovanie invite linkov | ✅ |
+| `v1/admin/game-update` | POST | Úprava zápasu | ✅ |
+| `v1/admin/game-tips` | GET | Tipy pre zápas (admin) | ✅ |
+| `v1/admin/recalc-points` | POST | Hromadný prepočet bodov | ✅ |
+| `v1/admin/standings` | GET | Poradie (admin) | ✅ |
+| `v1/admin/group-standings` | GET/POST | Skupinové tabuľky — sync, úprava, finalizácia | ✅ |
+| `v1/admin/test-setup` | POST | Generovanie test dát | ✅ |
+| `v1/admin/run-migration` | POST | Spustenie DB migrácií | ✅ |
+| `v1/admin/login-logs` | GET | Log prihlásení | ✅ |
+| `v1/admin/sync-scores` | POST | Sync výsledkov z API-Sports | ✅ |
 
 ---
 
@@ -453,4 +453,4 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 
 ---
 
-*Posledná aktualizácia: 2026-05-08 (v1.98)*
+*Posledná aktualizácia: 2026-05-08 (v1.99)*
