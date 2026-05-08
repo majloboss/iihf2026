@@ -27,7 +27,7 @@ export default function UserLayout() {
                         🏒 Zápasy
                     </NavLink>
                     <NavLink to="/standings" className={({ isActive }) => isActive ? styles.active : ''}>
-                        🏆 Tabuľky
+                        👥 Skupiny
                     </NavLink>
                     <NavLink to="/profile"   className={({ isActive }) => isActive ? styles.active : ''}>
                         👤 Profil
