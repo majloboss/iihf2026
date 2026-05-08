@@ -18,7 +18,8 @@
 - Admin — zadávanie výsledkov (dedikovaná obrazovka, inline, kartový layout, efektívny stav live/finished)
 - Admin — Skupiny — prehľad poradia všetkých skupín (tipovačkové poradie hráčov per skupina)
 - Admin — Nástroje — test setup: 4 tlačidlá (Základná skupina / QF / SF / Finále+Bronz), každé generuje dátumy a tipy; playoff len pre hry kde admin nastavil tímy
-- Admin — Nástroje — Spustenie súťaže: vymaže userov/tipy/linky/skupiny, obnoví pôvodný rozvrh z PDF
+- Admin — Nástroje — Inicializácia systému: vymaže userov/tipy/linky/skupiny/tabuľky, zápasy zostanú
+- Admin — Nástroje — Spustenie súťaže: vymaže tipy/skupiny/tabuľky, obnoví pôvodný rozvrh z PDF, useri zostávajú
 - Výpočet bodov — automaticky po zadaní výsledku adminom; aj hromadný prepočet
 - Tabuľky poradia tipujúcich — per skupina, breakdown 3-2-1-0, tiebreak
 - Skupinové tabuľky A, B — filter "Tabuľky" v menu Zápasy (user) aj Výsledky (admin)
