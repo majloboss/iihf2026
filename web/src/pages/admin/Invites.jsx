@@ -132,7 +132,7 @@ export default function Invites() {
                                 <td>
                                     {i.used_by_username
                                         ? <span
-                                            onClick={() => setEditUser({ id: i.used_by_id, username: i.used_by_username, first_name: i.first_name, last_name: i.last_name, email: i.email, phone: i.phone })}
+                                            onClick={() => setEditUser({ id: i.used_by_id, username: i.used_by_username, first_name: i.first_name, last_name: i.last_name, email: i.email, phone: i.phone, avatar: i.avatar })}
                                             style={{ cursor: 'pointer', color: '#0d6efd', textDecoration: 'underline' }}
                                           >{i.used_by_username}</span>
                                         : '—'}
