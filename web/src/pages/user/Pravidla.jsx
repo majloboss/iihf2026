@@ -90,6 +90,47 @@ export default function Pravidla() {
             </div>
 
             <div className={styles.card}>
+                <h3 className={styles.cardTitle}>Príklady (play-off)</h3>
+                <p className={styles.exampleDesc}>Skutočný výsledok: <strong>CAN 2:1 SVK</strong></p>
+                <table className={styles.table}>
+                    <thead>
+                        <tr>
+                            <th>Tip</th>
+                            <th className={styles.center}>Body</th>
+                            <th>Dôvod</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>CAN 2:1 SVK</td>
+                            <td className={styles.center}><span className={styles.pts3}>5</span></td>
+                            <td>víťaz ✓, góly CAN ✓, góly SVK ✓</td>
+                        </tr>
+                        <tr>
+                            <td>CAN 2:0 SVK</td>
+                            <td className={styles.center}><span className={styles.pts2}>4</span></td>
+                            <td>víťaz ✓, góly CAN ✓, góly SVK ✗</td>
+                        </tr>
+                        <tr>
+                            <td>CAN 3:2 SVK</td>
+                            <td className={styles.center}><span className={styles.pts1}>3</span></td>
+                            <td>víťaz ✓, góly CAN ✗, góly SVK ✗</td>
+                        </tr>
+                        <tr>
+                            <td>SVK 2:1 CAN</td>
+                            <td className={styles.center}><span className={styles.pts1}>1</span></td>
+                            <td>víťaz ✗, góly CAN ✗, góly SVK ✓</td>
+                        </tr>
+                        <tr>
+                            <td>SVK 3:0 CAN</td>
+                            <td className={styles.center}><span className={styles.pts0}>0</span></td>
+                            <td>víťaz ✗, góly CAN ✗, góly SVK ✗</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div className={styles.card}>
                 <h3 className={styles.cardTitle}>Poradie v skupinách</h3>
                 <p>Hráči súťažia v skupinách priateľov. Poradie určuje celkový počet bodov zo všetkých tipovaných zápasov.</p>
                 <p>Pri rovnosti bodov rozhoduje počet tipov s plným počtom bodov (3 resp. 5), potom počet tipov s 2 bodmi, atď.</p>
