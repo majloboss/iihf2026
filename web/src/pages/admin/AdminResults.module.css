@@ -22,14 +22,40 @@
     color: #28a745;
 }
 
+.editBlock {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #f0f0f0;
+}
+
 .editRow {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-top: 10px;
-    padding-top: 10px;
-    border-top: 1px solid #f0f0f0;
     flex-wrap: wrap;
+}
+
+.otCheck {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.82rem;
+    color: #555;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.otCheck input[type="checkbox"] {
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+    accent-color: #1a3a6b;
+}
+
+.resultOT {
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: #888;
 }
 
 .statusSel {

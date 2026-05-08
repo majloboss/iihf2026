@@ -44,7 +44,7 @@ if (array_key_exists('status', $body)) {
     $params[':status'] = $body['status'];
 }
 
-foreach (['score1', 'score2'] as $f) {
+foreach (['score1', 'score2', 'final1', 'final2'] as $f) {
     if (array_key_exists($f, $body)) {
         $sets[] = "$f = :$f";
         $params[":$f"] = $body[$f] !== null && $body[$f] !== '' ? (int)$body[$f] : null;

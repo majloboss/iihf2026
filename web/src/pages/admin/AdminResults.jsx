@@ -76,10 +76,13 @@ function TipsPanel({ gameId }) {
 }
 
 function ResultCard({ game: initGame }) {
-    const initEff  = effectiveStatus(initGame);
+    const initEff = effectiveStatus(initGame);
+    // s1/s2 = zobrazovaný výsledok (final ak OT, inak regulation)
+    const initOT  = initGame.final1 != null;
     const [game,   setGame]   = useState(initGame);
-    const [s1,     setS1]     = useState(initGame.score1 != null ? String(initGame.score1) : '');
-    const [s2,     setS2]     = useState(initGame.score2 != null ? String(initGame.score2) : '');
+    const [s1,     setS1]     = useState(initOT ? String(initGame.final1) : (initGame.score1 != null ? String(initGame.score1) : ''));
+    const [s2,     setS2]     = useState(initOT ? String(initGame.final2) : (initGame.score2 != null ? String(initGame.score2) : ''));
+    const [isOT,   setIsOT]   = useState(initOT);
     const [status, setStatus] = useState(initEff);
     const [saving, setSaving] = useState(false);
     const [saved,  setSaved]  = useState(false);
@@ -88,20 +91,31 @@ function ResultCard({ game: initGame }) {
 
     const started = initEff !== 'scheduled';
     const canEdit = status === 'finished';
-    const dirty   = status !== effectiveStatus(game) ||
-                    (canEdit && (s1 !== (game.score1 != null ? String(game.score1) : '') ||
-                                 s2 !== (game.score2 != null ? String(game.score2) : '')));
+
+    // Porovnanie voči uloženému stavu
+    const savedS1 = initOT ? (game.final1 != null ? String(game.final1) : '') : (game.score1 != null ? String(game.score1) : '');
+    const savedS2 = initOT ? (game.final2 != null ? String(game.final2) : '') : (game.score2 != null ? String(game.score2) : '');
+    const dirty = status !== effectiveStatus(game) ||
+        (canEdit && (s1 !== savedS1 || s2 !== savedS2 || isOT !== (game.final1 != null)));
 
     const save = async () => {
         if (canEdit && (s1 === '' || s2 === '')) { setErr('Zadaj oba góly'); return; }
+        const v1 = parseInt(s1), v2 = parseInt(s2);
+        if (isOT && v1 === v2) { setErr('Po predĺžení musí byť víťaz (nie remíza)'); return; }
+        if (isOT && Math.abs(v1 - v2) !== 1) { setErr('Po predĺžení môže byť rozdiel iba 1 gól'); return; }
         setSaving(true); setErr(''); setSaved(false);
+        // Ak OT: regulárne = loser:loser, final = zadaný výsledok
+        const reg = isOT ? Math.min(v1, v2) : null;
+        const payload = {
+            status,
+            score1: canEdit ? (isOT ? reg  : v1)   : null,
+            score2: canEdit ? (isOT ? reg  : v2)   : null,
+            final1: canEdit && isOT ? v1 : null,
+            final2: canEdit && isOT ? v2 : null,
+        };
         try {
-            await updateGame(game.id, {
-                status,
-                score1: canEdit ? parseInt(s1) : null,
-                score2: canEdit ? parseInt(s2) : null,
-            });
-            setGame(g => ({ ...g, status, score1: canEdit ? parseInt(s1) : null, score2: canEdit ? parseInt(s2) : null }));
+            await updateGame(game.id, payload);
+            setGame(g => ({ ...g, ...payload }));
             setSaved(true);
             setTimeout(() => setSaved(false), 2000);
             if (open) { setOpen(false); setTimeout(() => setOpen(true), 100); }
@@ -125,7 +139,11 @@ function ResultCard({ game: initGame }) {
                     {status === 'live'
                         ? <span className={gStyles.live}>LIVE</span>
                         : status === 'finished' && game.score1 != null
-                            ? <span className={styles.result}>{game.score1}:{game.score2}</span>
+                            ? <span className={styles.result}>
+                                {game.final1 != null && game.score1 === game.score2
+                                    ? <>{game.final1}:{game.final2} <span className={styles.resultOT}>(predĺženie)</span></>
+                                    : <>{game.score1}:{game.score2}</>}
+                              </span>
                             : 'vs'}
                 </div>
                 <TeamBlock code={game.team2} />
@@ -133,24 +151,32 @@ function ResultCard({ game: initGame }) {
 
             {/* Editácia stavu a skóre */}
             {started && (
-                <div className={styles.editRow}>
-                    <select value={status} onChange={e => setStatus(e.target.value)} className={styles.statusSel}
-                        style={{ color: status === 'finished' ? '#28a745' : status === 'live' ? '#dc3545' : '#888' }}>
-                        <option value="scheduled">Plánovaný</option>
-                        <option value="live">Prebieha</option>
-                        <option value="finished">Odohraný</option>
-                    </select>
-                    {canEdit && (
-                        <div className={styles.scoreBox}>
-                            <input type="number" min="0" max="30" value={s1} onChange={e => setS1(e.target.value)} className={styles.scoreIn} />
-                            <span className={styles.colon}>:</span>
-                            <input type="number" min="0" max="30" value={s2} onChange={e => setS2(e.target.value)} className={styles.scoreIn} />
-                        </div>
-                    )}
-                    <button className={styles.btnSave} onClick={save} disabled={saving || !dirty}>
-                        {saving ? '…' : saved ? '✓' : 'Uložiť'}
-                    </button>
-                    {err && <span className={styles.errMsg}>{err}</span>}
+                <div className={styles.editBlock}>
+                    <div className={styles.editRow}>
+                        <select value={status} onChange={e => setStatus(e.target.value)} className={styles.statusSel}
+                            style={{ color: status === 'finished' ? '#28a745' : status === 'live' ? '#dc3545' : '#888' }}>
+                            <option value="scheduled">Plánovaný</option>
+                            <option value="live">Prebieha</option>
+                            <option value="finished">Odohraný</option>
+                        </select>
+                        {canEdit && (
+                            <div className={styles.scoreBox}>
+                                <input type="number" min="0" max="30" value={s1} onChange={e => setS1(e.target.value)} className={styles.scoreIn} />
+                                <span className={styles.colon}>:</span>
+                                <input type="number" min="0" max="30" value={s2} onChange={e => setS2(e.target.value)} className={styles.scoreIn} />
+                            </div>
+                        )}
+                        {canEdit && (
+                            <label className={styles.otCheck}>
+                                <input type="checkbox" checked={isOT} onChange={e => setIsOT(e.target.checked)} />
+                                Po predĺžení
+                            </label>
+                        )}
+                        <button className={styles.btnSave} onClick={save} disabled={saving || !dirty}>
+                            {saving ? '…' : saved ? '✓' : 'Uložiť'}
+                        </button>
+                        {err && <span className={styles.errMsg}>{err}</span>}
+                    </div>
                 </div>
             )}
 

@@ -19,7 +19,7 @@ if ($method === 'POST') {
     }
 
     $games = $pdo->query("
-        SELECT phase, team1, team2, score1, score2
+        SELECT phase, team1, team2, score1, score2, final1, final2
         FROM iihf2026.games
         WHERE phase IN ('A','B') AND status='finished' AND score1 IS NOT NULL
     ")->fetchAll();
@@ -27,12 +27,19 @@ if ($method === 'POST') {
     foreach ($games as $g) {
         $ph = $g['phase']; $t1 = $g['team1']; $t2 = $g['team2'];
         $s1 = (int)$g['score1']; $s2 = (int)$g['score2'];
-        $groups[$ph][$t1]['gp']++; $groups[$ph][$t1]['gf'] += $s1; $groups[$ph][$t1]['ga'] += $s2;
-        $groups[$ph][$t2]['gp']++; $groups[$ph][$t2]['gf'] += $s2; $groups[$ph][$t2]['ga'] += $s1;
+        $isOT = ($s1 === $s2) && $g['final1'] !== null;
+        $gf1 = $isOT ? (int)$g['final1'] : $s1;
+        $gf2 = $isOT ? (int)$g['final2'] : $s2;
+        $groups[$ph][$t1]['gp']++; $groups[$ph][$t1]['gf'] += $gf1; $groups[$ph][$t1]['ga'] += $gf2;
+        $groups[$ph][$t2]['gp']++; $groups[$ph][$t2]['gf'] += $gf2; $groups[$ph][$t2]['ga'] += $gf1;
         if ($s1 > $s2) {
-            $groups[$ph][$t1]['w']++; $groups[$ph][$t2]['l']++; $groups[$ph][$t1]['pts'] += 2;
+            $groups[$ph][$t1]['w']++; $groups[$ph][$t2]['l']++; $groups[$ph][$t1]['pts'] += 3;
         } elseif ($s2 > $s1) {
-            $groups[$ph][$t2]['w']++; $groups[$ph][$t1]['l']++; $groups[$ph][$t2]['pts'] += 2;
+            $groups[$ph][$t2]['w']++; $groups[$ph][$t1]['l']++; $groups[$ph][$t2]['pts'] += 3;
+        } elseif ($isOT && (int)$g['final1'] > (int)$g['final2']) {
+            $groups[$ph][$t1]['w']++; $groups[$ph][$t2]['l']++; $groups[$ph][$t1]['pts'] += 2; $groups[$ph][$t2]['pts'] += 1;
+        } elseif ($isOT && (int)$g['final2'] > (int)$g['final1']) {
+            $groups[$ph][$t2]['w']++; $groups[$ph][$t1]['l']++; $groups[$ph][$t2]['pts'] += 2; $groups[$ph][$t1]['pts'] += 1;
         } else {
             $groups[$ph][$t1]['d']++; $groups[$ph][$t2]['d']++;
             $groups[$ph][$t1]['pts']++; $groups[$ph][$t2]['pts']++;

@@ -29,6 +29,13 @@ function calc_score(string $t1, string $t2, array $r, int $gid = 0, int $run = 0
     return $r[$t1] < $r[$t2] ? [$w, $l] : [$l, $w];
 }
 
+// Vráti [final1, final2] pre OT/SO keď je regulárny výsledok remíza
+function calc_final(int $s, string $t1, string $t2, array $r, int $gid, int $run): array {
+    mt_srand($gid * 5003 + $run + 77);
+    $t1_wins = mt_rand(0, 99) < ($r[$t1] < $r[$t2] ? 60 : 40);
+    return $t1_wins ? [$s + 1, $s] : [$s, $s + 1];
+}
+
 function gen_tip(int $uid, int $gid, int $s1, int $s2, int $run = 0): array {
     mt_srand($uid * 997 + $gid * 31 + $run);
     $roll = mt_rand(0, 99);
@@ -91,8 +98,10 @@ if ($action === 'group') {
             $starts = new DateTime($base_date[$phase] . 'T' . $time_slots[$slot] . '+00:00');
             $starts->modify('+' . ($round * 2) . ' days');
             [$s1,$s2] = calc_score($game['team1'],$game['team2'],$ratings,$game['id'],$run_seed);
-            $pdo->prepare("UPDATE iihf2026.games SET starts_at=?,score1=?,score2=?,status='finished' WHERE id=?")
-                ->execute([$starts->format('Y-m-d H:i:sP'),$s1,$s2,$game['id']]);
+            $f1 = $f2 = null;
+            if ($s1 === $s2) [$f1,$f2] = calc_final($s1,$game['team1'],$game['team2'],$ratings,$game['id'],$run_seed);
+            $pdo->prepare("UPDATE iihf2026.games SET starts_at=?,score1=?,score2=?,final1=?,final2=?,status='finished' WHERE id=?")
+                ->execute([$starts->format('Y-m-d H:i:sP'),$s1,$s2,$f1,$f2,$game['id']]);
         }
     }
 
@@ -314,7 +323,7 @@ if ($action === 'reset') {
         [64,'GOLD',null,null,'2026-05-31 18:20+00','Zurich / Swiss Life Arena'],
     ];
 
-    $stmt = $pdo->prepare("UPDATE iihf2026.games SET team1=?,team2=?,starts_at=?,venue=?,score1=NULL,score2=NULL,status='scheduled' WHERE game_number=?");
+    $stmt = $pdo->prepare("UPDATE iihf2026.games SET team1=?,team2=?,starts_at=?,venue=?,score1=NULL,score2=NULL,final1=NULL,final2=NULL,status='scheduled' WHERE game_number=?");
     foreach ($orig as [$gn,$ph,$t1,$t2,$dt,$venue]) {
         $stmt->execute([$t1,$t2,$dt,$venue,$gn]);
     }
