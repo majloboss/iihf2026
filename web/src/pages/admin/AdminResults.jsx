@@ -102,6 +102,7 @@ function ResultCard({ game: initGame }) {
         if (canEdit && (s1 === '' || s2 === '')) { setErr('Zadaj oba góly'); return; }
         const v1 = parseInt(s1), v2 = parseInt(s2);
         if (isOT && v1 === v2) { setErr('Po predĺžení musí byť víťaz (nie remíza)'); return; }
+        if (isOT && Math.abs(v1 - v2) !== 1) { setErr('Po predĺžení môže byť rozdiel iba 1 gól'); return; }
         setSaving(true); setErr(''); setSaved(false);
         // Ak OT: regulárne = loser:loser, final = zadaný výsledok
         const reg = isOT ? Math.min(v1, v2) : null;
