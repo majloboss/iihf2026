@@ -25,10 +25,10 @@ foreach ($games as $game) {
     $s2 = (int)$game['score2'];
     $is_playoff  = in_array($game['phase'], ['QF', 'SF', 'BRONZE', 'GOLD']);
     $sc          = $sc_all[$game['phase']] ?? null;
-    $winner_pts  = (int)($sc['pts_winner'] ?? 1);
+    $winner_pts  = (int)($sc['pts_winner'] ?? ($is_playoff ? 5 : 3));
     $goals1_pts  = (int)($sc['pts_goals1'] ?? 1);
     $goals2_pts  = (int)($sc['pts_goals2'] ?? 1);
-    $exact_pts   = (int)($sc['pts_exact']  ?? ($is_playoff ? 2 : 0));
+    $exact_pts   = (int)($sc['pts_exact']  ?? 0);
     $real_winner = $s1 > $s2 ? 1 : ($s1 < $s2 ? -1 : 0);
 
     $tips = $pdo->prepare("SELECT id, tip1, tip2 FROM iihf2026.tips WHERE game_id = ?");

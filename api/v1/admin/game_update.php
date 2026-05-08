@@ -69,7 +69,7 @@ if ($game && $game['status'] === 'finished' && $game['score1'] !== null && $game
 
     $sc = $pdo->prepare("SELECT pts_winner, pts_goals1, pts_goals2, pts_exact FROM iihf2026.scoring_config WHERE phase = ?");
     $sc->execute([$game['phase']]);
-    $cfg = $sc->fetch() ?: ['pts_winner' => 1, 'pts_goals1' => 1, 'pts_goals2' => 1, 'pts_exact' => ($is_playoff ? 2 : 0)];
+    $cfg = $sc->fetch() ?: ['pts_winner' => ($is_playoff ? 5 : 3), 'pts_goals1' => 1, 'pts_goals2' => 1, 'pts_exact' => 0];
     $winner_pts = (int)$cfg['pts_winner'];
     $goals1_pts = (int)$cfg['pts_goals1'];
     $goals2_pts = (int)$cfg['pts_goals2'];
