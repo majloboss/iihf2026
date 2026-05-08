@@ -1,9 +1,14 @@
 <?php
-// POST /v1/admin/run-migration — run pending DB migrations (one-time use)
+// POST /v1/admin/run-migration — run pending DB migrations
 require_auth(true);
 $pdo = db();
 
-$sql = file_get_contents(__DIR__ . '/../../migrations/003_group_standings.sql');
-$pdo->exec($sql);
+$migrations = ['003_group_standings.sql', '004_invites_sent_to.sql'];
+$ran = [];
+foreach ($migrations as $file) {
+    $sql = file_get_contents(__DIR__ . '/../../migrations/' . $file);
+    $pdo->exec($sql);
+    $ran[] = $file;
+}
 
-json_ok(['migration' => '003_group_standings', 'done' => true]);
+json_ok(['migrations' => $ran, 'done' => true]);

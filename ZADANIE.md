@@ -13,7 +13,7 @@
 - Skupiny — vytvorenie, vstup (pending→schválenie), odchod, zrušenie, filter Len moje/Všetky
 - Skupiny — rozbalenie skupiny → zoznam členov, klik na člena → detail (avatar, meno, email, tel)
 - Admin — správa používateľov (zoznam, aktivácia, rola, edit, heslo, zmazanie)
-- Admin — pozývacie linky (generovanie, zoznam)
+- Admin — pozývacie linky (generovanie, zoznam, komu bol poslaný, Kopírovať URL per riadok, editácia poznámky)
 - Admin — správa zápasov (úprava dátumu/času, tímov, miesta, stavu a skóre)
 - Admin — zadávanie výsledkov (dedikovaná obrazovka, inline, kartový layout, efektívny stav live/finished)
 - Admin — Skupiny — prehľad poradia všetkých skupín (tipovačkové poradie hráčov per skupina)
@@ -418,4 +418,4 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 
 ---
 
-*Posledná aktualizácia: 2026-05-08 (v1.64)*
+*Posledná aktualizácia: 2026-05-09 (v1.65)*

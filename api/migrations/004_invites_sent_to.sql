@@ -1,0 +1,1 @@
+ALTER TABLE admin.invites ADD COLUMN IF NOT EXISTS sent_to VARCHAR(100);
