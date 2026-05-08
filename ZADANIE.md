@@ -33,7 +33,7 @@
 ### 🔲 TODO (nie je implementované)
 - Dashboard — najbližšie zápasy, posledné výsledky, skrátené poradie
 - Notifikácie — push (Web + FCM) + email
-- Admin — generovanie play-off zápasov (po finalizácii skupinových tabuliek)
+- Admin — manuálne priradenie tímov do play-off zápasov (QF, SF, Bronz, Finále)
 - Admin — nastavenia bodovacieho systému
 - Android aplikácia (Kotlin)
 
@@ -148,11 +148,9 @@ Boduje sa výsledok **riadnej hracej doby (60 minút)** — predĺženie ani sam
 
 **Postup do play-off:** Top 4 zo skupiny A + Top 4 zo skupiny B = 8 tímov v štvrťfinále
 
-### Generovanie play-off zápasov 🔲
-1. Systém vypočíta tabuľku skupín po odohraní zápasov 1–56
-2. Admin skontroluje tabuľku, môže urobiť korekcie
-3. Admin schváli tabuľku
-4. Systém automaticky vygeneruje štvrťfinálové dvojice podľa pravidiel z PDF
+### Priradenie play-off zápasov 🔲
+1. Admin finalizuje skupinové tabuľky (sync → úprava poradia → finalizovať)
+2. Admin manuálne priradí tímy do zápasov 57–64 (QF, SF, Bronz, Finále) cez správu zápasov
 
 ---
 
