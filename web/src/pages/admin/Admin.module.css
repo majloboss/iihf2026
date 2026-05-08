@@ -147,3 +147,39 @@
 .btnSmall:disabled, .btnSmallDanger:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .error { color: #c0392b; margin-top: 12px; }
+.err   { color: #c0392b; margin-top: 12px; }
+
+.wrap { padding: 0; }
+
+.toolbar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 8px;
+}
+.toolbar h2 { margin: 0; color: #1a3a6b; }
+.count { font-size: 0.85rem; color: #888; }
+
+.mono  { font-family: monospace; font-size: 0.82rem; }
+.small { font-size: 0.82rem; color: #555; }
+
+.btnMore {
+    margin-top: 12px;
+    padding: 8px 20px;
+    background: #e9ecef;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    color: #333;
+}
+.btnMore:hover { background: #dee2e6; }
+
+.badgeProd {
+    background: #d4edda; color: #155724;
+    padding: 2px 8px; border-radius: 10px; font-size: 0.78rem; font-weight: 600;
+}
+.badgeDev {
+    background: #fff3cd; color: #856404;
+    padding: 2px 8px; border-radius: 10px; font-size: 0.78rem; font-weight: 600;
+}

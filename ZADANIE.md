@@ -45,8 +45,11 @@
 - Zápasy — automatický výber aktívnej fázy pri otvorení (live → najbližší scheduled)
 - Zápasy — auto-scroll na dnešný / najbližší deň so zápasmi
 
+### ✅ Hotovo (nedávno doplnené — čaká na migráciu 008 na serveri)
+- Admin — logovanie prihlásení (čas, user, rola, env main/develop, IP, zariadenie); Admin → Prihlásenia
+
 ### 🔲 TODO (nie je implementované)
-- SQL migrácie na serveri — spustiť 006_scoring_exact.sql + 007_scoring_fix.sql, potom prepočítať body
+- Migrácia 008 na serveri — spustiť 008_login_logs.sql
 - Notifikácie — push (Web + FCM) + email
 - Admin — nastavenia bodovacieho systému
 - Android aplikácia (Kotlin)
@@ -442,4 +445,4 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 
 ---
 
-*Posledná aktualizácia: 2026-05-08 (v1.95)*
+*Posledná aktualizácia: 2026-05-08 (v1.96)*
