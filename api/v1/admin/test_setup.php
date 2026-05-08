@@ -13,23 +13,24 @@ $ratings = [
     'LAT'=>9,'DEN'=>10,'AUT'=>11,'NOR'=>12,'ITA'=>13,'SLO'=>14,'HUN'=>15,'GBR'=>16,
 ];
 
-function calc_score(string $t1, string $t2, array $r, int $gid = 0): array {
+function calc_score(string $t1, string $t2, array $r, int $gid = 0, int $run = 0): array {
     $d = abs($r[$t1] - $r[$t2]);
     if ($gid > 0 && $d <= 2) {
-        mt_srand($gid * 7919);
+        mt_srand($gid * 7919 + $run);
         $roll = mt_rand(0, 99); $draw_score = mt_rand(0, 2) === 0 ? 2 : 1;
         if ($roll < ($d === 1 ? 35 : 15)) return [$draw_score, $draw_score];
     }
-    if ($d === 1)     { $w = 2; $l = 1; }
-    elseif ($d === 2) { $w = 3; $l = 1; }
-    elseif ($d === 3) { $w = 3; $l = 0; }
-    elseif ($d === 4) { $w = 4; $l = 0; }
-    else              { $w = 5; $l = 0; }
+    mt_srand($gid * 1031 + $run);
+    if ($d === 1)     { $w = 2 + mt_rand(0,1); $l = mt_rand(0,1); }
+    elseif ($d === 2) { $w = 3 + mt_rand(0,1); $l = mt_rand(0,1); }
+    elseif ($d === 3) { $w = 3 + mt_rand(0,1); $l = mt_rand(0,1); }
+    elseif ($d === 4) { $w = 4 + mt_rand(0,1); $l = 0; }
+    else              { $w = 5 + mt_rand(0,1); $l = 0; }
     return $r[$t1] < $r[$t2] ? [$w, $l] : [$l, $w];
 }
 
-function gen_tip(int $uid, int $gid, int $s1, int $s2): array {
-    mt_srand($uid * 997 + $gid * 31);
+function gen_tip(int $uid, int $gid, int $s1, int $s2, int $run = 0): array {
+    mt_srand($uid * 997 + $gid * 31 + $run);
     $roll = mt_rand(0, 99);
     if ($roll < 30) return [$s1, $s2];
     $win = $s1 > $s2 ? 1 : ($s1 < $s2 ? -1 : 0);
@@ -68,7 +69,8 @@ $sc_cfg = [];
 foreach ($pdo->query("SELECT phase,pts_winner,pts_goals1,pts_goals2 FROM iihf2026.scoring_config")->fetchAll() as $r) {
     $sc_cfg[$r['phase']] = $r;
 }
-$users = $pdo->query("SELECT id FROM admin.users WHERE is_active=TRUE AND role='user'")->fetchAll(PDO::FETCH_COLUMN);
+$users    = $pdo->query("SELECT id FROM admin.users WHERE is_active=TRUE AND role='user'")->fetchAll(PDO::FETCH_COLUMN);
+$run_seed = mt_rand(1, 999983); // unikátne per generovanie → rôzne výsledky zakaždým
 
 // ── ACTION: group ─────────────────────────────────────────────────────────────
 if ($action === 'group') {
@@ -87,7 +89,7 @@ if ($action === 'group') {
             $slot   = $idx % 4;
             $starts = new DateTime($base_date[$phase] . 'T' . $time_slots[$slot] . '+00:00');
             $starts->modify('+' . ($round * 2) . ' days');
-            [$s1,$s2] = calc_score($game['team1'],$game['team2'],$ratings,$game['id']);
+            [$s1,$s2] = calc_score($game['team1'],$game['team2'],$ratings,$game['id'],$run_seed);
             $pdo->prepare("UPDATE iihf2026.games SET starts_at=?,score1=?,score2=?,status='finished' WHERE id=?")
                 ->execute([$starts->format('Y-m-d H:i:sP'),$s1,$s2,$game['id']]);
         }
@@ -117,7 +119,7 @@ if ($action === 'group') {
     $ins = $pdo->prepare("INSERT INTO iihf2026.tips (user_id,game_id,tip1,tip2,updated_at) VALUES (?,?,?,?,NOW())");
     foreach ($users as $uid) {
         foreach ($group_games as $g) {
-            [$t1,$t2] = gen_tip((int)$uid,(int)$g['id'],(int)$g['score1'],(int)$g['score2']);
+            [$t1,$t2] = gen_tip((int)$uid,(int)$g['id'],(int)$g['score1'],(int)$g['score2'],$run_seed);
             $ins->execute([$uid,$g['id'],$t1,$t2]);
         }
     }
@@ -137,7 +139,7 @@ function playoff_start(?string $last_game_date): DateTime {
 }
 
 // ── Playoff helper: nastav dátumy + generuj tipy pre hry kde admin nastavil tímy ──
-function gen_tips_for_phase(PDO $pdo, string $phase, array $users, array $sc_cfg): array {
+function gen_tips_for_phase(PDO $pdo, string $phase, array $users, array $sc_cfg, int $run_seed = 0): array {
     $games = $pdo->prepare("SELECT id,team1,team2,score1,score2 FROM iihf2026.games WHERE phase=? AND team1 IS NOT NULL AND team2 IS NOT NULL ORDER BY game_number");
     $games->execute([$phase]);
     $games = $games->fetchAll();
@@ -150,7 +152,7 @@ function gen_tips_for_phase(PDO $pdo, string $phase, array $users, array $sc_cfg
         foreach ($games as $g) {
             $s1 = $g['score1'] !== null ? (int)$g['score1'] : mt_rand(0,3);
             $s2 = $g['score2'] !== null ? (int)$g['score2'] : mt_rand(0,3);
-            [$t1,$t2] = gen_tip((int)$uid,(int)$g['id'],$s1,$s2);
+            [$t1,$t2] = gen_tip((int)$uid,(int)$g['id'],$s1,$s2,$run_seed);
             $ins->execute([$uid,$g['id'],$t1,$t2]);
         }
     }
@@ -174,7 +176,7 @@ if ($action === 'qf') {
         $dt = (clone $start)->modify('+' . ($i * 2) . ' hours');
         $pdo->prepare("UPDATE iihf2026.games SET starts_at=? WHERE id=?")->execute([$dt->format('Y-m-d H:i:sP'), $gid]);
     }
-    $info = gen_tips_for_phase($pdo,'QF',$users,$sc_cfg);
+    $info = gen_tips_for_phase($pdo,'QF',$users,$sc_cfg,$run_seed);
     json_ok(['action'=>'qf','games'=>$info,'users'=>count($users)]);
 }
 
@@ -189,7 +191,7 @@ if ($action === 'sf') {
         $dt = (clone $start)->modify('+' . ($i * 2) . ' hours');
         $pdo->prepare("UPDATE iihf2026.games SET starts_at=? WHERE id=?")->execute([$dt->format('Y-m-d H:i:sP'), $gid]);
     }
-    $info = gen_tips_for_phase($pdo,'SF',$users,$sc_cfg);
+    $info = gen_tips_for_phase($pdo,'SF',$users,$sc_cfg,$run_seed);
     json_ok(['action'=>'sf','games'=>$info,'users'=>count($users)]);
 }
 
@@ -204,8 +206,8 @@ if ($action === 'final') {
         $dt = (clone $start)->modify('+' . ($i * 2) . ' hours');
         $pdo->prepare("UPDATE iihf2026.games SET starts_at=? WHERE id=?")->execute([$dt->format('Y-m-d H:i:sP'), $g['id']]);
     }
-    $bronze = gen_tips_for_phase($pdo,'BRONZE',$users,$sc_cfg);
-    $gold   = gen_tips_for_phase($pdo,'GOLD',  $users,$sc_cfg);
+    $bronze = gen_tips_for_phase($pdo,'BRONZE',$users,$sc_cfg,$run_seed);
+    $gold   = gen_tips_for_phase($pdo,'GOLD',  $users,$sc_cfg,$run_seed);
     json_ok(['action'=>'final','games'=>array_merge($bronze,$gold),'users'=>count($users)]);
 }
 
