@@ -54,19 +54,33 @@ export default function AdminTools() {
 
                 <hr style={{ margin: '20px 0', borderColor: '#eee' }} />
 
-                <h3 style={{ margin: '0 0 4px', fontSize: '1rem', color: '#dc3545' }}>⚠ Spustenie súťaže</h3>
+                <h3 style={{ margin: '0 0 4px', fontSize: '1rem', color: '#dc3545' }}>⚠ Inicializácia systému</h3>
                 <p style={{ margin: '0 0 12px', fontSize: '0.82rem', color: '#666' }}>
-                    Vymaže <strong>všetkých userov, tipy, pozývacie linky, skupiny</strong> a obnoví
-                    pôvodný rozvrh zápasov z PDF. Admini zostávajú. <strong>Nezvratné!</strong>
+                    Vymaže <strong>všetkých userov, tipy, pozývacie linky, skupiny a tabuľky</strong>.
+                    Zápasy zostanú. Admini zostávajú. <strong>Nezvratné!</strong>
                 </p>
                 <button className={styles.btnSmallDanger}
                     style={{ fontSize: '0.9rem', padding: '8px 16px' }}
-                    onClick={() => run('reset', 'POZOR! Toto vymaže VŠETKY testovacie dáta (userov, tipy, linky) a obnoví pôvodný rozvrh. Naozaj pokračovať?')}
+                    onClick={() => run('init', 'POZOR! Toto vymaže VŠETKÝCH userov, tipy, linky a skupiny. Zápasy ostanú nezmenené. Naozaj pokračovať?')}
                     disabled={running !== null}>
-                    {running === 'reset' ? 'Prebieha…' : '⚠ Spustiť súťaž (reset dát)'}
+                    {running === 'init' ? 'Prebieha…' : '⚠ Inicializovať systém'}
                 </button>
 
-                {ACTIONS.map(({ key }) => (
+                <hr style={{ margin: '20px 0', borderColor: '#eee' }} />
+
+                <h3 style={{ margin: '0 0 4px', fontSize: '1rem', color: '#dc3545' }}>⚠ Spustenie súťaže</h3>
+                <p style={{ margin: '0 0 12px', fontSize: '0.82rem', color: '#666' }}>
+                    Vymaže <strong>tipy, skupiny a tabuľky</strong>, obnoví pôvodný rozvrh zápasov z PDF.
+                    Useri a pozývacie linky zostávajú. <strong>Nezvratné!</strong>
+                </p>
+                <button className={styles.btnSmallDanger}
+                    style={{ fontSize: '0.9rem', padding: '8px 16px' }}
+                    onClick={() => run('reset', 'POZOR! Toto vymaže tipy, skupiny a tabuľky a obnoví pôvodný rozvrh z PDF. Naozaj pokračovať?')}
+                    disabled={running !== null}>
+                    {running === 'reset' ? 'Prebieha…' : '⚠ Spustiť súťaž'}
+                </button>
+
+                {[...ACTIONS.map(a => a.key), 'init', 'reset'].map(key => (
                     <div key={key}>
                         {errors[key] && (
                             <p style={{ color: '#dc3545', marginTop: 10, fontSize: '0.85rem' }}>
@@ -89,9 +103,11 @@ function ResultBlock({ r }) {
     if (r.action === 'group') return <>
         <div>✓ Zápasy: <strong>{r.games}</strong>, Hráči: <strong>{r.users}</strong>, Tipy: <strong>{r.tips}</strong></div>
     </>;
-    if (r.action === 'reset') return <>
+    if (r.action === 'init') return <>
         <div>✓ Userov vymazaných: <strong>{r.users_deleted}</strong></div>
         <div>✓ Linkov vymazaných: <strong>{r.links_deleted}</strong></div>
+    </>;
+    if (r.action === 'reset') return <>
         <div>✓ Zápasov obnovených: <strong>{r.games_reset}</strong></div>
     </>;
     if (r.games) return <>

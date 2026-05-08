@@ -206,14 +206,27 @@ if ($action === 'final') {
     json_ok(['action'=>'final','games'=>array_merge($bronze,$gold),'users'=>count($users)]);
 }
 
-// ── ACTION: reset — vymaže testovacie dáta + obnoví pôvodný rozvrh z PDF ────
-if ($action === 'reset') {
+// ── ACTION: init — vymaže testovacie dáta, zápasy zostanú ────────────────────
+if ($action === 'init') {
     $pdo->exec("DELETE FROM iihf2026.tips");
     $pdo->exec("DELETE FROM iihf2026.group_standings");
     $pdo->exec("DELETE FROM admin.group_members");
     $pdo->exec("DELETE FROM admin.friend_groups");
     $users_deleted = $pdo->exec("DELETE FROM admin.users WHERE role='user'");
     $links_deleted = $pdo->exec("DELETE FROM admin.invites");
+    json_ok([
+        'action'        => 'init',
+        'users_deleted' => (int)$users_deleted,
+        'links_deleted' => (int)$links_deleted,
+    ]);
+}
+
+// ── ACTION: reset — vymaže testovacie dáta + obnoví pôvodný rozvrh z PDF ────
+if ($action === 'reset') {
+    $pdo->exec("DELETE FROM iihf2026.tips");
+    $pdo->exec("DELETE FROM iihf2026.group_standings");
+    $pdo->exec("DELETE FROM admin.group_members");
+    $pdo->exec("DELETE FROM admin.friend_groups");
 
     // Pôvodný rozvrh z PDF (migration 002)
     $orig = [
@@ -289,10 +302,8 @@ if ($action === 'reset') {
     }
 
     json_ok([
-        'action'        => 'reset',
-        'users_deleted' => (int)$users_deleted,
-        'links_deleted' => (int)$links_deleted,
-        'games_reset'   => 64,
+        'action'      => 'reset',
+        'games_reset' => 64,
     ]);
 }
 
