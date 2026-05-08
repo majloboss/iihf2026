@@ -33,7 +33,9 @@
 - Pozývacie linky — generovanie, zoznam, sent_to, kopírovanie URL
 - Správa zápasov — dátum/čas, tímy (vrátane play-off 57–64), miesto, stav, skóre
 - Zadávanie výsledkov — dedikovaná obrazovka `/admin/results`, inline, kartový layout
+- Zadávanie výsledkov — checkbox "Po predĺžení": zadáš 3:2 + zaškrtneš → systém uloží regulárne 2:2 + konečné 3:2; validácia rozdiel = 1
 - Skupinové tabuľky — sync, úprava poradia pri rovnosti bodov, finalizácia
+- Skupinové tabuľky — bodový systém 3/2/1/0 (regulárna výhra=3, OT výhra=2, OT prehra=1, regulárna prehra=0)
 - Výpočet bodov — automaticky po výsledku + hromadný prepočet
 - Nástroje — generovanie test dát (skupina/QF/SF/Finále), Spustenie súťaže, Inicializácia
 - Prihlásenia — log všetkých prihlásení (čas, user, rola, env main/develop, IP, zariadenie)
@@ -453,4 +455,4 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 
 ---
 
-*Posledná aktualizácia: 2026-05-08 (v1.99)*
+*Posledná aktualizácia: 2026-05-08 (v2.00)*
