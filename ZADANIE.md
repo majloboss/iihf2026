@@ -34,10 +34,19 @@
 
 ### ✅ Hotovo (nedávno doplnené)
 - Admin — priradenie tímov do play-off zápasov — manuálne cez Admin → Zápasy (úprava team1/team2 pre hry 57–64)
+- Dashboard — najbližšie zápasy (s tipom/bez tipu), posledné výsledky, poradie v skupinách
+- Dashboard — klik na nadchádzajúci zápas → modal na zadanie/zmenu tipu
+- Dashboard — klik na live/finished zápas → modal s tipmi všetkých členov skupín
+- Dashboard — zápasy bez priradených tímov (TBD) nie sú tipovateľné
+- Mobilná optimalizácia — bottom nav 2 riadky (3+3), sidebar skrytý pod 900px
+- Pravidlá — stránka s bodovacou tabuľkou a príkladmi skupiny aj play-off
+- Skupiny (Profil) — záložky Profil / Skupiny v obrazovke Profil
+- Skupinové tabuľky A/B — opravená finalizácia (UPSERT, zachovanie finalized pri sync, live fallback pre nefinalizované skupiny)
+- Zápasy — automatický výber aktívnej fázy pri otvorení (live → najbližší scheduled)
+- Zápasy — auto-scroll na dnešný / najbližší deň so zápasmi
 
 ### 🔲 TODO (nie je implementované)
-- Dashboard — najbližšie zápasy, posledné výsledky, skrátené poradie
-- Mobilná optimalizácia — responzívne zobrazenie všetkých stránok na mobile bez horizontálneho scrollovania
+- SQL migrácie na serveri — spustiť 006_scoring_exact.sql + 007_scoring_fix.sql, potom prepočítať body
 - Notifikácie — push (Web + FCM) + email
 - Admin — nastavenia bodovacieho systému
 - Android aplikácia (Kotlin)
@@ -433,4 +442,4 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 
 ---
 
-*Posledná aktualizácia: 2026-05-08 (v1.88)*
+*Posledná aktualizácia: 2026-05-08 (v1.95)*
