@@ -96,9 +96,10 @@ if ($action === 'group') {
     }
 
     // Reset playoff — scheduled, no teams/scores (placeholder dates)
-    $qf_base  = (clone $today)->modify('+1 day');
-    $sf_base  = (clone $today)->modify('+2 days');
-    $fin_base = (clone $today)->modify('+3 days');
+    // QF = dnes (ten istý deň ako GROUP generovanie), SF = zajtra, Final = pozajtra
+    $qf_base  = clone $today;
+    $sf_base  = (clone $today)->modify('+1 day');
+    $fin_base = (clone $today)->modify('+2 days');
     $pld = ['QF'=>[], 'SF'=>[], 'BRONZE'=>[], 'GOLD'=>[]];
     for ($i=0;$i<4;$i++) $pld['QF'][]   = $qf_base->format('Y-m-d') . ($i % 2 === 0 ? 'T16:15:00+00:00' : 'T20:15:00+00:00');
     for ($i=0;$i<2;$i++) $pld['SF'][]   = $sf_base->format('Y-m-d') . ($i === 0 ? 'T16:15:00+00:00' : 'T20:15:00+00:00');
@@ -170,7 +171,9 @@ function gen_tips_for_phase(PDO $pdo, string $phase, array $users, array $sc_cfg
 // ── ACTION: qf ───────────────────────────────────────────────────────────────
 if ($action === 'qf') {
     // Dnes, ~1 hod po aktuálnom čase, 2h rozostupy
-    $start  = (new DateTime('now UTC'))->modify('+1 hour');
+    $now1h  = (new DateTime('now UTC'))->modify('+1 hour');
+    $start  = new DateTime('today UTC');
+    $start->setTime((int)$now1h->format('H'), (int)$now1h->format('i'));
     $qf_ids = $pdo->query("SELECT id FROM iihf2026.games WHERE phase='QF' ORDER BY game_number")->fetchAll(PDO::FETCH_COLUMN);
     foreach ($qf_ids as $i => $gid) {
         $dt = (clone $start)->modify('+' . ($i * 2) . ' hours');
