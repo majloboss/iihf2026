@@ -53,12 +53,12 @@ Boduje sa výsledok **riadnej hracej doby (60 minút)** — predĺženie ani sam
 
 | Podmienka | Skupinová fáza | Play-off (QF / SF / Finále / O bronz) |
 |-----------|:--------------:|:-------------------------------------:|
-| Správny víťaz alebo remíza | 1 bod | 3 body |
+| **Presný výsledok** | **3 body** | **5 bodov** |
+| Správny víťaz alebo remíza | 1 bod | 1 bod |
 | Správny počet gólov domácich | 1 bod | 1 bod |
 | Správny počet gólov hostí | 1 bod | 1 bod |
-| **Maximum za zápas** | **3 body** | **5 bodov** |
 
-**Príklady (skupinová fáza, skutočnosť FIN 3:2 GER):**
+**Príklady (skupinová fáza, skutočnosť FIN 3:2 GER, max 3 body):**
 | Tip | Body | Dôvod |
 |-----|:----:|-------|
 | FIN 3:2 GER | 3 | víťaz ✓, góly FIN ✓, góly GER ✓ |
@@ -431,4 +431,4 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 
 ---
 
-*Posledná aktualizácia: 2026-05-08 (v1.81)*
+*Posledná aktualizácia: 2026-05-08 (v1.87)*

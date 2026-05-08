@@ -49,7 +49,7 @@ function gen_tip(int $uid, int $gid, int $s1, int $s2, int $run = 0): array {
 
 function recalc_tips(PDO $pdo, int $game_id, int $s1, int $s2, string $phase, array $sc_cfg): void {
     $sc  = $sc_cfg[$phase] ?? $sc_cfg['A'];
-    $wp  = (int)$sc['pts_winner']; $gp1 = (int)$sc['pts_goals1']; $gp2 = (int)$sc['pts_goals2'];
+    $wp  = (int)$sc['pts_winner']; $gp1 = (int)$sc['pts_goals1']; $gp2 = (int)$sc['pts_goals2']; $ep = (int)$sc['pts_exact'];
     $rw  = $s1 > $s2 ? 1 : ($s1 < $s2 ? -1 : 0);
     $upd = $pdo->prepare("UPDATE iihf2026.tips SET points=? WHERE id=?");
     $stmt = $pdo->prepare("SELECT id,tip1,tip2 FROM iihf2026.tips WHERE game_id=?");
@@ -60,13 +60,14 @@ function recalc_tips(PDO $pdo, int $game_id, int $s1, int $s2, string $phase, ar
         if ($tw === $rw) $pts += $wp;
         if ($t1 === $s1) $pts += $gp1;
         if ($t2 === $s2) $pts += $gp2;
+        if ($t1 === $s1 && $t2 === $s2) $pts += $ep;
         $upd->execute([$pts, $t['id']]);
     }
 }
 
 
 $sc_cfg = [];
-foreach ($pdo->query("SELECT phase,pts_winner,pts_goals1,pts_goals2 FROM iihf2026.scoring_config")->fetchAll() as $r) {
+foreach ($pdo->query("SELECT phase,pts_winner,pts_goals1,pts_goals2,pts_exact FROM iihf2026.scoring_config")->fetchAll() as $r) {
     $sc_cfg[$r['phase']] = $r;
 }
 $users    = $pdo->query("SELECT id FROM admin.users WHERE is_active=TRUE AND role='user'")->fetchAll(PDO::FETCH_COLUMN);

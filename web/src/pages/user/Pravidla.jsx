@@ -23,10 +23,15 @@ export default function Pravidla() {
                         </tr>
                     </thead>
                     <tbody>
+                        <tr className={styles.exactRow}>
+                            <td><strong>Presný výsledok</strong></td>
+                            <td className={styles.center}><span className={styles.pts3}>3 body</span></td>
+                            <td className={styles.center}><span className={styles.pts3}>5 bodov</span></td>
+                        </tr>
                         <tr>
                             <td>Správny víťaz alebo remíza</td>
                             <td className={styles.center}><span className={styles.pts}>1 bod</span></td>
-                            <td className={styles.center}><span className={styles.pts}>3 body</span></td>
+                            <td className={styles.center}><span className={styles.pts}>1 bod</span></td>
                         </tr>
                         <tr>
                             <td>Správny počet gólov domácich</td>
@@ -37,11 +42,6 @@ export default function Pravidla() {
                             <td>Správny počet gólov hostí</td>
                             <td className={styles.center}><span className={styles.pts}>1 bod</span></td>
                             <td className={styles.center}><span className={styles.pts}>1 bod</span></td>
-                        </tr>
-                        <tr className={styles.maxRow}>
-                            <td><strong>Maximum za zápas</strong></td>
-                            <td className={styles.center}><strong>3 body</strong></td>
-                            <td className={styles.center}><strong>5 bodov</strong></td>
                         </tr>
                     </tbody>
                 </table>
@@ -104,27 +104,27 @@ export default function Pravidla() {
                         <tr>
                             <td>CAN 2:1 SVK</td>
                             <td className={styles.center}><span className={styles.pts3}>5</span></td>
-                            <td>víťaz ✓, góly CAN ✓, góly SVK ✓</td>
+                            <td>presný ✓</td>
                         </tr>
                         <tr>
                             <td>CAN 2:0 SVK</td>
-                            <td className={styles.center}><span className={styles.pts2}>4</span></td>
-                            <td>víťaz ✓, góly CAN ✓, góly SVK ✗</td>
+                            <td className={styles.center}><span className={styles.pts2}>2</span></td>
+                            <td>víťaz ✓, góly CAN ✓</td>
                         </tr>
                         <tr>
-                            <td>CAN 3:2 SVK</td>
-                            <td className={styles.center}><span className={styles.pts1}>3</span></td>
-                            <td>víťaz ✓, góly CAN ✗, góly SVK ✗</td>
-                        </tr>
-                        <tr>
-                            <td>SVK 2:1 CAN</td>
+                            <td>CAN 3:0 SVK</td>
                             <td className={styles.center}><span className={styles.pts1}>1</span></td>
-                            <td>víťaz ✗, góly CAN ✗, góly SVK ✓</td>
+                            <td>víťaz ✓</td>
                         </tr>
                         <tr>
-                            <td>SVK 3:0 CAN</td>
+                            <td>CAN 0:1 SVK</td>
+                            <td className={styles.center}><span className={styles.pts1}>1</span></td>
+                            <td>góly SVK ✓</td>
+                        </tr>
+                        <tr>
+                            <td>SVK 2:0 CAN</td>
                             <td className={styles.center}><span className={styles.pts0}>0</span></td>
-                            <td>víťaz ✗, góly CAN ✗, góly SVK ✗</td>
+                            <td>—</td>
                         </tr>
                     </tbody>
                 </table>

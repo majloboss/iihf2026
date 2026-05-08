@@ -65,8 +65,8 @@
 
 .center { text-align: center; }
 
-.maxRow td {
-    background: #f5f7fa;
+.exactRow td {
+    background: #f0faf4;
     font-size: 0.88rem;
 }
 

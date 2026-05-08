@@ -6,7 +6,7 @@ if ($method !== 'POST') json_error('Method not allowed', 405);
 $pdo = db();
 
 $sc_all = [];
-foreach ($pdo->query("SELECT phase, pts_winner, pts_goals1, pts_goals2 FROM iihf2026.scoring_config")->fetchAll() as $r) {
+foreach ($pdo->query("SELECT phase, pts_winner, pts_goals1, pts_goals2, pts_exact FROM iihf2026.scoring_config")->fetchAll() as $r) {
     $sc_all[$r['phase']] = $r;
 }
 
@@ -25,9 +25,10 @@ foreach ($games as $game) {
     $s2 = (int)$game['score2'];
     $is_playoff  = in_array($game['phase'], ['QF', 'SF', 'BRONZE', 'GOLD']);
     $sc          = $sc_all[$game['phase']] ?? null;
-    $winner_pts  = (int)($sc['pts_winner'] ?? ($is_playoff ? 3 : 1));
+    $winner_pts  = (int)($sc['pts_winner'] ?? 1);
     $goals1_pts  = (int)($sc['pts_goals1'] ?? 1);
     $goals2_pts  = (int)($sc['pts_goals2'] ?? 1);
+    $exact_pts   = (int)($sc['pts_exact']  ?? ($is_playoff ? 2 : 0));
     $real_winner = $s1 > $s2 ? 1 : ($s1 < $s2 ? -1 : 0);
 
     $tips = $pdo->prepare("SELECT id, tip1, tip2 FROM iihf2026.tips WHERE game_id = ?");
@@ -41,6 +42,7 @@ foreach ($games as $game) {
         if ($tip_winner === $real_winner) $pts += $winner_pts;
         if ($t1 === $s1) $pts += $goals1_pts;
         if ($t2 === $s2) $pts += $goals2_pts;
+        if ($t1 === $s1 && $t2 === $s2) $pts += $exact_pts;
         $upd->execute([$pts, $t['id']]);
         $updated_tips++;
     }
