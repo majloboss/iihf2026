@@ -95,16 +95,25 @@ if ($action === 'group') {
         }
     }
 
-    // Reset playoff — scheduled, no teams/scores (placeholder dates)
-    // QF = dnes (ten istý deň ako GROUP generovanie), SF = zajtra, Final = pozajtra
+    // Reset playoff — scheduled, no teams/scores
+    // Časy sú dynamické: QF dnes now+1h, SF zajtra, Final pozajtra — rovnaký čas ako QF
+    $now1h    = (new DateTime('now UTC'))->modify('+1 hour');
+    $pld_h    = (int)$now1h->format('H');
+    $pld_m    = (int)$now1h->format('i');
     $qf_base  = clone $today;
     $sf_base  = (clone $today)->modify('+1 day');
     $fin_base = (clone $today)->modify('+2 days');
     $pld = ['QF'=>[], 'SF'=>[], 'BRONZE'=>[], 'GOLD'=>[]];
-    for ($i=0;$i<4;$i++) $pld['QF'][]   = $qf_base->format('Y-m-d') . ($i % 2 === 0 ? 'T16:15:00+00:00' : 'T20:15:00+00:00');
-    for ($i=0;$i<2;$i++) $pld['SF'][]   = $sf_base->format('Y-m-d') . ($i === 0 ? 'T16:15:00+00:00' : 'T20:15:00+00:00');
-    $pld['BRONZE'][] = $fin_base->format('Y-m-d') . 'T16:15:00+00:00';
-    $pld['GOLD'][]   = $fin_base->format('Y-m-d') . 'T20:15:00+00:00';
+    for ($i=0;$i<4;$i++) {
+        $dt = (clone $qf_base)->setTime($pld_h, $pld_m)->modify('+' . ($i * 2) . ' hours');
+        $pld['QF'][] = $dt->format('Y-m-d\TH:i:sP');
+    }
+    for ($i=0;$i<2;$i++) {
+        $dt = (clone $sf_base)->setTime($pld_h, $pld_m)->modify('+' . ($i * 2) . ' hours');
+        $pld['SF'][] = $dt->format('Y-m-d\TH:i:sP');
+    }
+    $pld['BRONZE'][] = (clone $fin_base)->setTime($pld_h, $pld_m)->format('Y-m-d\TH:i:sP');
+    $pld['GOLD'][]   = (clone $fin_base)->setTime($pld_h, $pld_m)->modify('+2 hours')->format('Y-m-d\TH:i:sP');
 
     foreach ($pld as $phase => $dates) {
         $ids = $pdo->query("SELECT id FROM iihf2026.games WHERE phase='$phase' ORDER BY game_number")->fetchAll(PDO::FETCH_COLUMN);
