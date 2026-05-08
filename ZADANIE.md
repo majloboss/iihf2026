@@ -170,6 +170,9 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 ### Správa pozývacích linkov ✅
 - ✅ Generovanie pozývacieho linku
 - ✅ Zobrazenie zoznamu linkov (použité / nepoužité)
+- ✅ Komu bol link poslaný (editovateľné pole sent_to)
+- ✅ Kopírovanie celej URL per riadok
+- ✅ Klik na username hráča → detail/úprava profilu (UserModal)
 
 ### Správa zápasov a výsledkov
 - ✅ Úprava zápasu — dátum/čas (lokálny), tímy, miesto
