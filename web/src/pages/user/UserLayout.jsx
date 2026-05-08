@@ -35,6 +35,9 @@ export default function UserLayout() {
                     <NavLink to="/groups"    className={({ isActive }) => isActive ? styles.active : ''}>
                         👥 Skupiny
                     </NavLink>
+                    <NavLink to="/pravidla"  className={({ isActive }) => isActive ? styles.active : ''}>
+                        📋 Pravidlá
+                    </NavLink>
                 </nav>
                 {profile && (
                     <div className={styles.userInfo}>
