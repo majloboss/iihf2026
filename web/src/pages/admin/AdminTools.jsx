@@ -2,19 +2,34 @@ import { useState } from 'react';
 import { apiFetch } from '../../api/client';
 import styles from './Admin.module.css';
 
-export default function AdminTools() {
-    const [running, setRunning] = useState(false);
-    const [result,  setResult]  = useState(null);
-    const [error,   setError]   = useState('');
+const ACTIONS = [
+    { key: 'group', label: 'Základná skupina', warn: 'Prepíše VŠETKY zápasy, výsledky a tipy. Pokračovať?' },
+    { key: 'qf',    label: 'Štvrťfinále',      warn: 'Vygeneruje QF zápasy a tipy. Pokračovať?' },
+    { key: 'sf',    label: 'Semifinále',        warn: 'Vygeneruje SF zápasy a tipy. Pokračovať?' },
+    { key: 'final', label: 'Finále + Bronz',    warn: 'Vygeneruje Finále a zápas o bronz. Pokračovať?' },
+];
 
-    const runSetup = async () => {
-        if (!window.confirm('Toto prepíše VŠETKY zápasy, výsledky a tipy. Pokračovať?')) return;
-        setRunning(true); setResult(null); setError('');
+export default function AdminTools() {
+    const [running, setRunning] = useState(null);
+    const [results, setResults] = useState({});
+    const [errors,  setErrors]  = useState({});
+
+    const run = async (action, warn) => {
+        if (!window.confirm(warn)) return;
+        setRunning(action);
+        setResults(p => ({ ...p, [action]: null }));
+        setErrors(p => ({ ...p, [action]: '' }));
         try {
-            const r = await apiFetch('v1/admin/test-setup', { method: 'POST' });
-            setResult(r);
-        } catch (e) { setError(e.message); }
-        finally { setRunning(false); }
+            const r = await apiFetch('v1/admin/test-setup', {
+                method: 'POST',
+                body: JSON.stringify({ action }),
+            });
+            setResults(p => ({ ...p, [action]: r }));
+        } catch (e) {
+            setErrors(p => ({ ...p, [action]: e.message }));
+        } finally {
+            setRunning(null);
+        }
     };
 
     return (
@@ -22,31 +37,47 @@ export default function AdminTools() {
             <h2>Nástroje</h2>
 
             <div className={styles.card} style={{ padding: 20, marginTop: 16 }}>
-                <h3 style={{ margin: '0 0 8px', fontSize: '1rem' }}>Test setup — presun turnaja do minulosti</h3>
-                <p style={{ margin: '0 0 16px', fontSize: '0.85rem', color: '#666' }}>
-                    Posunie dátumy skupinovej fázy na 15.4.–28.4., play-off 5.–8.5.
-                    Vygeneruje výsledky podľa ratingu a tipy pre všetkých aktívnych userov.
-                    <br /><strong>Pozor: prepíše existujúce výsledky a tipy!</strong>
+                <h3 style={{ margin: '0 0 4px', fontSize: '1rem' }}>Test setup — generovanie dát</h3>
+                <p style={{ margin: '0 0 16px', fontSize: '0.82rem', color: '#666' }}>
+                    Každé tlačidlo generuje dáta pre danú fázu turnaja. Poradie: najprv Základná skupina, potom QF → SF → Finále.
                 </p>
-                <button className={styles.btn} onClick={runSetup} disabled={running}>
-                    {running ? 'Prebieha…' : '▶ Spustiť test setup'}
-                </button>
 
-                {error && <p style={{ color: '#dc3545', marginTop: 12, fontSize: '0.85rem' }}>{error}</p>}
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                    {ACTIONS.map(({ key, label, warn }) => (
+                        <button key={key} className={styles.btn}
+                            onClick={() => run(key, warn)}
+                            disabled={running !== null}>
+                            {running === key ? 'Prebieha…' : '▶ ' + label}
+                        </button>
+                    ))}
+                </div>
 
-                {result && (
-                    <div style={{ marginTop: 16, fontSize: '0.85rem', background: '#f8f9fa', padding: 12, borderRadius: 8 }}>
-                        <div>✓ Zápasy aktualizované: <strong>{result.games_updated}</strong></div>
-                        <div>✓ Tipy vygenerované: <strong>{result.tips_generated}</strong> ({result.users} hráčov)</div>
-                        <div style={{ marginTop: 8 }}>
-                            <strong>Top 4 Sk. A:</strong> {result.group_A_top4?.join(', ')}<br />
-                            <strong>Top 4 Sk. B:</strong> {result.group_B_top4?.join(', ')}<br />
-                            <strong>Bronz:</strong> {result.bronze}<br />
-                            <strong>Zlato:</strong> {result.gold}
-                        </div>
+                {ACTIONS.map(({ key }) => (
+                    <div key={key}>
+                        {errors[key] && (
+                            <p style={{ color: '#dc3545', marginTop: 10, fontSize: '0.85rem' }}>
+                                [{key}] {errors[key]}
+                            </p>
+                        )}
+                        {results[key] && (
+                            <div style={{ marginTop: 12, fontSize: '0.85rem', background: '#f8f9fa', padding: 10, borderRadius: 8 }}>
+                                <ResultBlock r={results[key]} />
+                            </div>
+                        )}
                     </div>
-                )}
+                ))}
             </div>
         </div>
     );
+}
+
+function ResultBlock({ r }) {
+    if (r.action === 'group') return <>
+        <div>✓ Zápasy: <strong>{r.games}</strong>, Hráči: <strong>{r.users}</strong>, Tipy: <strong>{r.tips}</strong></div>
+    </>;
+    if (r.results) return <>
+        <div>✓ Výsledky:</div>
+        {r.results.map((s, i) => <div key={i} style={{ marginLeft: 8 }}>• {s}</div>)}
+    </>;
+    return <div>✓ Hotovo</div>;
 }
