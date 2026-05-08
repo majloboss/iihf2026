@@ -107,11 +107,12 @@ nav a.active { background: rgba(255,255,255,0.18); color: #fff; font-weight: 600
     .sidebar { display: none; }
 
     .content {
-        padding: 16px 12px 80px; /* bottom padding for nav bar */
+        padding: 16px 12px 120px; /* bottom padding for 2-row nav bar */
     }
 
     .bottomNav {
         display: flex;
+        flex-wrap: wrap;
         position: fixed;
         bottom: 0;
         left: 0;
@@ -122,23 +123,27 @@ nav a.active { background: rgba(255,255,255,0.18); color: #fff; font-weight: 600
     }
 
     .bottomNav a {
-        flex: 1;
+        width: 33.333%;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        padding: 8px 4px 10px;
+        padding: 10px 4px 12px;
         color: rgba(255,255,255,0.65);
         text-decoration: none;
-        font-size: 0.6rem;
-        gap: 3px;
+        font-size: 0.65rem;
+        gap: 4px;
         transition: color 0.15s, background 0.15s;
     }
+
+    /* 4th and 5th item → second row, 50% each */
+    .bottomNav a:nth-child(4),
+    .bottomNav a:nth-child(5) { width: 50%; }
 
     .bottomNav a:hover { background: rgba(255,255,255,0.08); }
     .bottomNav a.active { color: #fff; background: rgba(255,255,255,0.15); }
 
-    .bottomNavIcon { font-size: 1.25rem; line-height: 1; }
+    .bottomNavIcon { font-size: 1.4rem; line-height: 1; }
 }
 
 @media (min-width: 701px) {
