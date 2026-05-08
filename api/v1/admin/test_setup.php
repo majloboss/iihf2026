@@ -182,11 +182,12 @@ if ($action === 'qf') {
 
 // ── ACTION: sf ───────────────────────────────────────────────────────────────
 if ($action === 'sf') {
-    // Nasledujúci deň, rovnaký čas ako now+1h, 2h rozostupy
-    $base  = (new DateTime('now UTC'))->modify('+1 hour');
-    $start = (new DateTime('today UTC'))->modify('+1 day');
-    $start->setTime((int)$base->format('H'), (int)$base->format('i'));
-    $sf_ids = $pdo->query("SELECT id FROM iihf2026.games WHERE phase='SF' ORDER BY game_number")->fetchAll(PDO::FETCH_COLUMN);
+    // Nasledujúci deň po poslednom QF zápase, čas = now+1h, 2h rozostupy
+    $base    = (new DateTime('now UTC'))->modify('+1 hour');
+    $last_qf = $pdo->query("SELECT MAX(DATE(starts_at AT TIME ZONE 'UTC')) FROM iihf2026.games WHERE phase='QF'")->fetchColumn();
+    $start   = new DateTime(($last_qf ?: date('Y-m-d')) . 'T00:00:00+00:00');
+    $start->modify('+1 day')->setTime((int)$base->format('H'), (int)$base->format('i'));
+    $sf_ids  = $pdo->query("SELECT id FROM iihf2026.games WHERE phase='SF' ORDER BY game_number")->fetchAll(PDO::FETCH_COLUMN);
     foreach ($sf_ids as $i => $gid) {
         $dt = (clone $start)->modify('+' . ($i * 2) . ' hours');
         $pdo->prepare("UPDATE iihf2026.games SET starts_at=? WHERE id=?")->execute([$dt->format('Y-m-d H:i:sP'), $gid]);
@@ -197,10 +198,11 @@ if ($action === 'sf') {
 
 // ── ACTION: final ─────────────────────────────────────────────────────────────
 if ($action === 'final') {
-    // Pozajtra, rovnaký čas ako now+1h, 2h rozostupy
-    $base  = (new DateTime('now UTC'))->modify('+1 hour');
-    $start = (new DateTime('today UTC'))->modify('+2 days');
-    $start->setTime((int)$base->format('H'), (int)$base->format('i'));
+    // Nasledujúci deň po poslednom SF zápase, čas = now+1h, 2h rozostupy
+    $base    = (new DateTime('now UTC'))->modify('+1 hour');
+    $last_sf = $pdo->query("SELECT MAX(DATE(starts_at AT TIME ZONE 'UTC')) FROM iihf2026.games WHERE phase='SF'")->fetchColumn();
+    $start   = new DateTime(($last_sf ?: date('Y-m-d')) . 'T00:00:00+00:00');
+    $start->modify('+1 day')->setTime((int)$base->format('H'), (int)$base->format('i'));
     $fin_ids = $pdo->query("SELECT id,phase FROM iihf2026.games WHERE phase IN ('BRONZE','GOLD') ORDER BY game_number")->fetchAll();
     foreach ($fin_ids as $i => $g) {
         $dt = (clone $start)->modify('+' . ($i * 2) . ' hours');
