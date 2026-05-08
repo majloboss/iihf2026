@@ -32,9 +32,6 @@ export default function UserLayout() {
                     <NavLink to="/profile"   className={({ isActive }) => isActive ? styles.active : ''}>
                         👤 Profil
                     </NavLink>
-                    <NavLink to="/groups"    className={({ isActive }) => isActive ? styles.active : ''}>
-                        👥 Skupiny
-                    </NavLink>
                     <NavLink to="/pravidla"  className={({ isActive }) => isActive ? styles.active : ''}>
                         📋 Pravidlá
                     </NavLink>
