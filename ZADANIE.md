@@ -53,19 +53,19 @@ Boduje sa výsledok **riadnej hracej doby (60 minút)** — predĺženie ani sam
 
 | Podmienka | Skupinová fáza | Play-off (QF / SF / Finále / O bronz) |
 |-----------|:--------------:|:-------------------------------------:|
-| Správny víťaz alebo remíza | 1 bod | 3 body |
+| Správny víťaz alebo remíza | **3 body** | **5 bodov** |
 | Správny počet gólov domácich | 1 bod | 1 bod |
 | Správny počet gólov hostí | 1 bod | 1 bod |
-| **Maximum za zápas** | **3 body** | **5 bodov** |
+| **Maximum za zápas** | **5 bodov** | **7 bodov** |
 
-**Príklady (skupinová fáza, skutočnosť FIN 3:2 GER):**
+**Príklady (skupinová fáza, skutočnosť FIN 3:2 GER, max 5 bodov):**
 | Tip | Body | Dôvod |
 |-----|:----:|-------|
-| FIN 3:2 GER | 3 | víťaz ✓, góly FIN ✓, góly GER ✓ |
-| FIN 3:1 GER | 2 | víťaz ✓, góly FIN ✓, góly GER ✗ |
-| FIN 2:1 GER | 1 | víťaz ✓, góly FIN ✗, góly GER ✗ |
-| FIN 1:2 GER | 1 | víťaz ✗, góly FIN ✗, góly GER ✓ |
-| FIN 0:1 GER | 0 | víťaz ✗, góly FIN ✗, góly GER ✗ |
+| FIN 3:2 GER | 5 | víťaz ✓, góly FIN ✓, góly GER ✓ |
+| FIN 3:1 GER | 4 | víťaz ✓, góly FIN ✓ |
+| FIN 2:1 GER | 3 | víťaz ✓ |
+| FIN 1:2 GER | 1 | góly GER ✓ |
+| FIN 0:1 GER | 0 | — |
 
 ---
 
@@ -431,4 +431,4 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 
 ---
 
-*Posledná aktualizácia: 2026-05-08 (v1.81)*
+*Posledná aktualizácia: 2026-05-08 (v1.88)*

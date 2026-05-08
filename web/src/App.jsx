@@ -15,6 +15,7 @@ import UserLayout from './pages/user/UserLayout';
 import Groups from './pages/user/Groups';
 import Games from './pages/user/Games';
 import Standings from './pages/user/Standings';
+import Pravidla from './pages/user/Pravidla';
 
 function PrivateUserRoute({ children }) {
     const { user } = useAuth();
@@ -50,6 +51,7 @@ export default function App() {
                         <Route path="/groups"    element={<Groups />} />
                         <Route path="/standings" element={<Standings />} />
                         <Route path="/profile"   element={<Profile />} />
+                        <Route path="/pravidla"  element={<Pravidla />} />
                     </Route>
 
                     <Route path="/admin" element={
