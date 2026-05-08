@@ -49,6 +49,8 @@ try {
         str_starts_with($path, 'v1/admin/group-standings') => require __DIR__ . '/v1/admin/group_standings.php',
         $path === 'v1/admin/run-migration'               => require __DIR__ . '/v1/admin/run_migration.php',
         $path === 'v1/admin/login-logs'                  => require __DIR__ . '/v1/admin/login_logs.php',
+        $path === 'v1/admin/sync-scores'                 => require __DIR__ . '/v1/admin/sync_scores.php',
+        $path === 'v1/notifications'                     => require __DIR__ . '/v1/notifications.php',
         default                            => json_error('Not found', 404)
     };
 } catch (Throwable $e) {

@@ -3,7 +3,7 @@
 require_auth(true);
 $pdo = db();
 
-$migrations = ['003_group_standings.sql', '004_invites_sent_to.sql'];
+$migrations = ['003_group_standings.sql', '004_invites_sent_to.sql', '009_notification_settings.sql'];
 $ran = [];
 foreach ($migrations as $file) {
     $sql = file_get_contents(__DIR__ . '/../../migrations/' . $file);

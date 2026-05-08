@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getProfile, updateProfile, changePassword, deleteAccount, uploadAvatar } from '../api/profile';
 import Groups from './user/Groups';
+import Notifications from './user/Notifications';
 import styles from './Profile.module.css';
 
 export default function Profile() {
@@ -84,9 +85,11 @@ export default function Profile() {
                 <div className={styles.tabs}>
                     <button className={tab === 'profil'  ? styles.tabActive : styles.tab} onClick={() => setTab('profil')}>👤 Profil</button>
                     <button className={tab === 'skupiny' ? styles.tabActive : styles.tab} onClick={() => setTab('skupiny')}>👥 Skupiny</button>
+                    <button className={tab === 'notif'   ? styles.tabActive : styles.tab} onClick={() => setTab('notif')}>🔔 Notifikácie</button>
                 </div>
 
                 {tab === 'skupiny' && <div className={styles.tabContent}><Groups /></div>}
+                {tab === 'notif'   && <div className={styles.tabContent}><Notifications /></div>}
 
                 {tab === 'profil' && <>
                     <section className={styles.section}>
