@@ -47,10 +47,9 @@ export default function App() {
 
                     <Route element={<PrivateUserRoute><UserLayout /></PrivateUserRoute>}>
                         <Route path="/games"     element={<Games />} />
-                        <Route path="/groups"    element={<Groups />} />
+                        <Route path="/groups"    element={<Navigate to="/profile" replace />} />
                         <Route path="/standings" element={<Standings />} />
                         <Route path="/profile"   element={<Profile />} />
-                        <Route path="/groups"    element={<Navigate to="/profile" replace />} />
                         <Route path="/pravidla"  element={<Pravidla />} />
                     </Route>
 
