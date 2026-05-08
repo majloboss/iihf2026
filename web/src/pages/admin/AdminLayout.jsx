@@ -37,6 +37,9 @@ export default function AdminLayout() {
                     <NavLink to="/admin/tools" className={({ isActive }) => isActive ? styles.active : ''}>
                         🔧 Nástroje
                     </NavLink>
+                    <NavLink to="/admin/login-logs" className={({ isActive }) => isActive ? styles.active : ''}>
+                        📋 Prihlásenia
+                    </NavLink>
                 </nav>
                 <button className={styles.logout} onClick={handleLogout}>Odhlásiť</button>
             </aside>
