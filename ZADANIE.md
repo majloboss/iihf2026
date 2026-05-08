@@ -45,11 +45,13 @@
 - Zápasy — automatický výber aktívnej fázy pri otvorení (live → najbližší scheduled)
 - Zápasy — auto-scroll na dnešný / najbližší deň so zápasmi
 
-### ✅ Hotovo (nedávno doplnené — čaká na migráciu 008 na serveri)
+### ✅ Hotovo (nedávno doplnené)
 - Admin — logovanie prihlásení (čas, user, rola, env main/develop, IP, zariadenie); Admin → Prihlásenia
+- Admin — Sync výsledkov z API-Sports (liga 111, IIHF WC, sezóna 2026); Admin → Nástroje → Sync výsledkov
+  - Automaticky aktualizuje skóre + stav zápasov + prepočíta body tipujúcich
+  - Free plán API-Sports: aktivuje sa od 15.5.2026 keď turnaj začne ako "current" sezóna
 
 ### 🔲 TODO (nie je implementované)
-- Migrácia 008 na serveri — spustiť 008_login_logs.sql
 - Notifikácie — push (Web + FCM) + email
 - Admin — nastavenia bodovacieho systému
 - Android aplikácia (Kotlin)
@@ -445,4 +447,4 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 
 ---
 
-*Posledná aktualizácia: 2026-05-08 (v1.96)*
+*Posledná aktualizácia: 2026-05-08 (v1.97)*
