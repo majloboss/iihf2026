@@ -8,3 +8,5 @@ CREATE TABLE IF NOT EXISTS admin.notification_settings (
     minutes_before INT,
     PRIMARY KEY (user_id, notif_type)
 );
+-- patch: pridaj enabled ak chýba (pre existujúce tabuľky bez tohto stĺpca)
+ALTER TABLE admin.notification_settings ADD COLUMN IF NOT EXISTS enabled BOOLEAN NOT NULL DEFAULT TRUE;
