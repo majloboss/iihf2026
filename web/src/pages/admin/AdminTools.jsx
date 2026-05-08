@@ -52,6 +52,20 @@ export default function AdminTools() {
                     ))}
                 </div>
 
+                <hr style={{ margin: '20px 0', borderColor: '#eee' }} />
+
+                <h3 style={{ margin: '0 0 4px', fontSize: '1rem', color: '#dc3545' }}>⚠ Spustenie súťaže</h3>
+                <p style={{ margin: '0 0 12px', fontSize: '0.82rem', color: '#666' }}>
+                    Vymaže <strong>všetkých userov, tipy, pozývacie linky, skupiny</strong> a obnoví
+                    pôvodný rozvrh zápasov z PDF. Admini zostávajú. <strong>Nezvratné!</strong>
+                </p>
+                <button className={styles.btnSmallDanger}
+                    style={{ fontSize: '0.9rem', padding: '8px 16px' }}
+                    onClick={() => run('reset', 'POZOR! Toto vymaže VŠETKY testovacie dáta (userov, tipy, linky) a obnoví pôvodný rozvrh. Naozaj pokračovať?')}
+                    disabled={running !== null}>
+                    {running === 'reset' ? 'Prebieha…' : '⚠ Spustiť súťaž (reset dát)'}
+                </button>
+
                 {ACTIONS.map(({ key }) => (
                     <div key={key}>
                         {errors[key] && (
@@ -75,9 +89,14 @@ function ResultBlock({ r }) {
     if (r.action === 'group') return <>
         <div>✓ Zápasy: <strong>{r.games}</strong>, Hráči: <strong>{r.users}</strong>, Tipy: <strong>{r.tips}</strong></div>
     </>;
-    if (r.results) return <>
-        <div>✓ Výsledky:</div>
-        {r.results.map((s, i) => <div key={i} style={{ marginLeft: 8 }}>• {s}</div>)}
+    if (r.action === 'reset') return <>
+        <div>✓ Userov vymazaných: <strong>{r.users_deleted}</strong></div>
+        <div>✓ Linkov vymazaných: <strong>{r.links_deleted}</strong></div>
+        <div>✓ Zápasov obnovených: <strong>{r.games_reset}</strong></div>
+    </>;
+    if (r.games) return <>
+        <div>✓ Tipy pre hráčov: <strong>{r.users}</strong></div>
+        {r.games.map((s, i) => <div key={i} style={{ marginLeft: 8 }}>• {s}</div>)}
     </>;
     return <div>✓ Hotovo</div>;
 }
