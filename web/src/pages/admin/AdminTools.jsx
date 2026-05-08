@@ -2,20 +2,21 @@ import { useState } from 'react';
 import { apiFetch } from '../../api/client';
 import styles from './Admin.module.css';
 
-const ACTIONS = [
-    { key: 'group', label: 'Základná skupina', warn: 'Prepíše VŠETKY zápasy, výsledky a tipy. Pokračovať?' },
-    { key: 'qf',    label: 'Štvrťfinále',      warn: 'Vygeneruje QF zápasy a tipy. Pokračovať?' },
-    { key: 'sf',    label: 'Semifinále',        warn: 'Vygeneruje SF zápasy a tipy. Pokračovať?' },
-    { key: 'final', label: 'Finále + Bronz',    warn: 'Vygeneruje Finále a zápas o bronz. Pokračovať?' },
+const GEN_ACTIONS = [
+    { key: 'group', label: 'Základná skupina' },
+    { key: 'qf',    label: 'Štvrťfinále' },
+    { key: 'sf',    label: 'Semifinále' },
+    { key: 'final', label: 'Finále + Bronz' },
 ];
 
 export default function AdminTools() {
-    const [running, setRunning] = useState(null);
-    const [results, setResults] = useState({});
-    const [errors,  setErrors]  = useState({});
+    const [running,  setRunning]  = useState(null);
+    const [results,  setResults]  = useState({});
+    const [errors,   setErrors]   = useState({});
+    const [confirm,  setConfirm]  = useState(null); // 'init' | 'reset' | null
 
-    const run = async (action, warn) => {
-        if (!window.confirm(warn)) return;
+    const run = async (action) => {
+        setConfirm(null);
         setRunning(action);
         setResults(p => ({ ...p, [action]: null }));
         setErrors(p => ({ ...p, [action]: '' }));
@@ -32,69 +33,108 @@ export default function AdminTools() {
         }
     };
 
+    const busy = running !== null;
+
     return (
         <div style={{ maxWidth: 600, padding: 24 }}>
             <h2>Nástroje</h2>
 
+            {/* ── Generovanie testovacích dát ─────────────────────────── */}
             <div className={styles.card} style={{ padding: 20, marginTop: 16 }}>
-                <h3 style={{ margin: '0 0 4px', fontSize: '1rem' }}>Test setup — generovanie dát</h3>
+                <h3 style={{ margin: '0 0 4px', fontSize: '1rem' }}>Generovanie testovacích dát</h3>
                 <p style={{ margin: '0 0 16px', fontSize: '0.82rem', color: '#666' }}>
-                    Každé tlačidlo generuje dáta pre danú fázu turnaja. Poradie: najprv Základná skupina, potom QF → SF → Finále.
+                    Každé tlačidlo generuje dáta pre danú fázu. Poradie: Základná skupina → QF → SF → Finále.
                 </p>
-
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                    {ACTIONS.map(({ key, label, warn }) => (
+                    {GEN_ACTIONS.map(({ key, label }) => (
                         <button key={key} className={styles.btn}
-                            onClick={() => run(key, warn)}
-                            disabled={running !== null}>
+                            onClick={() => run(key)}
+                            disabled={busy}>
                             {running === key ? 'Prebieha…' : '▶ ' + label}
                         </button>
                     ))}
                 </div>
+                <ResultArea keys={GEN_ACTIONS.map(a => a.key)} results={results} errors={errors} />
+            </div>
 
-                <hr style={{ margin: '20px 0', borderColor: '#eee' }} />
+            {/* ── Spustenie súťaže ────────────────────────────────────── */}
+            <div className={styles.card} style={{ padding: 20, marginTop: 12, borderLeft: '4px solid #28a745' }}>
+                <h3 style={{ margin: '0 0 4px', fontSize: '1rem', color: '#28a745' }}>▶ Spustenie súťaže</h3>
+                <p style={{ margin: '0 0 12px', fontSize: '0.82rem', color: '#666' }}>
+                    Vymaže <strong>tipy, skupiny a tabuľky</strong>, obnoví pôvodný rozvrh zápasov z PDF.
+                    Useri a pozývacie linky zostávajú. <strong>Nezvratné!</strong>
+                </p>
+                {confirm === 'reset'
+                    ? <ConfirmInline
+                        text="Naozaj obnoviť pôvodný rozvrh a vymazať tipy?"
+                        onYes={() => run('reset')}
+                        onNo={() => setConfirm(null)}
+                      />
+                    : <button
+                        className={styles.btn}
+                        style={{ background: '#28a745' }}
+                        onClick={() => setConfirm('reset')}
+                        disabled={busy}>
+                        {running === 'reset' ? 'Prebieha…' : '▶ Spustiť súťaž'}
+                      </button>
+                }
+                <ResultArea keys={['reset']} results={results} errors={errors} />
+            </div>
 
+            {/* ── Inicializácia systému ───────────────────────────────── */}
+            <div className={styles.card} style={{ padding: 20, marginTop: 12, borderLeft: '4px solid #dc3545' }}>
                 <h3 style={{ margin: '0 0 4px', fontSize: '1rem', color: '#dc3545' }}>⚠ Inicializácia systému</h3>
                 <p style={{ margin: '0 0 12px', fontSize: '0.82rem', color: '#666' }}>
                     Vymaže <strong>všetkých userov, tipy, pozývacie linky, skupiny a tabuľky</strong>.
                     Zápasy zostanú. Admini zostávajú. <strong>Nezvratné!</strong>
                 </p>
-                <button className={styles.btnSmallDanger}
-                    style={{ fontSize: '0.9rem', padding: '8px 16px' }}
-                    onClick={() => run('init', 'POZOR! Toto vymaže VŠETKÝCH userov, tipy, linky a skupiny. Zápasy ostanú nezmenené. Naozaj pokračovať?')}
-                    disabled={running !== null}>
-                    {running === 'init' ? 'Prebieha…' : '⚠ Inicializovať systém'}
-                </button>
-
-                <hr style={{ margin: '20px 0', borderColor: '#eee' }} />
-
-                <h3 style={{ margin: '0 0 4px', fontSize: '1rem', color: '#dc3545' }}>⚠ Spustenie súťaže</h3>
-                <p style={{ margin: '0 0 12px', fontSize: '0.82rem', color: '#666' }}>
-                    Vymaže <strong>tipy, skupiny a tabuľky</strong>, obnoví pôvodný rozvrh zápasov z PDF.
-                    Useri a pozývacie linky zostávajú. <strong>Nezvratné!</strong>
-                </p>
-                <button className={styles.btnSmallDanger}
-                    style={{ fontSize: '0.9rem', padding: '8px 16px' }}
-                    onClick={() => run('reset', 'POZOR! Toto vymaže tipy, skupiny a tabuľky a obnoví pôvodný rozvrh z PDF. Naozaj pokračovať?')}
-                    disabled={running !== null}>
-                    {running === 'reset' ? 'Prebieha…' : '⚠ Spustiť súťaž'}
-                </button>
-
-                {[...ACTIONS.map(a => a.key), 'init', 'reset'].map(key => (
-                    <div key={key}>
-                        {errors[key] && (
-                            <p style={{ color: '#dc3545', marginTop: 10, fontSize: '0.85rem' }}>
-                                [{key}] {errors[key]}
-                            </p>
-                        )}
-                        {results[key] && (
-                            <div style={{ marginTop: 12, fontSize: '0.85rem', background: '#f8f9fa', padding: 10, borderRadius: 8 }}>
-                                <ResultBlock r={results[key]} />
-                            </div>
-                        )}
-                    </div>
-                ))}
+                {confirm === 'init'
+                    ? <ConfirmInline
+                        text="Naozaj vymazať VŠETKÝCH userov a všetky dáta?"
+                        onYes={() => run('init')}
+                        onNo={() => setConfirm(null)}
+                      />
+                    : <button
+                        className={styles.btnSmallDanger}
+                        style={{ fontSize: '0.9rem', padding: '8px 16px' }}
+                        onClick={() => setConfirm('init')}
+                        disabled={busy}>
+                        {running === 'init' ? 'Prebieha…' : '⚠ Inicializovať systém'}
+                      </button>
+                }
+                <ResultArea keys={['init']} results={results} errors={errors} />
             </div>
+        </div>
+    );
+}
+
+function ConfirmInline({ text, onYes, onNo }) {
+    return (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#fff3cd', border: '1px solid #ffc107', borderRadius: 6, padding: '8px 12px' }}>
+            <span style={{ fontSize: '0.88rem', flex: 1 }}>{text}</span>
+            <button onClick={onYes} style={{ background: '#dc3545', color: '#fff', border: 'none', borderRadius: 5, padding: '5px 14px', cursor: 'pointer', fontWeight: 600 }}>Áno</button>
+            <button onClick={onNo}  style={{ background: '#6c757d', color: '#fff', border: 'none', borderRadius: 5, padding: '5px 14px', cursor: 'pointer' }}>Nie</button>
+        </div>
+    );
+}
+
+function ResultArea({ keys, results, errors }) {
+    const items = keys.flatMap(key => {
+        const out = [];
+        if (errors[key])  out.push({ key, type: 'error', content: errors[key] });
+        if (results[key]) out.push({ key, type: 'result', content: results[key] });
+        return out;
+    });
+    if (items.length === 0) return null;
+    return (
+        <div style={{ marginTop: 14 }}>
+            {items.map(({ key, type, content }) =>
+                type === 'error'
+                    ? <p key={key} style={{ color: '#dc3545', margin: '6px 0', fontSize: '0.85rem' }}>[{key}] {content}</p>
+                    : <div key={key} style={{ background: '#f0fff4', border: '1px solid #28a745', borderRadius: 6, padding: '8px 12px', fontSize: '0.85rem', marginBottom: 6 }}>
+                        <ResultBlock r={content} />
+                      </div>
+            )}
         </div>
     );
 }
