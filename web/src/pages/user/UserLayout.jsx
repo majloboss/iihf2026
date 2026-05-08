@@ -23,6 +23,9 @@ export default function UserLayout() {
                     <span>IIHF 2026</span>
                 </div>
                 <nav>
+                    <NavLink to="/dashboard" className={({ isActive }) => isActive ? styles.active : ''}>
+                        🏠 Prehľad
+                    </NavLink>
                     <NavLink to="/games"     className={({ isActive }) => isActive ? styles.active : ''}>
                         🏒 Zápasy
                     </NavLink>

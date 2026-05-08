@@ -1,0 +1,166 @@
+.wrap {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 16px;
+}
+
+.loading { color: #aaa; padding: 40px; text-align: center; }
+
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+@media (max-width: 700px) {
+    .grid { grid-template-columns: 1fr; }
+}
+
+.section { display: flex; flex-direction: column; gap: 10px; }
+
+.sectionHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 6px;
+    margin-bottom: 2px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #1a3a6b;
+    padding-bottom: 6px;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.more {
+    font-size: 0.78rem;
+    color: #1a3a6b;
+    text-decoration: none;
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: none;
+}
+.more:hover { text-decoration: underline; }
+
+/* ── Game card ── */
+.gameCard {
+    background: #fff;
+    border: 1px solid #e9ecef;
+    border-left: 3px solid #e9ecef;
+    border-radius: 8px;
+    padding: 10px 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.05);
+}
+.finished { border-left-color: #28a745; }
+.live     { border-left-color: #dc3545; }
+
+.gameCardTop {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 7px;
+}
+.gamePhase { font-size: 0.72rem; color: #888; }
+.gameTime  { font-size: 0.72rem; color: #888; font-weight: 600; }
+
+.gameRow {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.gameTeam {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex: 1;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #1a3a6b;
+}
+.gameTeamRight { flex-direction: row-reverse; justify-content: flex-start; }
+.gameFlag { width: 22px; height: 14px; object-fit: cover; border-radius: 2px; flex-shrink: 0; }
+.tbd { color: #aaa; font-weight: 400; font-size: 0.82rem; }
+
+.gameScore {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #222;
+    min-width: 60px;
+    justify-content: center;
+}
+.scoreSep { color: #aaa; font-weight: 400; }
+.vs { font-size: 0.75rem; color: #aaa; font-weight: 400; }
+
+.gameTip {
+    margin-top: 7px;
+    font-size: 0.75rem;
+    color: #888;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.gamePts { font-weight: 700; border-radius: 4px; padding: 1px 5px; font-size: 0.72rem; }
+.ptsGood { background: #d4edda; color: #155724; }
+.ptsMed  { background: #fff3cd; color: #856404; }
+.ptsBad  { background: #f8d7da; color: #721c24; }
+
+/* ── Standings card ── */
+.standCard {
+    background: #fff;
+    border: 1px solid #e8ecf0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,.05);
+}
+.standHeader {
+    background: #1a3a6b;
+    color: #fff;
+    padding: 8px 12px;
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+.standBody { padding: 4px 0; }
+
+.standRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 12px;
+    border-bottom: 1px solid #f8f8f8;
+}
+.standRow:last-child { border-bottom: none; }
+.standMe { background: #f0f5ff; }
+
+.standRank { width: 22px; font-size: 0.8rem; font-weight: 700; color: #aaa; flex-shrink: 0; }
+.r1 { color: #f5a623; }
+.r2 { color: #9b9b9b; }
+.r3 { color: #c47b3a; }
+
+.standPlayer {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.85rem;
+    color: #333;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.standAvatar { width: 22px; height: 22px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+.standAvatarPh {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: #d0d8e8; color: #1a3a6b;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 0.68rem; font-weight: 700; flex-shrink: 0;
+}
+.standPts { font-weight: 700; font-size: 0.88rem; color: #1a3a6b; }
+
+.standEllipsis { text-align: center; color: #ccc; font-size: 0.78rem; padding: 2px 0; }
+
+.empty { color: #aaa; font-size: 0.88rem; text-align: center; padding: 20px 0; }

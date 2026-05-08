@@ -16,6 +16,7 @@ import Games from './pages/user/Games';
 import GroupStandings from './pages/user/GroupStandings';
 import Standings from './pages/user/Standings';
 import Pravidla from './pages/user/Pravidla';
+import Dashboard from './pages/user/Dashboard';
 
 function PrivateUserRoute({ children }) {
     const { user } = useAuth();
@@ -35,7 +36,7 @@ function HomeRedirect() {
     const { user } = useAuth();
     if (!user) return <Navigate to="/login" replace />;
     if (user.role === 'admin') return <Navigate to="/admin/users" replace />;
-    return <Navigate to="/games" replace />;
+    return <Navigate to="/dashboard" replace />;
 }
 
 export default function App() {
@@ -47,6 +48,7 @@ export default function App() {
                     <Route path="/register" element={<Register />} />
 
                     <Route element={<PrivateUserRoute><UserLayout /></PrivateUserRoute>}>
+                        <Route path="/dashboard" element={<Dashboard />} />
                         <Route path="/games"     element={<Games />} />
                         <Route path="/tabulky"   element={<GroupStandings />} />
                         <Route path="/groups"    element={<Navigate to="/profile" replace />} />
