@@ -25,28 +25,42 @@
 - Dashboard — klik na live/finished → modal s tipmi členov skupín
 - Pravidlá — stránka s bodovacou tabuľkou a príkladmi
 - Notifikácie (nastavenia) — záložka v Profile; per typ: email/push/čas pred zápasom
-- Mobilná optimalizácia — bottom nav 2 riadky (3+3), sidebar skrytý pod 900px
+- Mobilná optimalizácia — bottom nav 2 riadky (3+3), sidebar skrytý pod 900px, Odhlásiť tlačidlo viditeľné na mobile
 - PWA — manifest, offline SW, favicon
 
 **Admin časť**
-- Správa používateľov — zoznam, aktivácia, rola, edit, heslo, zmazanie
-- Pozývacie linky — generovanie, zoznam, sent_to, kopírovanie URL
+- Správa používateľov — zoznam, aktivácia, rola, edit, heslo, zmazanie (vrátane FK cleanup)
+- Pozvánky (dříve Pozývacie linky):
+  - Generovanie linku s voliteľným adresátom (meno / email)
+  - Keď je adresát email — automaticky sa odošle pozývací email cez SMTP
+  - Email obsahuje registračný link + pravidlá tipovačky
+  - Voliteľný výber skupiny (dropdown z adminových skupín) — nový člen sa po registrácii automaticky pridá
+  - Badge "Mail odoslaný" a stĺpec "Skupina" v zozname pozvánok
 - Správa zápasov — dátum/čas, tímy (vrátane play-off 57–64), miesto, stav, skóre
 - Zadávanie výsledkov — dedikovaná obrazovka `/admin/results`, inline, kartový layout
 - Zadávanie výsledkov — checkbox "Po predĺžení": zadáš 3:2 + zaškrtneš → systém uloží regulárne 2:2 + konečné 3:2; validácia rozdiel = 1
 - Skupinové tabuľky — sync, úprava poradia pri rovnosti bodov, finalizácia
 - Skupinové tabuľky — bodový systém 3/2/1/0 (regulárna výhra=3, OT výhra=2, OT prehra=1, regulárna prehra=0)
 - Výpočet bodov — automaticky po výsledku + hromadný prepočet
-- Nástroje — generovanie test dát (skupina/QF/SF/Finále), Spustenie súťaže, Inicializácia
+- Admin menu — sekcia "Správa": Pozvánky, Nástroje, Prihlásenia, Odoslané maily
+- Nástroje — generovanie test dát (skupina/QF/SF/Finále), Spustenie súťaže, Inicializácia, Sync API-Sports, Test emailu (SMTP), Spustenie DB migrácií
 - Prihlásenia — log všetkých prihlásení (čas, user, rola, env main/develop, IP, zariadenie)
+- Odoslané maily — log všetkých odoslaných emailov (čas, komu, predmet, stav)
+- SMTP email — betclub@fellow.sk, smtp.websupport.sk:465 SSL; helper send_mail + send_mail_logged
 - Sync výsledkov — API-Sports (liga 111, sezóna 2026); aktualizuje skóre + stav + prepočíta body
   - ⚠️ Free plán: aktivuje sa od 15.5.2026 keď turnaj začne
 
 ### 🔲 TODO (nie je implementované)
-- Notifikácie — faktické odosielanie push (Web Push API) + email (SMTP fellow.sk)
-- Notifikácie — cron job na fellow.sk pre scheduled odosielanie (X min pred zápasom)
+- Notifikácie — faktické odosielanie push (Web Push API)
+- Notifikácie — cron job na fellow.sk cPanel (`php api/cron/send_notifications.php` každých 5 min)
+  - Skript existuje (`api/cron/send_notifications.php`), treba nastaviť v cPanel
 - Admin — nastavenia bodovacieho systému (úprava scoring_config)
 - Android aplikácia (Kotlin)
+
+### ⚠️ TREBA SPUSTIŤ (DB migrácie)
+- V Admin → Nástroje → kliknúť **"Spustit migracie"** — spustí run_012 + run_013
+  - `run_012.sql` — stĺpec `email_sent` v invites, tabuľka `mail_log`
+  - `run_013.sql` — stĺpec `group_id` v invites (odporúčanie skupiny)
 
 ---
 
@@ -184,10 +198,13 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 - ✅ Zmena hesla používateľovi
 - ✅ Zmazanie používateľa
 
-### Správa pozývacích linkov ✅
-- ✅ Generovanie pozývacieho linku
-- ✅ Zobrazenie zoznamu linkov (použité / nepoužité)
-- ✅ Komu bol link poslaný (editovateľné pole sent_to)
+### Pozvánky ✅
+- ✅ Generovanie pozývacieho linku s adresátom (meno alebo email)
+- ✅ Ak je adresát platná emailová adresa — automaticky sa odošle pozývací email
+- ✅ Email obsahuje registračný link + odkaz na pravidlá tipovačky
+- ✅ Výber skupiny pri vytváraní pozvánky — nový člen pridaný automaticky po registrácii
+- ✅ Zobrazenie zoznamu linkov (použité / nepoužité), stĺpce: Adresát / Skupina / Mail badge
+- ✅ Editovateľné pole Adresát (inline klik)
 - ✅ Kopírovanie celej URL per riadok
 - ✅ Klik na username hráča → detail/úprava profilu (UserModal)
 
@@ -278,6 +295,30 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 | created_at | TIMESTAMP | |
 | used_at | TIMESTAMP | NULL = nepoužitý |
 | user_id | FK → users | NULL = nepoužitý |
+| sent_to | VARCHAR(150) | meno alebo email adresáta |
+| email_sent | BOOLEAN DEFAULT FALSE | TRUE ak bol odoslaný email (run_012) |
+| group_id | FK → friend_groups | odporúčaná skupina (run_013) |
+
+### admin.mail_log ✅ (run_012)
+| Pole | Typ | Popis |
+|------|-----|-------|
+| id | SERIAL PK | |
+| to_email | VARCHAR(150) NOT NULL | |
+| subject | VARCHAR(255) NOT NULL | |
+| status | VARCHAR(10) DEFAULT 'sent' | `sent` \| `failed` |
+| error_msg | TEXT | chybová správa pri failed |
+| sent_at | TIMESTAMP DEFAULT NOW() | |
+
+### admin.login_logs ✅
+| Pole | Typ | Popis |
+|------|-----|-------|
+| id | SERIAL PK | |
+| user_id | FK → users ON DELETE SET NULL | |
+| username | VARCHAR(50) NOT NULL | |
+| ip_address | VARCHAR(45) | |
+| user_agent | TEXT | |
+| env | VARCHAR(10) DEFAULT 'main' | `main` \| `develop` |
+| logged_at | TIMESTAMP DEFAULT NOW() | |
 
 ### admin.friend_groups ✅
 | Pole | Typ | Popis |
@@ -346,7 +387,7 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 | updated_by | FK → users | |
 | updated_at | TIMESTAMP | |
 
-### admin.notification_settings 🟠
+### admin.notification_settings ✅
 | Pole | Typ | Popis |
 |------|-----|-------|
 | user_id | FK → users | |
@@ -383,12 +424,13 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 | Obrazovka | Popis | Stav |
 |-----------|-------|------|
 | **Správa používateľov** | Zoznam, aktivácia, zmena roly, edit, heslo, zmazanie | ✅ |
-| **Pozývacie linky** | Generovanie, zoznam, sent_to, kopírovanie URL | ✅ |
+| **Pozvánky** | Generovanie, email, odporúčanie skupiny, zoznam | ✅ |
 | **Zápasy** | Zoznam a úprava zápasov (dátum, čas, tímy, miesto) | ✅ |
-| **Zadanie výsledku** | Inline zadávanie skóre + stavu; prepočet bodov | ✅ |
+| **Zadanie výsledku** | Inline zadávanie skóre + stavu; prepočet bodov; OT checkbox | ✅ |
 | **Skupinové tabuľky** | Sync, úprava poradia, finalizácia | ✅ |
-| **Nástroje** | Test dáta, spustenie súťaže, inicializácia, sync API-Sports | ✅ |
+| **Nástroje** | Test dáta, súťaž, inicializácia, sync API-Sports, test email, DB migrácie | ✅ |
 | **Prihlásenia** | Log prihlásení (čas, user, rola, env, IP, zariadenie) | ✅ |
+| **Odoslané maily** | Log všetkých emailov (čas, komu, predmet, stav) | ✅ |
 | **Nastavenia bodovanie** | Úprava scoring_config hodnôt | 🔲 |
 
 ### API endpointy
@@ -427,6 +469,8 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 | `v1/admin/run-migration` | POST | Spustenie DB migrácií | ✅ |
 | `v1/admin/login-logs` | GET | Log prihlásení | ✅ |
 | `v1/admin/sync-scores` | POST | Sync výsledkov z API-Sports | ✅ |
+| `v1/admin/test-mail` | POST | Odoslanie testovacieho emailu | ✅ |
+| `v1/admin/mail-log` | GET | Log odoslaných mailov | ✅ |
 
 ---
 
@@ -442,7 +486,7 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 ### DB schémy v DB-BET
 | Schéma | Obsah |
 |--------|-------|
-| `admin` | users, invites, friend_groups, group_members, notification_settings, schema_versions |
+| `admin` | users, invites, friend_groups, group_members, notification_settings, notification_log, login_logs, mail_log |
 | `iihf2026` | teams, games, scoring_config, tips |
 
 ---
@@ -455,4 +499,4 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 
 ---
 
-*Posledná aktualizácia: 2026-05-08 (v2.00)*
+*Posledná aktualizácia: 2026-05-09 (v2.10)*
