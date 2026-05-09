@@ -1,7 +1,7 @@
 <?php
-// GET  /v1/admin/invites  — zoznam pozývacích linkov
-// POST /v1/admin/invites  — generuj nový link
-// PUT  /v1/admin/invites  — uprav sent_to pre existujúci link
+// GET  /v1/admin/invites  - zoznam pozyvacich linkov
+// POST /v1/admin/invites  - generuj novy link
+// PUT  /v1/admin/invites  - uprav sent_to pre existujuci link
 $auth = require_admin();
 $pdo  = db();
 require_once __DIR__ . '/../../helpers/mailer.php';
@@ -118,22 +118,22 @@ if ($method === 'POST') {
 
         $subject = 'Pozvánka do IIHF 2026 Tipovačky';
         $group_line = $group_name
-            ? "Po registrácii budeš automaticky pridaný do skupiny „{$group_name}" — kde budeš môcť súťažiť s ostatnými členmi.\n\n"
-            : "Odporúčame ti pripojiť sa k existujúcej skupine alebo si vytvoriť vlastnú a pozvať ďalších priateľov.\n\n";
+            ? "Po registracii budes automaticky pridany do skupiny \"" . $group_name . "\" - kde budes moct sutazit s ostatnymi clenmi.\n\n"
+            : "Odporucame ti pripojit sa k existujucej skupine alebo si vytvorit vlastnu a pozvat dalsich priatelov.\n\n";
 
         $rules_url = APP_URL . '/pravidla';
         $body_mail = "Ahoj,\n\n"
-            . "pozývame Ťa do IIHF 2026 Tipovačky — súťaže v tipovaní výsledkov Majstrovstiev sveta v ľadovom hokeji 2026 (15. – 31. mája 2026).\n\n"
-            . "Zaregistruj sa kliknutím na tento odkaz:\n$link\n\n"
-            . "Po registrácii si zvolíš vlastné meno a heslo. Potom môžeš:\n"
-            . "• tipovať presné výsledky všetkých 64 zápasov MS\n"
-            . "• súťažiť s kamarátmi v skupinách\n"
-            . "• sledovať priebežné poradie\n\n"
+            . "pozyvame Ta do IIHF 2026 Tipovacky - sutaze v tipovani vysledkov Majstrovstiev sveta v ladovom hokeji 2026 (15. - 31. maja 2026).\n\n"
+            . "Zaregistruj sa kliknutim na tento odkaz:\n$link\n\n"
+            . "Po registracii si zvolis vlastne meno a heslo. Potom mozes:\n"
+            . "- tipovat presne vysledky vsetkych 64 zapasov MS\n"
+            . "- sutazit s kamaratmi v skupinach\n"
+            . "- sledovat priebezne poradie\n\n"
             . $group_line
-            . "Pred začatím odporúčame prečítať si pravidlá tipovačky:\n$rules_url\n\n"
-            . "Link je jednorazový — platí pre jednu registráciu.\n\n"
-            . "Tešíme sa na Teba!\n"
-            . "IIHF 2026 Tipovačka";
+            . "Pred zacatim odporucame precitat si pravidla tipovacky:\n$rules_url\n\n"
+            . "Link je jednorazovy - plati pre jednu registraciu.\n\n"
+            . "Tesime sa na Teba!\n"
+            . "IIHF 2026 Tipovacka";
         try {
             send_mail_logged($pdo, $sent_to, $subject, $body_mail);
             $pdo->prepare("UPDATE admin.invites SET email_sent=TRUE WHERE id=?")->execute([$id]);
