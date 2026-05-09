@@ -7,18 +7,34 @@ $pdo  = db();
 require_once __DIR__ . '/../../helpers/mailer.php';
 
 if ($method === 'GET') {
-    $rows = $pdo->query(
-        "SELECT i.id, i.invite_token, i.sent_to, i.created_at, i.used_at, i.email_sent,
-                i.group_id,
-                fg.name AS group_name,
-                i.user_id AS used_by_id,
-                u.username AS used_by_username,
-                u.first_name, u.last_name, u.email, u.phone, u.avatar
-         FROM admin.invites i
-         LEFT JOIN admin.users u ON u.id = i.user_id
-         LEFT JOIN admin.friend_groups fg ON fg.id = i.group_id
-         ORDER BY i.created_at DESC"
-    )->fetchAll();
+    // Skús plnú query s group_id; ak stĺpec ešte neexistuje (run_013.sql), použij fallback
+    try {
+        $rows = $pdo->query(
+            "SELECT i.id, i.invite_token, i.sent_to, i.created_at, i.used_at, i.email_sent,
+                    i.group_id,
+                    fg.name AS group_name,
+                    i.user_id AS used_by_id,
+                    u.username AS used_by_username,
+                    u.first_name, u.last_name, u.email, u.phone, u.avatar
+             FROM admin.invites i
+             LEFT JOIN admin.users u ON u.id = i.user_id
+             LEFT JOIN admin.friend_groups fg ON fg.id = i.group_id
+             ORDER BY i.created_at DESC"
+        )->fetchAll();
+    } catch (PDOException $e) {
+        // Fallback bez group_id (pred migráciou run_013.sql)
+        $rows = $pdo->query(
+            "SELECT i.id, i.invite_token, i.sent_to, i.created_at, i.used_at, i.email_sent,
+                    i.user_id AS used_by_id,
+                    u.username AS used_by_username,
+                    u.first_name, u.last_name, u.email, u.phone, u.avatar
+             FROM admin.invites i
+             LEFT JOIN admin.users u ON u.id = i.user_id
+             ORDER BY i.created_at DESC"
+        )->fetchAll();
+        foreach ($rows as &$r) { $r['group_id'] = null; $r['group_name'] = null; }
+        unset($r);
+    }
 
     $base = APP_URL . '/register?token=';
     foreach ($rows as &$r) {
@@ -52,10 +68,19 @@ if ($method === 'POST') {
         if (!$chk->fetch()) $group_id = null;
     }
 
-    $stmt = $pdo->prepare(
-        'INSERT INTO admin.invites (invite_token, created_by, sent_to, group_id) VALUES (?, ?, ?, ?) RETURNING id'
-    );
-    $stmt->execute([$token, $auth['user_id'], $sent_to ?: null, $group_id ?: null]);
+    try {
+        $stmt = $pdo->prepare(
+            'INSERT INTO admin.invites (invite_token, created_by, sent_to, group_id) VALUES (?, ?, ?, ?) RETURNING id'
+        );
+        $stmt->execute([$token, $auth['user_id'], $sent_to ?: null, $group_id ?: null]);
+    } catch (PDOException $e) {
+        // Fallback ak group_id stĺpec ešte neexistuje (run_013.sql)
+        $group_id = null;
+        $stmt = $pdo->prepare(
+            'INSERT INTO admin.invites (invite_token, created_by, sent_to) VALUES (?, ?, ?) RETURNING id'
+        );
+        $stmt->execute([$token, $auth['user_id'], $sent_to ?: null]);
+    }
     $id = $stmt->fetchColumn();
 
     $link       = APP_URL . '/register?token=' . $token;
