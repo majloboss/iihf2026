@@ -6,10 +6,11 @@ function send_mail(string $to, string $subject, string $body): void {
     $port = MAIL_PORT;
 
     $fp = $port === 465
-        ? fsockopen('ssl://' . $host, $port, $errno, $errstr, 10)
-        : fsockopen($host, $port, $errno, $errstr, 10);
+        ? fsockopen('ssl://' . $host, $port, $errno, $errstr, 15)
+        : fsockopen($host, $port, $errno, $errstr, 15);
 
-    if (!$fp) throw new RuntimeException("SMTP: $errstr ($errno)");
+    if (!$fp) throw new RuntimeException("SMTP connect {$host}:{$port} failed: $errstr ($errno)");
+    stream_set_timeout($fp, 15);
 
     smtp_read($fp);
     smtp_cmd($fp, 'EHLO localhost');
