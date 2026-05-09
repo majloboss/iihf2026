@@ -29,9 +29,6 @@ $pdo->prepare('DELETE FROM admin.friend_groups WHERE created_by = ?')->execute([
 $pdo->prepare('UPDATE admin.invites SET user_id = NULL WHERE user_id = ?')->execute([$id]);
 $pdo->prepare('UPDATE admin.invites SET created_by = NULL WHERE created_by = ?')->execute([$id]);
 
-// scoring_config — uvoľni updated_by
-$pdo->prepare('UPDATE iihf2026.scoring_config SET updated_by = NULL WHERE updated_by = ?')->execute([$id]);
-
 // Zmaž usera (tips, notification_settings, notification_log majú ON DELETE CASCADE)
 $pdo->prepare('DELETE FROM admin.users WHERE id = ?')->execute([$id]);
 
