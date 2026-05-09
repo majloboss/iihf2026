@@ -4,6 +4,7 @@
 // PUT  /v1/admin/invites  — uprav sent_to pre existujúci link
 $auth = require_admin();
 $pdo  = db();
+require_once __DIR__ . '/../../helpers/mailer.php';
 
 if ($method === 'GET') {
     $rows = $pdo->query(
@@ -34,8 +35,34 @@ if ($method === 'POST') {
     $stmt->execute([$token, $auth['user_id'], $sent_to ?: null]);
     $id = $stmt->fetchColumn();
 
-    $link = APP_URL . '/register?token=' . $token;
-    json_ok(['id' => $id, 'token' => $token, 'link' => $link, 'sent_to' => $sent_to], 201);
+    $link       = APP_URL . '/register?token=' . $token;
+    $email_sent = false;
+    $email_err  = null;
+
+    if ($sent_to && filter_var($sent_to, FILTER_VALIDATE_EMAIL)) {
+        $subject = 'Pozvánka do IIHF 2026 Tipovačky';
+        $body_mail = "Ahoj,\n\n"
+            . "pozývame Ťa do IIHF 2026 Tipovačky — súťaže v tipovaní výsledkov Majstrovstiev sveta v ľadovom hokeji 2026 (15. – 31. mája 2026).\n\n"
+            . "Zaregistruj sa kliknutím na tento odkaz:\n$link\n\n"
+            . "Po registrácii si zvolíš vlastné meno a heslo. Potom môžeš:\n"
+            . "• tipovať presné výsledky všetkých 64 zápasov MS\n"
+            . "• súťažiť s kamarátmi v skupinách\n"
+            . "• sledovať priebežné poradie\n\n"
+            . "Odporúčame ti pripojiť sa k existujúcej skupine alebo si vytvoriť vlastnú a pozvať ďalších priateľov.\n\n"
+            . "Link je jednorazový — platí pre jednu registráciu.\n\n"
+            . "Tešíme sa na Teba!\n"
+            . "IIHF 2026 Tipovačka";
+        try {
+            send_mail_logged($pdo, $sent_to, $subject, $body_mail);
+            $pdo->prepare("UPDATE admin.invites SET email_sent=TRUE WHERE id=?")->execute([$id]);
+            $email_sent = true;
+        } catch (Throwable $e) {
+            $email_err = $e->getMessage();
+        }
+    }
+
+    json_ok(['id' => $id, 'token' => $token, 'link' => $link, 'sent_to' => $sent_to,
+             'email_sent' => $email_sent, 'email_err' => $email_err], 201);
 }
 
 if ($method === 'PUT') {
