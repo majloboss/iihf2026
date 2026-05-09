@@ -8,10 +8,18 @@ require_once __DIR__ . '/../../helpers/mailer.php';
 
 if ($method === 'GET') {
     // Skús plnú query s group_id; ak stĺpec ešte neexistuje (run_013.sql), použij fallback
+    // Postupný fallback pre prípad chýbajúcich stĺpcov (run_012 / run_013)
+    $baseSelect = "SELECT i.id, i.invite_token, i.sent_to, i.created_at, i.used_at,
+                          i.user_id AS used_by_id,
+                          u.username AS used_by_username,
+                          u.first_name, u.last_name, u.email, u.phone, u.avatar
+                   FROM admin.invites i
+                   LEFT JOIN admin.users u ON u.id = i.user_id
+                   ORDER BY i.created_at DESC";
     try {
         $rows = $pdo->query(
-            "SELECT i.id, i.invite_token, i.sent_to, i.created_at, i.used_at, i.email_sent,
-                    i.group_id,
+            "SELECT i.id, i.invite_token, i.sent_to, i.created_at, i.used_at,
+                    i.email_sent, i.group_id,
                     fg.name AS group_name,
                     i.user_id AS used_by_id,
                     u.username AS used_by_username,
@@ -22,18 +30,30 @@ if ($method === 'GET') {
              ORDER BY i.created_at DESC"
         )->fetchAll();
     } catch (PDOException $e) {
-        // Fallback bez group_id (pred migráciou run_013.sql)
-        $rows = $pdo->query(
-            "SELECT i.id, i.invite_token, i.sent_to, i.created_at, i.used_at, i.email_sent,
-                    i.user_id AS used_by_id,
-                    u.username AS used_by_username,
-                    u.first_name, u.last_name, u.email, u.phone, u.avatar
-             FROM admin.invites i
-             LEFT JOIN admin.users u ON u.id = i.user_id
-             ORDER BY i.created_at DESC"
-        )->fetchAll();
-        foreach ($rows as &$r) { $r['group_id'] = null; $r['group_name'] = null; }
-        unset($r);
+        try {
+            // Bez group_id (run_013 nespustený)
+            $rows = $pdo->query(
+                "SELECT i.id, i.invite_token, i.sent_to, i.created_at, i.used_at,
+                        i.email_sent,
+                        i.user_id AS used_by_id,
+                        u.username AS used_by_username,
+                        u.first_name, u.last_name, u.email, u.phone, u.avatar
+                 FROM admin.invites i
+                 LEFT JOIN admin.users u ON u.id = i.user_id
+                 ORDER BY i.created_at DESC"
+            )->fetchAll();
+            foreach ($rows as &$r) { $r['group_id'] = null; $r['group_name'] = null; }
+            unset($r);
+        } catch (PDOException $e2) {
+            // Bez email_sent aj group_id (run_012 nespustený)
+            $rows = $pdo->query($baseSelect)->fetchAll();
+            foreach ($rows as &$r) {
+                $r['email_sent'] = false;
+                $r['group_id']   = null;
+                $r['group_name'] = null;
+            }
+            unset($r);
+        }
     }
 
     $base = APP_URL . '/register?token=';
