@@ -45,6 +45,18 @@ function send_mail(string $to, string $subject, string $body): void {
     fclose($fp);
 }
 
+function send_mail_logged(PDO $pdo, string $to, string $subject, string $body): void {
+    try {
+        send_mail($to, $subject, $body);
+        $pdo->prepare("INSERT INTO admin.mail_log (to_email, subject, status) VALUES (?,?,'sent')")
+            ->execute([$to, $subject]);
+    } catch (Throwable $e) {
+        $pdo->prepare("INSERT INTO admin.mail_log (to_email, subject, status, error_msg) VALUES (?,?,'failed',?)")
+            ->execute([$to, $subject, $e->getMessage()]);
+        throw $e;
+    }
+}
+
 function smtp_cmd($fp, string $cmd): string {
     fwrite($fp, "$cmd\r\n");
     return smtp_read($fp);

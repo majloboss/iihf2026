@@ -44,6 +44,15 @@ nav a {
 nav a:hover { background: rgba(255,255,255,0.1); color: #fff; }
 nav a.active { background: rgba(255,255,255,0.18); color: #fff; font-weight: 600; }
 
+.navSection {
+    padding: 8px 20px 4px;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(255,255,255,0.4);
+    margin-top: 8px;
+}
+
 .logout {
     margin: 16px;
     padding: 10px;

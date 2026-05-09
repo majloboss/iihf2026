@@ -19,9 +19,6 @@ export default function AdminLayout() {
                     <NavLink to="/admin/users"   className={({ isActive }) => isActive ? styles.active : ''}>
                         👤 Používatelia
                     </NavLink>
-                    <NavLink to="/admin/invites" className={({ isActive }) => isActive ? styles.active : ''}>
-                        🔗 Pozývacie linky
-                    </NavLink>
                     <NavLink to="/admin/games" className={({ isActive }) => isActive ? styles.active : ''}>
                         🏒 Zápasy
                     </NavLink>
@@ -34,11 +31,20 @@ export default function AdminLayout() {
                     <NavLink to="/admin/standings" className={({ isActive }) => isActive ? styles.active : ''}>
                         🏆 Skupiny
                     </NavLink>
+
+                    <div className={styles.navSection}>Správa</div>
+
+                    <NavLink to="/admin/invites" className={({ isActive }) => isActive ? styles.active : ''}>
+                        🔗 Pozvánky
+                    </NavLink>
                     <NavLink to="/admin/tools" className={({ isActive }) => isActive ? styles.active : ''}>
                         🔧 Nástroje
                     </NavLink>
                     <NavLink to="/admin/login-logs" className={({ isActive }) => isActive ? styles.active : ''}>
                         📋 Prihlásenia
+                    </NavLink>
+                    <NavLink to="/admin/mail-log" className={({ isActive }) => isActive ? styles.active : ''}>
+                        📧 Odoslané maily
                     </NavLink>
                 </nav>
                 <button className={styles.logout} onClick={handleLogout}>Odhlásiť</button>

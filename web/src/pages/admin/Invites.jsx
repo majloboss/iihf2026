@@ -57,24 +57,37 @@ function SentToCell({ invite, onSaved }) {
 
 export default function Invites() {
     const [invites,    setInvites]    = useState([]);
+    const [groups,     setGroups]     = useState([]);
     const [loading,    setLoading]    = useState(true);
     const [generating, setGen]        = useState(false);
     const [sentTo,     setSentTo]     = useState('');
+    const [groupId,    setGroupId]    = useState('');
     const [error,      setError]      = useState('');
+    const [info,       setInfo]       = useState('');
     const [editUser,   setEditUser]   = useState(null);
 
     const load = () => getInvites()
-        .then(setInvites)
+        .then(data => {
+            // API vracia {invites, groups}
+            if (data?.invites) {
+                setInvites(data.invites);
+                setGroups(data.groups || []);
+            } else {
+                setInvites(data); // fallback pre staré API
+            }
+        })
         .catch(e => setError(e.message))
         .finally(() => setLoading(false));
 
     useEffect(() => { load(); }, []);
 
     const generate = async () => {
-        setGen(true); setError('');
+        setGen(true); setError(''); setInfo('');
         try {
-            await createInvite(sentTo.trim() || null);
+            const res = await createInvite(sentTo.trim() || null, groupId ? parseInt(groupId) : null);
             setSentTo('');
+            if (res?.email_sent) setInfo('✓ Pozvánka odoslaná emailom');
+            else if (res?.email_err) setError('Mail chyba: ' + res.email_err);
             load();
         } catch (err) { setError(err.message); }
         finally { setGen(false); }
@@ -87,35 +100,55 @@ export default function Invites() {
     return (
         <div>
             <div className={styles.header}>
-                <h2>Pozývací linky</h2>
+                <h2>Pozvánky</h2>
             </div>
 
             <div style={{display:'flex', gap:8, alignItems:'center', marginBottom:16, flexWrap:'wrap'}}>
+                <label style={{fontWeight:500, fontSize:'0.9rem'}}>Adresát</label>
                 <input
                     type="text"
-                    placeholder="Komu (meno / poznámka)"
+                    placeholder="meno / email"
                     value={sentTo}
                     onChange={e => setSentTo(e.target.value)}
                     onKeyDown={e => e.key === 'Enter' && generate()}
                     className={styles.inlineInput}
                     style={{width:200}}
                 />
+                {groups.length > 0 && (
+                    <>
+                        <label style={{fontWeight:500, fontSize:'0.9rem'}}>Skupina</label>
+                        <select
+                            value={groupId}
+                            onChange={e => setGroupId(e.target.value)}
+                            className={styles.inlineInput}
+                            style={{width:160}}
+                        >
+                            <option value="">— bez skupiny —</option>
+                            {groups.map(g => (
+                                <option key={g.id} value={g.id}>{g.name}</option>
+                            ))}
+                        </select>
+                    </>
+                )}
                 <button className={styles.btn} onClick={generate} disabled={generating}>
                     {generating ? 'Generujem…' : '+ Nový link'}
                 </button>
             </div>
 
             {error && <p className={styles.error}>{error}</p>}
+            {info  && <p className={styles.success}>{info}</p>}
 
             {loading ? <p>Načítavam…</p> : (
                 <table className={styles.table}>
                     <thead>
                         <tr>
                             <th>ID</th>
-                            <th>Komu</th>
+                            <th>Adresát</th>
+                            <th>Skupina</th>
                             <th>Vytvorený</th>
                             <th>Použitý</th>
                             <th>Hráč</th>
+                            <th>Mail</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -124,6 +157,11 @@ export default function Invites() {
                             <tr key={i.id}>
                                 <td>{i.id}</td>
                                 <td><SentToCell invite={i} onSaved={handleSentToSaved} /></td>
+                                <td>
+                                    {i.group_name
+                                        ? <span className={styles.badgeInfo}>{i.group_name}</span>
+                                        : <span style={{color:'#aaa'}}>—</span>}
+                                </td>
                                 <td>{new Date(i.created_at).toLocaleString('sk-SK')}</td>
                                 <td>{i.used_at
                                     ? new Date(i.used_at).toLocaleString('sk-SK')
@@ -136,6 +174,11 @@ export default function Invites() {
                                             style={{ cursor: 'pointer', color: '#0d6efd', textDecoration: 'underline' }}
                                           >{i.used_by_username}</span>
                                         : '—'}
+                                </td>
+                                <td>
+                                    {i.email_sent
+                                        ? <span className={styles.badgeProd} title="Pozvánka odoslaná emailom">✓</span>
+                                        : <span style={{color:'#aaa'}}>—</span>}
                                 </td>
                                 <td><CopyBtn text={i.link} /></td>
                             </tr>

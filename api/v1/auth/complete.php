@@ -24,6 +24,22 @@ $pdo->prepare(
     'UPDATE admin.users SET username = ?, password = ?, is_active = TRUE, username_changed = TRUE WHERE id = ?'
 )->execute([$username, $hash, $payload['user_id']]);
 
+// Auto-join skupiny z pozvánky (ak bola zadaná)
+$inv = $pdo->prepare('SELECT group_id FROM admin.invites WHERE user_id = ? AND group_id IS NOT NULL LIMIT 1');
+$inv->execute([$payload['user_id']]);
+$invRow = $inv->fetch();
+if ($invRow) {
+    $gid = (int)$invRow['group_id'];
+    // Pridaj len ak ešte nie je členom
+    $exists = $pdo->prepare('SELECT 1 FROM admin.group_members WHERE group_id=? AND user_id=?');
+    $exists->execute([$gid, $payload['user_id']]);
+    if (!$exists->fetch()) {
+        $pdo->prepare(
+            "INSERT INTO admin.group_members (group_id, user_id, status, joined_at) VALUES (?, ?, 'accepted', NOW())"
+        )->execute([$gid, $payload['user_id']]);
+    }
+}
+
 $token = jwt_create([
     'user_id'          => $payload['user_id'],
     'role'             => 'user',
