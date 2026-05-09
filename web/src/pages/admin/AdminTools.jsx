@@ -10,9 +10,11 @@ const GEN_ACTIONS = [
 ];
 
 export default function AdminTools() {
-    const [running,  setRunning]  = useState(null);
-    const [results,  setResults]  = useState({});
-    const [errors,   setErrors]   = useState({});
+    const [running,    setRunning]    = useState(null);
+    const [results,    setResults]    = useState({});
+    const [errors,     setErrors]     = useState({});
+    const [migrating,  setMigrating]  = useState(false);
+    const [migrateRes, setMigrateRes] = useState('');
     const [confirm,  setConfirm]  = useState(null); // 'init' | 'reset' | null
     const [syncRes,  setSyncRes]  = useState(null);
     const [syncErr,  setSyncErr]  = useState('');
@@ -39,7 +41,16 @@ export default function AdminTools() {
         }
     };
 
-    const busy = running !== null || syncing;
+    const busy = running !== null || syncing || migrating;
+
+    const runMigrations = async () => {
+        setMigrating(true); setMigrateRes('');
+        try {
+            const r = await apiFetch('v1/admin/run-migration', { method: 'POST' });
+            setMigrateRes('✓ Hotovo: ' + r.migrations.join(', '));
+        } catch (e) { setMigrateRes('✗ ' + e.message); }
+        finally { setMigrating(false); }
+    };
 
     const sendTestMail = async () => {
         setTestMailing(true); setTestMailRes('');
@@ -62,6 +73,22 @@ export default function AdminTools() {
     return (
         <div style={{ maxWidth: 600, padding: 24 }}>
             <h2>Nástroje</h2>
+
+            {/* ── DB Migrácie ─────────────────────────────────────────── */}
+            <div className={styles.card} style={{ padding: 20, marginTop: 16, borderLeft: '4px solid #fd7e14' }}>
+                <h3 style={{ margin: '0 0 4px', fontSize: '1rem', color: '#fd7e14' }}>🗄 DB Migrácie</h3>
+                <p style={{ margin: '0 0 12px', fontSize: '0.82rem', color: '#666' }}>
+                    Spustí všetky pending migrácie (run_012, run_013...). Bezpečné — prikazy su IF NOT EXISTS.
+                </p>
+                <button className={styles.btn} style={{ background: '#fd7e14' }} onClick={runMigrations} disabled={busy}>
+                    {migrating ? 'Spustam...' : '▶ Spustit migracie'}
+                </button>
+                {migrateRes && (
+                    <p style={{ marginTop: 8, fontSize: '0.85rem', color: migrateRes.startsWith('✓') ? '#28a745' : '#dc3545' }}>
+                        {migrateRes}
+                    </p>
+                )}
+            </div>
 
             {/* ── Sync výsledkov z API-Sports ─────────────────────────── */}
             <div className={styles.card} style={{ padding: 20, marginTop: 16, borderLeft: '4px solid #1a3a6b' }}>
