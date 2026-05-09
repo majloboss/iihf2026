@@ -187,6 +187,10 @@
     background: #d4edda; color: #155724;
     padding: 2px 8px; border-radius: 10px; font-size: 0.78rem; font-weight: 600;
 }
+.badgeInfo {
+    background: #dbeafe; color: #1e40af;
+    padding: 2px 8px; border-radius: 10px; font-size: 0.78rem; font-weight: 500;
+}
 .badgeDev {
     background: #fff3cd; color: #856404;
     padding: 2px 8px; border-radius: 10px; font-size: 0.78rem; font-weight: 600;

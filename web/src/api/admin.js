@@ -14,8 +14,8 @@ export const deleteUser    = (id) => apiFetch('v1/admin/user-delete', {
     method: 'POST', body: JSON.stringify({ id })
 });
 export const getInvites        = () => apiFetch('v1/admin/invites');
-export const createInvite      = (sent_to) => apiFetch('v1/admin/invites', {
-    method: 'POST', body: JSON.stringify({ sent_to })
+export const createInvite      = (sent_to, group_id = null) => apiFetch('v1/admin/invites', {
+    method: 'POST', body: JSON.stringify({ sent_to, group_id })
 });
 export const updateInviteSentTo = (id, sent_to) => apiFetch('v1/admin/invites', {
     method: 'PUT', body: JSON.stringify({ id, sent_to })

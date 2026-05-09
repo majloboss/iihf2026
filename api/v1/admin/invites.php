@@ -8,12 +8,15 @@ require_once __DIR__ . '/../../helpers/mailer.php';
 
 if ($method === 'GET') {
     $rows = $pdo->query(
-        "SELECT i.id, i.invite_token, i.sent_to, i.created_at, i.used_at,
+        "SELECT i.id, i.invite_token, i.sent_to, i.created_at, i.used_at, i.email_sent,
+                i.group_id,
+                fg.name AS group_name,
                 i.user_id AS used_by_id,
                 u.username AS used_by_username,
                 u.first_name, u.last_name, u.email, u.phone, u.avatar
          FROM admin.invites i
          LEFT JOIN admin.users u ON u.id = i.user_id
+         LEFT JOIN admin.friend_groups fg ON fg.id = i.group_id
          ORDER BY i.created_at DESC"
     )->fetchAll();
 
@@ -21,18 +24,38 @@ if ($method === 'GET') {
     foreach ($rows as &$r) {
         $r['link'] = $base . $r['invite_token'];
     }
-    json_ok($rows);
+
+    // Skupiny kde je admin členom (pre dropdown)
+    $groups = $pdo->prepare(
+        "SELECT fg.id, fg.name
+         FROM admin.friend_groups fg
+         JOIN admin.group_members gm ON gm.group_id = fg.id AND gm.user_id = ? AND gm.status = 'accepted'
+         ORDER BY fg.name"
+    );
+    $groups->execute([$auth['user_id']]);
+
+    json_ok(['invites' => $rows, 'groups' => $groups->fetchAll()]);
 }
 
 if ($method === 'POST') {
-    $body    = json_decode(file_get_contents('php://input'), true) ?? [];
-    $sent_to = isset($body['sent_to']) ? trim($body['sent_to']) : null;
-    $token   = bin2hex(random_bytes(24));
+    $body     = json_decode(file_get_contents('php://input'), true) ?? [];
+    $sent_to  = isset($body['sent_to']) ? trim($body['sent_to']) : null;
+    $group_id = isset($body['group_id']) ? (int)$body['group_id'] : null;
+    $token    = bin2hex(random_bytes(24));
+
+    // Overiť že admin je členom skupiny
+    if ($group_id) {
+        $chk = $pdo->prepare(
+            "SELECT 1 FROM admin.group_members WHERE group_id=? AND user_id=? AND status='accepted'"
+        );
+        $chk->execute([$group_id, $auth['user_id']]);
+        if (!$chk->fetch()) $group_id = null;
+    }
 
     $stmt = $pdo->prepare(
-        'INSERT INTO admin.invites (invite_token, created_by, sent_to) VALUES (?, ?, ?) RETURNING id'
+        'INSERT INTO admin.invites (invite_token, created_by, sent_to, group_id) VALUES (?, ?, ?, ?) RETURNING id'
     );
-    $stmt->execute([$token, $auth['user_id'], $sent_to ?: null]);
+    $stmt->execute([$token, $auth['user_id'], $sent_to ?: null, $group_id ?: null]);
     $id = $stmt->fetchColumn();
 
     $link       = APP_URL . '/register?token=' . $token;
@@ -40,7 +63,19 @@ if ($method === 'POST') {
     $email_err  = null;
 
     if ($sent_to && filter_var($sent_to, FILTER_VALIDATE_EMAIL)) {
+        // Získaj názov skupiny ak bol zadaný
+        $group_name = null;
+        if ($group_id) {
+            $gname = $pdo->prepare('SELECT name FROM admin.friend_groups WHERE id=?');
+            $gname->execute([$group_id]);
+            $group_name = $gname->fetchColumn() ?: null;
+        }
+
         $subject = 'Pozvánka do IIHF 2026 Tipovačky';
+        $group_line = $group_name
+            ? "Po registrácii budeš automaticky pridaný do skupiny „{$group_name}" — kde budeš môcť súťažiť s ostatnými členmi.\n\n"
+            : "Odporúčame ti pripojiť sa k existujúcej skupine alebo si vytvoriť vlastnú a pozvať ďalších priateľov.\n\n";
+
         $body_mail = "Ahoj,\n\n"
             . "pozývame Ťa do IIHF 2026 Tipovačky — súťaže v tipovaní výsledkov Majstrovstiev sveta v ľadovom hokeji 2026 (15. – 31. mája 2026).\n\n"
             . "Zaregistruj sa kliknutím na tento odkaz:\n$link\n\n"
@@ -48,7 +83,7 @@ if ($method === 'POST') {
             . "• tipovať presné výsledky všetkých 64 zápasov MS\n"
             . "• súťažiť s kamarátmi v skupinách\n"
             . "• sledovať priebežné poradie\n\n"
-            . "Odporúčame ti pripojiť sa k existujúcej skupine alebo si vytvoriť vlastnú a pozvať ďalších priateľov.\n\n"
+            . $group_line
             . "Link je jednorazový — platí pre jednu registráciu.\n\n"
             . "Tešíme sa na Teba!\n"
             . "IIHF 2026 Tipovačka";
@@ -62,7 +97,7 @@ if ($method === 'POST') {
     }
 
     json_ok(['id' => $id, 'token' => $token, 'link' => $link, 'sent_to' => $sent_to,
-             'email_sent' => $email_sent, 'email_err' => $email_err], 201);
+             'group_id' => $group_id, 'email_sent' => $email_sent, 'email_err' => $email_err], 201);
 }
 
 if ($method === 'PUT') {
