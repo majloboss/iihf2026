@@ -17,6 +17,9 @@ export default function AdminTools() {
     const [syncRes,  setSyncRes]  = useState(null);
     const [syncErr,  setSyncErr]  = useState('');
     const [syncing,  setSyncing]  = useState(false);
+    const [testMailTo,  setTestMailTo]  = useState('');
+    const [testMailRes, setTestMailRes] = useState('');
+    const [testMailing, setTestMailing] = useState(false);
 
     const run = async (action) => {
         setConfirm(null);
@@ -37,6 +40,15 @@ export default function AdminTools() {
     };
 
     const busy = running !== null || syncing;
+
+    const sendTestMail = async () => {
+        setTestMailing(true); setTestMailRes('');
+        try {
+            await apiFetch('v1/admin/test-mail', { method: 'POST', body: JSON.stringify({ to: testMailTo }) });
+            setTestMailRes('✓ Email odoslaný na ' + testMailTo);
+        } catch (e) { setTestMailRes('✗ ' + e.message); }
+        finally { setTestMailing(false); }
+    };
 
     const syncScores = async () => {
         setSyncing(true); setSyncRes(null); setSyncErr('');
@@ -67,6 +79,31 @@ export default function AdminTools() {
                         <div>📅 Dátum: <strong>{syncRes.date}</strong> | Stiahnutých: <strong>{syncRes.fetched}</strong> | Aktualizovaných: <strong>{syncRes.updated}</strong></div>
                         {syncRes.log?.map((l, i) => <div key={i} style={{ marginLeft: 8, marginTop: 2 }}>{l}</div>)}
                     </div>
+                )}
+            </div>
+
+            {/* ── Test emailu ────────────────────────────────────────── */}
+            <div className={styles.card} style={{ padding: 20, marginTop: 16, borderLeft: '4px solid #6f42c1' }}>
+                <h3 style={{ margin: '0 0 4px', fontSize: '1rem', color: '#6f42c1' }}>📧 Test emailu (SMTP)</h3>
+                <p style={{ margin: '0 0 12px', fontSize: '0.82rem', color: '#666' }}>
+                    Pošle testovací email na zadanú adresu — overí že SMTP funguje.
+                </p>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                    <input
+                        type="email"
+                        placeholder="email@example.com"
+                        value={testMailTo}
+                        onChange={e => setTestMailTo(e.target.value)}
+                        style={{ padding: '7px 10px', border: '1px solid #ccc', borderRadius: 6, fontSize: '0.88rem', flex: 1, minWidth: 200 }}
+                    />
+                    <button className={styles.btn} onClick={sendTestMail} disabled={testMailing || !testMailTo}>
+                        {testMailing ? 'Odosielam…' : '📤 Odoslať test'}
+                    </button>
+                </div>
+                {testMailRes && (
+                    <p style={{ marginTop: 8, fontSize: '0.85rem', color: testMailRes.startsWith('✓') ? '#28a745' : '#dc3545' }}>
+                        {testMailRes}
+                    </p>
                 )}
             </div>
 

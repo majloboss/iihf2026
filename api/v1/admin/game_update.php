@@ -53,6 +53,7 @@ foreach (['score1', 'score2', 'final1', 'final2'] as $f) {
 
 if (empty($sets)) json_error('Nič na uloženie', 400);
 
+$sets[] = 'updated_at = NOW()';
 $pdo = db();
 $pdo->prepare('UPDATE iihf2026.games SET ' . implode(', ', $sets) . ' WHERE id = :id')
     ->execute($params);

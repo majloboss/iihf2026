@@ -82,10 +82,13 @@ export default function Profile() {
     return (
         <div className={styles.wrap}>
             <div className={styles.card}>
-                <div className={styles.tabs}>
-                    <button className={tab === 'profil'  ? styles.tabActive : styles.tab} onClick={() => setTab('profil')}>👤 Profil</button>
-                    <button className={tab === 'skupiny' ? styles.tabActive : styles.tab} onClick={() => setTab('skupiny')}>👥 Skupiny</button>
-                    <button className={tab === 'notif'   ? styles.tabActive : styles.tab} onClick={() => setTab('notif')}>🔔 Notifikácie</button>
+                <div className={styles.tabsRow}>
+                    <div className={styles.tabs}>
+                        <button className={tab === 'profil'  ? styles.tabActive : styles.tab} onClick={() => setTab('profil')}>👤 Profil</button>
+                        <button className={tab === 'skupiny' ? styles.tabActive : styles.tab} onClick={() => setTab('skupiny')}>👥 Skupiny</button>
+                        <button className={tab === 'notif'   ? styles.tabActive : styles.tab} onClick={() => setTab('notif')}>🔔 Notifikácie</button>
+                    </div>
+                    <button className={styles.btnLogout} onClick={() => { signOut(); navigate('/login'); }}>Odhlásiť</button>
                 </div>
 
                 {tab === 'skupiny' && <div className={styles.tabContent}><Groups /></div>}
