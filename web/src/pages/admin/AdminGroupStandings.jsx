@@ -20,6 +20,7 @@ function GroupTable({ phase, teams, finalized, onMove }) {
                 {finalized && <span className={styles.finalBadge}>✓ Finalizovaná</span>}
                 {!finalized && teams.length > 0 && <span className={styles.liveBadge}>Live</span>}
             </div>
+            <div className={styles.tableScroll}>
             <table className={gsStyles.table}>
                 <thead>
                     <tr>
@@ -56,6 +57,7 @@ function GroupTable({ phase, teams, finalized, onMove }) {
                     ))}
                 </tbody>
             </table>
+            </div>
         </div>
     );
 }

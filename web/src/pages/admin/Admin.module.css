@@ -195,3 +195,88 @@
     background: #fff3cd; color: #856404;
     padding: 2px 8px; border-radius: 10px; font-size: 0.78rem; font-weight: 600;
 }
+
+/* ── Shared layout helpers ── */
+.genForm {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.toolsWrap {
+    max-width: 600px;
+    padding: 24px;
+}
+
+/* ── Mobile (max 900px) ── */
+@media (max-width: 900px) {
+    /* Table → karta na riadok */
+    .table {
+        display: block;
+        background: transparent;
+        box-shadow: none;
+        border-radius: 0;
+        overflow: visible;
+        margin-top: 12px;
+    }
+    .table thead { display: none; }
+    .table tbody { display: flex; flex-direction: column; gap: 10px; }
+    .table tr {
+        display: block;
+        background: #fff;
+        border-radius: 10px;
+        padding: 12px 14px;
+        border: 1px solid #e9ecef;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .table tr:hover td { background: none; }
+    .table td {
+        display: flex;
+        align-items: center;
+        padding: 4px 0;
+        border-bottom: none;
+        font-size: 0.88rem;
+        gap: 8px;
+        min-height: 26px;
+        flex-wrap: wrap;
+    }
+    .table td::before {
+        content: attr(data-label);
+        font-size: 0.68rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #bbb;
+        min-width: 72px;
+        flex-shrink: 0;
+    }
+    /* Bunka bez labelu (akcie/tlačidlá) */
+    .table td[data-label=""] {
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px solid #f0f0f0;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+    .table td[data-label=""]::before { display: none; }
+
+    .hideOnMobile { display: none !important; }
+
+    /* Header + toolbar */
+    .header { flex-direction: column; align-items: flex-start; gap: 10px; }
+    .header h2 { font-size: 1.1rem; }
+    .toolbar { flex-wrap: wrap; gap: 8px; }
+
+    /* Formulár generovania (Pozvánky) */
+    .genForm { flex-direction: column; align-items: stretch; }
+    .genForm .inlineInput { width: 100% !important; box-sizing: border-box; }
+    .genForm .btn { width: 100%; }
+
+    /* Akcie v riadku */
+    .actions { flex-wrap: wrap; gap: 4px; }
+
+    /* AdminTools wrap */
+    .toolsWrap { padding: 0; }
+}

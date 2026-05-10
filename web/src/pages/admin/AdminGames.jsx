@@ -63,10 +63,10 @@ export default function AdminGames() {
                     <tr>
                         <th>#</th>
                         <th>Fáza</th>
-                        <th>Dátum / čas (UTC)</th>
+                        <th>Dátum / čas</th>
                         <th>Tím 1</th>
                         <th>Tím 2</th>
-                        <th>Miesto</th>
+                        <th className={styles.hideOnMobile}>Miesto</th>
                         <th>Stav</th>
                         <th></th>
                     </tr>
@@ -74,14 +74,14 @@ export default function AdminGames() {
                 <tbody>
                     {filtered.map(g => (
                         <tr key={g.id}>
-                            <td>{g.game_number}</td>
-                            <td><span className={styles.badge}>{PHASE_LABEL[g.phase] || g.phase}</span></td>
-                            <td>{formatLocal(g.starts_at)}</td>
-                            <td>{g.team1 || <span style={{color:'#aaa'}}>TBD</span>}</td>
-                            <td>{g.team2 || <span style={{color:'#aaa'}}>TBD</span>}</td>
-                            <td style={{fontSize:'0.82rem',maxWidth:'160px',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{g.venue}</td>
-                            <td><span className={effectiveStatus(g) === 'finished' ? styles.badgeAdmin : effectiveStatus(g) === 'live' ? styles.badgeLive : styles.badge}>{effectiveStatus(g)}</span></td>
-                            <td style={{display:'flex', alignItems:'center', gap:6}}>
+                            <td data-label="#">{g.game_number}</td>
+                            <td data-label="Fáza"><span className={styles.badge}>{PHASE_LABEL[g.phase] || g.phase}</span></td>
+                            <td data-label="Dátum">{formatLocal(g.starts_at)}</td>
+                            <td data-label="Tím 1">{g.team1 || <span style={{color:'#aaa'}}>TBD</span>}</td>
+                            <td data-label="Tím 2">{g.team2 || <span style={{color:'#aaa'}}>TBD</span>}</td>
+                            <td data-label="Miesto" className={styles.hideOnMobile} style={{fontSize:'0.82rem',maxWidth:'160px',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{g.venue}</td>
+                            <td data-label="Stav"><span className={effectiveStatus(g) === 'finished' ? styles.badgeAdmin : effectiveStatus(g) === 'live' ? styles.badgeLive : styles.badge}>{effectiveStatus(g)}</span></td>
+                            <td data-label="" style={{display:'flex', alignItems:'center', gap:6, justifyContent:'flex-end'}}>
                                 {g.flashscore_url && (
                                     <a href={g.flashscore_url} target="_blank" rel="noopener noreferrer" title="FlashScore">
                                         <img src="/flashscore.png" alt="FS" style={{width:18,height:18,borderRadius:4,opacity:0.85,verticalAlign:'middle'}} />
