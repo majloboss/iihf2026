@@ -60,8 +60,6 @@ export default function UserInvites() {
 
     return (
         <div className={styles.wrap}>
-            <h2 className={styles.title}>Moje pozvánky</h2>
-
             {/* Formulár */}
             <div className={styles.form}>
                 <div className={styles.formRow}>

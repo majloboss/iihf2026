@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { getProfile, updateProfile, changePassword, deleteAccount, uploadAvatar } from '../api/profile';
 import Groups from './user/Groups';
 import Notifications from './user/Notifications';
+import UserInvites from './user/UserInvites';
 import styles from './Profile.module.css';
 
 export default function Profile() {
@@ -84,15 +85,17 @@ export default function Profile() {
             <div className={styles.card}>
                 <div className={styles.tabsRow}>
                     <div className={styles.tabs}>
-                        <button className={tab === 'profil'  ? styles.tabActive : styles.tab} onClick={() => setTab('profil')}>👤 Profil</button>
-                        <button className={tab === 'skupiny' ? styles.tabActive : styles.tab} onClick={() => setTab('skupiny')}>👥 Skupiny</button>
-                        <button className={tab === 'notif'   ? styles.tabActive : styles.tab} onClick={() => setTab('notif')}>🔔 Notifikácie</button>
+                        <button className={tab === 'profil'   ? styles.tabActive : styles.tab} onClick={() => setTab('profil')}>👤 Profil</button>
+                        <button className={tab === 'skupiny'  ? styles.tabActive : styles.tab} onClick={() => setTab('skupiny')}>👥 Skupiny</button>
+                        <button className={tab === 'pozvanky' ? styles.tabActive : styles.tab} onClick={() => setTab('pozvanky')}>✉ Pozvánky</button>
+                        <button className={tab === 'notif'    ? styles.tabActive : styles.tab} onClick={() => setTab('notif')}>🔔 Notifikácie</button>
                     </div>
                     <button className={styles.btnLogout} onClick={() => { signOut(); navigate('/login'); }}>Odhlásiť</button>
                 </div>
 
-                {tab === 'skupiny' && <div className={styles.tabContent}><Groups /></div>}
-                {tab === 'notif'   && <div className={styles.tabContent}><Notifications /></div>}
+                {tab === 'skupiny'  && <div className={styles.tabContent}><Groups /></div>}
+                {tab === 'pozvanky' && <div className={styles.tabContent}><UserInvites /></div>}
+                {tab === 'notif'    && <div className={styles.tabContent}><Notifications /></div>}
 
                 {tab === 'profil' && <>
                     <section className={styles.section}>

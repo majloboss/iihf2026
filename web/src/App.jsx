@@ -19,7 +19,6 @@ import GroupStandings from './pages/user/GroupStandings';
 import Standings from './pages/user/Standings';
 import Pravidla from './pages/user/Pravidla';
 import Dashboard from './pages/user/Dashboard';
-import UserInvites from './pages/user/UserInvites';
 
 function PrivateUserRoute({ children }) {
     const { user } = useAuth();
@@ -58,7 +57,6 @@ export default function App() {
                         <Route path="/standings" element={<Standings />} />
                         <Route path="/profile"   element={<Profile />} />
                         <Route path="/pravidla"  element={<Pravidla />} />
-                        <Route path="/invites"   element={<UserInvites />} />
                     </Route>
 
                     <Route path="/admin" element={

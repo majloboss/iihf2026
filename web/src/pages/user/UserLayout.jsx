@@ -38,9 +38,6 @@ export default function UserLayout() {
                     <NavLink to="/profile"   className={({ isActive }) => isActive ? styles.active : ''}>
                         👤 Profil
                     </NavLink>
-                    <NavLink to="/invites"   className={({ isActive }) => isActive ? styles.active : ''}>
-                        ✉ Pozvánky
-                    </NavLink>
                     <NavLink to="/pravidla"  className={({ isActive }) => isActive ? styles.active : ''}>
                         📋 Pravidlá
                     </NavLink>
@@ -76,9 +73,6 @@ export default function UserLayout() {
                     </NavLink>
                     <NavLink to="/profile"   className={({ isActive }) => isActive ? styles.active : ''}>
                         <span className={styles.bottomNavIcon}>👤</span>Profil
-                    </NavLink>
-                    <NavLink to="/invites"   className={({ isActive }) => isActive ? styles.active : ''}>
-                        <span className={styles.bottomNavIcon}>✉</span>Pozvánky
                     </NavLink>
                     <NavLink to="/pravidla"  className={({ isActive }) => isActive ? styles.active : ''}>
                         <span className={styles.bottomNavIcon}>📋</span>Pravidlá
