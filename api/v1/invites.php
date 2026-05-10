@@ -107,11 +107,10 @@ if ($method === 'POST') {
         $rules_url = APP_URL . '/pravidla';
 
         $group_line = $group_name
-            ? "Po registrácii budeš automaticky pridaný do skupiny \"" . $group_name . "\", kde budeš môcť súťažiť so " . $sender_username . " a ostatnými členmi.\n\n"
+            ? "Po registrácii budeš automaticky pridaný do skupiny \"" . $group_name . "\", kde budeš môcť súťažiť s hráčom " . $sender_username . " a ostatnými členmi.\n\n"
             : "Odporúčame ti pripojiť sa k existujúcej skupine alebo si vytvoriť vlastnú a pozvať ďalších priateľov.\n\n";
 
-        $body_mail = "Ahoj,\n\n"
-            . $sender_username . " ťa pozýva do IIHF 2026 Tipovačky – súťaže v tipovaní výsledkov Majstrovstiev sveta v ľadovom hokeji 2026 (15. – 31. mája 2026).\n\n"
+        $body_mail = "Ahoj,\nhráč " . $sender_username . " ťa pozýva do IIHF 2026 Tipovačky – súťaže v tipovaní výsledkov Majstrovstiev sveta v ľadovom hokeji 2026 (15. – 31. mája 2026).\n\n"
             . "Zaregistruj sa kliknutím na tento odkaz:\n" . $link . "\n\n"
             . "Po registrácii si zvolíš vlastné meno a heslo. Potom môžeš:\n"
             . "- tipovať presné výsledky všetkých 64 zápasov MS\n"
