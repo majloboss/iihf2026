@@ -76,6 +76,14 @@ try {
     }
 }
 
+// Sync flashscore_url do games_pdf
+if ($has_fs_url) {
+    try {
+        $pdo->prepare("UPDATE iihf2026.games_pdf SET flashscore_url = :url WHERE game_number = (SELECT game_number FROM iihf2026.games WHERE id = :id)")
+            ->execute([':url' => $params[':flashscore_url'], ':id' => $game_id]);
+    } catch (PDOException $e) { /* games_pdf este neexistuje (run_016 nespusteny) */ }
+}
+
 // Po každom uložení skontroluj aktuálny stav v DB a prepočítaj body ak je finished + skóre
 $stmt = $pdo->prepare("SELECT phase, status, score1, score2 FROM iihf2026.games WHERE id = ?");
 $stmt->execute([$game_id]);

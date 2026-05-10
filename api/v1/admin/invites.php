@@ -23,9 +23,11 @@ if ($method === 'GET') {
                     fg.name AS group_name,
                     i.user_id AS used_by_id,
                     u.username AS used_by_username,
-                    u.first_name, u.last_name, u.email, u.phone, u.avatar
+                    u.first_name, u.last_name, u.email, u.phone, u.avatar,
+                    c.username AS created_by_username
              FROM admin.invites i
              LEFT JOIN admin.users u ON u.id = i.user_id
+             LEFT JOIN admin.users c ON c.id = i.created_by
              LEFT JOIN admin.friend_groups fg ON fg.id = i.group_id
              ORDER BY i.created_at DESC"
         )->fetchAll();
@@ -37,9 +39,11 @@ if ($method === 'GET') {
                         i.email_sent,
                         i.user_id AS used_by_id,
                         u.username AS used_by_username,
-                        u.first_name, u.last_name, u.email, u.phone, u.avatar
+                        u.first_name, u.last_name, u.email, u.phone, u.avatar,
+                        c.username AS created_by_username
                  FROM admin.invites i
                  LEFT JOIN admin.users u ON u.id = i.user_id
+                 LEFT JOIN admin.users c ON c.id = i.created_by
                  ORDER BY i.created_at DESC"
             )->fetchAll();
             foreach ($rows as &$r) { $r['group_id'] = null; $r['group_name'] = null; }
@@ -48,9 +52,10 @@ if ($method === 'GET') {
             // Bez email_sent aj group_id (run_012 nespustený)
             $rows = $pdo->query($baseSelect)->fetchAll();
             foreach ($rows as &$r) {
-                $r['email_sent'] = false;
-                $r['group_id']   = null;
-                $r['group_name'] = null;
+                $r['email_sent']           = false;
+                $r['group_id']             = null;
+                $r['group_name']           = null;
+                $r['created_by_username']  = null;
             }
             unset($r);
         }
@@ -61,14 +66,8 @@ if ($method === 'GET') {
         $r['link'] = $base . $r['invite_token'];
     }
 
-    // Skupiny kde je admin členom (pre dropdown)
-    $groups = $pdo->prepare(
-        "SELECT fg.id, fg.name
-         FROM admin.friend_groups fg
-         JOIN admin.group_members gm ON gm.group_id = fg.id AND gm.user_id = ? AND gm.status = 'accepted'
-         ORDER BY fg.name"
-    );
-    $groups->execute([$auth['user_id']]);
+    // Admin vidí všetky skupiny v systéme
+    $groups = $pdo->query("SELECT id, name FROM admin.friend_groups ORDER BY name");
 
     json_ok(['invites' => $rows, 'groups' => $groups->fetchAll()]);
 }
@@ -116,24 +115,25 @@ if ($method === 'POST') {
             $group_name = $gname->fetchColumn() ?: null;
         }
 
-        $subject = 'Pozvánka do IIHF 2026 Tipovačky';
-        $group_line = $group_name
-            ? "Po registracii budes automaticky pridany do skupiny \"" . $group_name . "\" - kde budes moct sutazit s ostatnymi clenmi.\n\n"
-            : "Odporucame ti pripojit sa k existujucej skupine alebo si vytvorit vlastnu a pozvat dalsich priatelov.\n\n";
-
+        $subject   = 'Pozvánka do IIHF 2026 Tipovačky';
         $rules_url = APP_URL . '/pravidla';
+
+        $group_line = $group_name
+            ? "Po registrácii budeš automaticky pridaný do skupiny \"" . $group_name . "\", kde budeš môcť súťažiť s ostatnými členmi.\n\n"
+            : "Odporúčame ti pripojiť sa k existujúcej skupine alebo si vytvoriť vlastnú a pozvať ďalších priateľov.\n\n";
+
         $body_mail = "Ahoj,\n\n"
-            . "pozyvame Ta do IIHF 2026 Tipovacky - sutaze v tipovani vysledkov Majstrovstiev sveta v ladovom hokeji 2026 (15. - 31. maja 2026).\n\n"
-            . "Zaregistruj sa kliknutim na tento odkaz:\n$link\n\n"
-            . "Po registracii si zvolis vlastne meno a heslo. Potom mozes:\n"
-            . "- tipovat presne vysledky vsetkych 64 zapasov MS\n"
-            . "- sutazit s kamaratmi v skupinach\n"
-            . "- sledovat priebezne poradie\n\n"
+            . "pozývame ťa do IIHF 2026 Tipovačky – súťaže v tipovaní výsledkov Majstrovstiev sveta v ľadovom hokeji 2026 (15. – 31. mája 2026).\n\n"
+            . "Zaregistruj sa kliknutím na tento odkaz:\n" . $link . "\n\n"
+            . "Po registrácii si zvolíš vlastné meno a heslo. Potom môžeš:\n"
+            . "- tipovať presné výsledky všetkých 64 zápasov MS\n"
+            . "- súťažiť s kamarátmi v skupinách\n"
+            . "- sledovať priebežné poradie\n\n"
             . $group_line
-            . "Pred zacatim odporucame precitat si pravidla tipovacky:\n$rules_url\n\n"
-            . "Link je jednorazovy - plati pre jednu registraciu.\n\n"
-            . "Tesime sa na Teba!\n"
-            . "IIHF 2026 Tipovacka";
+            . "Pred začatím odporúčame prečítať si pravidlá tipovačky:\n" . $rules_url . "\n\n"
+            . "Link je jednorazový – platí pre jednu registráciu.\n\n"
+            . "Tešíme sa na teba!\n"
+            . "IIHF 2026 Tipovačka";
         try {
             send_mail_logged($pdo, $sent_to, $subject, $body_mail);
             $pdo->prepare("UPDATE admin.invites SET email_sent=TRUE WHERE id=?")->execute([$id]);

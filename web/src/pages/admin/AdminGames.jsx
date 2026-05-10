@@ -37,7 +37,8 @@ export default function AdminGames() {
     };
 
     const phases = ['all', 'A', 'B', 'QF', 'SF', 'BRONZE', 'GOLD'];
-    const filtered = phase === 'all' ? games : games.filter(g => g.phase === phase);
+    const filtered = (phase === 'all' ? games : games.filter(g => g.phase === phase))
+        .slice().sort((a, b) => a.game_number - b.game_number);
 
     if (loading) return <p>Načítavam…</p>;
     if (error)   return <p style={{color:'red'}}>Chyba: {error}</p>;
@@ -80,7 +81,12 @@ export default function AdminGames() {
                             <td>{g.team2 || <span style={{color:'#aaa'}}>TBD</span>}</td>
                             <td style={{fontSize:'0.82rem',maxWidth:'160px',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{g.venue}</td>
                             <td><span className={effectiveStatus(g) === 'finished' ? styles.badgeAdmin : effectiveStatus(g) === 'live' ? styles.badgeLive : styles.badge}>{effectiveStatus(g)}</span></td>
-                            <td>
+                            <td style={{display:'flex', alignItems:'center', gap:6}}>
+                                {g.flashscore_url && (
+                                    <a href={g.flashscore_url} target="_blank" rel="noopener noreferrer" title="FlashScore">
+                                        <img src="/flashscore.png" alt="FS" style={{width:18,height:18,borderRadius:4,opacity:0.85,verticalAlign:'middle'}} />
+                                    </a>
+                                )}
                                 <button className={styles.btnSmall} onClick={() => setEditing(g)}>Upraviť</button>
                             </td>
                         </tr>

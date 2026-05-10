@@ -8,3 +8,7 @@ export const leaveGroup    = (group_id)             => apiFetch('v1/group-leave'
 export const getMembers    = (group_id)             => apiFetch(`v1/group-members?group_id=${group_id}`);
 export const memberAction  = (group_id, user_id, action) =>
     apiFetch('v1/group-members', { method: 'POST', body: JSON.stringify({ group_id, user_id, action }) });
+export const inviteMember     = (group_id, username) =>
+    apiFetch('v1/group-members', { method: 'POST', body: JSON.stringify({ group_id, username, action: 'invite' }) });
+export const acceptGroupInvite = (group_id) =>
+    apiFetch('v1/group-members', { method: 'POST', body: JSON.stringify({ group_id, action: 'accept_invite' }) });

@@ -121,3 +121,4 @@ VALUES
 -- ============================================================
 INSERT INTO admin.schema_versions (version, description)
 VALUES (2, 'iihf2026.games: naplnenie 64 zapasov podla IIHF2026.pdf');
+

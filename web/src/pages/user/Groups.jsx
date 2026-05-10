@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { getGroups, createGroup, disbandGroup, joinGroup, leaveGroup, getMembers, memberAction } from '../../api/groups';
-import { getUser } from '../../api/users';
+import { getGroups, createGroup, disbandGroup, joinGroup, leaveGroup, getMembers, memberAction, inviteMember, acceptGroupInvite } from '../../api/groups';
+import { getUser, getUsers } from '../../api/users';
 import styles from './Groups.module.css';
 
 function Avatar({ src, name, size = 32 }) {
@@ -23,8 +23,21 @@ export default function Groups() {
     const [members, setMembers]     = useState({});
     const [userDetail, setUserDetail] = useState(null);
 
+    const [inviteQuery, setInviteQuery]     = useState('');
+    const [inviteShowDrop, setInviteShowDrop] = useState(false);
+    const [allUsers, setAllUsers]           = useState(null);
+    const allUsersRef                       = useRef(null);
+    const [inviteBusy, setInviteBusy]       = useState('');
+    const [inviteErr, setInviteErr]         = useState('');
+
     const load = () => getGroups().then(setGroups).finally(() => setLoading(false));
     useEffect(() => { load(); }, []);
+
+    useEffect(() => {
+        setInviteQuery('');
+        setInviteShowDrop(false);
+        setInviteErr('');
+    }, [expanded]);
 
     const loadMembers = (id) =>
         getMembers(id).then(data => setMembers(m => ({ ...m, [id]: data })));
@@ -33,6 +46,29 @@ export default function Groups() {
         if (expanded === id) { setExpanded(null); return; }
         setExpanded(id);
         if (!members[id]) loadMembers(id);
+    };
+
+    const ensureUsers = async () => {
+        if (allUsersRef.current) return allUsersRef.current;
+        const data = await getUsers();
+        allUsersRef.current = data;
+        setAllUsers(data);
+        return data;
+    };
+
+    const getSuggestions = (groupId, query) => {
+        const users = allUsersRef.current;
+        if (!users) return [];
+        const existing = new Set((members[groupId] || []).map(m => m.user_id));
+        const lower = query.toLowerCase();
+        return users
+            .filter(u => Number(u.id) !== Number(user.user_id) && !existing.has(u.id))
+            .filter(u => !query ||
+                u.username.toLowerCase().includes(lower) ||
+                (u.first_name || '').toLowerCase().includes(lower) ||
+                (u.last_name  || '').toLowerCase().includes(lower)
+            )
+            .slice(0, 8);
     };
 
     const openDetail = async (uid) => {
@@ -85,11 +121,29 @@ export default function Groups() {
         finally { setBusy(''); }
     };
 
+    const doInvite = async (groupId) => {
+        if (!inviteQuery.trim()) return;
+        setInviteBusy(`invite-${groupId}`); setInviteErr('');
+        try {
+            await inviteMember(groupId, inviteQuery.trim());
+            setInviteQuery(''); setInviteShowDrop(false);
+            loadMembers(groupId); load();
+        } catch (e) { setInviteErr(e.message); }
+        finally { setInviteBusy(''); }
+    };
+
+    const doAcceptInvite = async (groupId) => {
+        setBusy(`accept-${groupId}`);
+        try { await acceptGroupInvite(groupId); loadMembers(groupId); load(); }
+        catch (e) { alert(e.message); }
+        finally { setBusy(''); }
+    };
+
     const fullName = (u) =>
         (u.first_name || u.last_name) ? `${u.first_name || ''} ${u.last_name || ''}`.trim() : u.username;
 
     const filtered = myOnly
-        ? groups.filter(g => g.my_status === 'accepted' || g.created_by === user.user_id)
+        ? groups.filter(g => g.my_status === 'accepted' || g.my_status === 'invited' || g.created_by === user.user_id)
         : groups;
 
     if (loading) return <div className={styles.wrap}><p>Načítavam…</p></div>;
@@ -131,6 +185,8 @@ export default function Groups() {
                     const isOpen     = expanded === g.id;
                     const grpMembers = members[g.id];
                     const pendingCnt = grpMembers?.filter(m => m.status === 'pending').length ?? 0;
+                    const canInvite  = myStatus === 'accepted' || isFounder;
+                    const suggestions = isOpen ? getSuggestions(g.id, inviteQuery) : [];
 
                     return (
                         <div key={g.id} className={styles.card}>
@@ -155,6 +211,9 @@ export default function Groups() {
                                     {myStatus === 'pending' && (
                                         <span className={styles.badgePendingMine}>Čaká na schválenie</span>
                                     )}
+                                    {myStatus === 'invited' && (
+                                        <span className={styles.badgeInvitedCard}>Pozvánka</span>
+                                    )}
                                     {myStatus === 'accepted' && !isFounder && (
                                         <button className={styles.btnLeave} onClick={() => doLeave(g.id)} disabled={!!busy}>Opustiť</button>
                                     )}
@@ -166,6 +225,59 @@ export default function Groups() {
 
                             {isOpen && (
                                 <div className={styles.membersList}>
+                                    {canInvite && (
+                                        <div className={styles.inviteSection}>
+                                            <div className={styles.inviteRow}>
+                                                <div className={styles.inviteInputWrap}>
+                                                    <input
+                                                        className={styles.inviteInput}
+                                                        placeholder="pozvi nového člena"
+                                                        value={inviteQuery}
+                                                        onChange={async e => {
+                                                            const q = e.target.value;
+                                                            setInviteQuery(q);
+                                                            if (q.length >= 1) {
+                                                                if (!allUsersRef.current) await ensureUsers();
+                                                                setInviteShowDrop(true);
+                                                            } else {
+                                                                setInviteShowDrop(false);
+                                                            }
+                                                        }}
+                                                        onDoubleClick={async () => {
+                                                            if (!allUsersRef.current) await ensureUsers();
+                                                            setInviteShowDrop(true);
+                                                        }}
+                                                        onFocus={() => { if (allUsersRef.current && inviteQuery) setInviteShowDrop(true); }}
+                                                        onBlur={() => setTimeout(() => setInviteShowDrop(false), 150)}
+                                                        onKeyDown={e => e.key === 'Enter' && doInvite(g.id)}
+                                                    />
+                                                    {inviteShowDrop && suggestions.length > 0 && (
+                                                        <div className={styles.dropDown}>
+                                                            {suggestions.map(u => (
+                                                                <button
+                                                                    key={u.id}
+                                                                    className={styles.dropItem}
+                                                                    onMouseDown={() => { setInviteQuery(u.username); setInviteShowDrop(false); }}
+                                                                >
+                                                                    <Avatar src={u.avatar} name={fullName(u)} size={24} />
+                                                                    <span className={styles.dropName}>{fullName(u)}</span>
+                                                                    <small className={styles.dropUser}>@{u.username}</small>
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <button
+                                                    className={styles.btnInvite}
+                                                    disabled={!inviteQuery.trim() || inviteBusy === `invite-${g.id}`}
+                                                    onClick={() => doInvite(g.id)}
+                                                >
+                                                    {inviteBusy === `invite-${g.id}` ? '…' : 'Pozvať'}
+                                                </button>
+                                            </div>
+                                            {inviteErr && <p className={styles.inviteErr}>{inviteErr}</p>}
+                                        </div>
+                                    )}
                                     {!grpMembers ? (
                                         <p className={styles.emptySmall}>Načítavam…</p>
                                     ) : grpMembers.length === 0 ? (
@@ -185,6 +297,12 @@ export default function Groups() {
                                             )}
                                             {m.status === 'pending' && !isFounder && (
                                                 <span className={styles.badgeWait}>čaká</span>
+                                            )}
+                                            {m.status === 'invited' && Number(m.user_id) === Number(user.user_id) && (
+                                                <button className={styles.btnAccept} onClick={() => doAcceptInvite(g.id)} disabled={busy === `accept-${g.id}`}>Akceptovať</button>
+                                            )}
+                                            {m.status === 'invited' && Number(m.user_id) !== Number(user.user_id) && (
+                                                <span className={styles.badgeInvited}>pozvaný</span>
                                             )}
                                         </div>
                                     ))}

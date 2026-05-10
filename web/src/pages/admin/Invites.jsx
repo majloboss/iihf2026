@@ -143,12 +143,13 @@ export default function Invites() {
                     <thead>
                         <tr>
                             <th>ID</th>
+                            <th>Vytvorený</th>
+                            <th>Zaslal</th>
                             <th>Adresát</th>
                             <th>Skupina</th>
-                            <th>Vytvorený</th>
                             <th>Použitý</th>
                             <th>Hráč</th>
-                            <th>Mail</th>
+                            <th>Email</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -156,13 +157,14 @@ export default function Invites() {
                         {invites.map(i => (
                             <tr key={i.id}>
                                 <td>{i.id}</td>
+                                <td>{new Date(i.created_at).toLocaleString('sk-SK')}</td>
+                                <td>{i.created_by_username || <span style={{color:'#aaa'}}>—</span>}</td>
                                 <td><SentToCell invite={i} onSaved={handleSentToSaved} /></td>
                                 <td>
                                     {i.group_name
                                         ? <span className={styles.badgeInfo}>{i.group_name}</span>
                                         : <span style={{color:'#aaa'}}>—</span>}
                                 </td>
-                                <td>{new Date(i.created_at).toLocaleString('sk-SK')}</td>
                                 <td>{i.used_at
                                     ? new Date(i.used_at).toLocaleString('sk-SK')
                                     : <span className={styles.unused}>Nepoužitý</span>}
