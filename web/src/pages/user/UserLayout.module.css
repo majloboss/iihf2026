@@ -108,7 +108,7 @@
     .sidebar { display: none; }
 
     .content {
-        padding: 16px 12px 120px;
+        padding: 16px 12px calc(160px + env(safe-area-inset-bottom, 0px));
     }
 
     .bottomNav {

@@ -250,6 +250,13 @@
 .flagCode { font-size: 0.65rem; font-weight: 700; color: #555; letter-spacing: 0.03em; }
 .flagBtnActive .flagCode { color: #1a3a6b; }
 
+@media (max-width: 480px) {
+    .flagsRow { gap: 4px; }
+    .flagBtn  { padding: 3px 3px; border-width: 2px; }
+    .flagImg  { width: 26px; height: 17px; }
+    .flagCode { font-size: 0.58rem; }
+}
+
 /* Aktívne filtre */
 .activeFilters {
     display: flex;
