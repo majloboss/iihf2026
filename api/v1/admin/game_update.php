@@ -51,7 +51,8 @@ foreach (['score1', 'score2', 'final1', 'final2'] as $f) {
     }
 }
 
-if (array_key_exists('flashscore_url', $body)) {
+$has_fs_url = array_key_exists('flashscore_url', $body);
+if ($has_fs_url) {
     $sets[] = 'flashscore_url = :flashscore_url';
     $params[':flashscore_url'] = trim($body['flashscore_url']) ?: null;
 }
@@ -60,8 +61,20 @@ if (empty($sets)) json_error('Nič na uloženie', 400);
 
 $sets[] = 'updated_at = NOW()';
 $pdo = db();
-$pdo->prepare('UPDATE iihf2026.games SET ' . implode(', ', $sets) . ' WHERE id = :id')
-    ->execute($params);
+try {
+    $pdo->prepare('UPDATE iihf2026.games SET ' . implode(', ', $sets) . ' WHERE id = :id')
+        ->execute($params);
+} catch (PDOException $e) {
+    // Ak zlyhalo kvoli flashscore_url (run_014 nespusteny), skus bez neho
+    if ($has_fs_url && str_contains($e->getMessage(), 'flashscore_url')) {
+        $sets   = array_filter($sets, fn($s) => !str_contains($s, 'flashscore_url'));
+        unset($params[':flashscore_url']);
+        $pdo->prepare('UPDATE iihf2026.games SET ' . implode(', ', $sets) . ' WHERE id = :id')
+            ->execute($params);
+    } else {
+        throw $e;
+    }
+}
 
 // Po každom uložení skontroluj aktuálny stav v DB a prepočítaj body ak je finished + skóre
 $stmt = $pdo->prepare("SELECT phase, status, score1, score2 FROM iihf2026.games WHERE id = ?");
