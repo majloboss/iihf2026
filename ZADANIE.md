@@ -4,6 +4,14 @@
 
 ---
 
+## ⚠️ PRACOVNÉ PRAVIDLÁ (vždy dodržiavať)
+
+1. **Push iba na `develop`** — na `main` NIKDY automaticky, iba na samostatný explicitný pokyn
+2. **Komunikácia v slovenčine** — všetka komunikácia s userom prebieha po slovensky
+3. **Na `develop` sa nepýtam** — zmeny vykonávam priamo bez čakania na potvrdenie; pýtam sa len pri deploy na main alebo deštruktívnych operáciách
+
+---
+
 ## STAV IMPLEMENTÁCIE — PREHĽAD
 
 ### ✅ V PRODUKCII (main / iihf2026.fellow.sk)
