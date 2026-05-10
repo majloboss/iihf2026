@@ -31,6 +31,7 @@ try {
         $path === 'v1/profile-password'    => require __DIR__ . '/v1/profile-password.php',
         $path === 'v1/profile-delete'      => require __DIR__ . '/v1/profile-delete.php',
         $path === 'v1/profile-avatar'      => require __DIR__ . '/v1/profile-avatar.php',
+        $path === 'v1/invites'             => require __DIR__ . '/v1/invites.php',
         $path === 'v1/groups'              => require __DIR__ . '/v1/groups.php',
         $path === 'v1/group-join'          => require __DIR__ . '/v1/group-join.php',
         $path === 'v1/group-leave'         => require __DIR__ . '/v1/group-leave.php',
