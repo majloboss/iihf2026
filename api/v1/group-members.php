@@ -38,7 +38,7 @@ if ($method === 'POST') {
         $username = trim($body['username'] ?? '');
         if (!$username) json_error('Chýba meno používateľa', 400);
 
-        $u = $pdo->prepare("SELECT id FROM admin.users WHERE username = ? AND active = TRUE");
+        $u = $pdo->prepare("SELECT id FROM admin.users WHERE username = ? AND is_active = TRUE");
         $u->execute([$username]);
         $invitee = $u->fetch();
         if (!$invitee) json_error('Používateľ nenájdený', 404);

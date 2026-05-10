@@ -48,11 +48,11 @@ function send_mail(string $to, string $subject, string $body): void {
 function send_mail_logged(PDO $pdo, string $to, string $subject, string $body): void {
     try {
         send_mail($to, $subject, $body);
-        $pdo->prepare("INSERT INTO admin.mail_log (to_email, subject, status) VALUES (?,?,'sent')")
-            ->execute([$to, $subject]);
+        $pdo->prepare("INSERT INTO admin.mail_log (to_email, subject, body, status) VALUES (?,?,?,'sent')")
+            ->execute([$to, $subject, $body]);
     } catch (Throwable $e) {
-        $pdo->prepare("INSERT INTO admin.mail_log (to_email, subject, status, error_msg) VALUES (?,?,'failed',?)")
-            ->execute([$to, $subject, $e->getMessage()]);
+        $pdo->prepare("INSERT INTO admin.mail_log (to_email, subject, body, status, error_msg) VALUES (?,?,?,'failed',?)")
+            ->execute([$to, $subject, $body, $e->getMessage()]);
         throw $e;
     }
 }

@@ -8,7 +8,7 @@ $limit  = min((int)($_GET['limit'] ?? 100), 500);
 $offset = (int)($_GET['offset'] ?? 0);
 
 $rows = $pdo->prepare("
-    SELECT id, to_email, subject, status, error_msg, sent_at
+    SELECT id, to_email, subject, body, status, error_msg, sent_at
     FROM admin.mail_log
     ORDER BY sent_at DESC
     LIMIT :lim OFFSET :off

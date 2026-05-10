@@ -1,12 +1,42 @@
 import { useEffect, useState } from 'react';
 import { apiFetch } from '../../api/client';
 import styles from './Admin.module.css';
+import mailStyles from './AdminMailLog.module.css';
+
+function MailModal({ row, onClose }) {
+    return (
+        <div className={mailStyles.overlay} onClick={e => e.target === e.currentTarget && onClose()}>
+            <div className={mailStyles.modal}>
+                <div className={mailStyles.header}>
+                    <div>
+                        <div className={mailStyles.subject}>{row.subject}</div>
+                        <div className={mailStyles.meta}>
+                            Komu: <strong>{row.to_email}</strong>
+                            {' · '}
+                            {new Date(row.sent_at).toLocaleString('sk-SK')}
+                            {' · '}
+                            {row.status === 'sent'
+                                ? <span className={styles.badgeProd}>✓ Odoslaný</span>
+                                : <span className={styles.badgeLive}>✗ Chyba</span>}
+                        </div>
+                    </div>
+                    <button className={mailStyles.close} onClick={onClose}>✕</button>
+                </div>
+                {row.error_msg && (
+                    <div className={mailStyles.errBox}>{row.error_msg}</div>
+                )}
+                <pre className={mailStyles.body}>{row.body || '(obsah nie je uložený)'}</pre>
+            </div>
+        </div>
+    );
+}
 
 export default function AdminMailLog() {
     const [rows,    setRows]    = useState([]);
     const [total,   setTotal]   = useState(0);
     const [loading, setLoading] = useState(true);
     const [err,     setErr]     = useState('');
+    const [detail,  setDetail]  = useState(null);
 
     const load = (offset = 0) => {
         apiFetch(`v1/admin/mail-log?limit=100&offset=${offset}`)
@@ -40,7 +70,7 @@ export default function AdminMailLog() {
                                 <tr><td colSpan={4} style={{textAlign:'center',color:'#aaa',padding:20}}>Žiadne maily</td></tr>
                             )}
                             {rows.map(r => (
-                                <tr key={r.id}>
+                                <tr key={r.id} className={mailStyles.row} onClick={() => setDetail(r)}>
                                     <td data-label="Čas" className={styles.small}>{new Date(r.sent_at).toLocaleString('sk-SK')}</td>
                                     <td data-label="Komu" className={styles.mono}>{r.to_email}</td>
                                     <td data-label="Predmet">{r.subject}</td>
@@ -60,6 +90,7 @@ export default function AdminMailLog() {
                     )}
                 </>
             )}
+            {detail && <MailModal row={detail} onClose={() => setDetail(null)} />}
         </div>
     );
 }
