@@ -37,7 +37,8 @@ export default function AdminGames() {
     };
 
     const phases = ['all', 'A', 'B', 'QF', 'SF', 'BRONZE', 'GOLD'];
-    const filtered = phase === 'all' ? games : games.filter(g => g.phase === phase);
+    const filtered = (phase === 'all' ? games : games.filter(g => g.phase === phase))
+        .slice().sort((a, b) => a.game_number - b.game_number);
 
     if (loading) return <p>Načítavam…</p>;
     if (error)   return <p style={{color:'red'}}>Chyba: {error}</p>;

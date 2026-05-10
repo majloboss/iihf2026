@@ -215,7 +215,8 @@ export default function AdminResults() {
             .catch(e   => { setError(e.message); setLoading(false); });
     }, []);
 
-    const filtered = phase === 'all' ? games : games.filter(g => g.phase === phase);
+    const filtered = (phase === 'all' ? games : games.filter(g => g.phase === phase))
+        .slice().sort((a, b) => a.game_number - b.game_number);
 
     const byDate = {};
     filtered.forEach(g => {

@@ -162,7 +162,8 @@ export default function Games() {
     }, []);
 
     const phases = ['all', 'A', 'B', 'standings', 'QF', 'SF', 'BRONZE', 'GOLD'];
-    const filtered = (phase === 'all' || phase === 'standings') ? games : games.filter(g => g.phase === phase);
+    const filtered = ((phase === 'all' || phase === 'standings') ? games : games.filter(g => g.phase === phase))
+        .slice().sort((a, b) => a.game_number - b.game_number);
 
     // Group by date
     const byDate = {};
