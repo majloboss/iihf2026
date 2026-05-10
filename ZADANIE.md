@@ -12,8 +12,10 @@
 - Prihlásenie (JWT) + registrácia cez pozývací link
 - Profil — avatar, meno, priezvisko, email, telefón, zmena hesla, zmazanie účtu
 - Profil — záložky: Profil / Skupiny / Notifikácie
+- 🟠 Profil — záložka Pozvánky: zoznam odoslaných pozvánok, nová pozvánka s výberom skupiny
 - Skupiny — vytvorenie, vstup (pending→schválenie), odchod, zrušenie, filter Len moje/Všetky
 - Skupiny — rozbalenie → zoznam členov s avatarmi, klik na člena → detail
+- 🟠 Skupiny — pozvanie člena zo skupiny (autocomplete, dvojklik = všetci); žltý badge „Pozvánka" pri pozvanom hráčovi; Akceptovať v detaile skupiny
 - Zápasy — zoznam 64 zápasov, vlajky, filter podľa fázy, grupovanie podľa dátumu
 - Zápasy — auto-scroll na dnešný deň, auto-výber aktívnej fázy (live → najbližší)
 - Tipovanie — presné skóre, uzavretie 5 min pred zápasom, editácia; TBD zápasy netipovateľné
@@ -245,6 +247,7 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 - ✅ Klik na skupinu → rozbalí sa zoznam členov s avatarmi
 - ✅ Klik na člena → detail profilu (avatar, meno, email, telefón)
 - ✅ Filter „Len moje" / „Všetky"
+- 🟠 Člen skupiny môže pozvať iného hráča priamo (status `invited`); pozvaný vidí žltý badge a akceptuje v detaile skupiny
 - 🔲 Hráč tipuje iba raz — rovnaký tip sa použije vo všetkých jeho skupinách
 
 ---
@@ -335,7 +338,7 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 |------|-----|-------|
 | group_id | FK → friend_groups | |
 | user_id | FK → users | |
-| status | VARCHAR(10) DEFAULT 'pending' | `pending` \| `accepted` |
+| status | VARCHAR(10) DEFAULT 'pending' | `pending` \| `accepted` \| `invited` |
 | joined_at | TIMESTAMP | |
 | PK(group_id, user_id) | | |
 
@@ -449,7 +452,7 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 | `v1/groups` | GET/POST/DELETE | Zoznam, vytvorenie, zrušenie skupiny | ✅ |
 | `v1/group-join` | POST | Žiadosť o vstup do skupiny | ✅ |
 | `v1/group-leave` | POST | Opustenie skupiny | ✅ |
-| `v1/group-members` | GET/POST | Členovia skupiny, schválenie/odmietnutie | ✅ |
+| `v1/group-members` | GET/POST | Členovia skupiny, schválenie/odmietnutie/pozvanie/akceptovanie | ✅ |
 | `v1/users` | GET | Zoznam hráčov / detail hráča | ✅ |
 | `v1/games` | GET | Zoznam zápasov s tipmi | ✅ |
 | `v1/tips` | POST | Uloženie tipu | ✅ |
@@ -501,4 +504,4 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 
 ---
 
-*Posledná aktualizácia: 2026-05-10 (v2.11)*
+*Posledná aktualizácia: 2026-05-10 (v2.12)*

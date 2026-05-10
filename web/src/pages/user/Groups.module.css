@@ -312,3 +312,125 @@
 .modalLink:hover { text-decoration: underline; }
 
 .error { color: #c0392b; font-size: 0.85rem; margin: 0; }
+
+/* Invite row */
+.inviteSection {
+    padding: 8px 0 4px;
+    border-bottom: 1px solid #ebebeb;
+    margin-bottom: 4px;
+}
+
+.inviteRow {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.inviteInputWrap {
+    position: relative;
+    flex: 1;
+}
+
+.inviteInput {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 7px 10px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    outline: none;
+    background: #fafafa;
+    color: #333;
+    transition: border-color 0.15s;
+}
+.inviteInput:focus { border-color: #1a3a6b; background: #fff; }
+.inviteInput::placeholder { color: #bbb; }
+
+.dropDown {
+    position: absolute;
+    top: calc(100% + 3px);
+    left: 0; right: 0;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 7px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    z-index: 100;
+    max-height: 220px;
+    overflow-y: auto;
+}
+
+.dropItem {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 7px 10px;
+    background: none;
+    border: none;
+    border-radius: 0;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.1s;
+}
+.dropItem:hover { background: #f0f4fa; }
+.dropItem:first-child { border-radius: 7px 7px 0 0; }
+.dropItem:last-child  { border-radius: 0 0 7px 7px; }
+.dropItem:only-child  { border-radius: 7px; }
+
+.dropName { font-size: 0.88rem; color: #222; font-weight: 500; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dropUser { font-size: 0.78rem; color: #aaa; flex-shrink: 0; }
+
+.btnInvite {
+    padding: 7px 13px;
+    background: #1a3a6b;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    white-space: nowrap;
+    transition: background 0.12s;
+    flex-shrink: 0;
+}
+.btnInvite:hover:not(:disabled) { background: #24519e; }
+.btnInvite:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.inviteErr { font-size: 0.82rem; color: #c0392b; margin: 5px 0 0; }
+
+/* Invited status */
+.badgeInvited {
+    font-size: 0.75rem;
+    background: #fff3cd;
+    color: #856404;
+    padding: 2px 8px;
+    border-radius: 20px;
+    white-space: nowrap;
+    border: 1px solid rgba(255,193,7,0.5);
+    flex-shrink: 0;
+}
+
+.badgeInvitedCard {
+    font-size: 0.78rem;
+    background: #fff3cd;
+    color: #856404;
+    padding: 3px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+    border: 1px solid rgba(255,193,7,0.5);
+    font-weight: 600;
+}
+
+.btnAccept {
+    padding: 5px 12px;
+    background: #d4edda;
+    color: #155724;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    transition: background 0.12s;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.btnAccept:hover:not(:disabled) { background: #c3e6cb; }
+.btnAccept:disabled { opacity: 0.5; cursor: not-allowed; }
