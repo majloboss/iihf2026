@@ -16,9 +16,23 @@ export default function AdminLayout() {
                     <span>Admin</span>
                 </div>
                 <nav>
+                    <div className={styles.navSection}>Správa</div>
+
                     <NavLink to="/admin/users"   className={({ isActive }) => isActive ? styles.active : ''}>
                         👤 Používatelia
                     </NavLink>
+                    <NavLink to="/admin/invites" className={({ isActive }) => isActive ? styles.active : ''}>
+                        🔗 Pozvánky
+                    </NavLink>
+                    <NavLink to="/admin/login-logs" className={({ isActive }) => isActive ? styles.active : ''}>
+                        📋 Prihlásenia
+                    </NavLink>
+                    <NavLink to="/admin/mail-log" className={({ isActive }) => isActive ? styles.active : ''}>
+                        📧 Odoslané maily
+                    </NavLink>
+
+                    <div className={styles.navSection}>Súťaž</div>
+
                     <NavLink to="/admin/games" className={({ isActive }) => isActive ? styles.active : ''}>
                         🏒 Zápasy
                     </NavLink>
@@ -32,19 +46,10 @@ export default function AdminLayout() {
                         🏆 Skupiny
                     </NavLink>
 
-                    <div className={styles.navSection}>Správa</div>
+                    <div className={styles.navSection}>Systém</div>
 
-                    <NavLink to="/admin/invites" className={({ isActive }) => isActive ? styles.active : ''}>
-                        🔗 Pozvánky
-                    </NavLink>
                     <NavLink to="/admin/tools" className={({ isActive }) => isActive ? styles.active : ''}>
                         🔧 Nástroje
-                    </NavLink>
-                    <NavLink to="/admin/login-logs" className={({ isActive }) => isActive ? styles.active : ''}>
-                        📋 Prihlásenia
-                    </NavLink>
-                    <NavLink to="/admin/mail-log" className={({ isActive }) => isActive ? styles.active : ''}>
-                        📧 Odoslané maily
                     </NavLink>
                 </nav>
                 <button className={styles.logout} onClick={handleLogout}>Odhlásiť</button>
