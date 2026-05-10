@@ -39,7 +39,7 @@ function TipInput({ game, onSaved }) {
 
     if (!canTip) {
         if (game.tip1 != null) return <div className={styles.tipDone}>{game.tip1}:{game.tip2} {game.points != null && <span className={styles.pts}>+{game.points}b</span>}</div>;
-        // "Uzavreté" only in the 5-min pre-game window; after start time show nothing
+        if (!game.team1 || !game.team2) return null;
         if (new Date() < new Date(game.starts_at)) return <div className={styles.tipClosed}>Uzavreté</div>;
         return null;
     }
