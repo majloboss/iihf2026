@@ -1,11 +1,14 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { getGames } from '../../api/games';
 import { saveTip, getGameTips } from '../../api/tips';
-import GroupStandings from './GroupStandings';
 import styles from './Games.module.css';
 
-const PHASE_LABEL = { A: 'Skupina A', B: 'Skupina B', standings: 'Tabuľky', QF: 'Štvrťfinále', SF: 'Semifinále', BRONZE: 'O bronz', GOLD: 'Finále' };
+const PHASE_LABEL = { A: 'Skupina A', B: 'Skupina B', QF: 'Štvrťfinále', SF: 'Semifinále', BRONZE: 'O bronz', GOLD: 'Finále' };
 const FLAG_URL = (code) => `/flags/team_flag_${code?.toLowerCase()}.png`;
+const dayKey = (iso) => {
+    const d = new Date(iso);
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+};
 
 function TeamBlock({ code, score, isLeft }) {
     return (
@@ -120,25 +123,22 @@ function GroupTips({ gameId }) {
     );
 }
 
-function formatDate(iso) {
-    const d = new Date(iso);
-    return d.toLocaleDateString('sk-SK', { weekday: 'short', day: '2-digit', month: '2-digit' }) + ' ' +
-        d.toLocaleTimeString('sk-SK', { hour: '2-digit', minute: '2-digit' });
-}
-
 export default function Games() {
-    const [games, setGames] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
-    const [phase, setPhase] = useState('all');
-    const scrollRef = useRef(null);
+    const [games, setGames]               = useState([]);
+    const [loading, setLoading]           = useState(true);
+    const [error, setError]               = useState('');
+    const [phase, setPhase]               = useState('all');
+    const [selectedDay, setSelectedDay]   = useState(null);
+    const [selectedTeam, setSelectedTeam] = useState(null);
+    const scrollRef    = useRef(null);
+    const calContainer = useRef(null);
+    const todayCalBtn  = useRef(null);
 
     useEffect(() => {
         getGames()
             .then(data => {
                 setGames(data);
                 setLoading(false);
-                // Auto-select active phase: live first, then nearest upcoming, else 'all'
                 const live = data.find(g => g.status === 'live');
                 if (live) { setPhase(live.phase); return; }
                 const now = Date.now();
@@ -148,35 +148,46 @@ export default function Games() {
             .catch(e => { setError(e.message || 'Chyba API'); setLoading(false); });
     }, []);
 
-    // Auto-scroll to today / nearest upcoming day after initial load
+    // Auto-scroll games list to today
     useEffect(() => {
         if (!games.length || !scrollRef.current) return;
-        const timer = setTimeout(() => {
-            scrollRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 150);
-        return () => clearTimeout(timer);
+        const t = setTimeout(() => scrollRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150);
+        return () => clearTimeout(t);
+    }, [games]);
+
+    // Auto-scroll calendar to today
+    useEffect(() => {
+        if (!todayCalBtn.current || !calContainer.current) return;
+        const c = calContainer.current;
+        const b = todayCalBtn.current;
+        c.scrollLeft = b.offsetLeft - c.offsetWidth / 2 + b.offsetWidth / 2;
     }, [games]);
 
     const handleSaved = useCallback((gameId, t1, t2) => {
         setGames(prev => prev.map(g => g.id === gameId ? { ...g, tip1: t1, tip2: t2 } : g));
     }, []);
 
-    const phases = ['all', 'A', 'B', 'standings', 'QF', 'SF', 'BRONZE', 'GOLD'];
-    const filtered = ((phase === 'all' || phase === 'standings') ? games : games.filter(g => g.phase === phase))
+    const phases  = ['all', 'A', 'B', 'QF', 'SF', 'BRONZE', 'GOLD'];
+    const todayK  = dayKey(new Date().toISOString());
+    const allDays = [...new Set(games.map(g => dayKey(g.starts_at)))].sort();
+    const allTeams = [...new Set(games.flatMap(g => [g.team1, g.team2]).filter(Boolean))].sort();
+
+    const filtered = games
+        .filter(g => phase === 'all' || g.phase === phase)
+        .filter(g => !selectedDay  || dayKey(g.starts_at) === selectedDay)
+        .filter(g => !selectedTeam || g.team1 === selectedTeam || g.team2 === selectedTeam)
         .slice().sort((a, b) => a.game_number - b.game_number);
 
-    // Group by date
     const byDate = {};
     filtered.forEach(g => {
-        const d = new Date(g.starts_at).toLocaleDateString('sk-SK', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' });
-        if (!byDate[d]) byDate[d] = [];
-        byDate[d].push(g);
+        const dk = new Date(g.starts_at).toLocaleDateString('sk-SK', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' });
+        if (!byDate[dk]) byDate[dk] = [];
+        byDate[dk].push(g);
     });
 
     if (loading) return <div className={styles.wrap}><p>Načítavam…</p></div>;
-    if (error) return <div className={styles.wrap}><p style={{color:'red'}}>Chyba: {error}</p></div>;
+    if (error)   return <div className={styles.wrap}><p style={{color:'red'}}>Chyba: {error}</p></div>;
 
-    // Find first day >= today for auto-scroll
     const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
     const targetDate = Object.keys(byDate).find(dk => {
         const d = new Date(byDate[dk][0].starts_at); d.setHours(0, 0, 0, 0);
@@ -185,6 +196,7 @@ export default function Games() {
 
     return (
         <div className={styles.wrap}>
+            {/* Fázy */}
             <div className={styles.topBar}>
                 <h2>Zápasy</h2>
                 <div className={styles.filters}>
@@ -197,9 +209,66 @@ export default function Games() {
                 </div>
             </div>
 
-            {phase === 'standings' && <GroupStandings />}
+            {/* Kalendár */}
+            <div className={styles.calRow} ref={calContainer}>
+                {allDays.map(dk => {
+                    const d       = new Date(dk + 'T12:00:00');
+                    const isToday  = dk === todayK;
+                    const isActive = dk === selectedDay;
+                    return (
+                        <button
+                            key={dk}
+                            ref={isToday ? todayCalBtn : null}
+                            className={`${styles.calDay} ${isToday ? styles.calDayToday : ''} ${isActive ? styles.calDayActive : ''}`}
+                            onClick={() => setSelectedDay(selectedDay === dk ? null : dk)}
+                        >
+                            <span className={styles.calDayWeekday}>
+                                {d.toLocaleDateString('sk-SK', { weekday: 'short' })}
+                            </span>
+                            <span className={styles.calDayNum}>{d.getDate()}</span>
+                            <span className={styles.calDayMonth}>{d.getMonth() + 1}.</span>
+                        </button>
+                    );
+                })}
+            </div>
 
-            {phase !== 'standings' && Object.entries(byDate).map(([date, dayGames]) => (
+            {/* Vlajky tímov */}
+            {allTeams.length > 0 && (
+                <div className={styles.flagsRow}>
+                    {allTeams.map(team => (
+                        <button
+                            key={team}
+                            className={`${styles.flagBtn} ${selectedTeam === team ? styles.flagBtnActive : ''}`}
+                            onClick={() => setSelectedTeam(selectedTeam === team ? null : team)}
+                        >
+                            <img className={styles.flagImg} src={FLAG_URL(team)} alt={team}
+                                onError={e => e.target.style.display='none'} />
+                            <span className={styles.flagCode}>{team}</span>
+                        </button>
+                    ))}
+                </div>
+            )}
+
+            {/* Aktívne filtre — chips na zrušenie */}
+            {(selectedDay || selectedTeam) && (
+                <div className={styles.activeFilters}>
+                    {selectedDay && (
+                        <span className={styles.filterChip}>
+                            {new Date(selectedDay + 'T12:00:00').toLocaleDateString('sk-SK', { day: '2-digit', month: '2-digit' })}
+                            <button onClick={() => setSelectedDay(null)}>×</button>
+                        </span>
+                    )}
+                    {selectedTeam && (
+                        <span className={styles.filterChip}>
+                            {selectedTeam}
+                            <button onClick={() => setSelectedTeam(null)}>×</button>
+                        </span>
+                    )}
+                </div>
+            )}
+
+            {/* Zápasy */}
+            {Object.entries(byDate).map(([date, dayGames]) => (
                 <div key={date} className={styles.dayGroup} ref={date === targetDate ? scrollRef : null}>
                     <div className={styles.dayHeader}>{date}</div>
                     {dayGames.map(g => {
@@ -208,35 +277,35 @@ export default function Games() {
                                   : new Date(g.starts_at).getTime() <= now ? 'live'
                                   : 'scheduled';
                         return (
-                        <div key={g.id} className={`${styles.card} ${es === 'finished' ? styles.cardFinished : es === 'live' ? styles.cardLive : ''}`}>
-                            <div className={styles.cardTop}>
-                                <span className={styles.phase}>{PHASE_LABEL[g.phase] || g.phase} • Zápas {g.game_number}</span>
-                                <span className={styles.time}>{new Date(g.starts_at).toLocaleTimeString('sk-SK', { hour: '2-digit', minute: '2-digit' })}</span>
-                            </div>
-                            <div className={styles.matchRow}>
-                                <TeamBlock code={g.team1} score={es === 'finished' ? g.score1 : null} isLeft />
-                                <div className={styles.vs}>
-                                    {es === 'live' ? <span className={styles.live}>LIVE</span> : 'vs'}
+                            <div key={g.id} className={`${styles.card} ${es === 'finished' ? styles.cardFinished : es === 'live' ? styles.cardLive : ''}`}>
+                                <div className={styles.cardTop}>
+                                    <span className={styles.phase}>{PHASE_LABEL[g.phase] || g.phase} • Zápas {g.game_number}</span>
+                                    <span className={styles.time}>{new Date(g.starts_at).toLocaleTimeString('sk-SK', { hour: '2-digit', minute: '2-digit' })}</span>
                                 </div>
-                                <TeamBlock code={g.team2} score={es === 'finished' ? g.score2 : null} />
+                                <div className={styles.matchRow}>
+                                    <TeamBlock code={g.team1} score={es === 'finished' ? g.score1 : null} isLeft />
+                                    <div className={styles.vs}>
+                                        {es === 'live' ? <span className={styles.live}>LIVE</span> : 'vs'}
+                                    </div>
+                                    <TeamBlock code={g.team2} score={es === 'finished' ? g.score2 : null} />
+                                </div>
+                                <div className={styles.venue}>
+                                    {g.venue}
+                                    {g.flashscore_url && (
+                                        <a href={g.flashscore_url} target="_blank" rel="noopener noreferrer" className={styles.fsLink} title="Sledovať na FlashScore">
+                                            <img src="/flashscore.png" alt="FlashScore" className={styles.fsIcon} />
+                                        </a>
+                                    )}
+                                </div>
+                                <TipInput game={g} onSaved={handleSaved} />
+                                {es !== 'scheduled' && <GroupTips gameId={g.id} />}
                             </div>
-                            <div className={styles.venue}>
-                                {g.venue}
-                                {g.flashscore_url && (
-                                    <a href={g.flashscore_url} target="_blank" rel="noopener noreferrer" className={styles.fsLink} title="Sledovať na FlashScore">
-                                        <img src="/flashscore.png" alt="FlashScore" className={styles.fsIcon} />
-                                    </a>
-                                )}
-                            </div>
-                            <TipInput game={g} onSaved={handleSaved} />
-                            {es !== 'scheduled' && <GroupTips gameId={g.id} />}
-                        </div>
                         );
                     })}
                 </div>
             ))}
 
-            {phase !== 'standings' && filtered.length === 0 && <p className={styles.empty}>Žiadne zápasy</p>}
+            {filtered.length === 0 && <p className={styles.empty}>Žiadne zápasy</p>}
         </div>
     );
 }
