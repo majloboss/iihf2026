@@ -23,9 +23,11 @@ if ($method === 'GET') {
                     fg.name AS group_name,
                     i.user_id AS used_by_id,
                     u.username AS used_by_username,
-                    u.first_name, u.last_name, u.email, u.phone, u.avatar
+                    u.first_name, u.last_name, u.email, u.phone, u.avatar,
+                    c.username AS created_by_username
              FROM admin.invites i
              LEFT JOIN admin.users u ON u.id = i.user_id
+             LEFT JOIN admin.users c ON c.id = i.created_by
              LEFT JOIN admin.friend_groups fg ON fg.id = i.group_id
              ORDER BY i.created_at DESC"
         )->fetchAll();
@@ -37,9 +39,11 @@ if ($method === 'GET') {
                         i.email_sent,
                         i.user_id AS used_by_id,
                         u.username AS used_by_username,
-                        u.first_name, u.last_name, u.email, u.phone, u.avatar
+                        u.first_name, u.last_name, u.email, u.phone, u.avatar,
+                        c.username AS created_by_username
                  FROM admin.invites i
                  LEFT JOIN admin.users u ON u.id = i.user_id
+                 LEFT JOIN admin.users c ON c.id = i.created_by
                  ORDER BY i.created_at DESC"
             )->fetchAll();
             foreach ($rows as &$r) { $r['group_id'] = null; $r['group_name'] = null; }
@@ -48,9 +52,10 @@ if ($method === 'GET') {
             // Bez email_sent aj group_id (run_012 nespustený)
             $rows = $pdo->query($baseSelect)->fetchAll();
             foreach ($rows as &$r) {
-                $r['email_sent'] = false;
-                $r['group_id']   = null;
-                $r['group_name'] = null;
+                $r['email_sent']           = false;
+                $r['group_id']             = null;
+                $r['group_name']           = null;
+                $r['created_by_username']  = null;
             }
             unset($r);
         }
@@ -61,14 +66,8 @@ if ($method === 'GET') {
         $r['link'] = $base . $r['invite_token'];
     }
 
-    // Skupiny kde je admin členom (pre dropdown)
-    $groups = $pdo->prepare(
-        "SELECT fg.id, fg.name
-         FROM admin.friend_groups fg
-         JOIN admin.group_members gm ON gm.group_id = fg.id AND gm.user_id = ? AND gm.status = 'accepted'
-         ORDER BY fg.name"
-    );
-    $groups->execute([$auth['user_id']]);
+    // Admin vidí všetky skupiny v systéme
+    $groups = $pdo->query("SELECT id, name FROM admin.friend_groups ORDER BY name");
 
     json_ok(['invites' => $rows, 'groups' => $groups->fetchAll()]);
 }
