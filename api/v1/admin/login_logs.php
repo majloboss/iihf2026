@@ -8,7 +8,7 @@ $limit  = min((int)($_GET['limit']  ?? 100), 500);
 $offset = (int)($_GET['offset'] ?? 0);
 
 $rows = $pdo->prepare("
-    SELECT ll.id, ll.username, ll.ip_address, ll.user_agent, ll.logged_at,
+    SELECT ll.id, ll.username, ll.ip_address, ll.user_agent, ll.logged_at, ll.env,
            u.role, u.is_active
     FROM admin.login_logs ll
     LEFT JOIN admin.users u ON u.id = ll.user_id

@@ -3,7 +3,7 @@
 require_auth(true);
 $pdo = db();
 
-$migrations = ['003_group_standings.sql', '004_invites_sent_to.sql', '009_notification_settings.sql', '010_games_final_score.sql', '011_notification_log.sql', 'run_012.sql', 'run_013.sql', 'run_014.sql', 'run_015_flashscore_urls.sql', 'run_016_games_pdf.sql'];
+$migrations = ['003_group_standings.sql', '004_invites_sent_to.sql', '009_notification_settings.sql', '010_games_final_score.sql', '011_notification_log.sql', 'run_012.sql', 'run_013.sql', 'run_014.sql', 'run_015_flashscore_urls.sql', 'run_016_games_pdf.sql', 'run_017_mail_log_body.sql'];
 $ran = [];
 foreach ($migrations as $file) {
     $sql = file_get_contents(__DIR__ . '/../../migrations/' . $file);
