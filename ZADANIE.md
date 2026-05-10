@@ -28,6 +28,7 @@
 - Pravidlá — stránka s bodovacou tabuľkou a príkladmi
 - Notifikácie (nastavenia) — záložka v Profile; per typ: email/push/čas pred zápasom
 - Mobilná optimalizácia — bottom nav 2 riadky (3+3), sidebar skrytý pod 900px, Odhlásiť tlačidlo viditeľné na mobile
+- Admin mobilná optimalizácia — hamburger menu, tabuľky → karty (data-label), UserModal → bottom-sheet, GroupStandings → horizontálny scroll
 - PWA — manifest, offline SW, favicon, správne veľkosti ikon (192×192, 512×512)
 
 **Admin časť**
@@ -504,4 +505,4 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 
 ---
 
-*Posledná aktualizácia: 2026-05-10 (v2.13)*
+*Posledná aktualizácia: 2026-05-10 (v2.14)*
