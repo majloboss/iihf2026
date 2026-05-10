@@ -37,6 +37,7 @@ export default function GameModal({ game, onClose, onSaved }) {
     const [status, setStatus] = useState(game.status || 'scheduled');
     const [score1, setScore1] = useState(game.score1 != null ? String(game.score1) : '');
     const [score2, setScore2] = useState(game.score2 != null ? String(game.score2) : '');
+    const [fsUrl,   setFsUrl]   = useState(game.flashscore_url || '');
     const [saving, setSaving] = useState(false);
     const [error,  setError]  = useState('');
     const [success, setSuccess] = useState('');
@@ -55,6 +56,7 @@ export default function GameModal({ game, onClose, onSaved }) {
                 status,
                 score1: showScore && score1 !== '' ? parseInt(score1) : null,
                 score2: showScore && score2 !== '' ? parseInt(score2) : null,
+                flashscore_url: fsUrl || null,
             });
             setSuccess('Uložené.');
             onSaved({
@@ -66,6 +68,7 @@ export default function GameModal({ game, onClose, onSaved }) {
                 status,
                 score1: showScore && score1 !== '' ? parseInt(score1) : null,
                 score2: showScore && score2 !== '' ? parseInt(score2) : null,
+                flashscore_url: fsUrl || null,
             });
         } catch (e) { setError(e.message); }
         finally { setSaving(false); }
@@ -135,6 +138,16 @@ export default function GameModal({ game, onClose, onSaved }) {
                 <div className={styles.section}>
                     <h4>Miesto</h4>
                     <input value={venue} onChange={e => setVenue(e.target.value)} style={INPUT_STYLE} />
+                </div>
+
+                <div className={styles.section}>
+                    <h4>FlashScore link</h4>
+                    <input
+                        value={fsUrl}
+                        onChange={e => setFsUrl(e.target.value)}
+                        placeholder="https://www.flashscore.sk/zapas/hokej/..."
+                        style={INPUT_STYLE}
+                    />
                 </div>
 
                 <button className={styles.btn} onClick={save} disabled={saving}>
