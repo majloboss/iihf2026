@@ -92,29 +92,36 @@ if ($method === 'POST') {
     $email_err  = null;
 
     if ($sent_to && filter_var($sent_to, FILTER_VALIDATE_EMAIL)) {
+        // Meno odosielateľa
+        $senderStmt = $pdo->prepare('SELECT username FROM admin.users WHERE id = ?');
+        $senderStmt->execute([$auth['user_id']]);
+        $sender_username = $senderStmt->fetchColumn() ?: 'Hráč';
+
         $group_name = null;
         if ($group_id) {
             $gname = $pdo->prepare('SELECT name FROM admin.friend_groups WHERE id=?');
             $gname->execute([$group_id]);
             $group_name = $gname->fetchColumn() ?: null;
         }
-        $subject    = 'Pozvánka do IIHF 2026 Tipovačky';
+        $subject   = 'Pozvánka do IIHF 2026 Tipovačky';
+        $rules_url = APP_URL . '/pravidla';
+
         $group_line = $group_name
-            ? "Po registracii budes automaticky pridany do skupiny \"" . $group_name . "\" - kde budes moct sutazit s ostatnymi clenmi.\n\n"
-            : "Odporucame ti pripojit sa k existujucej skupine alebo si vytvorit vlastnu a pozvat dalsich priatelov.\n\n";
-        $rules_url  = APP_URL . '/pravidla';
-        $body_mail  = "Ahoj,\n\n"
-            . "pozyvame Ta do IIHF 2026 Tipovacky - sutaze v tipovani vysledkov Majstrovstiev sveta v ladovom hokeji 2026 (15. - 31. maja 2026).\n\n"
-            . "Zaregistruj sa kliknutim na tento odkaz:\n$link\n\n"
-            . "Po registracii si zvolis vlastne meno a heslo. Potom mozes:\n"
-            . "- tipovat presne vysledky vsetkych 64 zapasov MS\n"
-            . "- sutazit s kamaratmi v skupinach\n"
-            . "- sledovat priebezne poradie\n\n"
+            ? "Po registrácii budeš automaticky pridaný do skupiny \"" . $group_name . "\", kde budeš môcť súťažiť so " . $sender_username . " a ostatnými členmi.\n\n"
+            : "Odporúčame ti pripojiť sa k existujúcej skupine alebo si vytvoriť vlastnú a pozvať ďalších priateľov.\n\n";
+
+        $body_mail = "Ahoj,\n\n"
+            . $sender_username . " ťa pozýva do IIHF 2026 Tipovačky – súťaže v tipovaní výsledkov Majstrovstiev sveta v ľadovom hokeji 2026 (15. – 31. mája 2026).\n\n"
+            . "Zaregistruj sa kliknutím na tento odkaz:\n" . $link . "\n\n"
+            . "Po registrácii si zvolíš vlastné meno a heslo. Potom môžeš:\n"
+            . "- tipovať presné výsledky všetkých 64 zápasov MS\n"
+            . "- súťažiť s kamarátmi v skupinách\n"
+            . "- sledovať priebežné poradie\n\n"
             . $group_line
-            . "Pred zacatim odporucame precitat si pravidla tipovacky:\n$rules_url\n\n"
-            . "Link je jednorazovy - plati pre jednu registraciu.\n\n"
-            . "Tesime sa na Teba!\n"
-            . "IIHF 2026 Tipovacka";
+            . "Pred začatím odporúčame prečítať si pravidlá tipovačky:\n" . $rules_url . "\n\n"
+            . "Link je jednorazový – platí pre jednu registráciu.\n\n"
+            . "Tešíme sa na teba!\n"
+            . "IIHF 2026 Tipovačka";
         try {
             send_mail_logged($pdo, $sent_to, $subject, $body_mail);
             $pdo->prepare("UPDATE admin.invites SET email_sent=TRUE WHERE id=?")->execute([$id]);
