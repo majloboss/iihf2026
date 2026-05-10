@@ -36,7 +36,8 @@
   - Email obsahuje registračný link + pravidlá tipovačky
   - Voliteľný výber skupiny (dropdown z adminových skupín) — nový člen sa po registrácii automaticky pridá
   - Badge "Mail odoslaný" a stĺpec "Skupina" v zozname pozvánok
-- Správa zápasov — dátum/čas, tímy (vrátane play-off 57–64), miesto, stav, skóre
+- Správa zápasov — dátum/čas, tímy (vrátane play-off 57–64), miesto, stav, skóre, FlashScore link
+- FlashScore prepojenie — každý zápas môže mať link na detail zápasu na flashscore.sk; admin zadáva manuálne; ikona zobrazená pri zápase na stránke Zápasy
 - Zadávanie výsledkov — dedikovaná obrazovka `/admin/results`, inline, kartový layout
 - Zadávanie výsledkov — checkbox "Po predĺžení": zadáš 3:2 + zaškrtneš → systém uloží regulárne 2:2 + konečné 3:2; validácia rozdiel = 1
 - Skupinové tabuľky — sync, úprava poradia pri rovnosti bodov, finalizácia
@@ -58,9 +59,10 @@
 - Android aplikácia (Kotlin)
 
 ### ⚠️ TREBA SPUSTIŤ (DB migrácie)
-- V Admin → Nástroje → kliknúť **"Spustit migracie"** — spustí run_012 + run_013
+- V Admin → Nástroje → kliknúť **"Spustit migracie"** — spustí run_012 + run_013 + run_014
   - `run_012.sql` — stĺpec `email_sent` v invites, tabuľka `mail_log`
   - `run_013.sql` — stĺpec `group_id` v invites (odporúčanie skupiny)
+  - `run_014.sql` — stĺpec `flashscore_url` v games (FlashScore prepojenie)
 
 ---
 
@@ -499,4 +501,4 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 
 ---
 
-*Posledná aktualizácia: 2026-05-09 (v2.10)*
+*Posledná aktualizácia: 2026-05-10 (v2.11)*

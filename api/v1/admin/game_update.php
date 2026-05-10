@@ -51,6 +51,11 @@ foreach (['score1', 'score2', 'final1', 'final2'] as $f) {
     }
 }
 
+if (array_key_exists('flashscore_url', $body)) {
+    $sets[] = 'flashscore_url = :flashscore_url';
+    $params[':flashscore_url'] = trim($body['flashscore_url']) ?: null;
+}
+
 if (empty($sets)) json_error('Nič na uloženie', 400);
 
 $sets[] = 'updated_at = NOW()';

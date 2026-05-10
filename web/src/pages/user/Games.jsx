@@ -219,7 +219,14 @@ export default function Games() {
                                 </div>
                                 <TeamBlock code={g.team2} score={es === 'finished' ? g.score2 : null} />
                             </div>
-                            <div className={styles.venue}>{g.venue}</div>
+                            <div className={styles.venue}>
+                                {g.venue}
+                                {g.flashscore_url && (
+                                    <a href={g.flashscore_url} target="_blank" rel="noopener noreferrer" className={styles.fsLink} title="Sledovať na FlashScore">
+                                        <img src="/flashscore.png" alt="FlashScore" className={styles.fsIcon} />
+                                    </a>
+                                )}
+                            </div>
                             <TipInput game={g} onSaved={handleSaved} />
                             {es !== 'scheduled' && <GroupTips gameId={g.id} />}
                         </div>
