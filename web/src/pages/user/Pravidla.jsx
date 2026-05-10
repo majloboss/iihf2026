@@ -143,32 +143,61 @@ export default function Pravidla() {
                         <span className={styles.stepNum}>1</span>
                         <div>
                             <strong>Vytvor skupinu</strong>
-                            <p>V sekcii Skupiny klikni na <em>Vytvoriť skupinu</em> a zadaj jej názov. Staneš sa zakladateľom.</p>
+                            <p>V sekcii Skupiny klikni na <em>Vytvoriť skupinu</em> a zadaj jej názov. Staneš sa zakladateľom a automaticky prvým členom.</p>
                         </div>
                     </div>
                     <div className={styles.step}>
                         <span className={styles.stepNum}>2</span>
                         <div>
                             <strong>Pozvi priateľov</strong>
-                            <p>Zdieľaj názov skupiny. Ostatní hráči si ju nájdu v zozname a požiadajú o vstup.</p>
+                            <p>V sekcii <em>Pozvánky</em> vytvor pozývací link a pošli ho priateľovi — e-mailom alebo inak. Môžeš priamo vybrať skupinu, do ktorej chceš nového hráča automaticky zaradiť po registrácii.</p>
                         </div>
                     </div>
                     <div className={styles.step}>
                         <span className={styles.stepNum}>3</span>
                         <div>
                             <strong>Schváľ žiadosti</strong>
-                            <p>Ako zakladateľ uvidíš čakajúce žiadosti a každú môžeš schváliť alebo odmietnuť.</p>
+                            <p>Ak sa niekto prihlási do skupiny sám (bez pozvánky so skupinou), uvidíš jeho žiadosť v sekcii Skupiny a môžeš ju schváliť alebo odmietnuť.</p>
                         </div>
                     </div>
                     <div className={styles.step}>
                         <span className={styles.stepNum}>4</span>
                         <div>
                             <strong>Sleduj poradie</strong>
-                            <p>V sekcii Tabuľky vidíš poradie všetkých svojich skupín. Môžeš byť členom viacerých skupín naraz.</p>
+                            <p>V sekcii Tabuľky vidíš poradie všetkých svojich skupín. Môžeš byť členom viacerých skupín naraz — tvoje tipy platia v každej z nich.</p>
                         </div>
                     </div>
                 </div>
                 <p className={styles.note}>Skupinu môže zrušiť iba jej zakladateľ. Kedykoľvek môžeš skupinu opustiť sám.</p>
+            </div>
+
+            <div className={styles.card}>
+                <h3 className={styles.cardTitle}>Pozvánky</h3>
+                <p>Do tipovačky sa možno registrovať <strong>iba cez pozývací link</strong>. Každý link je jednorazový a platí pre jednu registráciu.</p>
+                <div className={styles.steps}>
+                    <div className={styles.step}>
+                        <span className={styles.stepNum}>1</span>
+                        <div>
+                            <strong>Vytvor pozvánku</strong>
+                            <p>V sekcii <em>Pozvánky</em> klikni na <em>Nová pozvánka</em>. Môžeš zadať e-mail adresáta — pozvánka mu bude doručená automaticky. Bez e-mailu ti systém vygeneruje link, ktorý mu pošleš sám.</p>
+                        </div>
+                    </div>
+                    <div className={styles.step}>
+                        <span className={styles.stepNum}>2</span>
+                        <div>
+                            <strong>Vyber skupinu (voliteľné)</strong>
+                            <p>Pri tvorbe pozvánky môžeš vybrať niektorú zo svojich skupín. Nový hráč bude po registrácii automaticky zaradený do tejto skupiny — bez potreby žiadosti a schválenia.</p>
+                        </div>
+                    </div>
+                    <div className={styles.step}>
+                        <span className={styles.stepNum}>3</span>
+                        <div>
+                            <strong>Sleduj stav</strong>
+                            <p>V zozname pozvánok vidíš, či link bol už použitý a kto sa cez neho zaregistroval.</p>
+                        </div>
+                    </div>
+                </div>
+                <p className={styles.note}>Každý registrovaný hráč môže posielať pozvánky. Počet pozvánok nie je obmedzený.</p>
             </div>
         </div>
     );
