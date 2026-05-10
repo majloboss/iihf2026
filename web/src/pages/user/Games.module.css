@@ -226,9 +226,9 @@
 
 /* Vlajky tímov */
 .flagsRow {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 5px;
     margin-bottom: 14px;
 }
 
@@ -237,11 +237,12 @@
     flex-direction: column;
     align-items: center;
     gap: 2px;
-    padding: 5px 6px;
+    padding: 5px 4px;
     border-radius: 7px;
     border: 2px solid transparent;
     background: #f8f9fa;
     cursor: pointer;
+    width: 100%;
     transition: border-color 0.12s, background 0.12s;
 }
 .flagBtn:hover { border-color: #1a3a6b; }
@@ -251,10 +252,10 @@
 .flagBtnActive .flagCode { color: #1a3a6b; }
 
 @media (max-width: 480px) {
-    .flagsRow { gap: 4px; }
-    .flagBtn  { padding: 3px 3px; border-width: 2px; }
+    .flagsRow { gap: 3px; }
+    .flagBtn  { padding: 3px 2px; }
     .flagImg  { width: 26px; height: 17px; }
-    .flagCode { font-size: 0.58rem; }
+    .flagCode { font-size: 0.57rem; }
 }
 
 /* Aktívne filtre */
