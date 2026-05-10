@@ -147,6 +147,23 @@
     .bottomNavRow a.active { color: #fff; background: rgba(255,255,255,0.15); }
 
     .bottomNavIcon { font-size: 1.4rem; line-height: 1; }
+
+    .bottomNavLogout {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 10px 4px 12px;
+        color: rgba(255,255,255,0.65);
+        font-size: 0.65rem;
+        gap: 4px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        transition: color 0.15s, background 0.15s;
+    }
+    .bottomNavLogout:hover { background: rgba(255,255,255,0.08); color: #fff; }
 }
 
 @media (min-width: 901px) {
