@@ -77,6 +77,9 @@ export default function UserLayout() {
                     <NavLink to="/pravidla"  className={({ isActive }) => isActive ? styles.active : ''}>
                         <span className={styles.bottomNavIcon}>📋</span>Pravidlá
                     </NavLink>
+                    <button className={styles.bottomNavLogout} onClick={handleLogout}>
+                        <span className={styles.bottomNavIcon}>🚪</span>Odhlásiť
+                    </button>
                 </div>
             </nav>
         </div>

@@ -103,7 +103,7 @@ export default function Invites() {
                 <h2>Pozvánky</h2>
             </div>
 
-            <div style={{display:'flex', gap:8, alignItems:'center', marginBottom:16, flexWrap:'wrap'}}>
+            <div className={styles.genForm} style={{marginBottom:16}}>
                 <label style={{fontWeight:500, fontSize:'0.9rem'}}>Adresát</label>
                 <input
                     type="text"
@@ -142,34 +142,34 @@ export default function Invites() {
                 <table className={styles.table}>
                     <thead>
                         <tr>
-                            <th>ID</th>
+                            <th className={styles.hideOnMobile}>ID</th>
                             <th>Vytvorený</th>
                             <th>Zaslal</th>
                             <th>Adresát</th>
                             <th>Skupina</th>
                             <th>Použitý</th>
                             <th>Hráč</th>
-                            <th>Email</th>
+                            <th>Mail</th>
                             <th></th>
                         </tr>
                     </thead>
                     <tbody>
                         {invites.map(i => (
                             <tr key={i.id}>
-                                <td>{i.id}</td>
-                                <td>{new Date(i.created_at).toLocaleString('sk-SK')}</td>
-                                <td>{i.created_by_username || <span style={{color:'#aaa'}}>—</span>}</td>
-                                <td><SentToCell invite={i} onSaved={handleSentToSaved} /></td>
-                                <td>
+                                <td data-label="ID" className={styles.hideOnMobile}>{i.id}</td>
+                                <td data-label="Vytvorený">{new Date(i.created_at).toLocaleString('sk-SK')}</td>
+                                <td data-label="Zaslal">{i.created_by_username || <span style={{color:'#aaa'}}>—</span>}</td>
+                                <td data-label="Adresát"><SentToCell invite={i} onSaved={handleSentToSaved} /></td>
+                                <td data-label="Skupina">
                                     {i.group_name
                                         ? <span className={styles.badgeInfo}>{i.group_name}</span>
                                         : <span style={{color:'#aaa'}}>—</span>}
                                 </td>
-                                <td>{i.used_at
+                                <td data-label="Použitý">{i.used_at
                                     ? new Date(i.used_at).toLocaleString('sk-SK')
                                     : <span className={styles.unused}>Nepoužitý</span>}
                                 </td>
-                                <td>
+                                <td data-label="Hráč">
                                     {i.used_by_username
                                         ? <span
                                             onClick={() => setEditUser({ id: i.used_by_id, username: i.used_by_username, first_name: i.first_name, last_name: i.last_name, email: i.email, phone: i.phone, avatar: i.avatar })}
@@ -177,12 +177,12 @@ export default function Invites() {
                                           >{i.used_by_username}</span>
                                         : '—'}
                                 </td>
-                                <td>
+                                <td data-label="Mail">
                                     {i.email_sent
                                         ? <span className={styles.badgeProd} title="Pozvánka odoslaná emailom">✓</span>
                                         : <span style={{color:'#aaa'}}>—</span>}
                                 </td>
-                                <td><CopyBtn text={i.link} /></td>
+                                <td data-label=""><CopyBtn text={i.link} /></td>
                             </tr>
                         ))}
                     </tbody>

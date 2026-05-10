@@ -48,23 +48,23 @@ export default function AdminLoginLogs() {
                                 <th>Používateľ</th>
                                 <th>Rola</th>
                                 <th>Env</th>
-                                <th>IP</th>
+                                <th className={styles.hideOnMobile}>IP</th>
                                 <th>Zariadenie</th>
                             </tr>
                         </thead>
                         <tbody>
                             {data.rows.map(r => (
                                 <tr key={r.id}>
-                                    <td className={styles.mono}>{fmt(r.logged_at)}</td>
-                                    <td><strong>{r.username}</strong></td>
-                                    <td>{r.role === 'admin' ? '🔑 admin' : '👤 user'}</td>
-                                    <td>
+                                    <td data-label="Čas" className={styles.mono}>{fmt(r.logged_at)}</td>
+                                    <td data-label="User"><strong>{r.username}</strong></td>
+                                    <td data-label="Rola">{r.role === 'admin' ? '🔑 admin' : '👤 user'}</td>
+                                    <td data-label="Env">
                                         <span className={r.env === 'develop' ? styles.badgeDev : styles.badgeProd}>
                                             {r.env ?? 'main'}
                                         </span>
                                     </td>
-                                    <td className={styles.mono}>{r.ip_address ?? '—'}</td>
-                                    <td className={styles.small}>{UA_SHORT(r.user_agent)}</td>
+                                    <td data-label="IP" className={`${styles.mono} ${styles.hideOnMobile}`}>{r.ip_address ?? '—'}</td>
+                                    <td data-label="Zariadenie" className={styles.small}>{UA_SHORT(r.user_agent)}</td>
                                 </tr>
                             ))}
                         </tbody>

@@ -41,10 +41,10 @@ export default function AdminMailLog() {
                             )}
                             {rows.map(r => (
                                 <tr key={r.id}>
-                                    <td className={styles.small}>{new Date(r.sent_at).toLocaleString('sk-SK')}</td>
-                                    <td className={styles.mono}>{r.to_email}</td>
-                                    <td>{r.subject}</td>
-                                    <td>
+                                    <td data-label="Čas" className={styles.small}>{new Date(r.sent_at).toLocaleString('sk-SK')}</td>
+                                    <td data-label="Komu" className={styles.mono}>{r.to_email}</td>
+                                    <td data-label="Predmet">{r.subject}</td>
+                                    <td data-label="Stav">
                                         {r.status === 'sent'
                                             ? <span className={styles.badgeProd}>✓ Odoslaný</span>
                                             : <span title={r.error_msg} className={styles.badgeLive} style={{cursor:'help'}}>✗ Chyba</span>}

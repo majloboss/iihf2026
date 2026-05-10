@@ -47,13 +47,13 @@ export default function Users() {
             <table className={styles.table}>
                 <thead>
                     <tr>
-                        <th>ID</th>
+                        <th className={styles.hideOnMobile}>ID</th>
                         <th>Username</th>
                         <th>Meno</th>
                         <th>Email</th>
                         <th>Rola</th>
                         <th>Aktívny</th>
-                        <th>Registrovaný</th>
+                        <th className={styles.hideOnMobile}>Registrovaný</th>
                         <th>Akcie</th>
                     </tr>
                 </thead>
@@ -64,18 +64,18 @@ export default function Users() {
                         const isExclusive = u.username === 'admin';
                         return (
                             <tr key={u.id}>
-                                <td>{u.id}</td>
-                                <td>{u.username}</td>
-                                <td>{[u.first_name, u.last_name].filter(Boolean).join(' ') || '—'}</td>
-                                <td>{u.email || '—'}</td>
-                                <td>
+                                <td data-label="ID" className={styles.hideOnMobile}>{u.id}</td>
+                                <td data-label="Username">{u.username}</td>
+                                <td data-label="Meno">{[u.first_name, u.last_name].filter(Boolean).join(' ') || '—'}</td>
+                                <td data-label="Email">{u.email || '—'}</td>
+                                <td data-label="Rola">
                                     <span className={u.role === 'admin' ? styles.badgeAdmin : styles.badge}>
                                         {u.role}
                                     </span>
                                 </td>
-                                <td>{u.is_active ? '✅' : '⏳'}</td>
-                                <td>{new Date(u.created_at).toLocaleDateString('sk-SK')}</td>
-                                <td className={styles.actions}>
+                                <td data-label="Aktívny">{u.is_active ? '✅' : '⏳'}</td>
+                                <td data-label="Registrovaný" className={styles.hideOnMobile}>{new Date(u.created_at).toLocaleDateString('sk-SK')}</td>
+                                <td data-label="" className={styles.actions}>
                                     <button
                                         className={styles.btnSmall}
                                         disabled={busy}

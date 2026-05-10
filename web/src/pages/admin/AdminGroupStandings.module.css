@@ -83,3 +83,13 @@
 .btnMove:hover:not(:disabled) { background: #f0f7ff; border-color: #1a3a6b; color: #1a3a6b; }
 .btnMove:disabled { opacity: 0.25; cursor: default; }
 .btnMove + .btnMove { margin-left: 2px; }
+
+.tableScroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 900px) {
+    .toolbar { flex-direction: column; align-items: stretch; }
+    .btnSync, .btnReset, .btnFinalize { width: 100%; text-align: center; }
+}

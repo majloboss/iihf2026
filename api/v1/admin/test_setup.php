@@ -15,18 +15,37 @@ $ratings = [
 
 function calc_score(string $t1, string $t2, array $r, int $gid = 0, int $run = 0): array {
     $d = abs($r[$t1] - $r[$t2]);
-    if ($gid > 0 && $d <= 2) {
-        mt_srand($gid * 7919 + $run);
-        $roll = mt_rand(0, 99); $draw_score = mt_rand(0, 2) === 0 ? 2 : 1;
-        if ($roll < ($d === 1 ? 35 : 15)) return [$draw_score, $draw_score];
+    mt_srand($gid * 7919 + $run);
+    $roll = mt_rand(0, 99);
+
+    // Remíza: d≤1=42%, d=2=32%, d=3=22%, d=4=13%, d≥5=8%
+    $draw_p = $d <= 1 ? 42 : ($d === 2 ? 32 : ($d === 3 ? 22 : ($d === 4 ? 13 : 8)));
+    if ($roll < $draw_p) {
+        $s = [0,1,1,1,1,2,2,2,3,3][mt_rand(0,9)]; // 1:1 najčastejšie, niekedy 0:0 / 2:2 / 3:3
+        return [$s, $s];
     }
-    mt_srand($gid * 1031 + $run);
-    if ($d === 1)     { $w = 2 + mt_rand(0,1); $l = mt_rand(0,1); }
-    elseif ($d === 2) { $w = 3 + mt_rand(0,1); $l = mt_rand(0,1); }
-    elseif ($d === 3) { $w = 3 + mt_rand(0,1); $l = mt_rand(0,1); }
-    elseif ($d === 4) { $w = 4 + mt_rand(0,1); $l = 0; }
-    else              { $w = 5 + mt_rand(0,1); $l = 0; }
-    return $r[$t1] < $r[$t2] ? [$w, $l] : [$l, $w];
+
+    // Prekvapenie (slabší vyhrá): d=1=26%, d=2=19%, d=3=13%, d=4=8%, d≥5=4%
+    mt_srand($gid * 1031 + $run + 3);
+    $upset_p  = $d <= 1 ? 26 : ($d === 2 ? 19 : ($d === 3 ? 13 : ($d === 4 ? 8 : 4)));
+    $t1_better = $r[$t1] < $r[$t2];
+    $t1_wins   = $t1_better xor (mt_rand(0, 99) < $upset_p);
+
+    // Skóre: prevažne tesné výsledky (2:1, 3:1, 3:2...), zriedka 5:0
+    mt_srand($gid * 3557 + $run + 7);
+    $idx = mt_rand(0, 99);
+    if      ($idx < 24) [$w,$l] = [2,1];
+    elseif  ($idx < 40) [$w,$l] = [3,1];
+    elseif  ($idx < 54) [$w,$l] = [2,0];
+    elseif  ($idx < 66) [$w,$l] = [3,2];
+    elseif  ($idx < 75) [$w,$l] = [4,1];
+    elseif  ($idx < 83) [$w,$l] = [4,2];
+    elseif  ($idx < 88) [$w,$l] = [4,3];
+    elseif  ($idx < 93) [$w,$l] = [5,1];
+    elseif  ($idx < 97) [$w,$l] = [5,2];
+    else                [$w,$l] = [5,0];
+
+    return $t1_wins ? [$w, $l] : [$l, $w];
 }
 
 // Vráti [final1, final2] pre OT/SO keď je regulárny výsledok remíza

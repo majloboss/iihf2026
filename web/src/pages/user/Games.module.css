@@ -181,3 +181,110 @@
 .tipPts { color: #28a745; font-size: 0.75rem; padding-left: 4px; }
 .tipsLoading { text-align: center; color: #aaa; font-size: 0.8rem; padding: 8px 0; }
 .tipsErr { color: #dc3545; font-size: 0.78rem; text-align: center; margin-top: 6px; }
+
+/* Kalendár */
+.calRow {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    margin-bottom: 12px;
+    scrollbar-width: thin;
+    scrollbar-color: #dee2e6 transparent;
+}
+.calRow::-webkit-scrollbar { height: 3px; }
+.calRow::-webkit-scrollbar-thumb { background: #dee2e6; border-radius: 3px; }
+
+.calDay {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    padding: 6px 9px;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    background: #fff;
+    cursor: pointer;
+    min-width: 44px;
+    flex-shrink: 0;
+    transition: border-color 0.12s, background 0.12s;
+    line-height: 1.3;
+}
+.calDay:hover { border-color: #1a3a6b; }
+.calDayWeekday { font-size: 0.65rem; color: #aaa; text-transform: lowercase; }
+.calDayNum     { font-size: 1rem; font-weight: 700; color: #333; }
+.calDayMonth   { font-size: 0.62rem; color: #bbb; }
+
+.calDayToday .calDayNum  { color: #1a3a6b; }
+.calDayToday .calDayWeekday { color: #1a3a6b; }
+.calDayToday { border-color: #1a3a6b; }
+
+.calDayActive { background: #1a3a6b !important; border-color: #1a3a6b !important; }
+.calDayActive .calDayWeekday,
+.calDayActive .calDayNum,
+.calDayActive .calDayMonth { color: #fff; }
+
+/* Vlajky tímov */
+.flagsRow {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 5px;
+    margin-bottom: 14px;
+}
+
+.flagBtn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 5px 4px;
+    border-radius: 7px;
+    border: 2px solid transparent;
+    background: #f8f9fa;
+    cursor: pointer;
+    width: 100%;
+    transition: border-color 0.12s, background 0.12s;
+}
+.flagBtn:hover { border-color: #1a3a6b; }
+.flagBtnActive { border-color: #1a3a6b; background: #e8eef8; }
+.flagImg { width: 34px; height: 22px; object-fit: cover; border-radius: 2px; display: block; }
+.flagCode { font-size: 0.65rem; font-weight: 700; color: #555; letter-spacing: 0.03em; }
+.flagBtnActive .flagCode { color: #1a3a6b; }
+
+@media (max-width: 480px) {
+    .flagsRow { gap: 3px; }
+    .flagBtn  { padding: 3px 2px; }
+    .flagImg  { width: 26px; height: 17px; }
+    .flagCode { font-size: 0.57rem; }
+}
+
+/* Aktívne filtre */
+.activeFilters {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+.filterChip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #e8eef8;
+    color: #1a3a6b;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 3px 8px 3px 10px;
+    border-radius: 20px;
+    border: 1px solid #c5d3eb;
+}
+.filterChip button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #1a3a6b;
+    font-size: 1rem;
+    line-height: 1;
+    padding: 0;
+    opacity: 0.6;
+}
+.filterChip button:hover { opacity: 1; }

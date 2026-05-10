@@ -71,7 +71,7 @@ export default function AdminTools() {
     };
 
     return (
-        <div style={{ maxWidth: 600, padding: 24 }}>
+        <div className={styles.toolsWrap}>
             <h2>Nástroje</h2>
 
             {/* ── DB Migrácie ─────────────────────────────────────────── */}
