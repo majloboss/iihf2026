@@ -6,3 +6,4 @@ define('DB_USER', 'your_db_user');
 define('DB_PASS', 'your_db_password');
 define('JWT_SECRET', 'your_random_secret_min_32_chars');
 define('APP_URL', 'https://iihf2026.fellow.sk');
+define('CRON_SECRET', 'your_cron_secret_token');
