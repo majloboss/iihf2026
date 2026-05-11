@@ -10,8 +10,11 @@ createRoot(document.getElementById('root')).render(
 )
 
 // Keď service worker prevezme kontrolu (nová verzia), stránka sa automaticky reloadne
+// Na /register nerobiť reload — SW inštalácia by zneplatnila invite link
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.addEventListener('controllerchange', () => {
-    window.location.reload();
+    if (!window.location.pathname.startsWith('/register')) {
+      window.location.reload();
+    }
   });
 }
