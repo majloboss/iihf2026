@@ -281,6 +281,17 @@ if ($action === 'init') {
     ]);
 }
 
+// ── ACTION: load_pdf — len obnoví rozvrh z games_pdf, nič iné nemaže ─────────
+if ($action === 'load_pdf') {
+    $pdf = $pdo->query("SELECT game_number, team1, team2, starts_at, venue, flashscore_url FROM iihf2026.games_pdf ORDER BY game_number")->fetchAll();
+    if (empty($pdf)) json_error('Tabuľka games_pdf je prázdna', 400);
+    $stmt = $pdo->prepare("UPDATE iihf2026.games SET team1=?,team2=?,starts_at=?,venue=?,flashscore_url=?,score1=NULL,score2=NULL,final1=NULL,final2=NULL,status='scheduled' WHERE game_number=?");
+    foreach ($pdf as $r) {
+        $stmt->execute([$r['team1'], $r['team2'], $r['starts_at'], $r['venue'], $r['flashscore_url'], $r['game_number']]);
+    }
+    json_ok(['action' => 'load_pdf', 'games_loaded' => count($pdf)]);
+}
+
 // ── ACTION: reset — vymaže testovacie dáta + obnoví pôvodný rozvrh z games_pdf ────
 if ($action === 'reset') {
     $pdo->exec("DELETE FROM iihf2026.tips");

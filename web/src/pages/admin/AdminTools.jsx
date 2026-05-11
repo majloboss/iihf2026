@@ -152,6 +152,30 @@ export default function AdminTools() {
                 <ResultArea keys={GEN_ACTIONS.map(a => a.key)} results={results} errors={errors} />
             </div>
 
+            {/* ── Načítanie zápasov z games_pdf ──────────────────────── */}
+            <div className={styles.card} style={{ padding: 20, marginTop: 12, borderLeft: '4px solid #0891b2' }}>
+                <h3 style={{ margin: '0 0 4px', fontSize: '1rem', color: '#0891b2' }}>📄 Načítať zápasy z PDF</h3>
+                <p style={{ margin: '0 0 12px', fontSize: '0.82rem', color: '#666' }}>
+                    Obnoví rozvrh všetkých 64 zápasov z tabuľky <code>games_pdf</code> (tímy, časy, miesta, FlashScore).
+                    Tipy, useri ani skupiny sa <strong>nemažú</strong>.
+                </p>
+                {confirm === 'load_pdf'
+                    ? <ConfirmInline
+                        text="Prepísať rozvrh zápasov z games_pdf? Existujúce skóre sa vynuluje."
+                        onYes={() => run('load_pdf')}
+                        onNo={() => setConfirm(null)}
+                      />
+                    : <button
+                        className={styles.btn}
+                        style={{ background: '#0891b2' }}
+                        onClick={() => setConfirm('load_pdf')}
+                        disabled={busy}>
+                        {running === 'load_pdf' ? 'Načítavam…' : '📄 Načítať z PDF'}
+                      </button>
+                }
+                <ResultArea keys={['load_pdf']} results={results} errors={errors} />
+            </div>
+
             {/* ── Spustenie súťaže ────────────────────────────────────── */}
             <div className={styles.card} style={{ padding: 20, marginTop: 12, borderLeft: '4px solid #28a745' }}>
                 <h3 style={{ margin: '0 0 4px', fontSize: '1rem', color: '#28a745' }}>▶ Spustenie súťaže</h3>
@@ -241,6 +265,9 @@ function ResultBlock({ r }) {
     if (r.action === 'init') return <>
         <div>✓ Userov vymazaných: <strong>{r.users_deleted}</strong></div>
         <div>✓ Linkov vymazaných: <strong>{r.links_deleted}</strong></div>
+    </>;
+    if (r.action === 'load_pdf') return <>
+        <div>✓ Zápasov načítaných z PDF: <strong>{r.games_loaded}</strong></div>
     </>;
     if (r.action === 'reset') return <>
         <div>✓ Zápasov obnovených: <strong>{r.games_reset}</strong></div>
