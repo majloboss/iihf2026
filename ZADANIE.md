@@ -67,12 +67,16 @@
 - Sync výsledkov — API-Sports (liga 111, sezóna 2026); aktualizuje skóre + stav + prepočíta body
   - ⚠️ Free plán: aktivuje sa od 15.5.2026 keď turnaj začne
 
-### 🔲 TODO (nie je implementované)
-- Notifikácie — faktické odosielanie push (Web Push API)
-- Notifikácie — cron job na fellow.sk cPanel (`php api/cron/send_notifications.php` každých 5 min)
-  - Skript existuje (`api/cron/send_notifications.php`), treba nastaviť v cPanel
-- Admin — nastavenia bodovacieho systému (úprava scoring_config)
-- Android aplikácia (Kotlin)
+### ✅ Cron job — notifikačné emaily
+- Cron job nastavený v cPanel (`php api/cron/send_notifications.php` každých 5 min)
+- Emaily odchádzajú ✅
+
+### 🔲 Možno neskôr
+- Push notifikácie (Web Push API) — nastavenia v profile sú, samotné odosielanie zatiaľ nie
+
+### ✅ Rozhodnuté — nebude sa meniť
+- Admin: nastavenia bodovacieho systému — natvrdo v kóde, vyhovuje
+- Android aplikácia — nebude sa robiť
 
 ### ✅ DB migrácie — všetky spustené na produkcii
 - `run_012.sql` — stĺpec `email_sent` v invites, tabuľka `mail_log`
