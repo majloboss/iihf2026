@@ -121,6 +121,7 @@
         background: #1a3a6b;
         z-index: 100;
         border-top: 1px solid rgba(255,255,255,0.15);
+        overflow: visible;
     }
 
     .bottomNav a {
@@ -141,6 +142,47 @@
     .bottomNav a.active { color: #fff; background: rgba(255,255,255,0.15); }
 
     .bottomNavIcon { font-size: 1.4rem; line-height: 1; }
+
+    /* Profil — avatar vyčnieva nad lištu */
+    .profileNav {
+        position: relative;
+        justify-content: flex-end !important;
+        padding-top: 30px !important;
+        gap: 2px !important;
+        overflow: visible;
+    }
+
+    .profileNavAvatar {
+        position: absolute;
+        top: -18px;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        border: 3px solid #1a3a6b;
+        background: #2a5a9b;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 -3px 14px rgba(0,0,0,0.35);
+        transition: border-color 0.15s;
+    }
+
+    .profileNav.active .profileNavAvatar {
+        border-color: #fff;
+    }
+
+    .profileNavImg {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .profileNavPh {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #fff;
+    }
 }
 
 @media (min-width: 901px) {

@@ -62,8 +62,14 @@ export default function UserLayout() {
                 <NavLink to="/games"     className={({ isActive }) => isActive ? styles.active : ''}>
                     <span className={styles.bottomNavIcon}>🏒</span>Zápasy
                 </NavLink>
-                <NavLink to="/profile"   className={({ isActive }) => isActive ? styles.active : ''}>
-                    <span className={styles.bottomNavIcon}>👤</span>Profil
+                <NavLink to="/profile" className={({ isActive }) => [styles.profileNav, isActive ? styles.active : ''].join(' ')}>
+                    <div className={styles.profileNavAvatar}>
+                        {profile?.avatar
+                            ? <img src={profile.avatar} alt="" className={styles.profileNavImg} />
+                            : <span className={styles.profileNavPh}>{profile?.username?.[0]?.toUpperCase() ?? '👤'}</span>
+                        }
+                    </div>
+                    Profil
                 </NavLink>
                 <NavLink to="/standings" className={({ isActive }) => isActive ? styles.active : ''}>
                     <span className={styles.bottomNavIcon}>👥</span>Skupiny
