@@ -6,7 +6,7 @@
 | Adrika Krchniaková    | adriana.krchniakova@gmail.com                |          |                |
 | Oliver Krchniak      | oliver.krchniak@gmail.com                 |          |                |
 | Radko Krchniak     |                 |          |                |
-| Jerry Peter Herich    |                 |          |                |
+| Jerry Peter Herich    | peter.herich23@gmail.com                |          |                |
 | Haky Jozef Haspra   |  haspra@impressive.sk               |          |                |
 | Juro Bulla    | juraj.bulla1@gmail.com                |          |                |
 | Rasťo Turanský    | turansky@yahoo.com                |          |                |
@@ -15,11 +15,8 @@
 | Lukáš Mojto      | lukas.mojto@gmail.com                 |          |                |
 | Adrián Gabriel     | adrian@puky.sk                |          |                |
 | Roderik Klein    |                 |          |                |
-| Kika Karkušová     |                 |          |                |
 | Maťo Štrajt     |                 |          |                |
-| Braňo Paríža     |                 |          |                |
 | Imi Loczi    | imrich.loczi@gmail.com                |          |                |
-| Ivan Ilavský    |                 |          |                |
 | Dušan Ilavský    |                 |          |                |
 | Miro Darida   |                 |          |                |
 |     |                 |          |                |
