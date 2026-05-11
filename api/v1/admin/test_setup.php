@@ -262,6 +262,7 @@ if ($action === 'init') {
     $pdo->exec("DELETE FROM admin.notification_log");
     $pdo->exec("DELETE FROM admin.notification_settings");
     $pdo->exec("DELETE FROM admin.login_logs");
+    $pdo->exec("DELETE FROM admin.mail_log");
     $pdo->exec("DELETE FROM admin.invites");               // FK created_by + user_id → users
     $pdo->exec("DELETE FROM admin.group_members");
     $pdo->exec("DELETE FROM admin.friend_groups");
