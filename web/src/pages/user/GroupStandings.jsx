@@ -8,6 +8,7 @@ function GroupTable({ phase, teams, onTeamClick }) {
     return (
         <div className={styles.groupCard}>
             <div className={styles.groupHeader}>Skupina {phase}</div>
+            <div className={styles.tableWrap}>
             <table className={styles.table}>
                 <thead>
                     <tr>
@@ -56,6 +57,7 @@ function GroupTable({ phase, teams, onTeamClick }) {
                     ))}
                 </tbody>
             </table>
+            </div>
         </div>
     );
 }

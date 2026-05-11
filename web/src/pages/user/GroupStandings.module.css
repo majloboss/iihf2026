@@ -78,3 +78,16 @@
 
 .teamRow { cursor: pointer; transition: background 0.12s; }
 .teamRow:hover td { background: #e8f0fb !important; }
+
+.tableWrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 900px) {
+    .table { font-size: 0.78rem; }
+    .table th { padding: 6px 6px; font-size: 0.63rem; }
+    .table td { padding: 7px 6px; }
+    .flag { width: 20px; height: 13px; }
+    .teamCell { gap: 5px; }
+}
