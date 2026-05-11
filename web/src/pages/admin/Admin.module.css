@@ -86,6 +86,30 @@
     font-size: 0.82rem;
 }
 
+.btnPhase {
+    padding: 6px 12px;
+    background: #cfe2ff;
+    color: #1a3a6b;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-weight: 500;
+    transition: background 0.15s;
+}
+.btnPhase:hover { background: #b6d0f5; }
+
+.btnPhaseActive {
+    padding: 6px 12px;
+    background: #1a3a6b;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
 .newLink {
     display: flex;
     align-items: center;

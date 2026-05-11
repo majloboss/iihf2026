@@ -50,7 +50,7 @@ export default function AdminGames() {
                 <div style={{display:'flex',gap:'6px',flexWrap:'wrap'}}>
                     {phases.map(p => (
                         <button key={p}
-                            className={phase === p ? styles.btn : styles.btnSmall}
+                            className={phase === p ? styles.btnPhaseActive : styles.btnPhase}
                             onClick={() => setPhase(p)}>
                             {p === 'all' ? 'Všetky' : (PHASE_LABEL[p] || p)}
                         </button>
