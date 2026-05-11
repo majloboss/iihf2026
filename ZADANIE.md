@@ -511,6 +511,30 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 - Logo: `sources/logo.png`
 - Vlajky tímov: `sources/team_flag_<kod>.png`
 
+## Nove ulohy 11.5.2026
+## ULOHA 1
+- favicon icona pre web ma dve farby: DEVELOP zelena, MAIN cervena
+- pre mobilnu verziu su obidve cervene
+- urob aj pre mobilnu verziu zelenu ikonu pre DEVELOP
+
+## ULOHA 2
+- optimalizacia menu na 5 poloziek
+- vyvoj je potrebne robit v tomto poradi
+- sucasne menu: Prehlad, Zapasy, Tabulky, Skupiny, Profil, Pravidla, Odhlasit
+- krok 1: obrazovku Tabulky presunut do obrazovky Zapasy
+--- nadpis Zapasy centrovat na stred obrazovky
+--- tlacitka Vsetky, Skupina A .. Finale su v doch riadkoc, na koniec duheho riadka vycentrovane napravo pribudne tlacitko Tabulky, po jeho kliknuti sa zobrazi sucasna obrazovka Tabulky
+- krok 2: upravy v obrazovke Profil
+---  obrazovka ma tieto podmenu hore: Profil, Skupiny, Pozvanky, Notifikacie
+--- do  tejto obrazovky pribudne este Odhlasenie   
+- krok 3: optimalizacia mobilnej verzie
+--- v dolnommenu bude len 5 poloziek menu: Prehľad, Z8pasy, Profil, Skupiny, Pravidlá
+
+
+
+
+
+
 ---
 
 *Posledná aktualizácia: 2026-05-10 (v2.14)*
