@@ -214,7 +214,7 @@ export default function Games() {
             {/* Fázy + Tabuľky toggle */}
             <div className={styles.topBar}>
                 <div className={styles.filters}>
-                    {view === 'games' && phases.map(p => (
+                    {phases.map(p => (
                         <button key={p} onClick={() => setPhase(p)} className={phaseBtnClass(p)}>
                             {PHASE_BTN[p]}
                         </button>
