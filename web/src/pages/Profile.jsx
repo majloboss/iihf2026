@@ -85,11 +85,11 @@ export default function Profile() {
             <div className={styles.card}>
                 <div className={styles.tabsRow}>
                     <div className={styles.tabs}>
-                        <button className={tab === 'profil'   ? styles.tabActive : styles.tab} onClick={() => setTab('profil')}>👤 Profil</button>
-                        <button className={tab === 'skupiny'  ? styles.tabActive : styles.tab} onClick={() => setTab('skupiny')}>👥 Skupiny</button>
-                        <button className={tab === 'pozvanky' ? styles.tabActive : styles.tab} onClick={() => setTab('pozvanky')}>✉ Pozvánky</button>
-                        <button className={tab === 'notif'    ? styles.tabActive : styles.tab} onClick={() => setTab('notif')}>🔔 Notifikácie</button>
-                        <button className={tab === 'odhlasenie' ? styles.tabActive : styles.tab} onClick={() => setTab('odhlasenie')}>🚪 Odhlásenie</button>
+                        <button className={tab === 'profil'     ? styles.tabActive : styles.tab} onClick={() => setTab('profil')}>Profil</button>
+                        <button className={tab === 'skupiny'    ? styles.tabActive : styles.tab} onClick={() => setTab('skupiny')}>Skupiny</button>
+                        <button className={tab === 'pozvanky'   ? styles.tabActive : styles.tab} onClick={() => setTab('pozvanky')}>Pozvánky</button>
+                        <button className={tab === 'notif'      ? styles.tabActive : styles.tab} onClick={() => setTab('notif')}>Notif</button>
+                        <button className={tab === 'odhlasenie' ? styles.tabActive : styles.tab} onClick={() => setTab('odhlasenie')}>Odhlásenie</button>
                     </div>
                     <button className={`${styles.btnLogout} ${styles.hideOnMobile}`} onClick={() => { signOut(); navigate('/login'); }}>Odhlásiť</button>
                 </div>

@@ -5,6 +5,7 @@ import Standings from './Standings';
 import styles from './Games.module.css';
 
 const PHASE_LABEL = { A: 'Skupina A', B: 'Skupina B', QF: 'Štvrťfinále', SF: 'Semifinále', BRONZE: 'O bronz', GOLD: 'Finále' };
+const PHASE_BTN   = { all: 'ALL', A: 'A', B: 'B', QF: 'QF', SF: 'SF', BRONZE: 'BR', GOLD: 'F' };
 const FLAG_URL = (code) => `/flags/team_flag_${code?.toLowerCase()}.png`;
 const dayKey = (iso) => {
     const d = new Date(iso);
@@ -196,12 +197,32 @@ export default function Games() {
         return d >= todayStart;
     });
 
+    const phaseBtnClass = (p) => {
+        const base = p === 'QF' || p === 'SF' ? [styles.pBtn, styles.pPlayoff]
+                   : p === 'BRONZE'            ? [styles.pBtn, styles.pBronze]
+                   : p === 'GOLD'              ? [styles.pBtn, styles.pGold]
+                   : [styles.pBtn, styles.pGroup];
+        const active = p === 'QF' || p === 'SF' ? styles.pPlayoffOn
+                     : p === 'BRONZE'            ? styles.pBronzeOn
+                     : p === 'GOLD'              ? styles.pGoldOn
+                     : styles.pGroupOn;
+        return [...base, phase === p ? active : ''].join(' ');
+    };
+
     return (
         <div className={styles.wrap}>
             {/* Fázy + Tabuľky toggle */}
             <div className={styles.topBar}>
-                <div className={styles.topBarTitle}>
-                    <h2>Zápasy</h2>
+                {view === 'games' && (
+                    <div className={styles.filters}>
+                        {phases.map(p => (
+                            <button key={p} onClick={() => setPhase(p)} className={phaseBtnClass(p)}>
+                                {PHASE_BTN[p]}
+                            </button>
+                        ))}
+                    </div>
+                )}
+                <div className={styles.tabulkyWrap}>
                     <button
                         className={view === 'standings' ? styles.btnTabulkyActive : styles.btnTabulky}
                         onClick={() => setView(v => v === 'standings' ? 'games' : 'standings')}
@@ -209,16 +230,6 @@ export default function Games() {
                         📊 Tabuľky
                     </button>
                 </div>
-                {view === 'games' && (
-                    <div className={styles.filters}>
-                        {phases.map(p => (
-                            <button key={p} onClick={() => setPhase(p)}
-                                className={phase === p ? styles.btnFilterActive : styles.btnFilter}>
-                                {p === 'all' ? 'Všetky' : (PHASE_LABEL[p] || p)}
-                            </button>
-                        ))}
-                    </div>
-                )}
             </div>
 
             {view === 'standings' ? <Standings /> : (
@@ -260,24 +271,6 @@ export default function Games() {
                                     <span className={styles.flagCode}>{team}</span>
                                 </button>
                             ))}
-                        </div>
-                    )}
-
-                    {/* Aktívne filtre — chips na zrušenie */}
-                    {(selectedDay || selectedTeam) && (
-                        <div className={styles.activeFilters}>
-                            {selectedDay && (
-                                <span className={styles.filterChip}>
-                                    {new Date(selectedDay + 'T12:00:00').toLocaleDateString('sk-SK', { day: '2-digit', month: '2-digit' })}
-                                    <button onClick={() => setSelectedDay(null)}>×</button>
-                                </span>
-                            )}
-                            {selectedTeam && (
-                                <span className={styles.filterChip}>
-                                    {selectedTeam}
-                                    <button onClick={() => setSelectedTeam(null)}>×</button>
-                                </span>
-                            )}
                         </div>
                     )}
 

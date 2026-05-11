@@ -298,7 +298,7 @@ export default function Dashboard() {
                 <section className={styles.section}>
                     {live.length > 0 && (
                         <>
-                            <div className={styles.sectionHeader}><span>🔴 Live</span></div>
+                            <div className={`${styles.sectionHeader} ${styles.sHLive}`}><span>Live</span></div>
                             {live.map(g => (
                                 <GameCard key={g.id} game={g}
                                     onTipClick={() => setTipGame(g)}
@@ -308,8 +308,8 @@ export default function Dashboard() {
                     )}
                     {upcoming.length > 0 && (
                         <>
-                            <div className={styles.sectionHeader}>
-                                <span>⏰ Najbližšie zápasy</span>
+                            <div className={`${styles.sectionHeader} ${styles.sHUpcoming}`}>
+                                <span>Najbližšie zápasy</span>
                                 <Link to="/games" className={styles.more}>Všetky →</Link>
                             </div>
                             {upcoming.map(g => (
@@ -321,8 +321,8 @@ export default function Dashboard() {
                     )}
                     {finished.length > 0 && (
                         <>
-                            <div className={styles.sectionHeader}>
-                                <span>✅ Posledné výsledky</span>
+                            <div className={`${styles.sectionHeader} ${styles.sHFinished}`}>
+                                <span>Posledné výsledky</span>
                                 <Link to="/games" className={styles.more}>Všetky →</Link>
                             </div>
                             {finished.map(g => (
@@ -338,8 +338,8 @@ export default function Dashboard() {
                 </section>
 
                 <section className={styles.section}>
-                    <div className={styles.sectionHeader}>
-                        <span>👥 Poradie v skupinách</span>
+                    <div className={`${styles.sectionHeader} ${styles.sHStandings}`}>
+                        <span>Poradie v skupinách</span>
                         <Link to="/standings" className={styles.more}>Celé →</Link>
                     </div>
                     {standings.length === 0

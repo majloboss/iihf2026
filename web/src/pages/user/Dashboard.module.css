@@ -34,6 +34,11 @@
     border-bottom: 2px solid #e9ecef;
 }
 
+.sHLive      { border-color: #dc3545; color: #dc3545; }
+.sHUpcoming  { border-color: #1a3a6b; color: #1a3a6b; }
+.sHFinished  { border-color: #28a745; color: #28a745; }
+.sHStandings { border-color: #0891b2; color: #0891b2; }
+
 .more {
     font-size: 0.78rem;
     color: #1a3a6b;
