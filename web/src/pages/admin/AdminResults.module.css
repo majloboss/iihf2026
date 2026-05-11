@@ -10,10 +10,14 @@
 .cardMeta { font-size: 0.75rem; color: #888; }
 
 .cardVenue {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
     font-size: 0.72rem;
     color: #bbb;
-    text-align: center;
-    margin-bottom: 8px;
+    margin-top: 6px;
+    margin-bottom: 4px;
 }
 
 .result {
