@@ -147,16 +147,16 @@
     .profileNav {
         position: relative;
         justify-content: flex-end !important;
-        padding-top: 30px !important;
+        padding-top: 34px !important;
         gap: 2px !important;
         overflow: visible;
     }
 
     .profileNavAvatar {
         position: absolute;
-        top: -18px;
-        width: 50px;
-        height: 50px;
+        top: -22px;
+        width: 55px;
+        height: 55px;
         border-radius: 50%;
         border: 3px solid #1a3a6b;
         background: #2a5a9b;
