@@ -213,21 +213,17 @@ export default function Games() {
         <div className={styles.wrap}>
             {/* Fázy + Tabuľky toggle */}
             <div className={styles.topBar}>
-                {view === 'games' && (
-                    <div className={styles.filters}>
-                        {phases.map(p => (
-                            <button key={p} onClick={() => setPhase(p)} className={phaseBtnClass(p)}>
-                                {PHASE_BTN[p]}
-                            </button>
-                        ))}
-                    </div>
-                )}
-                <div className={styles.tabulkyWrap}>
+                <div className={styles.filters}>
+                    {view === 'games' && phases.map(p => (
+                        <button key={p} onClick={() => setPhase(p)} className={phaseBtnClass(p)}>
+                            {PHASE_BTN[p]}
+                        </button>
+                    ))}
                     <button
-                        className={view === 'standings' ? styles.btnTabulkyActive : styles.btnTabulky}
+                        className={`${view === 'standings' ? styles.btnTabulkyActive : styles.btnTabulky} ${styles.btnTabulkyInline}`}
                         onClick={() => setView(v => v === 'standings' ? 'games' : 'standings')}
                     >
-                        📊 Tabuľky
+                        📊 TAB
                     </button>
                 </div>
             </div>
