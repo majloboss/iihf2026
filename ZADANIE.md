@@ -532,7 +532,26 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 - ✅ Skupiny (Standings): zrušený nadpis Tabuľky
 
 
+Pozývam ťa do IIHF 2026 Tipovačky – súťaže v tipovaní výsledkov Majstrovstiev sveta v ľadovom hokeji 2026 (15. – 31. mája 2026).
 
+Zaregistruj sa kliknutím na tento odkaz:
+https://dev_iihf2026.fellow.sk/register?token=4ba81abfeac27b642e41511c8a40d9b56c77a220575a788c
+
+Po registrácii si zvolíš prezývku a heslo. Potom môžeš:
+- tipovať presné výsledky všetkých 64 zápasov MS
+- súťažiť s kamarátmi v skupinách
+- sledovať priebežné poradie
+- posielať pozvánky kamarátom a rozširovať skupinu
+
+Po registrácii budeš automaticky pridaný do skupiny "MS 2026 Slovenskoooooo", kde budeš môcť súťažiť s milo a ostatnými členmi.
+
+Pred začatím odporúčame prečítať si pravidlá tipovačky:
+https://dev_iihf2026.fellow.sk/pravidla
+
+Link je jednorazový – platí pre jednu registráciu.
+
+Tešíme sa na teba!
+IIHF 2026 Tipovačka
 
 
 
