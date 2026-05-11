@@ -2,6 +2,31 @@ import { useEffect, useState } from 'react';
 import { apiFetch } from '../../api/client';
 import styles from './UserInvites.module.css';
 
+function buildInviteText(inv, myUsername) {
+    const rulesUrl = window.location.origin + '/pravidla';
+    const groupLine = inv.group_name
+        ? `Po registrácii budeš automaticky pridaný do skupiny "${inv.group_name}", kde budeš môcť súťažiť s ${myUsername} a ostatnými členmi.\n\n`
+        : 'Odporúčame ti pripojiť sa k existujúcej skupine alebo si vytvoriť vlastnú a pozvať ďalších priateľov.\n\n';
+    return `Pozývam ťa do IIHF 2026 Tipovačky – súťaže v tipovaní výsledkov Majstrovstiev sveta v ľadovom hokeji 2026 (15. – 31. mája 2026).
+
+Zaregistruj sa kliknutím na tento odkaz:
+${inv.link}
+
+Po registrácii si zvolíš prezývku a heslo. Potom môžeš:
+- tipovať presné výsledky všetkých 64 zápasov MS
+- súťažiť s kamarátmi v skupinách
+- sledovať priebežné poradie
+- posielať pozvánky kamarátom a rozširovať skupinu
+
+${groupLine}Pred začatím odporúčame prečítať si pravidlá tipovačky:
+${rulesUrl}
+
+Link je jednorazový – platí pre jednu registráciu.
+
+Tešíme sa na teba!
+IIHF 2026 Tipovačka`;
+}
+
 function CopyBtn({ text }) {
     const [copied, setCopied] = useState(false);
     const copy = () => {
@@ -11,7 +36,7 @@ function CopyBtn({ text }) {
     };
     return (
         <button className={styles.btnCopy} onClick={copy}>
-            {copied ? '✓ Skopírované' : 'Kopírovať link'}
+            {copied ? '✓ Skopírované' : 'Kopírovať pozvánku'}
         </button>
     );
 }
@@ -19,6 +44,7 @@ function CopyBtn({ text }) {
 export default function UserInvites() {
     const [invites,    setInvites]    = useState([]);
     const [groups,     setGroups]     = useState([]);
+    const [myUsername, setMyUsername] = useState('');
     const [loading,    setLoading]    = useState(true);
     const [sending,    setSending]    = useState(false);
     const [sentTo,     setSentTo]     = useState('');
@@ -32,6 +58,7 @@ export default function UserInvites() {
             .then(data => {
                 setInvites(data.invites || []);
                 setGroups(data.groups || []);
+                setMyUsername(data.my_username || '');
             })
             .catch(e => setError(e.message))
             .finally(() => setLoading(false));
@@ -125,7 +152,7 @@ export default function UserInvites() {
                                     <span className={styles.mailSent} title="Email odoslaný">✉</span>
                                 )}
                             </div>
-                            {!inv.used_at && <CopyBtn text={inv.link} />}
+                            {!inv.used_at && <CopyBtn text={buildInviteText(inv, myUsername)} />}
                         </div>
                     ))}
                 </div>

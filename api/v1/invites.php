@@ -55,7 +55,11 @@ if ($method === 'GET') {
     );
     $gStmt->execute([$auth['user_id']]);
 
-    json_ok(['invites' => $invites, 'groups' => $gStmt->fetchAll()]);
+    $meStmt = $pdo->prepare('SELECT username FROM admin.users WHERE id = ?');
+    $meStmt->execute([$auth['user_id']]);
+    $my_username = $meStmt->fetchColumn() ?: 'Hráč';
+
+    json_ok(['invites' => $invites, 'groups' => $gStmt->fetchAll(), 'my_username' => $my_username]);
 }
 
 if ($method === 'POST') {
@@ -112,10 +116,11 @@ if ($method === 'POST') {
 
         $body_mail = "Ahoj,\nhráč " . $sender_username . " ťa pozýva do IIHF 2026 Tipovačky – súťaže v tipovaní výsledkov Majstrovstiev sveta v ľadovom hokeji 2026 (15. – 31. mája 2026).\n\n"
             . "Zaregistruj sa kliknutím na tento odkaz:\n" . $link . "\n\n"
-            . "Po registrácii si zvolíš vlastné meno a heslo. Potom môžeš:\n"
+            . "Po registrácii si zvolíš prezývku a heslo. Potom môžeš:\n"
             . "- tipovať presné výsledky všetkých 64 zápasov MS\n"
             . "- súťažiť s kamarátmi v skupinách\n"
-            . "- sledovať priebežné poradie\n\n"
+            . "- sledovať priebežné poradie\n"
+            . "- posielať pozvánky kamarátom a rozširovať skupinu\n\n"
             . $group_line
             . "Pred začatím odporúčame prečítať si pravidlá tipovačky:\n" . $rules_url . "\n\n"
             . "Link je jednorazový – platí pre jednu registráciu.\n\n"
