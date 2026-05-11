@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { getGames } from '../../api/games';
 import { saveTip, getGameTips } from '../../api/tips';
-import Standings from './Standings';
+import GroupStandings from './GroupStandings';
 import styles from './Games.module.css';
 
 const PHASE_LABEL = { A: 'Skupina A', B: 'Skupina B', QF: 'Štvrťfinále', SF: 'Semifinále', BRONZE: 'O bronz', GOLD: 'Finále' };
@@ -228,7 +228,13 @@ export default function Games() {
                 </div>
             </div>
 
-            {view === 'standings' ? <Standings /> : (
+            {view === 'standings' ? (
+                <GroupStandings onTeamClick={(team) => {
+                    setSelectedTeam(team);
+                    setPhase('all');
+                    setView('games');
+                }} />
+            ) : (
                 <>
                     {/* Kalendár */}
                     <div className={styles.calRow} ref={calContainer}>
