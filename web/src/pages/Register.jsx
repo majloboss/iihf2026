@@ -32,7 +32,8 @@ export default function Register() {
             localStorage.setItem('token', tempToken);
             const data = await completeRegistration(username, password);
             signIn(data.token);
-            navigate('/');
+            sessionStorage.setItem('just_registered', '1');
+            navigate('/dashboard');
         } catch (err) {
             setError(err.message);
             setLoading(false);
