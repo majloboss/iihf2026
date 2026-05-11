@@ -2,14 +2,19 @@
 
 | Meno | Email / kontakt | Odoslaná | Zaregistrovaný |
 |------|-----------------|----------|----------------|
-| Rasťo     |                 |          |                |
+| Milo     |   krchniak@fellow.sk              |          |                |
+|      |                 |          |                |
+|      |                 |          |                |
+| Juro     | juraj.bulla1@gmail.com                |          |                |
+
+| Rasťo     | turansky@yahoo.com                |          |                |
 |      |                 |          |                |
 |      |                 |          |                |
 |      |                 |          |                |
 |      |                 |          |                |
 |      |                 |          |                |
 |      |                 |          |                |
-|      |                 |          |                |
+| Denis     |Fronko@ajty.eu                 |          |                |
 |      |                 |          |                |
 |      |                 |          |                |
 
