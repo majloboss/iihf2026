@@ -72,3 +72,6 @@
 .pts  { font-weight: 700; color: #1a3a6b; }
 .pos  { color: #28a745; }
 .neg  { color: #dc3545; }
+
+.teamRow { cursor: pointer; transition: background 0.12s; }
+.teamRow:hover td { background: #e8f0fb !important; }

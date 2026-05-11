@@ -4,7 +4,7 @@ import styles from './GroupStandings.module.css';
 
 const FLAG_URL = code => `/flags/team_flag_${code?.toLowerCase()}.png`;
 
-function GroupTable({ phase, teams }) {
+function GroupTable({ phase, teams, onTeamClick }) {
     return (
         <div className={styles.groupCard}>
             <div className={styles.groupHeader}>Skupina {phase}</div>
@@ -25,7 +25,12 @@ function GroupTable({ phase, teams }) {
                 <tbody>
                     {teams.map((t, i) => (
                         <tr key={t.team}
-                            className={i < 4 ? (i === 3 ? styles['last-qualified'] : styles.qualified) : ''}>
+                            className={[
+                                i < 4 ? (i === 3 ? styles['last-qualified'] : styles.qualified) : '',
+                                onTeamClick ? styles.teamRow : ''
+                            ].join(' ')}
+                            onClick={() => onTeamClick?.(t.team)}
+                        >
                             <td className={styles.left}>
                                 <span className={styles.rank}>{i + 1}.</span>
                             </td>
@@ -53,7 +58,7 @@ function GroupTable({ phase, teams }) {
     );
 }
 
-export default function GroupStandings() {
+export default function GroupStandings({ onTeamClick }) {
     const [data,    setData]    = useState(null);
     const [loading, setLoading] = useState(true);
     const [error,   setError]   = useState('');
@@ -70,8 +75,8 @@ export default function GroupStandings() {
 
     return (
         <div className={styles.wrap}>
-            <GroupTable phase="A" teams={data.A || []} />
-            <GroupTable phase="B" teams={data.B || []} />
+            <GroupTable phase="A" teams={data.A || []} onTeamClick={onTeamClick} />
+            <GroupTable phase="B" teams={data.B || []} onTeamClick={onTeamClick} />
         </div>
     );
 }

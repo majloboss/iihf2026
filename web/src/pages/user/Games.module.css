@@ -6,21 +6,49 @@
     gap: 12px;
     margin-bottom: 20px;
 }
-.topBar h2 { color: #1a3a6b; font-size: 1.3rem; margin: 0; }
+.filters {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+}
+.filters::-webkit-scrollbar { display: none; }
 
-.filters { display: flex; flex-wrap: wrap; gap: 6px; }
-
-.btnFilter, .btnFilterActive {
-    padding: 5px 12px;
+.btnTabulky, .btnTabulkyActive {
+    padding: 5px 10px;
     border-radius: 6px;
     cursor: pointer;
     font-size: 0.82rem;
+    font-weight: 600;
     border: 1px solid #dee2e6;
-    transition: background 0.15s;
+    transition: background 0.15s, border-color 0.15s;
+    white-space: nowrap;
 }
-.btnFilter { background: #e9ecef; color: #555; }
-.btnFilter:hover { background: #dee2e6; }
-.btnFilterActive { background: #1a3a6b; color: #fff; border-color: #1a3a6b; }
+.btnTabulky { background: #e9ecef; color: #555; }
+.btnTabulky:hover { background: #dee2e6; }
+.btnTabulkyActive { background: #28a745; color: #fff; border-color: #28a745; }
+.btnTabulkyInline { margin-left: auto; flex-shrink: 0; }
+
+/* Phase filter buttons */
+.pBtn {
+    padding: 5px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-weight: 600;
+    border: 1px solid;
+    transition: background 0.12s, color 0.12s;
+}
+.pGroup   { background: #dbeafe; color: #1e40af; border-color: #bfdbfe; }
+.pPlayoff { background: #dcfce7; color: #15803d; border-color: #bbf7d0; }
+.pBronze  { background: #fde8c8; color: #92400e; border-color: #fcd6a4; }
+.pGold    { background: #fef9c3; color: #a16207; border-color: #fef08a; }
+.pGroupOn   { background: #1e40af; color: #fff; border-color: #1e40af; }
+.pPlayoffOn { background: #15803d; color: #fff; border-color: #15803d; }
+.pBronzeOn  { background: #92400e; color: #fff; border-color: #92400e; }
+.pGoldOn    { background: #a16207; color: #fff; border-color: #a16207; }
 
 .dayGroup { margin-bottom: 28px; }
 .dayHeader {

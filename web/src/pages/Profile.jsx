@@ -85,17 +85,28 @@ export default function Profile() {
             <div className={styles.card}>
                 <div className={styles.tabsRow}>
                     <div className={styles.tabs}>
-                        <button className={tab === 'profil'   ? styles.tabActive : styles.tab} onClick={() => setTab('profil')}>👤 Profil</button>
-                        <button className={tab === 'skupiny'  ? styles.tabActive : styles.tab} onClick={() => setTab('skupiny')}>👥 Skupiny</button>
-                        <button className={tab === 'pozvanky' ? styles.tabActive : styles.tab} onClick={() => setTab('pozvanky')}>✉ Pozvánky</button>
-                        <button className={tab === 'notif'    ? styles.tabActive : styles.tab} onClick={() => setTab('notif')}>🔔 Notifikácie</button>
+                        <button className={tab === 'profil'     ? styles.tabActive : styles.tab} onClick={() => setTab('profil')}>Profil</button>
+                        <button className={tab === 'skupiny'    ? styles.tabActive : styles.tab} onClick={() => setTab('skupiny')}>Skupiny</button>
+                        <button className={tab === 'pozvanky'   ? styles.tabActive : styles.tab} onClick={() => setTab('pozvanky')}>Pozvánky</button>
+                        <button className={tab === 'notif'      ? styles.tabActive : styles.tab} onClick={() => setTab('notif')}>Notif</button>
+                        <button className={tab === 'odhlasenie' ? styles.tabActive : styles.tab} onClick={() => setTab('odhlasenie')}>Odhlásenie</button>
                     </div>
-                    <button className={styles.btnLogout} onClick={() => { signOut(); navigate('/login'); }}>Odhlásiť</button>
                 </div>
 
-                {tab === 'skupiny'  && <div className={styles.tabContent}><Groups /></div>}
-                {tab === 'pozvanky' && <div className={styles.tabContent}><UserInvites /></div>}
-                {tab === 'notif'    && <div className={styles.tabContent}><Notifications /></div>}
+                {tab === 'skupiny'    && <div className={styles.tabContent}><Groups /></div>}
+                {tab === 'pozvanky'  && <div className={styles.tabContent}><UserInvites /></div>}
+                {tab === 'notif'     && <div className={styles.tabContent}><Notifications /></div>}
+                {tab === 'odhlasenie' && (
+                    <div className={styles.tabContent}>
+                        <section className={styles.section}>
+                            <h3>Odhlásenie</h3>
+                            <p style={{ color: '#666', marginBottom: '20px' }}>Chceš sa odhlásiť z aplikácie?</p>
+                            <button className={styles.btnDanger} onClick={() => { signOut(); navigate('/login'); }}>
+                                🚪 Odhlásiť sa
+                            </button>
+                        </section>
+                    </div>
+                )}
 
                 {tab === 'profil' && <>
                     <section className={styles.section}>

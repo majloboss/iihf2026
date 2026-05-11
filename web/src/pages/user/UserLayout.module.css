@@ -108,12 +108,12 @@
     .sidebar { display: none; }
 
     .content {
-        padding: 16px 12px calc(160px + env(safe-area-inset-bottom, 0px));
+        padding: 16px 12px calc(80px + env(safe-area-inset-bottom, 0px));
     }
 
     .bottomNav {
         display: flex;
-        flex-direction: column;
+        flex-direction: row;
         position: fixed;
         bottom: 0;
         left: 0;
@@ -121,15 +121,10 @@
         background: #1a3a6b;
         z-index: 100;
         border-top: 1px solid rgba(255,255,255,0.15);
+        overflow: visible;
     }
 
-    .bottomNavRow {
-        display: flex;
-        flex-direction: row;
-        width: 100%;
-    }
-
-    .bottomNavRow a {
+    .bottomNav a {
         flex: 1;
         display: flex;
         flex-direction: column;
@@ -143,27 +138,51 @@
         transition: color 0.15s, background 0.15s;
     }
 
-    .bottomNavRow a:hover  { background: rgba(255,255,255,0.08); }
-    .bottomNavRow a.active { color: #fff; background: rgba(255,255,255,0.15); }
+    .bottomNav a:hover  { background: rgba(255,255,255,0.08); }
+    .bottomNav a.active { color: #fff; background: rgba(255,255,255,0.15); }
 
     .bottomNavIcon { font-size: 1.4rem; line-height: 1; }
 
-    .bottomNavLogout {
-        flex: 1;
+    /* Profil — avatar vyčnieva nad lištu */
+    .profileNav {
+        position: relative;
+        justify-content: flex-end !important;
+        padding-top: 30px !important;
+        gap: 2px !important;
+        overflow: visible;
+    }
+
+    .profileNavAvatar {
+        position: absolute;
+        top: -18px;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        border: 3px solid #1a3a6b;
+        background: #2a5a9b;
+        overflow: hidden;
         display: flex;
-        flex-direction: column;
         align-items: center;
         justify-content: center;
-        padding: 10px 4px 12px;
-        color: rgba(255,255,255,0.65);
-        font-size: 0.65rem;
-        gap: 4px;
-        background: none;
-        border: none;
-        cursor: pointer;
-        transition: color 0.15s, background 0.15s;
+        box-shadow: 0 -3px 14px rgba(0,0,0,0.35);
+        transition: border-color 0.15s;
     }
-    .bottomNavLogout:hover { background: rgba(255,255,255,0.08); color: #fff; }
+
+    .profileNav.active .profileNavAvatar {
+        border-color: #fff;
+    }
+
+    .profileNavImg {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .profileNavPh {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #fff;
+    }
 }
 
 @media (min-width: 901px) {

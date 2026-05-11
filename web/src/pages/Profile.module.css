@@ -24,7 +24,9 @@
 
 .tabs {
     display: flex;
-    padding: 0 8px;
+    padding: 0;
+    flex: 1;
+    min-width: 0;
 }
 
 .btnLogout {
@@ -40,18 +42,23 @@
     flex-shrink: 0;
 }
 .btnLogout:hover { background: #fdecea; color: #c0392b; border-color: #f5c6cb; }
+@media (max-width: 900px) { .hideOnMobile { display: none !important; } }
 
 .tab, .tabActive {
-    padding: 14px 20px;
+    flex: 1;
+    padding: 13px 4px;
     border: none;
     background: none;
     cursor: pointer;
-    font-size: 0.95rem;
+    font-size: 0.82rem;
     font-weight: 600;
     color: #aaa;
     border-bottom: 2px solid transparent;
     margin-bottom: -2px;
     transition: color 0.15s;
+    text-align: center;
+    min-width: 0;
+    white-space: nowrap;
 }
 
 .tabActive {

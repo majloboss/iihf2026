@@ -4,6 +4,14 @@
 
 ---
 
+## ⚠️ PRACOVNÉ PRAVIDLÁ (vždy dodržiavať)
+
+1. **Push iba na `develop`** — na `main` NIKDY automaticky, iba na samostatný explicitný pokyn
+2. **Komunikácia v slovenčine** — všetka komunikácia s userom prebieha po slovensky
+3. **Na `develop` sa nepýtam** — zmeny vykonávam priamo bez čakania na potvrdenie; pýtam sa len pri deploy na main alebo deštruktívnych operáciách
+
+---
+
 ## STAV IMPLEMENTÁCIE — PREHĽAD
 
 ### ✅ V PRODUKCII (main / iihf2026.fellow.sk)
@@ -503,6 +511,23 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 - Logo: `sources/logo.png`
 - Vlajky tímov: `sources/team_flag_<kod>.png`
 
+## Nove ulohy 11.5.2026
+## ULOHA 1
+- 🟠 favicon icona pre web ma dve farby: DEVELOP zelena, MAIN cervena
+- 🟠 PWA mobilná ikona: zelená pre DEVELOP (icon-192-dev.png, icon-512-dev.png), červená pre MAIN
+- 🟠 vite.config.js: VITE_API_URL obsahuje dev_ → zelené ikony, theme_color=#28a745
+
+## ULOHA 2
+- 🟠 optimalizacia menu na 5 poloziek pre rolu USER
+- krok 1: 🟠 obrazovku Tabulky presunutá do obrazovky Zapasy (toggle tlačidlo vpravo v topBar, nadpis Zápasy vycentrovaný)
+- krok 2: 🟠 Profil — pridaná záložka Odhlásenie (po Notifikácie); Odhlásiť tlačidlo skryté na mobile
+- krok 3: 🟠 mobilné dolné menu zjednodušené na 1 riadok, 5 položiek: Prehľad, Zápasy, Profil, Skupiny, Pravidlá
+
+
+
+
+
+
 ---
 
-*Posledná aktualizácia: 2026-05-10 (v2.14)*
+*Posledná aktualizácia: 2026-05-11 (v2.15)*

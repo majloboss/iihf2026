@@ -166,8 +166,8 @@ function GameTipsModal({ game, onClose }) {
 /* ── Game card ── */
 function GameCard({ game, onTipClick, onGroupTipsClick }) {
     const finished  = game.status === 'finished';
-    const live      = game.status === 'live';
-    const scheduled = game.status === 'scheduled';
+    const live      = !finished && new Date(game.starts_at).getTime() <= Date.now();
+    const scheduled = !finished && !live;
     const canTip    = scheduled && game.team1 && game.team2 && new Date() < new Date(new Date(game.starts_at).getTime() - 5 * 60000);
     const date      = new Date(game.starts_at);
     const timeStr   = date.toLocaleString('sk-SK', { day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' });
@@ -182,7 +182,10 @@ function GameCard({ game, onTipClick, onGroupTipsClick }) {
         >
             <div className={styles.gameCardTop}>
                 <span className={styles.gamePhase}>{PHASE_LABEL[game.phase] ?? game.phase}</span>
-                <span className={styles.gameTime}>{live ? '🔴 LIVE' : timeStr}</span>
+                {live
+                ? <span className={styles.liveBadge}>LIVE</span>
+                : <span className={styles.gameTime}>{timeStr}</span>
+            }
             </div>
             <div className={styles.gameRow}>
                 <div className={styles.gameTeam}>
@@ -286,8 +289,11 @@ export default function Dashboard() {
 
     const now      = Date.now();
     const finished = games.filter(g => g.status === 'finished').slice(-4).reverse();
-    const upcoming = games.filter(g => g.status === 'scheduled' && new Date(g.starts_at).getTime() > now).slice(0, 4);
-    const live     = games.filter(g => g.status === 'live');
+    const live     = games.filter(g => g.status !== 'finished' && new Date(g.starts_at).getTime() <= now);
+    const upcoming = [
+        ...live,
+        ...games.filter(g => g.status !== 'finished' && new Date(g.starts_at).getTime() > now).slice(0, 4),
+    ];
 
     return (
         <div className={styles.wrap}>
@@ -296,20 +302,10 @@ export default function Dashboard() {
 
             <div className={styles.grid}>
                 <section className={styles.section}>
-                    {live.length > 0 && (
-                        <>
-                            <div className={styles.sectionHeader}><span>🔴 Live</span></div>
-                            {live.map(g => (
-                                <GameCard key={g.id} game={g}
-                                    onTipClick={() => setTipGame(g)}
-                                    onGroupTipsClick={() => setGroupTipsGame(g)} />
-                            ))}
-                        </>
-                    )}
                     {upcoming.length > 0 && (
                         <>
-                            <div className={styles.sectionHeader}>
-                                <span>⏰ Najbližšie zápasy</span>
+                            <div className={`${styles.sectionHeader} ${live.length > 0 ? styles.sHLive : styles.sHUpcoming}`}>
+                                <span>Najbližšie zápasy</span>
                                 <Link to="/games" className={styles.more}>Všetky →</Link>
                             </div>
                             {upcoming.map(g => (
@@ -321,8 +317,8 @@ export default function Dashboard() {
                     )}
                     {finished.length > 0 && (
                         <>
-                            <div className={styles.sectionHeader}>
-                                <span>✅ Posledné výsledky</span>
+                            <div className={`${styles.sectionHeader} ${styles.sHFinished}`}>
+                                <span>Posledné výsledky</span>
                                 <Link to="/games" className={styles.more}>Všetky →</Link>
                             </div>
                             {finished.map(g => (
@@ -332,14 +328,14 @@ export default function Dashboard() {
                             ))}
                         </>
                     )}
-                    {live.length === 0 && upcoming.length === 0 && finished.length === 0 && (
+                    {upcoming.length === 0 && finished.length === 0 && (
                         <p className={styles.empty}>Žiadne zápasy</p>
                     )}
                 </section>
 
                 <section className={styles.section}>
-                    <div className={styles.sectionHeader}>
-                        <span>👥 Poradie v skupinách</span>
+                    <div className={`${styles.sectionHeader} ${styles.sHStandings}`}>
+                        <span>Poradie v skupinách</span>
                         <Link to="/standings" className={styles.more}>Celé →</Link>
                     </div>
                     {standings.length === 0

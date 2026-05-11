@@ -56,31 +56,27 @@ export default function UserLayout() {
                 <Outlet />
             </main>
             <nav className={styles.bottomNav}>
-                <div className={styles.bottomNavRow}>
-                    <NavLink to="/dashboard" className={({ isActive }) => isActive ? styles.active : ''}>
-                        <span className={styles.bottomNavIcon}>🏠</span>Prehľad
-                    </NavLink>
-                    <NavLink to="/games"     className={({ isActive }) => isActive ? styles.active : ''}>
-                        <span className={styles.bottomNavIcon}>🏒</span>Zápasy
-                    </NavLink>
-                    <NavLink to="/tabulky"   className={({ isActive }) => isActive ? styles.active : ''}>
-                        <span className={styles.bottomNavIcon}>📊</span>Tabuľky
-                    </NavLink>
-                </div>
-                <div className={styles.bottomNavRow}>
-                    <NavLink to="/standings" className={({ isActive }) => isActive ? styles.active : ''}>
-                        <span className={styles.bottomNavIcon}>👥</span>Skupiny
-                    </NavLink>
-                    <NavLink to="/profile"   className={({ isActive }) => isActive ? styles.active : ''}>
-                        <span className={styles.bottomNavIcon}>👤</span>Profil
-                    </NavLink>
-                    <NavLink to="/pravidla"  className={({ isActive }) => isActive ? styles.active : ''}>
-                        <span className={styles.bottomNavIcon}>📋</span>Pravidlá
-                    </NavLink>
-                    <button className={styles.bottomNavLogout} onClick={handleLogout}>
-                        <span className={styles.bottomNavIcon}>🚪</span>Odhlásiť
-                    </button>
-                </div>
+                <NavLink to="/dashboard" className={({ isActive }) => isActive ? styles.active : ''}>
+                    <span className={styles.bottomNavIcon}>🏠</span>Prehľad
+                </NavLink>
+                <NavLink to="/games"     className={({ isActive }) => isActive ? styles.active : ''}>
+                    <span className={styles.bottomNavIcon}>🏒</span>Zápasy
+                </NavLink>
+                <NavLink to="/profile" className={({ isActive }) => [styles.profileNav, isActive ? styles.active : ''].join(' ')}>
+                    <div className={styles.profileNavAvatar}>
+                        {profile?.avatar
+                            ? <img src={profile.avatar} alt="" className={styles.profileNavImg} />
+                            : <span className={styles.profileNavPh}>{profile?.username?.[0]?.toUpperCase() ?? '👤'}</span>
+                        }
+                    </div>
+                    Profil
+                </NavLink>
+                <NavLink to="/standings" className={({ isActive }) => isActive ? styles.active : ''}>
+                    <span className={styles.bottomNavIcon}>👥</span>Skupiny
+                </NavLink>
+                <NavLink to="/pravidla"  className={({ isActive }) => isActive ? styles.active : ''}>
+                    <span className={styles.bottomNavIcon}>📋</span>Pravidlá
+                </NavLink>
             </nav>
         </div>
     );

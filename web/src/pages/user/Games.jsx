@@ -1,9 +1,11 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { getGames } from '../../api/games';
 import { saveTip, getGameTips } from '../../api/tips';
+import GroupStandings from './GroupStandings';
 import styles from './Games.module.css';
 
 const PHASE_LABEL = { A: 'Skupina A', B: 'Skupina B', QF: 'Štvrťfinále', SF: 'Semifinále', BRONZE: 'O bronz', GOLD: 'Finále' };
+const PHASE_BTN   = { all: 'ALL', A: 'A', B: 'B', QF: 'QF', SF: 'SF', BRONZE: 'BR', GOLD: 'F' };
 const FLAG_URL = (code) => `/flags/team_flag_${code?.toLowerCase()}.png`;
 const dayKey = (iso) => {
     const d = new Date(iso);
@@ -130,6 +132,7 @@ export default function Games() {
     const [phase, setPhase]               = useState('all');
     const [selectedDay, setSelectedDay]   = useState(null);
     const [selectedTeam, setSelectedTeam] = useState(null);
+    const [view, setView]                 = useState('games');
     const scrollRef    = useRef(null);
     const calContainer = useRef(null);
     const todayCalBtn  = useRef(null);
@@ -194,118 +197,128 @@ export default function Games() {
         return d >= todayStart;
     });
 
+    const phaseBtnClass = (p) => {
+        const base = p === 'QF' || p === 'SF' ? [styles.pBtn, styles.pPlayoff]
+                   : p === 'BRONZE'            ? [styles.pBtn, styles.pBronze]
+                   : p === 'GOLD'              ? [styles.pBtn, styles.pGold]
+                   : [styles.pBtn, styles.pGroup];
+        const active = p === 'QF' || p === 'SF' ? styles.pPlayoffOn
+                     : p === 'BRONZE'            ? styles.pBronzeOn
+                     : p === 'GOLD'              ? styles.pGoldOn
+                     : styles.pGroupOn;
+        return [...base, view === 'games' && phase === p ? active : ''].join(' ');
+    };
+
     return (
         <div className={styles.wrap}>
-            {/* Fázy */}
+            {/* Fázy + Tabuľky toggle */}
             <div className={styles.topBar}>
-                <h2>Zápasy</h2>
                 <div className={styles.filters}>
                     {phases.map(p => (
-                        <button key={p} onClick={() => setPhase(p)}
-                            className={phase === p ? styles.btnFilterActive : styles.btnFilter}>
-                            {p === 'all' ? 'Všetky' : (PHASE_LABEL[p] || p)}
+                        <button key={p}
+                            onClick={() => { setPhase(p); setView('games'); }}
+                            className={phaseBtnClass(p)}>
+                            {PHASE_BTN[p]}
                         </button>
                     ))}
+                    <button
+                        className={`${view === 'standings' ? styles.btnTabulkyActive : styles.btnTabulky} ${styles.btnTabulkyInline}`}
+                        onClick={() => setView('standings')}
+                    >
+                        📊 TAB
+                    </button>
                 </div>
             </div>
 
-            {/* Kalendár */}
-            <div className={styles.calRow} ref={calContainer}>
-                {allDays.map(dk => {
-                    const d       = new Date(dk + 'T12:00:00');
-                    const isToday  = dk === todayK;
-                    const isActive = dk === selectedDay;
-                    return (
-                        <button
-                            key={dk}
-                            ref={isToday ? todayCalBtn : null}
-                            className={`${styles.calDay} ${isToday ? styles.calDayToday : ''} ${isActive ? styles.calDayActive : ''}`}
-                            onClick={() => setSelectedDay(selectedDay === dk ? null : dk)}
-                        >
-                            <span className={styles.calDayWeekday}>
-                                {d.toLocaleDateString('sk-SK', { weekday: 'short' })}
-                            </span>
-                            <span className={styles.calDayNum}>{d.getDate()}</span>
-                            <span className={styles.calDayMonth}>{d.getMonth() + 1}.</span>
-                        </button>
-                    );
-                })}
-            </div>
+            {view === 'standings' ? (
+                <GroupStandings onTeamClick={(team) => {
+                    setSelectedTeam(team);
+                    setPhase('all');
+                    setView('games');
+                }} />
+            ) : (
+                <>
+                    {/* Kalendár */}
+                    <div className={styles.calRow} ref={calContainer}>
+                        {allDays.map(dk => {
+                            const d       = new Date(dk + 'T12:00:00');
+                            const isToday  = dk === todayK;
+                            const isActive = dk === selectedDay;
+                            return (
+                                <button
+                                    key={dk}
+                                    ref={isToday ? todayCalBtn : null}
+                                    className={`${styles.calDay} ${isToday ? styles.calDayToday : ''} ${isActive ? styles.calDayActive : ''}`}
+                                    onClick={() => setSelectedDay(selectedDay === dk ? null : dk)}
+                                >
+                                    <span className={styles.calDayWeekday}>
+                                        {d.toLocaleDateString('sk-SK', { weekday: 'short' })}
+                                    </span>
+                                    <span className={styles.calDayNum}>{d.getDate()}</span>
+                                    <span className={styles.calDayMonth}>{d.getMonth() + 1}.</span>
+                                </button>
+                            );
+                        })}
+                    </div>
 
-            {/* Vlajky tímov */}
-            {allTeams.length > 0 && (
-                <div className={styles.flagsRow}>
-                    {allTeams.map(team => (
-                        <button
-                            key={team}
-                            className={`${styles.flagBtn} ${selectedTeam === team ? styles.flagBtnActive : ''}`}
-                            onClick={() => setSelectedTeam(selectedTeam === team ? null : team)}
-                        >
-                            <img className={styles.flagImg} src={FLAG_URL(team)} alt={team}
-                                onError={e => e.target.style.display='none'} />
-                            <span className={styles.flagCode}>{team}</span>
-                        </button>
-                    ))}
-                </div>
-            )}
-
-            {/* Aktívne filtre — chips na zrušenie */}
-            {(selectedDay || selectedTeam) && (
-                <div className={styles.activeFilters}>
-                    {selectedDay && (
-                        <span className={styles.filterChip}>
-                            {new Date(selectedDay + 'T12:00:00').toLocaleDateString('sk-SK', { day: '2-digit', month: '2-digit' })}
-                            <button onClick={() => setSelectedDay(null)}>×</button>
-                        </span>
+                    {/* Vlajky tímov */}
+                    {allTeams.length > 0 && (
+                        <div className={styles.flagsRow}>
+                            {allTeams.map(team => (
+                                <button
+                                    key={team}
+                                    className={`${styles.flagBtn} ${selectedTeam === team ? styles.flagBtnActive : ''}`}
+                                    onClick={() => setSelectedTeam(selectedTeam === team ? null : team)}
+                                >
+                                    <img className={styles.flagImg} src={FLAG_URL(team)} alt={team}
+                                        onError={e => e.target.style.display='none'} />
+                                    <span className={styles.flagCode}>{team}</span>
+                                </button>
+                            ))}
+                        </div>
                     )}
-                    {selectedTeam && (
-                        <span className={styles.filterChip}>
-                            {selectedTeam}
-                            <button onClick={() => setSelectedTeam(null)}>×</button>
-                        </span>
-                    )}
-                </div>
-            )}
 
-            {/* Zápasy */}
-            {Object.entries(byDate).map(([date, dayGames]) => (
-                <div key={date} className={styles.dayGroup} ref={date === targetDate ? scrollRef : null}>
-                    <div className={styles.dayHeader}>{date}</div>
-                    {dayGames.map(g => {
-                        const now = Date.now();
-                        const es  = g.status === 'finished' ? 'finished'
-                                  : new Date(g.starts_at).getTime() <= now ? 'live'
-                                  : 'scheduled';
-                        return (
-                            <div key={g.id} className={`${styles.card} ${es === 'finished' ? styles.cardFinished : es === 'live' ? styles.cardLive : ''}`}>
-                                <div className={styles.cardTop}>
-                                    <span className={styles.phase}>{PHASE_LABEL[g.phase] || g.phase} • Zápas {g.game_number}</span>
-                                    <span className={styles.time}>{new Date(g.starts_at).toLocaleTimeString('sk-SK', { hour: '2-digit', minute: '2-digit' })}</span>
-                                </div>
-                                <div className={styles.matchRow}>
-                                    <TeamBlock code={g.team1} score={es === 'finished' ? g.score1 : null} isLeft />
-                                    <div className={styles.vs}>
-                                        {es === 'live' ? <span className={styles.live}>LIVE</span> : 'vs'}
+                    {/* Zápasy */}
+                    {Object.entries(byDate).map(([date, dayGames]) => (
+                        <div key={date} className={styles.dayGroup} ref={date === targetDate ? scrollRef : null}>
+                            <div className={styles.dayHeader}>{date}</div>
+                            {dayGames.map(g => {
+                                const now = Date.now();
+                                const es  = g.status === 'finished' ? 'finished'
+                                          : new Date(g.starts_at).getTime() <= now ? 'live'
+                                          : 'scheduled';
+                                return (
+                                    <div key={g.id} className={`${styles.card} ${es === 'finished' ? styles.cardFinished : es === 'live' ? styles.cardLive : ''}`}>
+                                        <div className={styles.cardTop}>
+                                            <span className={styles.phase}>{PHASE_LABEL[g.phase] || g.phase} • Zápas {g.game_number}</span>
+                                            <span className={styles.time}>{new Date(g.starts_at).toLocaleTimeString('sk-SK', { hour: '2-digit', minute: '2-digit' })}</span>
+                                        </div>
+                                        <div className={styles.matchRow}>
+                                            <TeamBlock code={g.team1} score={es === 'finished' ? g.score1 : null} isLeft />
+                                            <div className={styles.vs}>
+                                                {es === 'live' ? <span className={styles.live}>LIVE</span> : 'vs'}
+                                            </div>
+                                            <TeamBlock code={g.team2} score={es === 'finished' ? g.score2 : null} />
+                                        </div>
+                                        <div className={styles.venue}>
+                                            {g.venue}
+                                            {g.flashscore_url && (
+                                                <a href={g.flashscore_url} target="_blank" rel="noopener noreferrer" className={styles.fsLink} title="Sledovať na FlashScore">
+                                                    <img src="/flashscore.png" alt="FlashScore" className={styles.fsIcon} />
+                                                </a>
+                                            )}
+                                        </div>
+                                        <TipInput game={g} onSaved={handleSaved} />
+                                        {es !== 'scheduled' && <GroupTips gameId={g.id} />}
                                     </div>
-                                    <TeamBlock code={g.team2} score={es === 'finished' ? g.score2 : null} />
-                                </div>
-                                <div className={styles.venue}>
-                                    {g.venue}
-                                    {g.flashscore_url && (
-                                        <a href={g.flashscore_url} target="_blank" rel="noopener noreferrer" className={styles.fsLink} title="Sledovať na FlashScore">
-                                            <img src="/flashscore.png" alt="FlashScore" className={styles.fsIcon} />
-                                        </a>
-                                    )}
-                                </div>
-                                <TipInput game={g} onSaved={handleSaved} />
-                                {es !== 'scheduled' && <GroupTips gameId={g.id} />}
-                            </div>
-                        );
-                    })}
-                </div>
-            ))}
+                                );
+                            })}
+                        </div>
+                    ))}
 
-            {filtered.length === 0 && <p className={styles.empty}>Žiadne zápasy</p>}
+                    {filtered.length === 0 && <p className={styles.empty}>Žiadne zápasy</p>}
+                </>
+            )}
         </div>
     );
 }

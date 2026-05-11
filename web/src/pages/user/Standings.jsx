@@ -57,7 +57,6 @@ export default function Standings() {
 
     return (
         <div className={styles.wrap}>
-            <h2 className={styles.title}>Tabuľky</h2>
             {groups.length === 0
                 ? <p className={styles.empty}>Nie si v žiadnej skupine.</p>
                 : groups.map(g => <GroupTable key={g.id} group={g} currentUserId={user?.user_id} />)}
