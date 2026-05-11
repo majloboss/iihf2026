@@ -21,7 +21,7 @@
 | Imi Loczi    | imrich.loczi@gmail.com                |          |                |
 | Ivan Ilavský    |                 |          |                |
 | Dušan Ilavský    |                 |          |                |
-|     |                 |          |                |
+| Miro Darida   |                 |          |                |
 |     |                 |          |                |
 |     |                 |          |                |
 |     |                 |          |                |
