@@ -254,18 +254,29 @@ if ($action === 'final') {
     json_ok(['action'=>'final','games'=>array_merge($bronze,$gold),'users'=>count($users)]);
 }
 
-// ── ACTION: init — vymaže testovacie dáta, zápasy zostanú ────────────────────
+// ── ACTION: init — vymaže všetko okrem zápasov a adminov ────────────────────
 if ($action === 'init') {
+    // Poradie: najprv tabulky odkazujúce na users, potom users
     $pdo->exec("DELETE FROM iihf2026.tips");
     $pdo->exec("DELETE FROM iihf2026.group_standings");
+    $pdo->exec("DELETE FROM admin.notification_log");
+    $pdo->exec("DELETE FROM admin.notification_settings");
+    $pdo->exec("DELETE FROM admin.login_logs");
+    $pdo->exec("DELETE FROM admin.invites");               // FK created_by + user_id → users
     $pdo->exec("DELETE FROM admin.group_members");
     $pdo->exec("DELETE FROM admin.friend_groups");
     $users_deleted = $pdo->exec("DELETE FROM admin.users WHERE role='user'");
-    $links_deleted = $pdo->exec("DELETE FROM admin.invites");
+
+    // Reset sekvencií
+    $pdo->exec("SELECT setval('admin.seq_invite', 1, false)");
+    $pdo->exec("SELECT setval('admin.friend_groups_id_seq', 1, false)");
+    $pdo->exec("SELECT setval('iihf2026.tips_id_seq', 1, false)");
+    // Users seq: začať za posledným admin ID
+    $pdo->exec("SELECT setval('admin.users_id_seq', (SELECT COALESCE(MAX(id), 0) + 1 FROM admin.users), false)");
+
     json_ok([
         'action'        => 'init',
         'users_deleted' => (int)$users_deleted,
-        'links_deleted' => (int)$links_deleted,
     ]);
 }
 
