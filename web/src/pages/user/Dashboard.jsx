@@ -286,10 +286,10 @@ export default function Dashboard() {
 
     const now      = Date.now();
     const finished = games.filter(g => g.status === 'finished').slice(-4).reverse();
-    const live     = games.filter(g => g.status === 'live');
+    const live     = games.filter(g => g.status !== 'finished' && new Date(g.starts_at).getTime() <= now);
     const upcoming = [
         ...live,
-        ...games.filter(g => g.status === 'scheduled' && new Date(g.starts_at).getTime() > now).slice(0, 4),
+        ...games.filter(g => g.status !== 'finished' && new Date(g.starts_at).getTime() > now).slice(0, 4),
     ];
 
     return (
