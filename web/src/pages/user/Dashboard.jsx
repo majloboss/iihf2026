@@ -182,7 +182,10 @@ function GameCard({ game, onTipClick, onGroupTipsClick }) {
         >
             <div className={styles.gameCardTop}>
                 <span className={styles.gamePhase}>{PHASE_LABEL[game.phase] ?? game.phase}</span>
-                <span className={styles.gameTime}>{live ? '🔴 LIVE' : timeStr}</span>
+                {live
+                ? <span className={styles.liveBadge}>LIVE</span>
+                : <span className={styles.gameTime}>{timeStr}</span>
+            }
             </div>
             <div className={styles.gameRow}>
                 <div className={styles.gameTeam}>
