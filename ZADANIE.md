@@ -69,11 +69,11 @@
 - Admin — nastavenia bodovacieho systému (úprava scoring_config)
 - Android aplikácia (Kotlin)
 
-### ⚠️ TREBA SPUSTIŤ (DB migrácie)
-- V Admin → Nástroje → kliknúť **"Spustit migracie"** — spustí run_012 + run_013 + run_014
-  - `run_012.sql` — stĺpec `email_sent` v invites, tabuľka `mail_log`
-  - `run_013.sql` — stĺpec `group_id` v invites (odporúčanie skupiny)
-  - `run_014.sql` — stĺpec `flashscore_url` v games (FlashScore prepojenie)
+### ✅ DB migrácie — všetky spustené na produkcii
+- `run_012.sql` — stĺpec `email_sent` v invites, tabuľka `mail_log`
+- `run_013.sql` — stĺpec `group_id` v invites (odporúčanie skupiny)
+- `run_014.sql` — stĺpec `flashscore_url` v games (FlashScore prepojenie)
+- `run_015` až `run_018` — flashscore URLs, PDF, mail log body, login_logs env
 
 ---
 
