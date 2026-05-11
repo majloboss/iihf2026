@@ -215,13 +215,15 @@ export default function Games() {
             <div className={styles.topBar}>
                 <div className={styles.filters}>
                     {phases.map(p => (
-                        <button key={p} onClick={() => setPhase(p)} className={phaseBtnClass(p)}>
+                        <button key={p}
+                            onClick={() => { setPhase(p); setView('games'); }}
+                            className={phaseBtnClass(p)}>
                             {PHASE_BTN[p]}
                         </button>
                     ))}
                     <button
                         className={`${view === 'standings' ? styles.btnTabulkyActive : styles.btnTabulky} ${styles.btnTabulkyInline}`}
-                        onClick={() => setView(v => v === 'standings' ? 'games' : 'standings')}
+                        onClick={() => setView('standings')}
                     >
                         📊 TAB
                     </button>
