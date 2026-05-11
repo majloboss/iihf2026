@@ -286,8 +286,11 @@ export default function Dashboard() {
 
     const now      = Date.now();
     const finished = games.filter(g => g.status === 'finished').slice(-4).reverse();
-    const upcoming = games.filter(g => g.status === 'scheduled' && new Date(g.starts_at).getTime() > now).slice(0, 4);
     const live     = games.filter(g => g.status === 'live');
+    const upcoming = [
+        ...live,
+        ...games.filter(g => g.status === 'scheduled' && new Date(g.starts_at).getTime() > now).slice(0, 4),
+    ];
 
     return (
         <div className={styles.wrap}>
@@ -296,19 +299,9 @@ export default function Dashboard() {
 
             <div className={styles.grid}>
                 <section className={styles.section}>
-                    {live.length > 0 && (
-                        <>
-                            <div className={`${styles.sectionHeader} ${styles.sHLive}`}><span>Live</span></div>
-                            {live.map(g => (
-                                <GameCard key={g.id} game={g}
-                                    onTipClick={() => setTipGame(g)}
-                                    onGroupTipsClick={() => setGroupTipsGame(g)} />
-                            ))}
-                        </>
-                    )}
                     {upcoming.length > 0 && (
                         <>
-                            <div className={`${styles.sectionHeader} ${styles.sHUpcoming}`}>
+                            <div className={`${styles.sectionHeader} ${live.length > 0 ? styles.sHLive : styles.sHUpcoming}`}>
                                 <span>Najbližšie zápasy</span>
                                 <Link to="/games" className={styles.more}>Všetky →</Link>
                             </div>
@@ -332,7 +325,7 @@ export default function Dashboard() {
                             ))}
                         </>
                     )}
-                    {live.length === 0 && upcoming.length === 0 && finished.length === 0 && (
+                    {upcoming.length === 0 && finished.length === 0 && (
                         <p className={styles.empty}>Žiadne zápasy</p>
                     )}
                 </section>
