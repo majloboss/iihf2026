@@ -518,7 +518,7 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 - urob aj pre mobilnu verziu zelenu ikonu pre DEVELOP
 
 ## ULOHA 2
-- optimalizacia menu na 5 poloziek
+- optimalizacia menu na 5 poloziek pre rolu USER
 - vyvoj je potrebne robit v tomto poradi
 - sucasne menu: Prehlad, Zapasy, Tabulky, Skupiny, Profil, Pravidla, Odhlasit
 - krok 1: obrazovku Tabulky presunut do obrazovky Zapasy
