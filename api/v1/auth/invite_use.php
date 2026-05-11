@@ -7,11 +7,28 @@ $token = trim($body['token'] ?? '');
 if (!$token) json_error('Chýba token');
 
 $pdo = db();
-$stmt = $pdo->prepare('SELECT id, used_at FROM admin.invites WHERE invite_token = ?');
+$stmt = $pdo->prepare(
+    'SELECT i.id, i.used_at, i.user_id, u.is_active
+     FROM admin.invites i
+     LEFT JOIN admin.users u ON u.id = i.user_id
+     WHERE i.invite_token = ?'
+);
 $stmt->execute([$token]);
 $invite = $stmt->fetch();
 
 if (!$invite) json_error('Neplatný pozývací link', 404);
+
+// Link bol otvorený skôr ale registrácia nebola dokončená — umožni znovu
+if ($invite['used_at'] && $invite['user_id'] && !$invite['is_active']) {
+    $tempToken = jwt_create([
+        'user_id'  => (int)$invite['user_id'],
+        'role'     => 'user',
+        'complete' => true,
+        'exp'      => time() + 3600,
+    ]);
+    json_ok(['temp_token' => $tempToken]);
+}
+
 if ($invite['used_at']) json_error('Pozývací link bol už použitý', 409);
 
 // Vytvor placeholder usera
@@ -34,12 +51,11 @@ try {
 
     $pdo->commit();
 
-    // Vrat docasny token pre dokoncenie registracie
     $tempToken = jwt_create([
         'user_id'  => $userId,
         'role'     => 'user',
-        'complete' => true,         // oznacenie: musi dokoncit registraciu
-        'exp'      => time() + 3600 // 1 hodina na dokoncenie
+        'complete' => true,
+        'exp'      => time() + 3600,
     ]);
     json_ok(['temp_token' => $tempToken]);
 } catch (Exception $e) {
