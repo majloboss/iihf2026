@@ -15,7 +15,8 @@ function GroupTable({ phase, teams, onTeamClick }) {
                         <th className={styles.left}>Tím</th>
                         <th>Z</th>
                         <th>V</th>
-                        <th>R</th>
+                        <th className={styles.thOt}>VP</th>
+                        <th className={styles.thOt}>PP</th>
                         <th>P</th>
                         <th>GS:GP</th>
                         <th>+/-</th>
@@ -43,7 +44,8 @@ function GroupTable({ phase, teams, onTeamClick }) {
                             </td>
                             <td>{t.gp}</td>
                             <td>{t.w}</td>
-                            <td>{t.d}</td>
+                            <td className={styles.tdOt}>{t.otw ?? 0}</td>
+                            <td className={styles.tdOt}>{t.otl ?? 0}</td>
                             <td>{t.l}</td>
                             <td>{t.gf}:{t.ga}</td>
                             <td className={t.gd > 0 ? styles.pos : t.gd < 0 ? styles.neg : ''}>

@@ -13,7 +13,7 @@ function computeLive(PDO $pdo, array $phases): array {
 
     $groups = ['A' => [], 'B' => []];
     foreach ($all_rows as $r) {
-        $groups[$r['phase']][$r['team']] ??= ['gp'=>0,'w'=>0,'d'=>0,'l'=>0,'gf'=>0,'ga'=>0,'pts'=>0];
+        $groups[$r['phase']][$r['team']] ??= ['gp'=>0,'w'=>0,'otw'=>0,'otl'=>0,'d'=>0,'l'=>0,'gf'=>0,'ga'=>0,'pts'=>0];
     }
 
     $games = $pdo->query("
@@ -35,9 +35,9 @@ function computeLive(PDO $pdo, array $phases): array {
         } elseif ($s2 > $s1) {
             $groups[$ph][$t2]['w']++; $groups[$ph][$t1]['l']++; $groups[$ph][$t2]['pts'] += 3;
         } elseif ($isOT && (int)$g['final1'] > (int)$g['final2']) {
-            $groups[$ph][$t1]['w']++; $groups[$ph][$t2]['l']++; $groups[$ph][$t1]['pts'] += 2; $groups[$ph][$t2]['pts'] += 1;
+            $groups[$ph][$t1]['otw']++; $groups[$ph][$t2]['otl']++; $groups[$ph][$t1]['pts'] += 2; $groups[$ph][$t2]['pts'] += 1;
         } elseif ($isOT && (int)$g['final2'] > (int)$g['final1']) {
-            $groups[$ph][$t2]['w']++; $groups[$ph][$t1]['l']++; $groups[$ph][$t2]['pts'] += 2; $groups[$ph][$t1]['pts'] += 1;
+            $groups[$ph][$t2]['otw']++; $groups[$ph][$t1]['otl']++; $groups[$ph][$t2]['pts'] += 2; $groups[$ph][$t1]['pts'] += 1;
         } else {
             $groups[$ph][$t1]['d']++; $groups[$ph][$t2]['d']++;
             $groups[$ph][$t1]['pts']++; $groups[$ph][$t2]['pts']++;
@@ -55,6 +55,7 @@ function computeLive(PDO $pdo, array $phases): array {
         $rank = 1;
         foreach ($groups[$ph] as $code => $s) {
             $result[$ph][] = ['team'=>$code, 'rank'=>$rank++, 'gp'=>$s['gp'], 'w'=>$s['w'],
+                              'otw'=>$s['otw'], 'otl'=>$s['otl'],
                               'd'=>$s['d'], 'l'=>$s['l'], 'gf'=>$s['gf'], 'ga'=>$s['ga'],
                               'gd'=>$s['gf']-$s['ga'], 'pts'=>$s['pts'], 'finalized'=>false];
         }
@@ -74,6 +75,7 @@ foreach ($stored as $r) {
     $result[$ph][] = [
         'team' => $r['team'], 'rank' => (int)$r['rank'],
         'gp'   => (int)$r['gp'], 'w'  => (int)$r['w'],
+        'otw'  => (int)($r['otw'] ?? 0), 'otl' => (int)($r['otl'] ?? 0),
         'd'    => (int)$r['d'],  'l'  => (int)$r['l'],
         'gf'   => (int)$r['gf'], 'ga' => (int)$r['ga'],
         'gd'   => (int)$r['gf'] - (int)$r['ga'],
