@@ -10,7 +10,7 @@
 | Haky Jozef Haspra   |  haspra@impressive.sk               |          |                |
 | Juro Bulla    | juraj.bulla1@gmail.com                |          |                |
 | Rasťo Turanský    | turansky@yahoo.com                |          |                |
-| Denis Fronko    |Fronko@ajty.eu                 |          |                |
+| Denis Fronko    |Fronko@ajty.eu                 |  11.5.2026 19:17        |                |
 | Erik Macháč     | erikmachac@gmail.com                 |          |                |
 | Lukáš Mojto      | lukas.mojto@gmail.com                 |          |                |
 | Adrián Gabriel     | adrian@puky.sk                |          |                |
