@@ -17,7 +17,7 @@
 | Roderik Klein    |                 |          |                |
 | Kika Karkušová     |                 |          |                |
 | Maťo Štrajt     |                 |          |                |
-| Braäo Paríža     |                 |          |                |
+| Braňo Paríža     |                 |          |                |
 | Imi Loczi    | imrich.loczi@gmail.com                |          |                |
 | Ivan Ilavský    |                 |          |                |
 | Dušan Ilavský    |                 |          |                |
