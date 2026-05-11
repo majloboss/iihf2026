@@ -20,16 +20,16 @@
 - Prihlásenie (JWT) + registrácia cez pozývací link
 - Profil — avatar, meno, priezvisko, email, telefón, zmena hesla, zmazanie účtu
 - Profil — záložky: Profil / Skupiny / Notifikácie
-- 🟠 Profil — záložka Pozvánky: zoznam odoslaných pozvánok, nová pozvánka s výberom skupiny
+- Profil — záložka Pozvánky: zoznam odoslaných pozvánok, nová pozvánka s výberom skupiny
 - Skupiny — vytvorenie, vstup (pending→schválenie), odchod, zrušenie, filter Len moje/Všetky
 - Skupiny — rozbalenie → zoznam členov s avatarmi, klik na člena → detail
-- 🟠 Skupiny — pozvanie člena zo skupiny (autocomplete, dvojklik = všetci); žltý badge „Pozvánka" pri pozvanom hráčovi; Akceptovať v detaile skupiny
+- Skupiny — pozvanie člena zo skupiny (autocomplete, dvojklik = všetci); žltý badge „Pozvánka" pri pozvanom hráčovi; Akceptovať v detaile skupiny
 - Zápasy — zoznam 64 zápasov, vlajky, filter podľa fázy, grupovanie podľa dátumu
-- Zápasy — auto-scroll na dnešný deň, auto-výber aktívnej fázy (live → najbližší)
+- Zápasy — auto-výber aktívnej fázy pri načítaní (live → najbližší); stránka sa otvára od vrchu
 - Tipovanie — presné skóre, uzavretie 5 min pred zápasom, editácia; TBD zápasy netipovateľné
 - Tipy skupín — po začiatku zápasu viditeľné tipy všetkých členov skupín
 - Tabuľky poradia — per skupina, breakdown 3-2-1-0, tiebreak
-- Skupinové tabuľky A/B — live výpočet + finalizácia adminom
+- Skupinové tabuľky A/B — live výpočet + finalizácia adminom; stĺpce VP (OT výhra) a PP (OT prehra); horizontálny scroll na mobile
 - Dashboard — najbližšie zápasy (s tipom/bez), posledné výsledky, skrátené poradie
 - Dashboard — klik na nadchádzajúci zápas → modal na zadanie/zmenu tipu
 - Dashboard — klik na live/finished → modal s tipmi členov skupín
@@ -37,19 +37,21 @@
 - Notifikácie (nastavenia) — záložka v Profile; per typ: email/push/čas pred zápasom
 - Mobilná optimalizácia — bottom nav 1 riadok 5 položiek (Prehľad, Zápasy, Profil, Skupiny, Pravidlá), avatar v kruhu vyčnieva nad lištu, sidebar skrytý pod 900px
 - Admin mobilná optimalizácia — hamburger menu, tabuľky → karty (data-label), UserModal → bottom-sheet, GroupStandings → horizontálny scroll
-- PWA — manifest, offline SW, ikony 192×512 (červená=main, zelená=develop), auto-reload pri novej verzii (skipWaiting + controllerchange)
+- PWA — manifest, offline SW, ikony 192×512 (tmavá=main, zelená=develop), auto-reload pri novej verzii (skipWaiting + controllerchange); reload bloknutý na /register a hneď po registrácii
 - Zápasy UI — farebné filter tlačidlá (ALL/A/B=modrá, QF/SF=zelená, BR=bronzová, F=zlatá), TAB zobrazí tabuľku tímov, klik na tím nastaví filter
 - Prehľad UI — sekcie farebne odlíšené, live zápasy v "Najbližšie zápasy", blikajúci LIVE badge, klik na live = tipy skupín
 - Profil UI — záložky bez ikon (Profil/Skupiny/Pozvánky/Notif/Odhlásenie), rovnomerná šírka
 
 **Admin časť**
 - Správa používateľov — zoznam, aktivácia, rola, edit, heslo, zmazanie (vrátane FK cleanup)
-- Pozvánky (dříve Pozývacie linky):
+- Pozvánky:
   - Generovanie linku s voliteľným adresátom (meno / email)
   - Keď je adresát email — automaticky sa odošle pozývací email cez SMTP
-  - Email obsahuje registračný link + pravidlá tipovačky
+  - Email obsahuje registračný link, zoznam funkcií tipovačky + info o posielaní pozvánok kamarátom
   - Voliteľný výber skupiny (dropdown z adminových skupín) — nový člen sa po registrácii automaticky pridá
   - Badge "Mail odoslaný" a stĺpec "Skupina" v zozname pozvánok
+  - Tlačidlo „Kopírovať pozvánku" — skopíruje celý text pozvánky (nie len link) do schránky
+  - Invite link zostane funkčný ak registrácia nebola dokončená (is_active = FALSE)
 - Správa zápasov — dátum/čas, tímy (vrátane play-off 57–64), miesto, stav, skóre, FlashScore link
 - FlashScore prepojenie — každý zápas môže mať link na detail zápasu na flashscore.sk; admin zadáva manuálne; ikona zobrazená pri zápase na stránke Zápasy
 - Zadávanie výsledkov — dedikovaná obrazovka `/admin/results`, inline, kartový layout
@@ -77,6 +79,7 @@
 - `run_013.sql` — stĺpec `group_id` v invites (odporúčanie skupiny)
 - `run_014.sql` — stĺpec `flashscore_url` v games (FlashScore prepojenie)
 - `run_015` až `run_018` — flashscore URLs, PDF, mail log body, login_logs env
+- `run_019.sql` — stĺpce `otw` a `otl` v `group_standings` (OT výhra/prehra)
 
 ---
 
@@ -514,47 +517,32 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 - Logo: `sources/logo.png`
 - Vlajky tímov: `sources/team_flag_<kod>.png`
 
-## Ulohy 11.5.2026 — všetko ✅ v main/produkcii
+## Zmeny 11.5.2026 — všetko ✅ v main/produkcii
 
-**ULOHA 1 — PWA ikony**
-- ✅ Zelená ikona pre DEVELOP (icon-192-dev.png, icon-512-dev.png), červená pre MAIN
-- ✅ PWA auto-reload pri novej verzii (skipWaiting + clientsClaim + controllerchange)
+**PWA a navigácia**
+- ✅ Zelená ikona pre DEVELOP, tmavá (IIHF logo) pre MAIN
+- ✅ PWA auto-reload pri novej verzii; bloknutý na /register a hneď po registrácii
+- ✅ Po registrácii navigate na /dashboard (nie na root /)
 
-**ULOHA 2 — Optimalizácia menu**
-- ✅ Mobilné dolné menu: 1 riadok, 5 položiek, Profil má avatar v kruhu vyčnievajúcom nad lištu
-- ✅ Tabuľky tímov (TAB) presunuté do obrazovky Zápasy; klik na tím nastaví filter
-- ✅ Profil: záložka Odhlásenie pridaná, duplicitné tlačidlo odstránené
+**Mobilné UI**
+- ✅ Mobilné dolné menu: 1 riadok, 5 položiek, Profil má avatar v kruhu vyčnievajúcom nad lištu (+10% väčší)
+- ✅ Skupinové tabuľky A/B: VP/PP stĺpce, horizontálny scroll na mobile
+- ✅ Zápasy: stranka sa otvára od vrchu (bez auto-scroll na dnešný deň)
+- ✅ Tabuľky tímov (TAB) v Zápasoch; klik na tím nastaví filter
 
 **Kozmetické úpravy**
 - ✅ Zápasy: farebné filter tlačidlá, TAB správa ako menu položka (nie toggle)
 - ✅ Prehľad: live zápasy v sekcii Najbližšie, blikajúci LIVE badge, detekcia podľa času
-- ✅ Profil: záložky bez ikon, rovnomerná šírka
-- ✅ Skupiny (Standings): zrušený nadpis Tabuľky
+- ✅ Profil: záložky bez ikon, rovnomerná šírka, záložka Odhlásenie
 
-
-Pozývam ťa do IIHF 2026 Tipovačky – súťaže v tipovaní výsledkov Majstrovstiev sveta v ľadovom hokeji 2026 (15. – 31. mája 2026).
-
-Zaregistruj sa kliknutím na tento odkaz:
-https://dev_iihf2026.fellow.sk/register?token=4ba81abfeac27b642e41511c8a40d9b56c77a220575a788c
-
-Po registrácii si zvolíš prezývku a heslo. Potom môžeš:
-- tipovať presné výsledky všetkých 64 zápasov MS
-- súťažiť s kamarátmi v skupinách
-- sledovať priebežné poradie
-- posielať pozvánky kamarátom a rozširovať skupinu
-
-Po registrácii budeš automaticky pridaný do skupiny "MS 2026 Slovenskoooooo", kde budeš môcť súťažiť s milo a ostatnými členmi.
-
-Pred začatím odporúčame prečítať si pravidlá tipovačky:
-https://dev_iihf2026.fellow.sk/pravidla
-
-Link je jednorazový – platí pre jednu registráciu.
-
-Tešíme sa na teba!
-IIHF 2026 Tipovačka
+**Pozvánky**
+- ✅ Tlačidlo „Kopírovať pozvánku" — celý text do schránky
+- ✅ Email pozvánky: rozšírený text + info o posielaní pozvánok ďalej
+- ✅ Invite link zostane funkčný ak registrácia nebola dokončená
+- ✅ Migrácia run_019: VP/PP stĺpce v group_standings
 
 
 
 ---
 
-*Posledná aktualizácia: 2026-05-11 (v2.29)*
+*Posledná aktualizácia: 2026-05-11 (v2.36)*
