@@ -2,20 +2,20 @@
 
 | Meno | Email / kontakt | Odoslaná | Zaregistrovaný |
 |------|-----------------|----------|----------------|
-| Milo     |   krchniak@fellow.sk              |          |                |
+| Milo Krchniak    |   krchniak@fellow.sk              |          |                |
+| Adrika Krchniaková    | adriana.krchniakova@gmail.com                |          |                |
+| Oliver Krchniak      | oliver.krchniak@gmail.com                 |          |                |
+| Radko Krchniak     |                 |          |                |
+| Jerry Peter Herich    |                 |          |                |
+| Haky Jozef Haspra   |  haspra@impressive.sk               |          |                |
+| Juro Bulla    | juraj.bulla1@gmail.com                |          |                |
+| Rasťo Turanský    | turansky@yahoo.com                |          |                |
+| Denis Fronko    |Fronko@ajty.eu                 |          |                |
+| Erik Macháč     | erikmachac@gmail.com                 |          |                |
+| Lukáš Mojto      | lukas.mojto@gmail.com                 |          |                |
 |      |                 |          |                |
 |      |                 |          |                |
-| Juro     | juraj.bulla1@gmail.com                |          |                |
-
-| Rasťo     | turansky@yahoo.com                |          |                |
 |      |                 |          |                |
 |      |                 |          |                |
 |      |                 |          |                |
 |      |                 |          |                |
-|      |                 |          |                |
-|      |                 |          |                |
-| Denis     |Fronko@ajty.eu                 |          |                |
-|      |                 |          |                |
-|      |                 |          |                |
-
-turansky@yahoo.com
