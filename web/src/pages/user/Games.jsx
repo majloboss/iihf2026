@@ -206,7 +206,7 @@ export default function Games() {
                      : p === 'BRONZE'            ? styles.pBronzeOn
                      : p === 'GOLD'              ? styles.pGoldOn
                      : styles.pGroupOn;
-        return [...base, phase === p ? active : ''].join(' ');
+        return [...base, view === 'games' && phase === p ? active : ''].join(' ');
     };
 
     return (
