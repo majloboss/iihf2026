@@ -91,7 +91,6 @@ export default function Profile() {
                         <button className={tab === 'notif'      ? styles.tabActive : styles.tab} onClick={() => setTab('notif')}>Notif</button>
                         <button className={tab === 'odhlasenie' ? styles.tabActive : styles.tab} onClick={() => setTab('odhlasenie')}>Odhlásenie</button>
                     </div>
-                    <button className={`${styles.btnLogout} ${styles.hideOnMobile}`} onClick={() => { signOut(); navigate('/login'); }}>Odhlásiť</button>
                 </div>
 
                 {tab === 'skupiny'    && <div className={styles.tabContent}><Groups /></div>}
