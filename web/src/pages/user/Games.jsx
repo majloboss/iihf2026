@@ -133,7 +133,6 @@ export default function Games() {
     const [selectedDay, setSelectedDay]   = useState(null);
     const [selectedTeam, setSelectedTeam] = useState(null);
     const [view, setView]                 = useState('games');
-    const scrollRef    = useRef(null);
     const calContainer = useRef(null);
     const todayCalBtn  = useRef(null);
 
@@ -150,13 +149,6 @@ export default function Games() {
             })
             .catch(e => { setError(e.message || 'Chyba API'); setLoading(false); });
     }, []);
-
-    // Auto-scroll games list to today
-    useEffect(() => {
-        if (!games.length || !scrollRef.current) return;
-        const t = setTimeout(() => scrollRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150);
-        return () => clearTimeout(t);
-    }, [games]);
 
     // Auto-scroll calendar to today
     useEffect(() => {
@@ -190,12 +182,6 @@ export default function Games() {
 
     if (loading) return <div className={styles.wrap}><p>Načítavam…</p></div>;
     if (error)   return <div className={styles.wrap}><p style={{color:'red'}}>Chyba: {error}</p></div>;
-
-    const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
-    const targetDate = Object.keys(byDate).find(dk => {
-        const d = new Date(byDate[dk][0].starts_at); d.setHours(0, 0, 0, 0);
-        return d >= todayStart;
-    });
 
     const phaseBtnClass = (p) => {
         const base = p === 'QF' || p === 'SF' ? [styles.pBtn, styles.pPlayoff]
@@ -280,7 +266,7 @@ export default function Games() {
 
                     {/* Zápasy */}
                     {Object.entries(byDate).map(([date, dayGames]) => (
-                        <div key={date} className={styles.dayGroup} ref={date === targetDate ? scrollRef : null}>
+                        <div key={date} className={styles.dayGroup}>
                             <div className={styles.dayHeader}>{date}</div>
                             {dayGames.map(g => {
                                 const now = Date.now();
