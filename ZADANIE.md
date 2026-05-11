@@ -513,22 +513,15 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 
 ## Nove ulohy 11.5.2026
 ## ULOHA 1
-- favicon icona pre web ma dve farby: DEVELOP zelena, MAIN cervena
-- pre mobilnu verziu su obidve cervene
-- urob aj pre mobilnu verziu zelenu ikonu pre DEVELOP
+- 🟠 favicon icona pre web ma dve farby: DEVELOP zelena, MAIN cervena
+- 🟠 PWA mobilná ikona: zelená pre DEVELOP (icon-192-dev.png, icon-512-dev.png), červená pre MAIN
+- 🟠 vite.config.js: VITE_API_URL obsahuje dev_ → zelené ikony, theme_color=#28a745
 
 ## ULOHA 2
-- optimalizacia menu na 5 poloziek pre rolu USER
-- vyvoj je potrebne robit v tomto poradi
-- sucasne menu: Prehlad, Zapasy, Tabulky, Skupiny, Profil, Pravidla, Odhlasit
-- krok 1: obrazovku Tabulky presunut do obrazovky Zapasy
---- nadpis Zapasy centrovat na stred obrazovky
---- tlacitka Vsetky, Skupina A .. Finale su v doch riadkoc, na koniec duheho riadka vycentrovane napravo pribudne tlacitko Tabulky, po jeho kliknuti sa zobrazi sucasna obrazovka Tabulky
-- krok 2: upravy v obrazovke Profil
----  obrazovka ma tieto podmenu hore: Profil, Skupiny, Pozvanky, Notifikacie
---- do  tejto obrazovky pribudne este Odhlasenie   
-- krok 3: optimalizacia mobilnej verzie
---- v dolnommenu bude len 5 poloziek menu: Prehľad, Z8pasy, Profil, Skupiny, Pravidlá
+- 🟠 optimalizacia menu na 5 poloziek pre rolu USER
+- krok 1: 🟠 obrazovku Tabulky presunutá do obrazovky Zapasy (toggle tlačidlo vpravo v topBar, nadpis Zápasy vycentrovaný)
+- krok 2: 🟠 Profil — pridaná záložka Odhlásenie (po Notifikácie); Odhlásiť tlačidlo skryté na mobile
+- krok 3: 🟠 mobilné dolné menu zjednodušené na 1 riadok, 5 položiek: Prehľad, Zápasy, Profil, Skupiny, Pravidlá
 
 
 
@@ -537,4 +530,4 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 
 ---
 
-*Posledná aktualizácia: 2026-05-10 (v2.14)*
+*Posledná aktualizácia: 2026-05-11 (v2.15)*

@@ -40,6 +40,7 @@
     flex-shrink: 0;
 }
 .btnLogout:hover { background: #fdecea; color: #c0392b; border-color: #f5c6cb; }
+@media (max-width: 900px) { .hideOnMobile { display: none !important; } }
 
 .tab, .tabActive {
     padding: 14px 20px;

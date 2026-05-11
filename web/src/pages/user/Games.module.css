@@ -6,7 +6,29 @@
     gap: 12px;
     margin-bottom: 20px;
 }
-.topBar h2 { color: #1a3a6b; font-size: 1.3rem; margin: 0; }
+.topBarTitle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin-bottom: 4px;
+}
+.topBarTitle h2 { color: #1a3a6b; font-size: 1.3rem; margin: 0; flex: 1; text-align: center; }
+
+.btnTabulky, .btnTabulkyActive {
+    position: absolute;
+    right: 0;
+    padding: 5px 13px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    border: 1px solid #dee2e6;
+    transition: background 0.15s, border-color 0.15s;
+    white-space: nowrap;
+}
+.btnTabulky { background: #e9ecef; color: #555; }
+.btnTabulky:hover { background: #dee2e6; }
+.btnTabulkyActive { background: #28a745; color: #fff; border-color: #28a745; }
 
 .filters { display: flex; flex-wrap: wrap; gap: 6px; }
 
