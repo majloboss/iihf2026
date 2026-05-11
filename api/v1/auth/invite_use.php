@@ -19,7 +19,8 @@ $invite = $stmt->fetch();
 if (!$invite) json_error('Neplatný pozývací link', 404);
 
 // Link bol otvorený skôr ale registrácia nebola dokončená — umožni znovu
-if ($invite['used_at'] && $invite['user_id'] && !$invite['is_active']) {
+$isActive = ($invite['is_active'] === 't' || $invite['is_active'] === true || $invite['is_active'] === 1 || $invite['is_active'] === '1');
+if ($invite['used_at'] && $invite['user_id'] && !$isActive) {
     $tempToken = jwt_create([
         'user_id'  => (int)$invite['user_id'],
         'role'     => 'user',
