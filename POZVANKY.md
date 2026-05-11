@@ -13,9 +13,16 @@
 | Denis Fronko    |Fronko@ajty.eu                 |          |                |
 | Erik Macháč     | erikmachac@gmail.com                 |          |                |
 | Lukáš Mojto      | lukas.mojto@gmail.com                 |          |                |
-|      |                 |          |                |
-|      |                 |          |                |
-|      |                 |          |                |
-|      |                 |          |                |
-|      |                 |          |                |
-|      |                 |          |                |
+| Adrián Gabriel     | adrian@puky.sk                |          |                |
+| Roderik Klein    |                 |          |                |
+| Kika Karkušová     |                 |          |                |
+| Maťo Štrajt     |                 |          |                |
+| Braäo Paríža     |                 |          |                |
+| Imi Loczi    | imrich.loczi@gmail.com                |          |                |
+| Ivan Ilavský    |                 |          |                |
+| Dušan Ilavský    |                 |          |                |
+|     |                 |          |                |
+|     |                 |          |                |
+|     |                 |          |                |
+|     |                 |          |                |
+
