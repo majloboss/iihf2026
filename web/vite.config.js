@@ -9,6 +9,10 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      workbox: {
+        skipWaiting: true,
+        clientsClaim: true,
+      },
       manifest: {
         name: isDev ? 'IIHF 2026 DEV' : 'IIHF 2026 Tipovačka',
         short_name: isDev ? 'IIHF DEV' : 'IIHF2026',
