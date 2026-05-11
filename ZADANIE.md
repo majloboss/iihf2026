@@ -35,9 +35,12 @@
 - Dashboard — klik na live/finished → modal s tipmi členov skupín
 - Pravidlá — stránka s bodovacou tabuľkou a príkladmi
 - Notifikácie (nastavenia) — záložka v Profile; per typ: email/push/čas pred zápasom
-- Mobilná optimalizácia — bottom nav 2 riadky (3+3), sidebar skrytý pod 900px, Odhlásiť tlačidlo viditeľné na mobile
+- Mobilná optimalizácia — bottom nav 1 riadok 5 položiek (Prehľad, Zápasy, Profil, Skupiny, Pravidlá), avatar v kruhu vyčnieva nad lištu, sidebar skrytý pod 900px
 - Admin mobilná optimalizácia — hamburger menu, tabuľky → karty (data-label), UserModal → bottom-sheet, GroupStandings → horizontálny scroll
-- PWA — manifest, offline SW, favicon, správne veľkosti ikon (192×192, 512×512)
+- PWA — manifest, offline SW, ikony 192×512 (červená=main, zelená=develop), auto-reload pri novej verzii (skipWaiting + controllerchange)
+- Zápasy UI — farebné filter tlačidlá (ALL/A/B=modrá, QF/SF=zelená, BR=bronzová, F=zlatá), TAB zobrazí tabuľku tímov, klik na tím nastaví filter
+- Prehľad UI — sekcie farebne odlíšené, live zápasy v "Najbližšie zápasy", blikajúci LIVE badge, klik na live = tipy skupín
+- Profil UI — záložky bez ikon (Profil/Skupiny/Pozvánky/Notif/Odhlásenie), rovnomerná šírka
 
 **Admin časť**
 - Správa používateľov — zoznam, aktivácia, rola, edit, heslo, zmazanie (vrátane FK cleanup)
@@ -69,11 +72,11 @@
 - Admin — nastavenia bodovacieho systému (úprava scoring_config)
 - Android aplikácia (Kotlin)
 
-### ⚠️ TREBA SPUSTIŤ (DB migrácie)
-- V Admin → Nástroje → kliknúť **"Spustit migracie"** — spustí run_012 + run_013 + run_014
-  - `run_012.sql` — stĺpec `email_sent` v invites, tabuľka `mail_log`
-  - `run_013.sql` — stĺpec `group_id` v invites (odporúčanie skupiny)
-  - `run_014.sql` — stĺpec `flashscore_url` v games (FlashScore prepojenie)
+### ✅ DB migrácie — všetky spustené na produkcii
+- `run_012.sql` — stĺpec `email_sent` v invites, tabuľka `mail_log`
+- `run_013.sql` — stĺpec `group_id` v invites (odporúčanie skupiny)
+- `run_014.sql` — stĺpec `flashscore_url` v games (FlashScore prepojenie)
+- `run_015` až `run_018` — flashscore URLs, PDF, mail log body, login_logs env
 
 ---
 
@@ -511,17 +514,22 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 - Logo: `sources/logo.png`
 - Vlajky tímov: `sources/team_flag_<kod>.png`
 
-## Nove ulohy 11.5.2026
-## ULOHA 1
-- 🟠 favicon icona pre web ma dve farby: DEVELOP zelena, MAIN cervena
-- 🟠 PWA mobilná ikona: zelená pre DEVELOP (icon-192-dev.png, icon-512-dev.png), červená pre MAIN
-- 🟠 vite.config.js: VITE_API_URL obsahuje dev_ → zelené ikony, theme_color=#28a745
+## Ulohy 11.5.2026 — všetko ✅ v main/produkcii
 
-## ULOHA 2
-- 🟠 optimalizacia menu na 5 poloziek pre rolu USER
-- krok 1: 🟠 obrazovku Tabulky presunutá do obrazovky Zapasy (toggle tlačidlo vpravo v topBar, nadpis Zápasy vycentrovaný)
-- krok 2: 🟠 Profil — pridaná záložka Odhlásenie (po Notifikácie); Odhlásiť tlačidlo skryté na mobile
-- krok 3: 🟠 mobilné dolné menu zjednodušené na 1 riadok, 5 položiek: Prehľad, Zápasy, Profil, Skupiny, Pravidlá
+**ULOHA 1 — PWA ikony**
+- ✅ Zelená ikona pre DEVELOP (icon-192-dev.png, icon-512-dev.png), červená pre MAIN
+- ✅ PWA auto-reload pri novej verzii (skipWaiting + clientsClaim + controllerchange)
+
+**ULOHA 2 — Optimalizácia menu**
+- ✅ Mobilné dolné menu: 1 riadok, 5 položiek, Profil má avatar v kruhu vyčnievajúcom nad lištu
+- ✅ Tabuľky tímov (TAB) presunuté do obrazovky Zápasy; klik na tím nastaví filter
+- ✅ Profil: záložka Odhlásenie pridaná, duplicitné tlačidlo odstránené
+
+**Kozmetické úpravy**
+- ✅ Zápasy: farebné filter tlačidlá, TAB správa ako menu položka (nie toggle)
+- ✅ Prehľad: live zápasy v sekcii Najbližšie, blikajúci LIVE badge, detekcia podľa času
+- ✅ Profil: záložky bez ikon, rovnomerná šírka
+- ✅ Skupiny (Standings): zrušený nadpis Tabuľky
 
 
 
@@ -530,4 +538,4 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 
 ---
 
-*Posledná aktualizácia: 2026-05-11 (v2.15)*
+*Posledná aktualizácia: 2026-05-11 (v2.29)*
