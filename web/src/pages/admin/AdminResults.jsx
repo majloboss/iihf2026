@@ -130,7 +130,15 @@ function ResultCard({ game: initGame }) {
                 <span className={styles.cardMeta}>{PHASE_LABEL[game.phase] || game.phase} • Zápas {game.game_number}</span>
                 <span className={styles.cardMeta}>{formatDateTime(game.starts_at)}</span>
             </div>
-            <div className={styles.cardVenue}>{game.venue}</div>
+            <div className={styles.cardVenue}>
+                {game.venue}
+                {game.flashscore_url && (
+                    <a href={game.flashscore_url} target="_blank" rel="noopener noreferrer"
+                        className={gStyles.fsLink} title="Sledovať na FlashScore">
+                        <img src="/flashscore.png" alt="FlashScore" className={gStyles.fsIcon} />
+                    </a>
+                )}
+            </div>
 
             {/* Zápas */}
             <div className={gStyles.matchRow}>
