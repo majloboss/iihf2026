@@ -13,7 +13,7 @@
 | Denis Fronko    |Fronko@ajty.eu                 |  11.5.2026        | 11.5.2026               |
 | Erik Macháč     | erikmachac@gmail.com                 | 11.5.2026         |                |
 | Lukáš Mojto      | lukas.mojto@gmail.com                 | 11.5.2026         | 11.5.2026                |
-| Adrián Gabriel     | adrian@puky.sk                | 11.5.2026         |                |
+| Adrián Gabriel     | adrian@puky.sk                | 11.5.2026         | 11.5.2026               |
 | Imi Loczi    | imrich.loczi@gmail.com                | 11.5.2026         |                |
 | Roderik Klein    |                 |          |                |
 | Maťo Štrajt     |                 |          |                |
