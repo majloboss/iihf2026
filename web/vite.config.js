@@ -12,6 +12,7 @@ export default defineConfig({
       workbox: {
         skipWaiting: true,
         clientsClaim: true,
+        cacheId: 'iihf2026-v2',
       },
       manifest: {
         name: isDev ? 'IIHF 2026 DEV' : 'IIHF 2026 Tipovačka',

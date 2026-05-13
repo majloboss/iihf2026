@@ -275,8 +275,13 @@ export default function Dashboard() {
     const [groupTipsGame, setGroupTipsGame] = useState(null);
 
     useEffect(() => {
-        Promise.all([getGames(), apiFetch('v1/standings'), apiFetch('v1/announcement')])
+        Promise.all([
+            getGames(),
+            apiFetch('v1/standings'),
+            apiFetch('v1/announcement').catch(() => null),
+        ])
             .then(([g, s, a]) => { setGames(g); setStandings(s); setAnnouncement(a); })
+            .catch(() => {})
             .finally(() => setLoading(false));
     }, []);
 
