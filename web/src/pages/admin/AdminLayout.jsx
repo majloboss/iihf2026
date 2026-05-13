@@ -32,10 +32,11 @@ export default function AdminLayout() {
                 </div>
                 <nav>
                     <div className={styles.navSection}>Správa</div>
-                    <NavLink to="/admin/users"      className={({ isActive }) => isActive ? styles.active : ''} onClick={close}>👤 Používatelia</NavLink>
-                    <NavLink to="/admin/invites"    className={({ isActive }) => isActive ? styles.active : ''} onClick={close}>🔗 Pozvánky</NavLink>
-                    <NavLink to="/admin/login-logs" className={({ isActive }) => isActive ? styles.active : ''} onClick={close}>📋 Prihlásenia</NavLink>
-                    <NavLink to="/admin/mail-log"   className={({ isActive }) => isActive ? styles.active : ''} onClick={close}>📧 Odoslané maily</NavLink>
+                    <NavLink to="/admin/users"         className={({ isActive }) => isActive ? styles.active : ''} onClick={close}>👤 Používatelia</NavLink>
+                    <NavLink to="/admin/invites"       className={({ isActive }) => isActive ? styles.active : ''} onClick={close}>🔗 Pozvánky</NavLink>
+                    <NavLink to="/admin/announcements" className={({ isActive }) => isActive ? styles.active : ''} onClick={close}>📢 Oznamy</NavLink>
+                    <NavLink to="/admin/login-logs"    className={({ isActive }) => isActive ? styles.active : ''} onClick={close}>📋 Prihlásenia</NavLink>
+                    <NavLink to="/admin/mail-log"      className={({ isActive }) => isActive ? styles.active : ''} onClick={close}>📧 Odoslané maily</NavLink>
 
                     <div className={styles.navSection}>Súťaž</div>
                     <NavLink to="/admin/games"           className={({ isActive }) => isActive ? styles.active : ''} onClick={close}>🏒 Zápasy</NavLink>

@@ -33,3 +33,7 @@ export const resetGroupStandings = (phase) => apiFetch(
     phase ? `v1/admin/group-standings/${phase}` : 'v1/admin/group-standings',
     { method: 'DELETE' }
 );
+export const getAnnouncements  = () => apiFetch('v1/admin/announcements');
+export const createAnnouncement = (body) => apiFetch('v1/admin/announcements', {
+    method: 'POST', body: JSON.stringify({ body })
+});

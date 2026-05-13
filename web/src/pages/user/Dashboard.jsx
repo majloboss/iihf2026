@@ -267,15 +267,16 @@ function StandingsCard({ group, currentUserId }) {
 /* ── Dashboard ── */
 export default function Dashboard() {
     const { user } = useAuth();
-    const [games, setGames]         = useState([]);
-    const [standings, setStandings] = useState([]);
-    const [loading, setLoading]     = useState(true);
-    const [tipGame, setTipGame]         = useState(null);
+    const [games, setGames]             = useState([]);
+    const [standings, setStandings]     = useState([]);
+    const [announcement, setAnnouncement] = useState(undefined);
+    const [loading, setLoading]         = useState(true);
+    const [tipGame, setTipGame]             = useState(null);
     const [groupTipsGame, setGroupTipsGame] = useState(null);
 
     useEffect(() => {
-        Promise.all([getGames(), apiFetch('v1/standings')])
-            .then(([g, s]) => { setGames(g); setStandings(s); })
+        Promise.all([getGames(), apiFetch('v1/standings'), apiFetch('v1/announcement')])
+            .then(([g, s, a]) => { setGames(g); setStandings(s); setAnnouncement(a); })
             .finally(() => setLoading(false));
     }, []);
 
@@ -342,6 +343,18 @@ export default function Dashboard() {
                         ? <p className={styles.empty}>Nie si v žiadnej skupine</p>
                         : standings.map(g => <StandingsCard key={g.id} group={g} currentUserId={user?.id} />)
                     }
+
+                    {announcement && (
+                        <div className={styles.announcement}>
+                            <div className={styles.announcementHead}>
+                                <span className={styles.announcementLabel}>📢 Správa organizátora</span>
+                                <span className={styles.announcementDate}>
+                                    {new Date(announcement.created_at).toLocaleDateString('sk-SK', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                                </span>
+                            </div>
+                            <div className={styles.announcementBody}>{announcement.body}</div>
+                        </div>
+                    )}
                 </section>
             </div>
         </div>
