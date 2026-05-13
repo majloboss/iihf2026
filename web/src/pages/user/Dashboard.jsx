@@ -304,7 +304,7 @@ export default function Dashboard() {
             {announcement && (
                 <div className={styles.announcement}>
                     <div className={styles.announcementHead}>
-                        <span className={styles.announcementLabel}>📢 Správa organizátora</span>
+                        <span className={styles.announcementLabel}>Správa organizátora</span>
                         <span className={styles.announcementDate}>
                             {new Date(announcement.created_at).toLocaleDateString('sk-SK', { day: '2-digit', month: '2-digit', year: 'numeric' })}
                         </span>
