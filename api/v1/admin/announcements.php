@@ -20,6 +20,8 @@ if ($method === 'POST') {
     $text = trim($body['body'] ?? '');
     if ($text === '') json_err('Oznam nesmie byť prázdny', 400);
 
+    $pdo->exec("UPDATE admin.announcements SET is_active = FALSE WHERE is_active = TRUE");
+
     $stmt = $pdo->prepare(
         "INSERT INTO admin.announcements (body, created_by, is_active) VALUES (?, ?, TRUE) RETURNING id, created_at"
     );

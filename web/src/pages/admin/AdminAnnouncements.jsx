@@ -18,12 +18,11 @@ export default function AdminAnnouncements() {
     const [err,        setErr]        = useState('');
     const [ok,         setOk]         = useState('');
 
+    const normalize = a => ({ ...a, is_active: a.is_active === true || a.is_active === 't' || a.is_active === '1' || a.is_active === 1 });
+
     useEffect(() => {
         getAnnouncements()
-            .then(data => setList(data.map(a => ({
-                ...a,
-                is_active: a.is_active === true || a.is_active === 't' || a.is_active === '1' || a.is_active === 1,
-            }))))
+            .then(data => setList(data.map(normalize)))
             .catch(e => setErr(e.message))
             .finally(() => setLoading(false));
     }, []);
@@ -33,7 +32,10 @@ export default function AdminAnnouncements() {
         setSaving(true); setErr(''); setOk('');
         try {
             const r = await createAnnouncement(text.trim());
-            setList(prev => [{ ...r, body: text.trim(), is_active: true }, ...prev]);
+            setList(prev => [
+                { ...r, body: text.trim(), is_active: true },
+                ...prev.map(a => ({ ...a, is_active: false })),
+            ]);
             setText('');
             setOk('Oznam bol pridaný.');
         } catch (e) { setErr(e.message); }
