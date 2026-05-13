@@ -3,14 +3,22 @@ import { updateGame } from '../../api/admin';
 import styles from './UserModal.module.css';
 
 const TEAMS = [
-    { code: 'FIN', name: 'Finland' },    { code: 'GER', name: 'Germany' },
-    { code: 'USA', name: 'United States' }, { code: 'SUI', name: 'Switzerland' },
-    { code: 'GBR', name: 'Great Britain' }, { code: 'AUT', name: 'Austria' },
-    { code: 'HUN', name: 'Hungary' },    { code: 'LAT', name: 'Latvia' },
-    { code: 'CAN', name: 'Canada' },     { code: 'SWE', name: 'Sweden' },
-    { code: 'CZE', name: 'Czech Republic' }, { code: 'DEN', name: 'Denmark' },
-    { code: 'SVK', name: 'Slovakia' },   { code: 'NOR', name: 'Norway' },
-    { code: 'ITA', name: 'Italy' },      { code: 'SLO', name: 'Slovenia' },
+    { code: 'AUT', name: 'Austria' },
+    { code: 'CAN', name: 'Canada' },
+    { code: 'CZE', name: 'Czech Republic' },
+    { code: 'DEN', name: 'Denmark' },
+    { code: 'FIN', name: 'Finland' },
+    { code: 'GER', name: 'Germany' },
+    { code: 'GBR', name: 'Great Britain' },
+    { code: 'HUN', name: 'Hungary' },
+    { code: 'ITA', name: 'Italy' },
+    { code: 'LAT', name: 'Latvia' },
+    { code: 'NOR', name: 'Norway' },
+    { code: 'SVK', name: 'Slovakia' },
+    { code: 'SLO', name: 'Slovenia' },
+    { code: 'SWE', name: 'Sweden' },
+    { code: 'SUI', name: 'Switzerland' },
+    { code: 'USA', name: 'United States' },
 ];
 
 const SELECT_STYLE = { padding:'8px 10px', border:'1px solid #ddd', borderRadius:'6px', fontSize:'0.9rem' };

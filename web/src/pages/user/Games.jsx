@@ -141,11 +141,12 @@ export default function Games() {
             .then(data => {
                 setGames(data);
                 setLoading(false);
+                const PLAYOFF = ['QF', 'SF', 'BRONZE', 'GOLD'];
                 const live = data.find(g => g.status === 'live');
-                if (live) { setPhase(live.phase); return; }
+                if (live && PLAYOFF.includes(live.phase)) { setPhase(live.phase); return; }
                 const now = Date.now();
                 const next = data.find(g => g.status === 'scheduled' && new Date(g.starts_at).getTime() > now);
-                if (next) setPhase(next.phase);
+                if (next && PLAYOFF.includes(next.phase)) setPhase(next.phase);
             })
             .catch(e => { setError(e.message || 'Chyba API'); setLoading(false); });
     }, []);
