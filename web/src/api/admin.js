@@ -37,3 +37,6 @@ export const getAnnouncements  = () => apiFetch('v1/admin/announcements');
 export const createAnnouncement = (body) => apiFetch('v1/admin/announcements', {
     method: 'POST', body: JSON.stringify({ body })
 });
+export const deactivateAnnouncement = (id) => apiFetch('v1/admin/announcements', {
+    method: 'PATCH', body: JSON.stringify({ id })
+});

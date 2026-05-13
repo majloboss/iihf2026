@@ -362,7 +362,7 @@
     border-left: 3px solid #e6b800;
     border-radius: 8px;
     padding: 12px 14px;
-    margin-top: 4px;
+    margin-bottom: 16px;
 }
 .announcementHead {
     display: flex;

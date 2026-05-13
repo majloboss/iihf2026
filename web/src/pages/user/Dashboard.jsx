@@ -301,6 +301,18 @@ export default function Dashboard() {
             {tipGame      && <TipModal      game={tipGame}      onClose={handleClose} onSaved={handleTipSaved} />}
             {groupTipsGame && <GameTipsModal game={groupTipsGame} onClose={handleClose} />}
 
+            {announcement && (
+                <div className={styles.announcement}>
+                    <div className={styles.announcementHead}>
+                        <span className={styles.announcementLabel}>📢 Správa organizátora</span>
+                        <span className={styles.announcementDate}>
+                            {new Date(announcement.created_at).toLocaleDateString('sk-SK', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                        </span>
+                    </div>
+                    <div className={styles.announcementBody}>{announcement.body}</div>
+                </div>
+            )}
+
             <div className={styles.grid}>
                 <section className={styles.section}>
                     {upcoming.length > 0 && (
@@ -343,18 +355,6 @@ export default function Dashboard() {
                         ? <p className={styles.empty}>Nie si v žiadnej skupine</p>
                         : standings.map(g => <StandingsCard key={g.id} group={g} currentUserId={user?.id} />)
                     }
-
-                    {announcement && (
-                        <div className={styles.announcement}>
-                            <div className={styles.announcementHead}>
-                                <span className={styles.announcementLabel}>📢 Správa organizátora</span>
-                                <span className={styles.announcementDate}>
-                                    {new Date(announcement.created_at).toLocaleDateString('sk-SK', { day: '2-digit', month: '2-digit', year: 'numeric' })}
-                                </span>
-                            </div>
-                            <div className={styles.announcementBody}>{announcement.body}</div>
-                        </div>
-                    )}
                 </section>
             </div>
         </div>
