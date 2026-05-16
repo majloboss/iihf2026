@@ -240,8 +240,6 @@ export default function Pravidla() {
 
     return (
         <div className={styles.wrap}>
-            <h2 className={styles.title}>Pravidlá tipovačky</h2>
-
             <div className={styles.tabs}>
                 {TABS.map(t => (
                     <button
