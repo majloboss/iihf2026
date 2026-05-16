@@ -9,7 +9,7 @@
 .filters {
     display: flex;
     flex-wrap: nowrap;
-    gap: 6px;
+    gap: 4px;
     overflow-x: auto;
     padding-bottom: 2px;
     scrollbar-width: none;
@@ -31,15 +31,31 @@
 .btnTabulkyActive { background: #28a745; color: #fff; border-color: #28a745; }
 .btnTabulkyInline { margin-left: auto; flex-shrink: 0; }
 
+/* Untipped toggle button */
+.untippedBtn, .untippedBtnOn {
+    padding: 5px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.88rem;
+    font-weight: 700;
+    border: 1px solid;
+    transition: background 0.12s, color 0.12s;
+    flex-shrink: 0;
+}
+.untippedBtn  { background: #fde8e8; color: #e57373; border-color: #f5c6c6; }
+.untippedBtnOn { background: #c0392b; color: #fff; border-color: #c0392b; }
+
 /* Phase filter buttons */
 .pBtn {
-    padding: 5px 10px;
+    padding: 5px 0;
     border-radius: 6px;
     cursor: pointer;
     font-size: 0.82rem;
     font-weight: 600;
     border: 1px solid;
     transition: background 0.12s, color 0.12s;
+    min-width: 36px;
+    text-align: center;
 }
 .pGroup   { background: #dbeafe; color: #1e40af; border-color: #bfdbfe; }
 .pPlayoff { background: #dcfce7; color: #15803d; border-color: #bbf7d0; }
@@ -273,7 +289,8 @@
     width: 100%;
     transition: border-color 0.12s, background 0.12s;
 }
-.flagBtn:hover { border-color: #1a3a6b; }
+.flagBtn:focus, .flagBtn:focus-visible { outline: none; }
+@media (hover: hover) { .flagBtn:hover { border-color: #1a3a6b; } }
 .flagBtnActive { border-color: #1a3a6b; background: #e8eef8; }
 .flagImg { width: 34px; height: 22px; object-fit: cover; border-radius: 2px; display: block; }
 .flagCode { font-size: 0.65rem; font-weight: 700; color: #555; letter-spacing: 0.03em; }

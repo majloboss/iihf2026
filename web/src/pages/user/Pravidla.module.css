@@ -127,3 +127,51 @@
     margin-bottom: 10px !important;
     font-size: 0.88rem !important;
 }
+
+/* ── Tabs ── */
+.tabs {
+    display: flex;
+    border-bottom: 2px solid #f0f0f0;
+    margin-bottom: 18px;
+}
+
+.tab, .tabActive {
+    flex: 1;
+    padding: 13px 4px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #aaa;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: color 0.15s;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.tab:hover { color: #555; }
+.tabActive  { color: #1a3a6b; border-bottom-color: #1a3a6b; }
+
+/* ── Guide list ── */
+.guideList {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.guideItem {
+    font-size: 0.88rem;
+    color: #444;
+    line-height: 1.5;
+    padding-left: 12px;
+    border-left: 3px solid #dbeafe;
+}
+
+.guideLabel {
+    font-weight: 700;
+    color: #1a3a6b;
+    display: inline;
+}
