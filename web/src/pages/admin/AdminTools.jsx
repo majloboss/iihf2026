@@ -24,8 +24,14 @@ export default function AdminTools() {
     const [testMailTo,  setTestMailTo]  = useState('');
     const [testMailRes, setTestMailRes] = useState('');
     const [testMailing, setTestMailing] = useState(false);
-    const [pushDiag,    setPushDiag]    = useState(null);
-    const [pushLoading, setPushLoading] = useState(false);
+    const [pushDiag,      setPushDiag]      = useState(null);
+    const [pushLoading,   setPushLoading]   = useState(false);
+    const [vapidLoading,  setVapidLoading]  = useState(false);
+    const [vapidMsg,      setVapidMsg]      = useState('');
+    const [subLoading,    setSubLoading]    = useState(false);
+    const [subMsg,        setSubMsg]        = useState('');
+    const [sendLoading,   setSendLoading]   = useState(false);
+    const [sendMsg,       setSendMsg]       = useState('');
 
     const run = async (action) => {
         setConfirm(null);
@@ -79,7 +85,65 @@ export default function AdminTools() {
         } catch (e) {
             setPushDiag({ browser, error: e.message });
         } finally {
-            setPushLoading(false); }
+            setPushLoading(false);
+        }
+    };
+
+    const generateVapid = async () => {
+        setVapidLoading(true); setVapidMsg('');
+        try {
+            const r = await apiFetch('v1/admin/generate-vapid', { method: 'POST' });
+            setVapidMsg('✓ VAPID kľúče vygenerované. Public key: ' + r.public_key.slice(0, 20) + '…');
+            // refresh diag
+            setPushDiag(null);
+        } catch (e) { setVapidMsg('✗ ' + e.message); }
+        finally { setVapidLoading(false); }
+    };
+
+    const subscribeBrowser = async () => {
+        setSubLoading(true); setSubMsg('');
+        try {
+            if (!('PushManager' in window)) throw new Error('Tento browser nepodporuje Web Push');
+            const perm = await Notification.requestPermission();
+            if (perm !== 'granted') throw new Error('Notifikácie zamietnuté (' + perm + ')');
+
+            const cfgRes = await fetch((import.meta.env.VITE_API_URL ?? '/api') + '/v1/push-config');
+            const cfg = await cfgRes.json();
+            if (!cfg.ok) throw new Error('VAPID public key nie je na serveri');
+
+            const vapidKey = cfg.data.public_key;
+            const keyBytes = Uint8Array.from(atob(vapidKey.replace(/-/g,'+').replace(/_/g,'/')), c => c.charCodeAt(0));
+
+            const reg = await navigator.serviceWorker.ready;
+            const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyBytes });
+
+            await apiFetch('v1/push-subscribe', { method: 'POST', body: JSON.stringify({ subscription: sub.toJSON() }) });
+            setSubMsg('✓ Browser prihlásený na push notifikácie.');
+            setPushDiag(null);
+        } catch (e) { setSubMsg('✗ ' + e.message); }
+        finally { setSubLoading(false); }
+    };
+
+    const unsubscribeBrowser = async () => {
+        setSubLoading(true); setSubMsg('');
+        try {
+            const reg = await navigator.serviceWorker.ready;
+            const sub = await reg.pushManager.getSubscription();
+            if (sub) await sub.unsubscribe();
+            await apiFetch('v1/push-subscribe', { method: 'DELETE' });
+            setSubMsg('✓ Subscription zrušená.');
+            setPushDiag(null);
+        } catch (e) { setSubMsg('✗ ' + e.message); }
+        finally { setSubLoading(false); }
+    };
+
+    const sendTestPush = async () => {
+        setSendLoading(true); setSendMsg('');
+        try {
+            await apiFetch('v1/admin/send-test-push', { method: 'POST' });
+            setSendMsg('✓ Push odoslaný — mal by sa zobraziť do pár sekúnd.');
+        } catch (e) { setSendMsg('✗ ' + e.message); }
+        finally { setSendLoading(false); }
     };
 
     const syncScores = async () => {
@@ -166,6 +230,41 @@ export default function AdminTools() {
                         {pushLoading ? 'Kontrolujem…' : '🔔 Spustiť diagnostiku'}
                     </button>
                     {pushDiag && <PushDiagBlock diag={pushDiag} />}
+
+                    {/* Krok 1: generovanie VAPID */}
+                    {pushDiag?.server?.vapid_config === 'missing' && (
+                        <div style={{ marginTop: 12 }}>
+                            <button className={styles.btn} style={{ background: '#fd7e14' }} onClick={generateVapid} disabled={vapidLoading}>
+                                {vapidLoading ? 'Generujem…' : '🔑 Generovať VAPID kľúče'}
+                            </button>
+                        </div>
+                    )}
+                    {vapidMsg && <p style={{ marginTop: 8, fontSize: '0.85rem', color: vapidMsg.startsWith('✓') ? '#28a745' : '#dc3545' }}>{vapidMsg}</p>}
+
+                    {/* Krok 2: prihlásiť browser */}
+                    {pushDiag?.server?.vapid_config === 'ok' && (
+                        <div style={{ marginTop: 12, display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                            <button className={styles.btn} style={{ background: '#0d6efd' }} onClick={subscribeBrowser} disabled={subLoading}>
+                                {subLoading ? 'Prihlasujem…' : '📲 Prihlásiť tento browser'}
+                            </button>
+                            {(pushDiag?.server?.subscribed_users ?? 0) > 0 && (
+                                <button className={styles.btn} style={{ background: '#6c757d' }} onClick={unsubscribeBrowser} disabled={subLoading}>
+                                    {subLoading ? '…' : '🚫 Odhlásiť'}
+                                </button>
+                            )}
+                        </div>
+                    )}
+                    {subMsg && <p style={{ marginTop: 8, fontSize: '0.85rem', color: subMsg.startsWith('✓') ? '#28a745' : '#dc3545' }}>{subMsg}</p>}
+
+                    {/* Krok 3: poslať test push */}
+                    {(pushDiag?.server?.subscribed_users ?? 0) > 0 && pushDiag?.server?.vapid_config === 'ok' && (
+                        <div style={{ marginTop: 12 }}>
+                            <button className={styles.btn} style={{ background: '#20c997' }} onClick={sendTestPush} disabled={sendLoading}>
+                                {sendLoading ? 'Odosielam…' : '📤 Poslať test push'}
+                            </button>
+                        </div>
+                    )}
+                    {sendMsg && <p style={{ marginTop: 8, fontSize: '0.85rem', color: sendMsg.startsWith('✓') ? '#28a745' : '#dc3545' }}>{sendMsg}</p>}
                 </div>
             )}
 
