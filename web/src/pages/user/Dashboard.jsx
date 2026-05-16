@@ -366,16 +366,16 @@ export default function Dashboard() {
 
             </div>
 
-            {announcementsHistory.length > 0 && (
+            {announcementsHistory.filter(a => !a.is_active).length > 0 && (
                 <section className={`${styles.section} ${styles.historySection}`}>
                     <div className={`${styles.sectionHeader} ${styles.sHHistory}`}>
                         <span>História správ organizátora</span>
                     </div>
-                    {announcementsHistory.map(a => (
+                    {announcementsHistory.filter(a => !a.is_active).map(a => (
                         <div key={a.id} className={`${styles.announcement} ${!a.is_active ? styles.announcementOld : ''}`}>
                             <div className={styles.announcementHead}>
                                 <span className={styles.announcementLabel}>
-                                    {a.is_active ? 'Správa organizátora' : 'Archív'}
+                                    {'Archív'}
                                 </span>
                                 <span className={styles.announcementDate}>
                                     {new Date(a.created_at).toLocaleDateString('sk-SK', { day: '2-digit', month: '2-digit', year: 'numeric' })}
