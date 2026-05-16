@@ -28,7 +28,7 @@
 - Zápasy — auto-výber aktívnej fázy pri načítaní (live → najbližší); stránka sa otvára od vrchu
 - Tipovanie — presné skóre, uzavretie 5 min pred zápasom, editácia; TBD zápasy netipovateľné
 - Tipy skupín — po začiatku zápasu viditeľné tipy všetkých členov skupín
-- Tabuľky poradia — per skupina, breakdown 3-2-1-0, tiebreak
+- Tabuľky poradia — per skupina, breakdown 7-6-5-4-3-2-1-0 (skupiny aj play-off), tiebreak
 - Skupinové tabuľky A/B — live výpočet + finalizácia adminom; stĺpce VP (OT výhra) a PP (OT prehra); horizontálny scroll na mobile
 - Dashboard — najbližšie zápasy (s tipom/bez), posledné výsledky, skrátené poradie
 - Dashboard — klik na nadchádzajúci zápas → modal na zadanie/zmenu tipu
@@ -549,4 +549,4 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 
 ---
 
-*Posledná aktualizácia: 2026-05-11 (v2.36)*
+*Posledná aktualizácia: 2026-05-15 (v2.45)*
