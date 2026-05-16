@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { apiFetch } from '../../api/client';
 import styles from './Admin.module.css';
 
+const isDev = (import.meta.env.VITE_API_URL ?? '').includes('dev_');
+
 const GEN_ACTIONS = [
     { key: 'group', label: 'Základná skupina' },
     { key: 'qf',    label: 'Štvrťfinále' },
@@ -22,6 +24,8 @@ export default function AdminTools() {
     const [testMailTo,  setTestMailTo]  = useState('');
     const [testMailRes, setTestMailRes] = useState('');
     const [testMailing, setTestMailing] = useState(false);
+    const [pushDiag,    setPushDiag]    = useState(null);
+    const [pushLoading, setPushLoading] = useState(false);
 
     const run = async (action) => {
         setConfirm(null);
@@ -59,6 +63,23 @@ export default function AdminTools() {
             setTestMailRes('✓ Email odoslaný na ' + testMailTo);
         } catch (e) { setTestMailRes('✗ ' + e.message); }
         finally { setTestMailing(false); }
+    };
+
+    const testPush = async () => {
+        setPushLoading(true); setPushDiag(null);
+        const browser = {
+            notification_api: 'Notification' in window,
+            push_manager:     'PushManager' in window,
+            service_worker:   'serviceWorker' in navigator,
+            permission:       'Notification' in window ? Notification.permission : 'unsupported',
+        };
+        try {
+            const server = await apiFetch('v1/admin/test-push', { method: 'POST' });
+            setPushDiag({ browser, server });
+        } catch (e) {
+            setPushDiag({ browser, error: e.message });
+        } finally {
+            setPushLoading(false); }
     };
 
     const syncScores = async () => {
@@ -133,6 +154,20 @@ export default function AdminTools() {
                     </p>
                 )}
             </div>
+
+            {/* ── Test Push notifikácií (len develop) ────────────────── */}
+            {isDev && (
+                <div className={styles.card} style={{ padding: 20, marginTop: 16, borderLeft: '4px solid #20c997' }}>
+                    <h3 style={{ margin: '0 0 4px', fontSize: '1rem', color: '#20c997' }}>🔔 Test Push notifikácií</h3>
+                    <p style={{ margin: '0 0 12px', fontSize: '0.82rem', color: '#666' }}>
+                        Diagnostika servera a browsera pre Web Push (VAPID). Len v develop prostredí.
+                    </p>
+                    <button className={styles.btn} style={{ background: '#20c997' }} onClick={testPush} disabled={pushLoading}>
+                        {pushLoading ? 'Kontrolujem…' : '🔔 Spustiť diagnostiku'}
+                    </button>
+                    {pushDiag && <PushDiagBlock diag={pushDiag} />}
+                </div>
+            )}
 
             {/* ── Generovanie testovacích dát ─────────────────────────── */}
             <div className={styles.card} style={{ padding: 20, marginTop: 16 }}>
@@ -254,6 +289,42 @@ function ResultArea({ keys, results, errors }) {
                         <ResultBlock r={content} />
                       </div>
             )}
+        </div>
+    );
+}
+
+function PushDiagBlock({ diag }) {
+    const { browser, server, error } = diag;
+    const ok  = v => <span style={{ color: '#28a745', fontWeight: 600 }}>✓ {v}</span>;
+    const bad = v => <span style={{ color: '#dc3545', fontWeight: 600 }}>✗ {v}</span>;
+    const chk = (val, label) => <div style={{ margin: '2px 0' }}>{val === 'ok' ? ok(label) : bad(label + ' (' + val + ')')}</div>;
+
+    return (
+        <div style={{ marginTop: 12, fontSize: '0.84rem', display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+            <div style={{ background: '#f0fff4', border: '1px solid #20c997', borderRadius: 6, padding: '10px 14px', flex: 1, minWidth: 200 }}>
+                <strong style={{ display: 'block', marginBottom: 6 }}>Browser</strong>
+                {chk(browser.notification_api ? 'ok' : 'missing', 'Notification API')}
+                {chk(browser.push_manager     ? 'ok' : 'missing', 'PushManager')}
+                {chk(browser.service_worker   ? 'ok' : 'missing', 'Service Worker')}
+                <div style={{ margin: '2px 0' }}>
+                    Povolenie: {browser.permission === 'granted' ? ok('granted') : bad(browser.permission)}
+                </div>
+            </div>
+            <div style={{ background: '#f0fff4', border: '1px solid #20c997', borderRadius: 6, padding: '10px 14px', flex: 1, minWidth: 200 }}>
+                <strong style={{ display: 'block', marginBottom: 6 }}>Server (PHP {server?.php_version})</strong>
+                {error && <div style={{ color: '#dc3545' }}>✗ {error}</div>}
+                {server && <>
+                    {chk(server.openssl_ec,       'OpenSSL EC (VAPID)')}
+                    {chk(server.curl,             'cURL')}
+                    {chk(server.mbstring,         'mbstring')}
+                    {chk(server.vapid_config,     'vapid.php config')}
+                    {chk(server.vapid_public_key, 'VAPID public key')}
+                    {chk(server.vapid_private_key,'VAPID private key')}
+                    <div style={{ margin: '4px 0 0' }}>
+                        Subscriptions v DB: <strong>{server.subscribed_users}</strong>
+                    </div>
+                </>}
+            </div>
         </div>
     );
 }

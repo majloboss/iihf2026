@@ -53,6 +53,7 @@ try {
         $path === 'v1/admin/sync-scores'                 => require __DIR__ . '/v1/admin/sync_scores.php',
         $path === 'v1/notifications'                     => require __DIR__ . '/v1/notifications.php',
         $path === 'v1/admin/test-mail'                   => require __DIR__ . '/v1/admin/test_mail.php',
+        $path === 'v1/admin/test-push'                   => require __DIR__ . '/v1/admin/test_push.php',
         $path === 'v1/admin/mail-log'                    => require __DIR__ . '/v1/admin/mail_log.php',
         $path === 'v1/admin/announcements'               => require __DIR__ . '/v1/admin/announcements.php',
         $path === 'v1/announcement'                      => require __DIR__ . '/v1/announcement.php',
