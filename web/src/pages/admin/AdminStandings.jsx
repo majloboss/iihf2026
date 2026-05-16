@@ -12,7 +12,7 @@ function GroupTable({ group }) {
                         <th>#</th>
                         <th>Hráč</th>
                         <th className={styles.right}>Body</th>
-                        <th className={styles.right}>3-2-1-0</th>
+                        <th className={styles.right}>7-6-5-4-3-2-1-0</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -30,7 +30,7 @@ function GroupTable({ group }) {
                                 </div>
                             </td>
                             <td className={`${styles.right} ${styles.pts}`}>{m.total_points}</td>
-                            <td className={`${styles.right} ${styles.tipsCount}`}>{m.pts3}-{m.pts2}-{m.pts1}-{m.pts0}</td>
+                            <td className={`${styles.right} ${styles.tipsCount}`}>{m.pts7}-{m.pts6}-{m.pts5}-{m.pts4}-{m.pts3}-{m.pts2}-{m.pts1}-{m.pts0}</td>
                         </tr>
                     ))}
                 </tbody>

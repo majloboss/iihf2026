@@ -8,7 +8,11 @@ $rows = $pdo->query("
            u.id AS user_id, u.username, u.avatar,
            COALESCE(SUM(t.points), 0)                   AS total_points,
            COUNT(t.points)                               AS scored_tips,
-           COUNT(CASE WHEN t.points >= 3 THEN 1 END)    AS pts3,
+           COUNT(CASE WHEN t.points = 7  THEN 1 END)    AS pts7,
+           COUNT(CASE WHEN t.points = 6  THEN 1 END)    AS pts6,
+           COUNT(CASE WHEN t.points = 5  THEN 1 END)    AS pts5,
+           COUNT(CASE WHEN t.points = 4  THEN 1 END)    AS pts4,
+           COUNT(CASE WHEN t.points = 3  THEN 1 END)    AS pts3,
            COUNT(CASE WHEN t.points = 2  THEN 1 END)    AS pts2,
            COUNT(CASE WHEN t.points = 1  THEN 1 END)    AS pts1,
            COUNT(CASE WHEN t.points = 0  THEN 1 END)    AS pts0
@@ -18,7 +22,7 @@ $rows = $pdo->query("
     LEFT JOIN iihf2026.tips t ON t.user_id = u.id AND t.points IS NOT NULL
     WHERE gm.status = 'accepted'
     GROUP BY fg.id, fg.name, u.id, u.username, u.avatar
-    ORDER BY fg.name, total_points DESC, pts3 DESC, pts2 DESC, pts1 DESC, u.username
+    ORDER BY fg.name, total_points DESC, pts7 DESC, pts6 DESC, pts5 DESC, pts4 DESC, pts3 DESC, pts2 DESC, pts1 DESC, u.username
 ");
 
 $groups = [];
@@ -33,6 +37,10 @@ foreach ($rows->fetchAll() as $r) {
         'avatar'      => $r['avatar'],
         'total_points'=> (int)$r['total_points'],
         'scored_tips' => (int)$r['scored_tips'],
+        'pts7'        => (int)$r['pts7'],
+        'pts6'        => (int)$r['pts6'],
+        'pts5'        => (int)$r['pts5'],
+        'pts4'        => (int)$r['pts4'],
         'pts3'        => (int)$r['pts3'],
         'pts2'        => (int)$r['pts2'],
         'pts1'        => (int)$r['pts1'],
