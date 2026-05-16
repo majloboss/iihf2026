@@ -270,6 +270,7 @@ export default function Dashboard() {
     const [games, setGames]             = useState([]);
     const [standings, setStandings]     = useState([]);
     const [announcement, setAnnouncement] = useState(undefined);
+    const [announcementsHistory, setAnnouncementsHistory] = useState([]);
     const [loading, setLoading]         = useState(true);
     const [tipGame, setTipGame]             = useState(null);
     const [groupTipsGame, setGroupTipsGame] = useState(null);
@@ -279,8 +280,9 @@ export default function Dashboard() {
             getGames(),
             apiFetch('v1/standings'),
             apiFetch('v1/announcement').catch(() => null),
+            apiFetch('v1/announcements').catch(() => []),
         ])
-            .then(([g, s, a]) => { setGames(g); setStandings(s); setAnnouncement(a); })
+            .then(([g, s, a, ah]) => { setGames(g); setStandings(s); setAnnouncement(a); setAnnouncementsHistory(ah); })
             .catch(() => {})
             .finally(() => setLoading(false));
     }, []);
@@ -361,7 +363,29 @@ export default function Dashboard() {
                         : standings.map(g => <StandingsCard key={g.id} group={g} currentUserId={user?.id} />)
                     }
                 </section>
+
             </div>
+
+            {announcementsHistory.filter(a => !a.is_active).length > 0 && (
+                <section className={`${styles.section} ${styles.historySection}`}>
+                    <div className={`${styles.sectionHeader} ${styles.sHHistory}`}>
+                        <span>História správ organizátora</span>
+                    </div>
+                    {announcementsHistory.filter(a => !a.is_active).map(a => (
+                        <div key={a.id} className={`${styles.announcement} ${!a.is_active ? styles.announcementOld : ''}`}>
+                            <div className={styles.announcementHead}>
+                                <span className={styles.announcementLabel}>
+                                    {'Archív'}
+                                </span>
+                                <span className={styles.announcementDate}>
+                                    {new Date(a.created_at).toLocaleDateString('sk-SK', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                                </span>
+                            </div>
+                            <div className={styles.announcementBody}>{a.body}</div>
+                        </div>
+                    ))}
+                </section>
+            )}
         </div>
     );
 }

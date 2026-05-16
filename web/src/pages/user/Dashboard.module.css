@@ -38,6 +38,7 @@
 .sHUpcoming  { border-color: #1a3a6b; color: #1a3a6b; }
 .sHFinished  { border-color: #28a745; color: #28a745; }
 .sHStandings { border-color: #0891b2; color: #0891b2; }
+.sHHistory   { border-color: #ccc;    color: #888; }
 
 .more {
     font-size: 0.78rem;
@@ -388,3 +389,14 @@
     white-space: pre-wrap;
     line-height: 1.5;
 }
+
+.announcementOld {
+    background: #f8f8f8;
+    border-color: #ddd;
+    border-left-color: #bbb;
+    opacity: 0.75;
+}
+.announcementOld .announcementLabel { color: #999; }
+.announcementOld .announcementBody  { font-weight: 400; color: #666; }
+
+.historySection { margin-top: 16px; }

@@ -56,6 +56,7 @@ try {
         $path === 'v1/admin/mail-log'                    => require __DIR__ . '/v1/admin/mail_log.php',
         $path === 'v1/admin/announcements'               => require __DIR__ . '/v1/admin/announcements.php',
         $path === 'v1/announcement'                      => require __DIR__ . '/v1/announcement.php',
+        $path === 'v1/announcements'                     => require __DIR__ . '/v1/announcements.php',
         default                            => json_error('Not found', 404)
     };
 } catch (Throwable $e) {
