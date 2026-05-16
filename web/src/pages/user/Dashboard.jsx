@@ -386,7 +386,7 @@ export default function Dashboard() {
                     </div>
                     {standings.length === 0
                         ? <p className={styles.empty}>Nie si v žiadnej skupine</p>
-                        : standings.map(g => <StandingsCard key={g.id} group={g} currentUserId={user?.id} />)
+                        : standings.map(g => <StandingsCard key={g.id} group={g} currentUserId={user?.user_id} />)
                     }
                 </section>
 
