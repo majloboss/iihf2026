@@ -76,14 +76,16 @@
 - Cron job nastavený v cPanel (`php api/cron/send_notifications.php` každých 5 min)
 - Emaily odchádzajú ✅
 
-### 🟠 Push notifikácie — hotové na develop
+### ✅ Push notifikácie — v produkcii (main)
 - VAPID kľúče (generovanie cez admin nástroj, uložené v `api/config/vapid.php`)
 - Web Push šifrovanie v čistom PHP (OpenSSL EC + AES-128-GCM, bez Composeru)
 - Service Worker push handler (`src/sw.js`, injectManifest stratégia)
-- Multi-device: tabuľka `user_push_subscriptions`, push ide na všetky zariadenia usera
+- Multi-device: tabuľka `admin.user_push_subscriptions` (migration 020), push ide na všetky zariadenia usera
 - Subscription flow pre bežných userov (záložka Notifikácie v Profile)
-- Admin nástroj: generovanie VAPID, prihlásiť browser, poslať test push (len develop)
-- Ešte chýba: push v cron notifikáciách (zatiaľ len email)
+- Admin nástroj: karta "VAPID kľúče" viditeľná na prod (generovanie/regenerovanie)
+- Admin nástroj: prihlásiť browser, poslať test push (len develop)
+- Cron notifikácie: push odosielaný súbežne s emailmi (game_start, untipped_game, result_entered)
+- ⚠️ DB: migration 020 treba spustiť na produkcii cez Admin → Nástroje → Spustiť migrácie
 
 ### ✅ Rozhodnuté — nebude sa meniť
 - Admin: nastavenia bodovacieho systému — natvrdo v kóde, vyhovuje
@@ -95,6 +97,7 @@
 - `run_014.sql` — stĺpec `flashscore_url` v games (FlashScore prepojenie)
 - `run_015` až `run_018` — flashscore URLs, PDF, mail log body, login_logs env
 - `run_019.sql` — stĺpce `otw` a `otl` v `group_standings` (OT výhra/prehra)
+- `run_020.sql` — tabuľka `admin.user_push_subscriptions` (multi-device push) ⚠️ spustiť na produkcii
 
 ---
 
@@ -560,4 +563,4 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 
 ---
 
-*Posledná aktualizácia: 2026-05-17 (v2.59)*
+*Posledná aktualizácia: 2026-05-17 (v2.61)*
