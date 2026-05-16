@@ -31,6 +31,20 @@
 .btnTabulkyActive { background: #28a745; color: #fff; border-color: #28a745; }
 .btnTabulkyInline { margin-left: auto; flex-shrink: 0; }
 
+/* Untipped toggle button */
+.untippedBtn, .untippedBtnOn {
+    padding: 5px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.88rem;
+    font-weight: 700;
+    border: 1px solid;
+    transition: background 0.12s, color 0.12s;
+    flex-shrink: 0;
+}
+.untippedBtn  { background: #fde8e8; color: #e57373; border-color: #f5c6c6; }
+.untippedBtnOn { background: #c0392b; color: #fff; border-color: #c0392b; }
+
 /* Phase filter buttons */
 .pBtn {
     padding: 5px 10px;

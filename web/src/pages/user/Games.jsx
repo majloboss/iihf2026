@@ -135,6 +135,7 @@ export default function Games() {
     const [selectedDay, setSelectedDay]   = useState(null);
     const [selectedTeam, setSelectedTeam] = useState(location.state?.team ?? null);
     const [view, setView]                 = useState('games');
+    const [showUntipped, setShowUntipped] = useState(false);
     const calContainer = useRef(null);
     const todayCalBtn  = useRef(null);
 
@@ -170,10 +171,15 @@ export default function Games() {
     const allDays = [...new Set(games.map(g => dayKey(g.starts_at)))].sort();
     const allTeams = [...new Set(games.flatMap(g => [g.team1, g.team2]).filter(Boolean))].sort();
 
+    const now2 = Date.now();
     const filtered = games
         .filter(g => phase === 'all' || g.phase === phase)
         .filter(g => !selectedDay  || dayKey(g.starts_at) === selectedDay)
         .filter(g => !selectedTeam || g.team1 === selectedTeam || g.team2 === selectedTeam)
+        .filter(g => !showUntipped || (
+            g.status === 'scheduled' && g.team1 && g.team2 &&
+            g.tip1 == null && new Date(g.starts_at).getTime() - now2 > 5 * 60000
+        ))
         .slice().sort((a, b) => a.game_number - b.game_number);
 
     const byDate = {};
@@ -203,6 +209,11 @@ export default function Games() {
             {/* Fázy + Tabuľky toggle */}
             <div className={styles.topBar}>
                 <div className={styles.filters}>
+                    <button
+                        className={showUntipped ? styles.untippedBtnOn : styles.untippedBtn}
+                        onClick={() => setShowUntipped(v => !v)}
+                        title="Nenatipované zápasy"
+                    >✓</button>
                     {phases.map(p => (
                         <button key={p}
                             onClick={() => { setPhase(p); setView('games'); }}
