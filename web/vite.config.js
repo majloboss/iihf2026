@@ -8,12 +8,12 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.js',
       registerType: 'autoUpdate',
-      workbox: {
-        skipWaiting: true,
-        clientsClaim: true,
-        cacheId: 'iihf2026-v2',
-        importScripts: ['sw-push.js'],
+      injectManifest: {
+        globPatterns: ['**/*.{js,css,html,png,svg,ico}'],
       },
       manifest: {
         name: isDev ? 'IIHF 2026 DEV' : 'IIHF 2026 Tipovačka',
