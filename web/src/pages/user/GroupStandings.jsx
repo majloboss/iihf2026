@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { apiFetch } from '../../api/client';
 import styles from './GroupStandings.module.css';
 
@@ -63,9 +64,13 @@ function GroupTable({ phase, teams, onTeamClick }) {
 }
 
 export default function GroupStandings({ onTeamClick }) {
+    const navigate = useNavigate();
     const [data,    setData]    = useState(null);
     const [loading, setLoading] = useState(true);
     const [error,   setError]   = useState('');
+
+    const handleTeamClick = onTeamClick
+        ?? ((team) => navigate('/games', { state: { team } }));
 
     useEffect(() => {
         apiFetch('v1/group-standings')
@@ -79,8 +84,8 @@ export default function GroupStandings({ onTeamClick }) {
 
     return (
         <div className={styles.wrap}>
-            <GroupTable phase="A" teams={data.A || []} onTeamClick={onTeamClick} />
-            <GroupTable phase="B" teams={data.B || []} onTeamClick={onTeamClick} />
+            <GroupTable phase="A" teams={data.A || []} onTeamClick={handleTeamClick} />
+            <GroupTable phase="B" teams={data.B || []} onTeamClick={handleTeamClick} />
         </div>
     );
 }
