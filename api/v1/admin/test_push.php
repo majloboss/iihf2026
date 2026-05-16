@@ -25,8 +25,8 @@ $vapid_file = __DIR__ . '/../../config/vapid.php';
 if (file_exists($vapid_file)) {
     $vapid = require $vapid_file;
     $checks['vapid_config']      = 'ok';
-    $checks['vapid_public_key']  = !empty($vapid['public_key'])  ? 'ok' : 'empty';
-    $checks['vapid_private_key'] = !empty($vapid['private_key']) ? 'ok' : 'empty';
+    $checks['vapid_public_key']  = !empty($vapid['public_key'])      ? 'ok' : 'empty';
+    $checks['vapid_private_key'] = !empty($vapid['private_key_pem']) ? 'ok' : 'empty';
 } else {
     $checks['vapid_config']      = 'missing';
     $checks['vapid_public_key']  = 'missing';
