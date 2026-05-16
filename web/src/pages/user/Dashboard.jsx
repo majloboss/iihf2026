@@ -303,6 +303,18 @@ export default function Dashboard() {
         ...games.filter(g => g.status !== 'finished' && new Date(g.starts_at).getTime() > now).slice(0, 4),
     ];
 
+    const todayStr    = new Date().toLocaleDateString('sk-SK', { year: 'numeric', month: '2-digit', day: '2-digit' });
+    const tomorrowStr = new Date(Date.now() + 86400000).toLocaleDateString('sk-SK', { year: 'numeric', month: '2-digit', day: '2-digit' });
+    const untipped = games.filter(g => {
+        if (g.status !== 'scheduled') return false;
+        if (!g.team1 || !g.team2) return false;
+        if (g.tip1 != null) return false;
+        const start = new Date(g.starts_at);
+        if (start.getTime() - now < 5 * 60000) return false;
+        const dayStr = start.toLocaleDateString('sk-SK', { year: 'numeric', month: '2-digit', day: '2-digit' });
+        return dayStr === todayStr || dayStr === tomorrowStr;
+    });
+
     return (
         <div className={styles.wrap}>
             {tipGame      && <TipModal      game={tipGame}      onClose={handleClose} onSaved={handleTipSaved} />}
@@ -318,6 +330,20 @@ export default function Dashboard() {
                     </div>
                     <div className={styles.announcementBody}>{announcement.body}</div>
                 </div>
+            )}
+
+            {untipped.length > 0 && (
+                <section className={`${styles.section} ${styles.untippedSection}`}>
+                    <div className={`${styles.sectionHeader} ${styles.sHUntipped}`}>
+                        <span>Nenatipované zápasy</span>
+                        <Link to="/games" className={styles.more}>Všetky →</Link>
+                    </div>
+                    {untipped.map(g => (
+                        <GameCard key={g.id} game={g}
+                            onTipClick={() => setTipGame(g)}
+                            onGroupTipsClick={() => setGroupTipsGame(g)} />
+                    ))}
+                </section>
             )}
 
             <div className={styles.grid}>
