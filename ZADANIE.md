@@ -38,9 +38,14 @@
 - Mobilná optimalizácia — bottom nav 1 riadok 5 položiek (Prehľad, Zápasy, Profil, Skupiny, Pravidlá), avatar v kruhu vyčnieva nad lištu, sidebar skrytý pod 900px
 - Admin mobilná optimalizácia — hamburger menu, tabuľky → karty (data-label), UserModal → bottom-sheet, GroupStandings → horizontálny scroll
 - PWA — manifest, offline SW, ikony 192×512 (tmavá=main, zelená=develop), auto-reload pri novej verzii (skipWaiting + controllerchange); reload bloknutý na /register a hneď po registrácii
-- Zápasy UI — farebné filter tlačidlá (ALL/A/B=modrá, QF/SF=zelená, BR=bronzová, F=zlatá), TAB zobrazí tabuľku tímov, klik na tím nastaví filter
+- Zápasy UI — farebné filter tlačidlá rovnakej šírky (ALL/A/B=modrá, QF/SF=zelená, BR=bronzová, F=zlatá), TAB zobrazí tabuľku tímov, klik na tím nastaví filter
+- Zápasy UI — filter nenatipovaných zápasov (✓ tlačidlo), kombinuje sa s ostatnými filtrami
 - Prehľad UI — sekcie farebne odlíšené, live zápasy v "Najbližšie zápasy", blikajúci LIVE badge, klik na live = tipy skupín
+- Prehľad UI — sekcia Nenatipované zápasy (dnes a zajtra, skryté ak prázdne)
+- Prehľad UI — História správ organizátora na konci (archivované správy)
 - Profil UI — záložky bez ikon (Profil/Skupiny/Pozvánky/Notif/Odhlásenie), rovnomerná šírka
+- Pravidlá — 3 záložky: Tipovanie, Pozvánky, Ovládanie (návod na používanie aplikácie)
+- Tabuľky — klik na tím v skupinovej tabuľke (/tabulky) naviguje na Zápasy s filtrom daného tímu
 
 **Admin časť**
 - Správa používateľov — zoznam, aktivácia, rola, edit, heslo, zmazanie (vrátane FK cleanup)
@@ -549,4 +554,4 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 
 ---
 
-*Posledná aktualizácia: 2026-05-15 (v2.45)*
+*Posledná aktualizácia: 2026-05-16 (v2.51)*
