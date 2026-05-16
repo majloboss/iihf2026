@@ -127,3 +127,48 @@
     margin-bottom: 10px !important;
     font-size: 0.88rem !important;
 }
+
+/* ── Tabs ── */
+.tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+}
+
+.tab, .tabActive {
+    padding: 7px 14px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid;
+    transition: background 0.12s, color 0.12s;
+    white-space: nowrap;
+}
+
+.tab       { background: #f0f4f8; color: #555; border-color: #dde3ea; }
+.tab:hover { background: #e2e8f0; }
+.tabActive { background: #1a3a6b; color: #fff; border-color: #1a3a6b; }
+
+/* ── Guide list ── */
+.guideList {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.guideItem {
+    font-size: 0.88rem;
+    color: #444;
+    line-height: 1.5;
+    padding-left: 12px;
+    border-left: 3px solid #dbeafe;
+}
+
+.guideLabel {
+    font-weight: 700;
+    color: #1a3a6b;
+    display: inline;
+}
