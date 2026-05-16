@@ -5,47 +5,65 @@
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../helpers/db.php';
 require_once __DIR__ . '/../helpers/mailer.php';
+require_once __DIR__ . '/../helpers/webpush.php';
 
-$pdo = db();
+$pdo   = db();
+$vapid = wp_load_vapid(); // null ak VAPID nie je nakonfigurované
 
 // ── game_start + untipped_game ────────────────────────────────────────────────
-// Nájdi hry kde starts_at je za [minutes_before - 3 .. minutes_before + 3] minút
-// (±3 min buffer pre 5-min cron)
 
 $users = $pdo->query("
     SELECT u.id, u.email, u.username,
            ns_start.enabled        AS gs_enabled,
            ns_start.email_enabled  AS gs_email,
+           ns_start.push_enabled   AS gs_push,
            ns_start.minutes_before AS gs_min,
            ns_ut.enabled           AS ut_enabled,
            ns_ut.email_enabled     AS ut_email,
-           ns_ut.minutes_before    AS ut_min
+           ns_ut.push_enabled      AS ut_push,
+           ns_ut.minutes_before    AS ut_min,
+           (SELECT COUNT(*) FROM admin.user_push_subscriptions WHERE user_id = u.id) AS push_count
     FROM admin.users u
     LEFT JOIN admin.notification_settings ns_start
         ON ns_start.user_id = u.id AND ns_start.notif_type = 'game_start'
     LEFT JOIN admin.notification_settings ns_ut
         ON ns_ut.user_id = u.id AND ns_ut.notif_type = 'untipped_game'
-    WHERE u.is_active = TRUE AND u.email IS NOT NULL AND u.email <> ''
+    WHERE u.is_active = TRUE
+      AND (
+          (u.email IS NOT NULL AND u.email <> '')
+          OR EXISTS (SELECT 1 FROM admin.user_push_subscriptions WHERE user_id = u.id)
+      )
 ")->fetchAll();
 
 foreach ($users as $u) {
-    $uid = (int)$u['id'];
+    $uid       = (int)$u['id'];
+    $has_email = !empty($u['email']);
+    $has_push  = $vapid && (int)$u['push_count'] > 0;
 
     // game_start
-    if ($u['gs_enabled'] && $u['gs_email']) {
+    if ($u['gs_enabled']) {
         $min = (int)($u['gs_min'] ?? 30);
-        send_game_notifications($pdo, $uid, $u['email'], $u['username'], $min, 'game_start', false);
+        if ($has_email && $u['gs_email']) {
+            send_game_notifications($pdo, $uid, $u['email'], $u['username'], $min, 'game_start', false, null, null);
+        }
+        if ($has_push && $u['gs_push']) {
+            send_game_push($pdo, $uid, $u['username'], $min, 'game_start', false, $vapid);
+        }
     }
 
     // untipped_game
-    if ($u['ut_enabled'] && $u['ut_email']) {
+    if ($u['ut_enabled']) {
         $min = (int)($u['ut_min'] ?? 30);
-        send_game_notifications($pdo, $uid, $u['email'], $u['username'], $min, 'untipped_game', true);
+        if ($has_email && $u['ut_email']) {
+            send_game_notifications($pdo, $uid, $u['email'], $u['username'], $min, 'untipped_game', true, null, null);
+        }
+        if ($has_push && $u['ut_push']) {
+            send_game_push($pdo, $uid, $u['username'], $min, 'untipped_game', true, $vapid);
+        }
     }
 }
 
 // ── result_entered ────────────────────────────────────────────────────────────
-// Hry ktoré skončili za posledných 10 minút a notifikácia ešte nebola poslaná
 
 $finished = $pdo->query("
     SELECT g.id, g.game_number, g.phase, g.team1, g.team2, g.score1, g.score2, g.final1, g.final2
@@ -56,7 +74,10 @@ $finished = $pdo->query("
 ")->fetchAll();
 
 foreach ($finished as $g) {
-    $recips = $pdo->prepare("
+    $score = score_str($g);
+
+    // Email príjemcovia
+    $email_recips = $pdo->prepare("
         SELECT u.id, u.email, u.username
         FROM admin.users u
         JOIN admin.notification_settings ns ON ns.user_id = u.id
@@ -68,16 +89,43 @@ foreach ($finished as $g) {
               WHERE nl.user_id = u.id AND nl.notif_type = 'result_entered' AND nl.game_id = ?
           )
     ");
-    $recips->execute([$g['id']]);
-
-    $score = score_str($g);
-    foreach ($recips->fetchAll() as $u) {
+    $email_recips->execute([$g['id']]);
+    foreach ($email_recips->fetchAll() as $u) {
         $subject = "Výsledok: {$g['team1']} – {$g['team2']}";
         $body    = "Ahoj {$u['username']},\n\nZápas č. {$g['game_number']} ({$g['team1']} – {$g['team2']}) sa skončil.\n\nVýsledok: $score\n\nIIHF 2026 Tipovačka";
         try {
             send_mail($u['email'], $subject, $body);
             log_notif($pdo, $u['id'], 'result_entered', $g['id']);
-        } catch (Throwable $e) { error_log("notif result_entered uid={$u['id']}: " . $e->getMessage()); }
+        } catch (Throwable $e) { error_log("notif result_entered email uid={$u['id']}: " . $e->getMessage()); }
+    }
+
+    // Push príjemcovia
+    if ($vapid) {
+        $push_recips = $pdo->prepare("
+            SELECT u.id, u.username
+            FROM admin.users u
+            JOIN admin.notification_settings ns ON ns.user_id = u.id
+            WHERE ns.notif_type = 'result_entered'
+              AND ns.enabled = TRUE AND ns.push_enabled = TRUE
+              AND u.is_active = TRUE
+              AND EXISTS (SELECT 1 FROM admin.user_push_subscriptions WHERE user_id = u.id)
+              AND NOT EXISTS (
+                  SELECT 1 FROM admin.notification_log nl
+                  WHERE nl.user_id = u.id AND nl.notif_type = 'result_entered_push' AND nl.game_id = ?
+              )
+        ");
+        $push_recips->execute([$g['id']]);
+        foreach ($push_recips->fetchAll() as $u) {
+            $payload = json_encode([
+                'title' => "Výsledok: {$g['team1']} – {$g['team2']}",
+                'body'  => $score,
+                'url'   => '/zapasy',
+            ]);
+            $result = send_push_to_user($pdo, $u['id'], $payload, $vapid);
+            if ($result['sent'] > 0) {
+                log_notif($pdo, $u['id'], 'result_entered_push', $g['id']);
+            }
+        }
     }
 }
 
@@ -97,15 +145,13 @@ function send_game_notifications(PDO $pdo, int $uid, string $email, string $user
           )
     ");
     $stmt->execute([':min' => $min, ':uid' => $uid, ':type' => $type]);
-    $games = $stmt->fetchAll();
 
-    foreach ($games as $g) {
+    foreach ($stmt->fetchAll() as $g) {
         if ($check_untipped) {
             $tipped = $pdo->prepare("SELECT 1 FROM iihf2026.tips WHERE user_id=? AND game_id=?");
             $tipped->execute([$uid, $g['id']]);
-            if ($tipped->fetch()) continue; // už tipoval
+            if ($tipped->fetch()) continue;
         }
-
         $time    = (new DateTime($g['starts_at']))->setTimezone(new DateTimeZone('Europe/Bratislava'))->format('H:i');
         $subject = $type === 'game_start'
             ? "Začína zápas: {$g['team1']} – {$g['team2']} o $time"
@@ -113,11 +159,47 @@ function send_game_notifications(PDO $pdo, int $uid, string $email, string $user
         $body    = $type === 'game_start'
             ? "Ahoj $username,\n\nO {$min} minút začína zápas č. {$g['game_number']}: {$g['team1']} – {$g['team2']} ($time).\n\nIIHF 2026 Tipovačka"
             : "Ahoj $username,\n\nEšte nemáš tip na zápas č. {$g['game_number']}: {$g['team1']} – {$g['team2']} ($time).\nTipovanie sa uzatvára o $time.\n\nIIHF 2026 Tipovačka";
-
         try {
             send_mail($email, $subject, $body);
             log_notif($pdo, $uid, $type, $g['id']);
-        } catch (Throwable $e) { error_log("notif $type uid=$uid: " . $e->getMessage()); }
+        } catch (Throwable $e) { error_log("notif $type email uid=$uid: " . $e->getMessage()); }
+    }
+}
+
+function send_game_push(PDO $pdo, int $uid, string $username, int $min, string $type, bool $check_untipped, array $vapid): void {
+    $push_type = $type . '_push';
+    $stmt = $pdo->prepare("
+        SELECT g.id, g.game_number, g.team1, g.team2, g.starts_at
+        FROM iihf2026.games g
+        WHERE g.status = 'scheduled'
+          AND g.team1 IS NOT NULL AND g.team2 IS NOT NULL
+          AND g.starts_at BETWEEN NOW() + (:min - 3) * INTERVAL '1 minute'
+                               AND NOW() + (:min + 3) * INTERVAL '1 minute'
+          AND NOT EXISTS (
+              SELECT 1 FROM admin.notification_log nl
+              WHERE nl.user_id = :uid AND nl.notif_type = :type AND nl.game_id = g.id
+          )
+    ");
+    $stmt->execute([':min' => $min, ':uid' => $uid, ':type' => $push_type]);
+
+    foreach ($stmt->fetchAll() as $g) {
+        if ($check_untipped) {
+            $tipped = $pdo->prepare("SELECT 1 FROM iihf2026.tips WHERE user_id=? AND game_id=?");
+            $tipped->execute([$uid, $g['id']]);
+            if ($tipped->fetch()) continue;
+        }
+        $time    = (new DateTime($g['starts_at']))->setTimezone(new DateTimeZone('Europe/Bratislava'))->format('H:i');
+        $title   = $type === 'game_start'
+            ? "{$g['team1']} – {$g['team2']} o $time"
+            : "Nezadaný tip: {$g['team1']} – {$g['team2']}";
+        $body    = $type === 'game_start'
+            ? "Začína za $min minút"
+            : "Tipovanie sa uzatvára o $time";
+        $payload = json_encode(['title' => $title, 'body' => $body, 'url' => '/zapasy']);
+        $result  = send_push_to_user($pdo, $uid, $payload, $vapid);
+        if ($result['sent'] > 0) {
+            log_notif($pdo, $uid, $push_type, $g['id']);
+        }
     }
 }
 
