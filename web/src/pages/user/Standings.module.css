@@ -91,6 +91,24 @@
 }
 
 .pts { font-weight: 700; color: #1a3a6b; font-size: 0.95rem; }
-.tipsCount { color: #aaa; font-size: 0.82rem; }
+.tipsCount { color: #aaa; font-size: 0.82rem; white-space: nowrap; }
 
 .empty { color: #aaa; text-align: center; padding: 40px 0; }
+
+@media (max-width: 480px) {
+    .wrap { padding: 10px 8px; }
+
+    .table th,
+    .table td { padding: 7px 5px; }
+
+    .table th { font-size: 0.65rem; }
+    .table td { font-size: 0.82rem; }
+
+    .rank { width: 22px; }
+
+    .avatar, .avatarPh { width: 22px; height: 22px; font-size: 0.65rem; }
+    .player { gap: 5px; }
+
+    .pts { font-size: 0.88rem; }
+    .tipsCount { font-size: 0.72rem; }
+}
