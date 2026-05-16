@@ -1,6 +1,6 @@
 <?php
-require_auth('admin');
-$pdo = db();
+$auth = require_auth('admin');
+$pdo  = db();
 
 if ($method !== 'POST') json_error('Method not allowed', 405);
 
