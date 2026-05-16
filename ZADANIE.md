@@ -85,7 +85,9 @@
 - Admin nástroj: karta "VAPID kľúče" viditeľná na prod (generovanie/regenerovanie)
 - Admin nástroj: prihlásiť browser, poslať test push (len develop)
 - Cron notifikácie: push odosielaný súbežne s emailmi (game_start, untipped_game, result_entered)
+- Notifikácia výsledku: obsahuje tip usera a počet získaných bodov
 - DB migrácia 020 automaticky platná pre prod (zdieľaná DB s develop)
+- Popis push notifikácií v Pravidlách (záložka Ovládanie)
 
 ### ✅ Rozhodnuté — nebude sa meniť
 - Admin: nastavenia bodovacieho systému — natvrdo v kóde, vyhovuje
@@ -563,4 +565,4 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 
 ---
 
-*Posledná aktualizácia: 2026-05-17 (v2.61)*
+*Posledná aktualizácia: 2026-05-17 (v2.62)*
