@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import { getGames } from '../../api/games';
 import { saveTip, getGameTips } from '../../api/tips';
 import GroupStandings from './GroupStandings';
@@ -126,12 +127,13 @@ function GroupTips({ gameId }) {
 }
 
 export default function Games() {
+    const location = useLocation();
     const [games, setGames]               = useState([]);
     const [loading, setLoading]           = useState(true);
     const [error, setError]               = useState('');
     const [phase, setPhase]               = useState('all');
     const [selectedDay, setSelectedDay]   = useState(null);
-    const [selectedTeam, setSelectedTeam] = useState(null);
+    const [selectedTeam, setSelectedTeam] = useState(location.state?.team ?? null);
     const [view, setView]                 = useState('games');
     const calContainer = useRef(null);
     const todayCalBtn  = useRef(null);
