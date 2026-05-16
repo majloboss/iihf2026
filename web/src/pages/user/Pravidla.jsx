@@ -227,7 +227,7 @@ function TabOvladanie() {
                     <div className={styles.guideItem}><span className={styles.guideLabel}>Avatar</span> — klikni na fotografiu a nahraj obrázok zo zariadenia.</div>
                     <div className={styles.guideItem}><span className={styles.guideLabel}>Osobné údaje</span> — meno, priezvisko, e-mail, telefón. E-mail je potrebný pre e-mailové notifikácie.</div>
                     <div className={styles.guideItem}><span className={styles.guideLabel}>Zmena hesla</span> — zadáš aktuálne heslo a dvakrát nové. Zmena je okamžitá.</div>
-                    <div className={styles.guideItem}><span className={styles.guideLabel}>Notifikácie</span> — záložka Notif. Nastavíš, kedy ti má aplikácia posielať e-maily (pred zápasom, netipovaný zápas a pod.).</div>
+                    <div className={styles.guideItem}><span className={styles.guideLabel}>Notifikácie</span> — záložka Notif. Nastavíš, o čom chceš byť upozornený — pred zápasom, pri netipovanom zápase, po zadaní výsledku. Notifikácie chodia e-mailom aj cez push notifikácie priamo do prehliadača (aj keď aplikácia nie je otvorená). Push aktivuješ tlačidlom v tejto záložke — funguje v Chrome, Edge, Firefox aj na mobile.</div>
                     <div className={styles.guideItem}><span className={styles.guideLabel}>Odhlásenie</span> — záložka Odhlásenie v Profile.</div>
                 </div>
             </div>

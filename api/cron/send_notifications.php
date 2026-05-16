@@ -44,7 +44,7 @@ foreach ($users as $u) {
     if ($u['gs_enabled']) {
         $min = (int)($u['gs_min'] ?? 30);
         if ($has_email && $u['gs_email']) {
-            send_game_notifications($pdo, $uid, $u['email'], $u['username'], $min, 'game_start', false, null, null);
+            send_game_notifications($pdo, $uid, $u['email'], $u['username'], $min, 'game_start', false);
         }
         if ($has_push && $u['gs_push']) {
             send_game_push($pdo, $uid, $u['username'], $min, 'game_start', false, $vapid);
@@ -55,7 +55,7 @@ foreach ($users as $u) {
     if ($u['ut_enabled']) {
         $min = (int)($u['ut_min'] ?? 30);
         if ($has_email && $u['ut_email']) {
-            send_game_notifications($pdo, $uid, $u['email'], $u['username'], $min, 'untipped_game', true, null, null);
+            send_game_notifications($pdo, $uid, $u['email'], $u['username'], $min, 'untipped_game', true);
         }
         if ($has_push && $u['ut_push']) {
             send_game_push($pdo, $uid, $u['username'], $min, 'untipped_game', true, $vapid);
@@ -78,9 +78,11 @@ foreach ($finished as $g) {
 
     // Email príjemcovia
     $email_recips = $pdo->prepare("
-        SELECT u.id, u.email, u.username
+        SELECT u.id, u.email, u.username,
+               t.home_score_tip, t.away_score_tip, t.points_earned
         FROM admin.users u
         JOIN admin.notification_settings ns ON ns.user_id = u.id
+        LEFT JOIN iihf2026.tips t ON t.user_id = u.id AND t.game_id = ?
         WHERE ns.notif_type = 'result_entered'
           AND ns.enabled = TRUE AND ns.email_enabled = TRUE
           AND u.is_active = TRUE AND u.email IS NOT NULL AND u.email <> ''
@@ -89,10 +91,13 @@ foreach ($finished as $g) {
               WHERE nl.user_id = u.id AND nl.notif_type = 'result_entered' AND nl.game_id = ?
           )
     ");
-    $email_recips->execute([$g['id']]);
+    $email_recips->execute([$g['id'], $g['id']]);
     foreach ($email_recips->fetchAll() as $u) {
-        $subject = "Výsledok: {$g['team1']} – {$g['team2']}";
-        $body    = "Ahoj {$u['username']},\n\nZápas č. {$g['game_number']} ({$g['team1']} – {$g['team2']}) sa skončil.\n\nVýsledok: $score\n\nIIHF 2026 Tipovačka";
+        $subject  = "Výsledok: {$g['team1']} – {$g['team2']}";
+        $tip_line = $u['home_score_tip'] !== null
+            ? "Tvoj tip: {$u['home_score_tip']}:{$u['away_score_tip']} → " . pts_label((int)($u['points_earned'] ?? 0))
+            : "Na tento zápas si nemal tip.";
+        $body = "Ahoj {$u['username']},\n\nZápas č. {$g['game_number']} ({$g['team1']} – {$g['team2']}) sa skončil.\n\nVýsledok: $score\n$tip_line\n\nIIHF 2026 Tipovačka";
         try {
             send_mail($u['email'], $subject, $body);
             log_notif($pdo, $u['id'], 'result_entered', $g['id']);
@@ -102,9 +107,11 @@ foreach ($finished as $g) {
     // Push príjemcovia
     if ($vapid) {
         $push_recips = $pdo->prepare("
-            SELECT u.id, u.username
+            SELECT u.id, u.username,
+                   t.home_score_tip, t.away_score_tip, t.points_earned
             FROM admin.users u
             JOIN admin.notification_settings ns ON ns.user_id = u.id
+            LEFT JOIN iihf2026.tips t ON t.user_id = u.id AND t.game_id = ?
             WHERE ns.notif_type = 'result_entered'
               AND ns.enabled = TRUE AND ns.push_enabled = TRUE
               AND u.is_active = TRUE
@@ -114,11 +121,14 @@ foreach ($finished as $g) {
                   WHERE nl.user_id = u.id AND nl.notif_type = 'result_entered_push' AND nl.game_id = ?
               )
         ");
-        $push_recips->execute([$g['id']]);
+        $push_recips->execute([$g['id'], $g['id']]);
         foreach ($push_recips->fetchAll() as $u) {
+            $push_body = $u['home_score_tip'] !== null
+                ? "$score · tip {$u['home_score_tip']}:{$u['away_score_tip']} → " . pts_label((int)($u['points_earned'] ?? 0))
+                : $score;
             $payload = json_encode([
                 'title' => "Výsledok: {$g['team1']} – {$g['team2']}",
-                'body'  => $score,
+                'body'  => $push_body,
                 'url'   => '/zapasy',
             ]);
             $result = send_push_to_user($pdo, $u['id'], $payload, $vapid);
@@ -201,6 +211,12 @@ function send_game_push(PDO $pdo, int $uid, string $username, int $min, string $
             log_notif($pdo, $uid, $push_type, $g['id']);
         }
     }
+}
+
+function pts_label(int $pts): string {
+    if ($pts === 1) return '1 bod';
+    if ($pts >= 2 && $pts <= 4) return "$pts body";
+    return "$pts bodov";
 }
 
 function score_str(array $g): string {
