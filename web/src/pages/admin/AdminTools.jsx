@@ -1,5 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { apiFetch } from '../../api/client';
+
+const BASE = import.meta.env.VITE_API_URL ?? '/api';
 import styles from './Admin.module.css';
 
 const isDev = (import.meta.env.VITE_API_URL ?? '').includes('dev_');
@@ -26,12 +28,19 @@ export default function AdminTools() {
     const [testMailing, setTestMailing] = useState(false);
     const [pushDiag,      setPushDiag]      = useState(null);
     const [pushLoading,   setPushLoading]   = useState(false);
+    const [vapidStatus,   setVapidStatus]   = useState(null); // null | 'ok' | 'missing'
     const [vapidLoading,  setVapidLoading]  = useState(false);
     const [vapidMsg,      setVapidMsg]      = useState('');
     const [subLoading,    setSubLoading]    = useState(false);
     const [subMsg,        setSubMsg]        = useState('');
     const [sendLoading,   setSendLoading]   = useState(false);
     const [sendMsg,       setSendMsg]       = useState('');
+
+    useEffect(() => {
+        fetch(BASE + '/v1/push-config')
+            .then(r => setVapidStatus(r.ok ? 'ok' : 'missing'))
+            .catch(() => setVapidStatus('missing'));
+    }, []);
 
     const run = async (action) => {
         setConfirm(null);
@@ -94,7 +103,7 @@ export default function AdminTools() {
         try {
             const r = await apiFetch('v1/admin/generate-vapid', { method: 'POST' });
             setVapidMsg('✓ VAPID kľúče vygenerované. Public key: ' + r.public_key.slice(0, 20) + '…');
-            // refresh diag
+            setVapidStatus('ok');
             setPushDiag(null);
         } catch (e) { setVapidMsg('✗ ' + e.message); }
         finally { setVapidLoading(false); }
@@ -220,6 +229,25 @@ export default function AdminTools() {
                 )}
             </div>
 
+            {/* ── VAPID kľúče (vždy viditeľné) ──────────────────────── */}
+            <div className={styles.card} style={{ padding: 20, marginTop: 16, borderLeft: '4px solid #20c997' }}>
+                <h3 style={{ margin: '0 0 4px', fontSize: '1rem', color: '#20c997' }}>🔑 VAPID kľúče (Push notifikácie)</h3>
+                <p style={{ margin: '0 0 12px', fontSize: '0.82rem', color: '#666' }}>
+                    Jednorazové generovanie VAPID kľúčov na serveri. Potrebné pre odosielanie push notifikácií.
+                </p>
+                {vapidStatus === null && <p style={{ fontSize: '0.85rem', color: '#999' }}>Kontrolujem…</p>}
+                {vapidStatus === 'ok' && (
+                    <p style={{ fontSize: '0.85rem', color: '#28a745', margin: '0 0 8px' }}>✓ VAPID kľúče sú nakonfigurované</p>
+                )}
+                {vapidStatus === 'missing' && (
+                    <p style={{ fontSize: '0.85rem', color: '#dc3545', margin: '0 0 8px' }}>✗ VAPID kľúče chýbajú — push notifikácie nebudú fungovať</p>
+                )}
+                <button className={styles.btn} style={{ background: '#20c997' }} onClick={generateVapid} disabled={vapidLoading}>
+                    {vapidLoading ? 'Generujem…' : vapidStatus === 'ok' ? '🔄 Regenerovať VAPID kľúče' : '🔑 Generovať VAPID kľúče'}
+                </button>
+                {vapidMsg && <p style={{ marginTop: 8, fontSize: '0.85rem', color: vapidMsg.startsWith('✓') ? '#28a745' : '#dc3545' }}>{vapidMsg}</p>}
+            </div>
+
             {/* ── Test Push notifikácií (len develop) ────────────────── */}
             {isDev && (
                 <div className={styles.card} style={{ padding: 20, marginTop: 16, borderLeft: '4px solid #20c997' }}>
@@ -231,16 +259,6 @@ export default function AdminTools() {
                         {pushLoading ? 'Kontrolujem…' : '🔔 Spustiť diagnostiku'}
                     </button>
                     {pushDiag && <PushDiagBlock diag={pushDiag} />}
-
-                    {/* Krok 1: generovanie VAPID */}
-                    {pushDiag?.server?.vapid_config === 'missing' && (
-                        <div style={{ marginTop: 12 }}>
-                            <button className={styles.btn} style={{ background: '#fd7e14' }} onClick={generateVapid} disabled={vapidLoading}>
-                                {vapidLoading ? 'Generujem…' : '🔑 Generovať VAPID kľúče'}
-                            </button>
-                        </div>
-                    )}
-                    {vapidMsg && <p style={{ marginTop: 8, fontSize: '0.85rem', color: vapidMsg.startsWith('✓') ? '#28a745' : '#dc3545' }}>{vapidMsg}</p>}
 
                     {/* Krok 2: prihlásiť browser */}
                     {pushDiag?.server?.vapid_config === 'ok' && (
