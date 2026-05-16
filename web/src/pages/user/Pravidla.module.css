@@ -131,25 +131,28 @@
 /* ── Tabs ── */
 .tabs {
     display: flex;
-    gap: 6px;
+    border-bottom: 2px solid #f0f0f0;
     margin-bottom: 18px;
-    flex-wrap: wrap;
 }
 
 .tab, .tabActive {
-    padding: 7px 14px;
-    border-radius: 8px;
+    flex: 1;
+    padding: 13px 4px;
+    border: none;
+    background: none;
+    cursor: pointer;
     font-size: 0.82rem;
     font-weight: 600;
-    cursor: pointer;
-    border: 1px solid;
-    transition: background 0.12s, color 0.12s;
+    color: #aaa;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: color 0.15s;
+    text-align: center;
     white-space: nowrap;
 }
 
-.tab       { background: #f0f4f8; color: #555; border-color: #dde3ea; }
-.tab:hover { background: #e2e8f0; }
-.tabActive { background: #1a3a6b; color: #fff; border-color: #1a3a6b; }
+.tab:hover { color: #555; }
+.tabActive  { color: #1a3a6b; border-bottom-color: #1a3a6b; }
 
 /* ── Guide list ── */
 .guideList {
