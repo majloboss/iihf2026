@@ -287,8 +287,8 @@
     width: 100%;
     transition: border-color 0.12s, background 0.12s;
 }
-.flagBtn:hover { border-color: #1a3a6b; }
 .flagBtn:focus, .flagBtn:focus-visible { outline: none; }
+@media (hover: hover) { .flagBtn:hover { border-color: #1a3a6b; } }
 .flagBtnActive { border-color: #1a3a6b; background: #e8eef8; }
 .flagImg { width: 34px; height: 22px; object-fit: cover; border-radius: 2px; display: block; }
 .flagCode { font-size: 0.65rem; font-weight: 700; color: #555; letter-spacing: 0.03em; }
