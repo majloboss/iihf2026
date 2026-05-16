@@ -9,14 +9,26 @@ if ($method === 'POST') {
     if (!$sub || !isset($sub['endpoint'], $sub['keys']['p256dh'], $sub['keys']['auth'])) {
         json_error('Neplatná subscription', 400);
     }
-    $pdo->prepare("UPDATE admin.users SET web_push_sub = ? WHERE id = ?")
-        ->execute([json_encode($sub), $uid]);
+    $pdo->prepare("
+        INSERT INTO admin.user_push_subscriptions (user_id, endpoint, subscription)
+        VALUES (?, ?, ?::jsonb)
+        ON CONFLICT (endpoint) DO UPDATE SET
+            user_id      = EXCLUDED.user_id,
+            subscription = EXCLUDED.subscription
+    ")->execute([$uid, $sub['endpoint'], json_encode($sub)]);
     json_ok(['saved' => true]);
 }
 
 if ($method === 'DELETE') {
-    $pdo->prepare("UPDATE admin.users SET web_push_sub = NULL WHERE id = ?")
-        ->execute([$uid]);
+    $body     = json_decode(file_get_contents('php://input'), true);
+    $endpoint = $body['endpoint'] ?? null;
+    if ($endpoint) {
+        $pdo->prepare("DELETE FROM admin.user_push_subscriptions WHERE user_id = ? AND endpoint = ?")
+            ->execute([$uid, $endpoint]);
+    } else {
+        $pdo->prepare("DELETE FROM admin.user_push_subscriptions WHERE user_id = ?")
+            ->execute([$uid]);
+    }
     json_ok(['removed' => true]);
 }
 

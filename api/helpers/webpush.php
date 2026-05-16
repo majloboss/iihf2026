@@ -62,6 +62,30 @@ function wp_vapid_jwt(string $endpoint, string $subject, string $private_pem): s
     return $data . '.' . wp_b64u_encode(wp_der_to_raw_sig($der_sig));
 }
 
+function send_push_to_user(PDO $pdo, int $uid, string $payload, array $vapid): array {
+    $rows = $pdo->prepare("SELECT endpoint, subscription FROM admin.user_push_subscriptions WHERE user_id = ?");
+    $rows->execute([$uid]);
+    $subs = $rows->fetchAll();
+    if (!$subs) return ['sent' => 0, 'failed' => 0, 'no_subscriptions' => true];
+
+    $sent = 0; $failed = 0;
+    foreach ($subs as $row) {
+        $sub    = json_decode($row['subscription'], true);
+        $result = send_web_push($sub, $payload, $vapid);
+        if ($result['ok']) {
+            $sent++;
+        } else {
+            $failed++;
+            // 410 Gone = subscription expired, remove it
+            if (($result['status'] ?? 0) === 410) {
+                $pdo->prepare("DELETE FROM admin.user_push_subscriptions WHERE endpoint = ?")
+                    ->execute([$row['endpoint']]);
+            }
+        }
+    }
+    return ['sent' => $sent, 'failed' => $failed];
+}
+
 function wp_load_vapid(): array|false {
     $f = __DIR__ . '/../config/vapid.php';
     return file_exists($f) ? require $f : false;

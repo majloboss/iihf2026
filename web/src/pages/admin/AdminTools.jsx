@@ -129,8 +129,9 @@ export default function AdminTools() {
         try {
             const reg = await navigator.serviceWorker.ready;
             const sub = await reg.pushManager.getSubscription();
+            const endpoint = sub?.endpoint ?? null;
             if (sub) await sub.unsubscribe();
-            await apiFetch('v1/push-subscribe', { method: 'DELETE' });
+            await apiFetch('v1/push-subscribe', { method: 'DELETE', body: JSON.stringify({ endpoint }) });
             setSubMsg('✓ Subscription zrušená.');
             setPushDiag(null);
         } catch (e) { setSubMsg('✗ ' + e.message); }

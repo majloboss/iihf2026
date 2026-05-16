@@ -33,11 +33,10 @@ if (file_exists($vapid_file)) {
     $checks['vapid_private_key'] = 'missing';
 }
 
-// How many users have a Web Push subscription saved
-$sub_count = (int)$pdo->query(
-    "SELECT COUNT(*) FROM admin.users WHERE web_push_sub IS NOT NULL AND web_push_sub <> ''"
-)->fetchColumn();
-$checks['subscribed_users'] = $sub_count;
+// How many devices does the current admin have subscribed
+$sub_stmt = $pdo->prepare("SELECT COUNT(*) FROM admin.user_push_subscriptions WHERE user_id = ?");
+$sub_stmt->execute([$auth['user_id']]);
+$checks['subscribed_users'] = (int)$sub_stmt->fetchColumn();
 
 // PHP version
 $checks['php_version'] = PHP_VERSION;
