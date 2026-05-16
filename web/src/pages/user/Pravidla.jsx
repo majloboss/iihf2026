@@ -2,8 +2,8 @@ import { useState } from 'react';
 import styles from './Pravidla.module.css';
 
 const TABS = [
-    { id: 'bodovanie',  label: 'Tipovanie a bodovanie' },
-    { id: 'skupiny',    label: 'Pozvánky a skupiny' },
+    { id: 'bodovanie',  label: 'Tipovanie' },
+    { id: 'skupiny',    label: 'Pozvánky' },
     { id: 'ovladanie',  label: 'Ovládanie' },
 ];
 
