@@ -85,7 +85,7 @@
 - Admin nástroj: karta "VAPID kľúče" viditeľná na prod (generovanie/regenerovanie)
 - Admin nástroj: prihlásiť browser, poslať test push (len develop)
 - Cron notifikácie: push odosielaný súbežne s emailmi (game_start, untipped_game, result_entered)
-- ⚠️ DB: migration 020 treba spustiť na produkcii cez Admin → Nástroje → Spustiť migrácie
+- DB migrácia 020 automaticky platná pre prod (zdieľaná DB s develop)
 
 ### ✅ Rozhodnuté — nebude sa meniť
 - Admin: nastavenia bodovacieho systému — natvrdo v kóde, vyhovuje
@@ -97,7 +97,7 @@
 - `run_014.sql` — stĺpec `flashscore_url` v games (FlashScore prepojenie)
 - `run_015` až `run_018` — flashscore URLs, PDF, mail log body, login_logs env
 - `run_019.sql` — stĺpce `otw` a `otl` v `group_standings` (OT výhra/prehra)
-- `run_020.sql` — tabuľka `admin.user_push_subscriptions` (multi-device push) ⚠️ spustiť na produkcii
+- `run_020.sql` — tabuľka `admin.user_push_subscriptions` (multi-device push)
 
 ---
 
