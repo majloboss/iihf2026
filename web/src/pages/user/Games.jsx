@@ -225,7 +225,7 @@ export default function Games() {
                         className={`${view === 'standings' ? styles.btnTabulkyActive : styles.btnTabulky} ${styles.btnTabulkyInline}`}
                         onClick={() => setView('standings')}
                     >
-                        📊 TAB
+                        TAB
                     </button>
                 </div>
             </div>
