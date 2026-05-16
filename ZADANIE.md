@@ -76,8 +76,14 @@
 - Cron job nastavený v cPanel (`php api/cron/send_notifications.php` každých 5 min)
 - Emaily odchádzajú ✅
 
-### 🔲 Možno neskôr
-- Push notifikácie (Web Push API) — nastavenia v profile sú, samotné odosielanie zatiaľ nie
+### 🟠 Push notifikácie — hotové na develop
+- VAPID kľúče (generovanie cez admin nástroj, uložené v `api/config/vapid.php`)
+- Web Push šifrovanie v čistom PHP (OpenSSL EC + AES-128-GCM, bez Composeru)
+- Service Worker push handler (`src/sw.js`, injectManifest stratégia)
+- Multi-device: tabuľka `user_push_subscriptions`, push ide na všetky zariadenia usera
+- Subscription flow pre bežných userov (záložka Notifikácie v Profile)
+- Admin nástroj: generovanie VAPID, prihlásiť browser, poslať test push (len develop)
+- Ešte chýba: push v cron notifikáciách (zatiaľ len email)
 
 ### ✅ Rozhodnuté — nebude sa meniť
 - Admin: nastavenia bodovacieho systému — natvrdo v kóde, vyhovuje
@@ -554,4 +560,4 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 
 ---
 
-*Posledná aktualizácia: 2026-05-16 (v2.51)*
+*Posledná aktualizácia: 2026-05-17 (v2.59)*
