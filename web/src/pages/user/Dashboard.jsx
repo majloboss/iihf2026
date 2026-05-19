@@ -246,7 +246,7 @@ function GameCard({ game, onTipClick, onGroupTipsClick }) {
                         <span className={styles.tipCheck}>✓</span> Môj tip: {game.tip1}:{game.tip2}
                         {game.points != null && (
                             <span className={`${styles.gamePts} ${
-                                isLsLive(game)
+                                isLsLive(game) && game.status !== 'finished'
                                     ? styles.ptsLive
                                     : game.points >= 3 ? styles.ptsGood : game.points > 0 ? styles.ptsMed : styles.ptsBad
                             }`}>
