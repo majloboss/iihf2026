@@ -25,6 +25,9 @@ if ($method === 'GET') {
             SELECT g.id, g.game_number, g.phase, g.team1, g.team2,
                    g.starts_at, g.venue, g.score1, g.score2, g.final1, g.final2, g.status,
                    g.flashscore_url,
+                   g.ls_score1, g.ls_score2, g.ls_final1, g.ls_final2,
+                   g.ls_status, g.ls_updated_at,
+                   g.ls_requests_expected, g.ls_requests_actual,
                    t.tip1, t.tip2, t.points
             FROM iihf2026.games g
             LEFT JOIN iihf2026.tips t ON t.game_id = g.id AND t.user_id = :uid

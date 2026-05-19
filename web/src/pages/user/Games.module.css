@@ -126,6 +126,8 @@
     min-width: 36px;
     text-align: center;
 }
+.result { font-size: 1.4rem; font-weight: 700; color: #28a745; }
+.resultOT { font-size: 0.7rem; font-weight: 400; color: #888; }
 .live {
     background: #dc3545;
     color: #fff;
@@ -225,6 +227,34 @@
 .tipPts { color: #28a745; font-size: 0.75rem; padding-left: 4px; }
 .tipsLoading { text-align: center; color: #aaa; font-size: 0.8rem; padding: 8px 0; }
 .tipsErr { color: #dc3545; font-size: 0.78rem; text-align: center; margin-top: 6px; }
+
+/* Live score bar */
+.liveBar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 8px 0 4px;
+    padding: 6px 10px;
+    background: #fff5f5;
+    border: 1px solid #f5c6cb;
+    border-radius: 8px;
+}
+.lsBadge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #dc3545;
+    letter-spacing: 0.05em;
+    animation: blink 1.2s ease-in-out infinite;
+}
+.liveScore {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #dc3545;
+    animation: blink 1.2s ease-in-out infinite;
+}
+.lsOT   { font-size: 0.75rem; font-weight: 400; }
+.lsTime { font-size: 0.75rem; color: #888; margin-left: auto; }
+.ptsLive { background: #fde8e8; color: #dc3545; padding: 2px 7px; border-radius: 10px; font-size: 0.82rem; }
 
 /* Kalendár */
 .calRow {

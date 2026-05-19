@@ -570,4 +570,32 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 
 ---
 
-*Posledná aktualizácia: 2026-05-19 (v2.65)*
+## Zmeny 19.5.2026 — Livescore (iba develop, v2.66–v2.67)
+
+### 🟠 Livescore — databáza (run_022)
+- 🟠 `iihf2026.teams`: nový stĺpec `api_name` — meno tímu v api-sports.io (pre mapovanie)
+- 🟠 `iihf2026.games`: 9 nových stĺpcov `ls_*` — live skóre, stav, timestamp, počty requestov (ukladajú sa oddelene od adminom potvrdeného výsledku)
+- 🟠 `iihf2026.livescore_daily`: tabuľka na denné počítanie API volaní (budget tracking)
+- 🟠 API kľúč api-sports.io uložený v `api/config/livescore_config.php`
+
+### 🟠 Livescore — backend cron
+- 🟠 `api/cron/livescore_poll.php` — polling logika: detekcia aktívnych zápasov, dynamický interval (next_poll_at), API volanie, update `ls_*` stĺpcov, OT/SO detekcia, denný budget limit (95 req/deň)
+- 🟠 `api/cron/run_livescore.php` — HTTP wrapper s `CRON_SECRET` token autentifikáciou
+- 🟠 Cron job nastavený na hostingu (`* * * * *` → DEV URL, script rozhoduje kedy volať API)
+
+### 🟠 Livescore — Admin obrazovka (Výsledky)
+- 🟠 AdminResults: live score bar — červená+blikanie keď `ls_status != FT` a `ls_score1 != null`
+- 🟠 AdminResults: tlačidlo „↙ Prevziať Livescore" — predvyplní formulár z `ls_*` hodnôt
+- 🟠 AdminResults: tipy hráčov — body červené počas live zápasu (`.tipPtsLive`)
+- 🟠 AdminResults: počítadlo requestov `Livescore: X / Y req`
+
+### 🟠 Livescore — User obrazovky
+- 🟠 Games (Zápasy): skóre presunuté do stredu (formát `3:1` zelené, OT zobrazuje `pp`)
+- 🟠 Games (Zápasy): live score bar pod venue — červená+blikanie keď `isLsLive(g)`
+- 🟠 Games (Zápasy): body tipu červené počas live zápasu (`.ptsLive`)
+- 🟠 Dashboard (Prehľad): live score bar v GameCard — červená+blikanie
+- 🟠 Dashboard (Prehľad): body tipu červené keď `isLsLive(game)`
+
+---
+
+*Posledná aktualizácia: 2026-05-19 (v2.69)*

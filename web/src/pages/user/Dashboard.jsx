@@ -7,6 +7,12 @@ import { useAuth } from '../../context/AuthContext';
 import styles from './Dashboard.module.css';
 
 const FLAG_URL = code => `/flags/team_flag_${code?.toLowerCase()}.png`;
+const isLsLive = (g) => g.ls_score1 != null && g.ls_status && g.ls_status !== 'FT';
+const formatLsAge = (ts) => {
+    if (!ts) return '';
+    const m = Math.floor((Date.now() - new Date(ts).getTime()) / 60000);
+    return m < 1 ? 'práve teraz' : `pred ${m} min`;
+};
 
 const PHASE_LABEL = {
     A: 'Skupina A', B: 'Skupina B',
@@ -205,12 +211,27 @@ function GameCard({ game, onTipClick, onGroupTipsClick }) {
                 </div>
             </div>
 
+            {isLsLive(game) && (
+                <div className={styles.liveBar}>
+                    <span className={styles.lsBadge}>LIVE</span>
+                    <span className={styles.liveScore}>
+                        {game.ls_score1}:{game.ls_score2}
+                        {game.ls_final1 != null && <span className={styles.lsOT}> pp</span>}
+                    </span>
+                    <span className={styles.lsTime}>{formatLsAge(game.ls_updated_at)}</span>
+                </div>
+            )}
+
             {game.tip1 != null
                 ? (
                     <div className={styles.gameTip}>
                         <span className={styles.tipCheck}>✓</span> Môj tip: {game.tip1}:{game.tip2}
                         {game.points != null && (
-                            <span className={`${styles.gamePts} ${game.points >= 3 ? styles.ptsGood : game.points > 0 ? styles.ptsMed : styles.ptsBad}`}>
+                            <span className={`${styles.gamePts} ${
+                                isLsLive(game)
+                                    ? styles.ptsLive
+                                    : game.points >= 3 ? styles.ptsGood : game.points > 0 ? styles.ptsMed : styles.ptsBad
+                            }`}>
                                 +{game.points}b
                             </span>
                         )}

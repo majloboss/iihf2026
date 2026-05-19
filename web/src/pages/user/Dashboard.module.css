@@ -134,6 +134,34 @@
 
 .tapHint { margin-top: 5px; font-size: 0.68rem; color: #aaa; text-align: right; }
 
+/* Live score bar */
+.liveBar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 6px 0 2px;
+    padding: 5px 8px;
+    background: #fff5f5;
+    border: 1px solid #f5c6cb;
+    border-radius: 6px;
+}
+.lsBadge {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #dc3545;
+    letter-spacing: 0.05em;
+    animation: blink 1.2s ease-in-out infinite;
+}
+.liveScore {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #dc3545;
+    animation: blink 1.2s ease-in-out infinite;
+}
+.lsOT   { font-size: 0.7rem; font-weight: 400; }
+.lsTime { font-size: 0.7rem; color: #888; margin-left: auto; }
+.ptsLive { background: #fde8e8; color: #dc3545; }
+
 /* ── Standings card ── */
 .standCard {
     background: #fff;

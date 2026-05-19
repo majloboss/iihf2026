@@ -8,6 +8,12 @@ import styles from './Games.module.css';
 const PHASE_LABEL = { A: 'Skupina A', B: 'Skupina B', QF: 'Štvrťfinále', SF: 'Semifinále', BRONZE: 'O bronz', GOLD: 'Finále' };
 const PHASE_BTN   = { all: 'ALL', A: 'A', B: 'B', QF: 'QF', SF: 'SF', BRONZE: 'BR', GOLD: 'F' };
 const FLAG_URL = (code) => `/flags/team_flag_${code?.toLowerCase()}.png`;
+const isLsLive = (g) => g.ls_score1 != null && g.ls_status && g.ls_status !== 'FT';
+const formatLsAge = (ts) => {
+    if (!ts) return '';
+    const m = Math.floor((Date.now() - new Date(ts).getTime()) / 60000);
+    return m < 1 ? 'práve teraz' : `pred ${m} min`;
+};
 const dayKey = (iso) => {
     const d = new Date(iso);
     return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -44,7 +50,14 @@ function TipInput({ game, onSaved }) {
     };
 
     if (!canTip) {
-        if (game.tip1 != null) return <div className={styles.tipDone}>{game.tip1}:{game.tip2} {game.points != null && <span className={styles.pts}>+{game.points}b</span>}</div>;
+        if (game.tip1 != null) return (
+            <div className={styles.tipDone}>
+                {game.tip1}:{game.tip2}
+                {game.points != null && (
+                    <span className={game.status === 'finished' ? styles.pts : styles.ptsLive}>+{game.points}b</span>
+                )}
+            </div>
+        );
         if (!game.team1 || !game.team2) return null;
         if (new Date() < new Date(game.starts_at)) return <div className={styles.tipClosed}>Uzavreté</div>;
         return null;
@@ -294,11 +307,19 @@ export default function Games() {
                                             <span className={styles.time}>{new Date(g.starts_at).toLocaleTimeString('sk-SK', { hour: '2-digit', minute: '2-digit' })}</span>
                                         </div>
                                         <div className={styles.matchRow}>
-                                            <TeamBlock code={g.team1} score={es === 'finished' ? g.score1 : null} isLeft />
+                                            <TeamBlock code={g.team1} isLeft />
                                             <div className={styles.vs}>
-                                                {es === 'live' ? <span className={styles.live}>LIVE</span> : 'vs'}
+                                                {es === 'live'
+                                                    ? <span className={styles.live}>LIVE</span>
+                                                    : es === 'finished' && g.score1 != null
+                                                        ? <span className={styles.result}>
+                                                            {g.final1 != null
+                                                                ? <>{g.final1}:{g.final2}<span className={styles.resultOT}> pp</span></>
+                                                                : <>{g.score1}:{g.score2}</>}
+                                                          </span>
+                                                        : 'vs'}
                                             </div>
-                                            <TeamBlock code={g.team2} score={es === 'finished' ? g.score2 : null} />
+                                            <TeamBlock code={g.team2} />
                                         </div>
                                         <div className={styles.venue}>
                                             {g.venue}
@@ -308,6 +329,16 @@ export default function Games() {
                                                 </a>
                                             )}
                                         </div>
+                                        {isLsLive(g) && (
+                                            <div className={styles.liveBar}>
+                                                <span className={styles.lsBadge}>LIVE</span>
+                                                <span className={styles.liveScore}>
+                                                    {g.ls_score1}:{g.ls_score2}
+                                                    {g.ls_final1 != null && <span className={styles.lsOT}> pp</span>}
+                                                </span>
+                                                <span className={styles.lsTime}>{formatLsAge(g.ls_updated_at)}</span>
+                                            </div>
+                                        )}
                                         <TipInput game={g} onSaved={handleSaved} />
                                         {es !== 'scheduled' && <GroupTips gameId={g.id} />}
                                     </div>
