@@ -86,13 +86,12 @@ function TabBodovanie() {
                     </thead>
                     <tbody>
                         <tr><td><strong>1.</strong> Celkové body</td><td>Súčet bodov zo všetkých tipovaných zápasov</td></tr>
-                        <tr><td><strong>2.</strong> Počet tipov za 7 bodov</td><td>Presný výsledok v play-off (víťaz + oba góly)</td></tr>
-                        <tr><td><strong>3.</strong> Počet tipov za 6 bodov</td><td>Víťaz v play-off + 1 správny počet gólov</td></tr>
+                        <tr><td><strong>2.</strong> Počet tipov za 7 bodov</td><td>Presný výsledok v play-off (víťaz/remíza + oba góly)</td></tr>
+                        <tr><td><strong>3.</strong> Počet tipov za 6 bodov</td><td>Víťaz/Remíza v play-off + 1 správny počet gólov</td></tr>
                         <tr><td><strong>4.</strong> Počet tipov za 5 bodov</td><td>Presný výsledok v základnej časti (víťaz/remíza + oba góly)</td></tr>
-                        <tr><td><strong>5.</strong> Počet tipov za 4 body</td><td>Víťaz/remíza v základnej časti + 1 správny počet gólov</td></tr>
-                        <tr><td><strong>6.</strong> Počet tipov za 3 body</td><td>Správny víťaz alebo remíza, bez správnych gólov</td></tr>
-                        <tr><td><strong>7.</strong> Počet tipov za 2 body</td><td>Oba správne počty gólov, ale zlý víťaz</td></tr>
-                        <tr><td><strong>8.</strong> Počet tipov za 1 bod</td><td>Jeden správny počet gólov</td></tr>
+                        <tr><td><strong>5.</strong> Počet tipov za 4 body</td><td>Víťaz/Remíza v základnej časti + 1 správny počet gólov</td></tr>
+                        <tr><td><strong>6.</strong> Počet tipov za 3 body</td><td>Správny víťaz/remíza, bez správnych gólov</td></tr>
+                        <tr><td><strong>7.</strong> Počet tipov za 1 bod</td><td>Jeden správny počet gólov</td></tr>
                     </tbody>
                 </table>
                 <p className={styles.note}>Ak sú hráči zhodní aj po všetkých kritériách, zdieľajú rovnaké miesto v poradí.</p>
