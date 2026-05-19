@@ -563,6 +563,9 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 
 
 
+**Admin — rozšírené filtrovanie výsledkov**
+- 🟠 AdminResults: kalendár dní, filter tímov (vlajky), farebné fázové tlačidlá (ako user stránka Zápasy)
+
 ---
 
-*Posledná aktualizácia: 2026-05-17 (v2.62)*
+*Posledná aktualizácia: 2026-05-19 (v2.63)*
