@@ -310,6 +310,7 @@ export default function AdminResults() {
 
             {/* Vlajky tímov */}
             {allTeams.length > 0 && (
+                <>
                 <div className={gStyles.flagsRow}>
                     {allTeams.map(team => (
                         <button
@@ -329,6 +330,7 @@ export default function AdminResults() {
                     </button>
                     {recalcMsg && <span className={recalcMsg.startsWith('✓') ? styles.recalcOk : styles.recalcErr}>{recalcMsg}</span>}
                 </div>
+                </>
             )}
 
             {Object.keys(byDate).length === 0
