@@ -570,33 +570,35 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 
 ---
 
-## Zmeny 19.5.2026 — Livescore (iba develop, v2.66–v2.67)
+## Zmeny 19.5.2026 — Livescore (v2.66–v2.78, main)
 
-### 🟠 Livescore — databáza (run_022)
-- 🟠 `iihf2026.teams`: nový stĺpec `api_name` — meno tímu v api-sports.io (pre mapovanie)
-- 🟠 `iihf2026.games`: 9 nových stĺpcov `ls_*` — live skóre, stav, timestamp, počty requestov (ukladajú sa oddelene od adminom potvrdeného výsledku)
-- 🟠 `iihf2026.livescore_daily`: tabuľka na denné počítanie API volaní (budget tracking)
-- 🟠 API kľúč api-sports.io uložený v `api/config/livescore_config.php`
+### ✅ Livescore — databáza (run_022)
+- ✅ `iihf2026.teams`: nový stĺpec `api_name` — meno tímu v api-sports.io (pre mapovanie)
+- ✅ `iihf2026.games`: 9 nových stĺpcov `ls_*` — live skóre, stav, timestamp, počty requestov (ukladajú sa oddelene od adminom potvrdeného výsledku)
+- ✅ `iihf2026.livescore_daily`: tabuľka na denné počítanie API volaní (budget tracking)
+- ✅ API kľúč api-sports.io uložený v `api/config/livescore_config.php`
 
-### 🟠 Livescore — backend cron
-- 🟠 `api/cron/livescore_poll.php` — polling logika: detekcia aktívnych zápasov, dynamický interval (next_poll_at), API volanie, update `ls_*` stĺpcov, OT/SO detekcia, denný budget limit (95 req/deň)
-- 🟠 `api/cron/run_livescore.php` — HTTP wrapper s `CRON_SECRET` token autentifikáciou
-- 🟠 Cron job nastavený na hostingu (`* * * * *` → DEV URL, script rozhoduje kedy volať API)
+### ✅ Livescore — backend cron
+- ✅ `api/cron/livescore_poll.php` — polling logika: detekcia aktívnych zápasov, dynamický interval (next_poll_at), API volanie, update `ls_*` stĺpcov, OT/SO detekcia, denný budget limit (95 req/deň)
+- ✅ `api/cron/run_livescore.php` — HTTP wrapper s `CRON_SECRET` token autentifikáciou
+- ✅ Cron job nastavený na hostingu (`* * * * *` → DEV URL, script rozhoduje kedy volať API)
+- ⚠️ api-sports.io free plán nepokrýva sezónu 2026 → automatický polling nefunkčný; admin zadáva livescore manuálne
 
-### 🟠 Livescore — Admin obrazovka (Výsledky)
-- 🟠 AdminResults: live score bar — červená+blikanie keď `ls_status != FT` a `ls_score1 != null`
-- 🟠 AdminResults: tlačidlo „↙ Prevziať Livescore" — predvyplní formulár z `ls_*` hodnôt
-- 🟠 AdminResults: tipy hráčov — body červené počas live zápasu (`.tipPtsLive`)
-- 🟠 AdminResults: počítadlo requestov `Livescore: X / Y req`
-- 🟠 AdminResults: manuálny vstup livescore — admin zadáva `ls_*` priamo (skóre + pp checkbox + „Uložiť live"); oddelené od finálneho výsledku; funguje aj bez automatického cronu
+### ✅ Livescore — Admin obrazovka (Výsledky)
+- ✅ Live score bar — červená+blikanie keď `ls_status != FT` a `ls_score1 != null`; skryje sa po uzavretí zápasu
+- ✅ Tlačidlo „↙ Prevziať Livescore" — predvyplní formulár z `ls_*` hodnôt
+- ✅ Manuálny vstup livescore — formulár s dvomi číselníkmi, pp checkbox, „Uložiť live"; predvyplní 0:0; oddelené od finálneho výsledku
+- ✅ Tipy hráčov — priebežné body červenou z `calcLivePoints` počas live; zelené po skončení
+- ✅ Auto-select dnešný deň v kalendári pri otvorení
 
-### 🟠 Livescore — User obrazovky
-- 🟠 Games (Zápasy): skóre presunuté do stredu (formát `3:1` zelené, OT zobrazuje `pp`)
-- 🟠 Games (Zápasy): live score bar pod venue — červená+blikanie keď `isLsLive(g)`
-- 🟠 Games (Zápasy): body tipu červené počas live zápasu (`.ptsLive`)
-- 🟠 Dashboard (Prehľad): live score bar v GameCard — červená+blikanie
-- 🟠 Dashboard (Prehľad): body tipu červené keď `isLsLive(game)`
+### ✅ Livescore — User obrazovky
+- ✅ Games (Zápasy): live score bar vertikálny (LIVE → skóre → čas), skryje sa po `status=finished`
+- ✅ Games (Zápasy): body tipu červené počas live (`.ptsLive`)
+- ✅ Games (Zápasy): tipy skupín — priebežné body červenou z `calcLivePoints`; auto-select dnes; auto-refresh 30s
+- ✅ Dashboard (Prehľad): live score bar vertikálny v GameCard; skryje sa po `status=finished`
+- ✅ Dashboard (Prehľad): body tipu červené keď `isLsLive(game)`; auto-refresh 30s
+- ✅ Dashboard (Prehľad): modal Tipy skupín — priebežné body červenou z `calcLivePoints`
 
 ---
 
-*Posledná aktualizácia: 2026-05-19 (v2.70)*
+*Posledná aktualizácia: 2026-05-19 (v2.78)*
