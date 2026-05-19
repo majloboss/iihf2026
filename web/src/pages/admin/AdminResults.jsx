@@ -8,6 +8,17 @@ const PHASE_LABEL = { A: 'Skupina A', B: 'Skupina B', QF: 'Štvrťfinále', SF: 
 const PHASE_BTN   = { all: 'ALL', A: 'A', B: 'B', QF: 'QF', SF: 'SF', BRONZE: 'BR', GOLD: 'F' };
 const FLAG_URL    = code => `/flags/team_flag_${code?.toLowerCase()}.png`;
 const isLsLive    = ls => ls && ls !== 'NS' && ls !== 'FT';
+const calcLivePoints = (t1, t2, g) => {
+    const s1 = g.ls_final1 != null ? +g.ls_final1 : (g.ls_score1 != null ? +g.ls_score1 : null);
+    const s2 = g.ls_final2 != null ? +g.ls_final2 : (g.ls_score2 != null ? +g.ls_score2 : null);
+    if (s1 == null || s2 == null || t1 == null || t2 == null) return null;
+    const n1 = +t1, n2 = +t2;
+    const isPlayoff = ['QF','SF','BRONZE','GOLD'].includes(g.phase);
+    const winPts = isPlayoff ? 5 : 3;
+    const rw = s1 > s2 ? 1 : s1 < s2 ? -1 : 0;
+    const tw = n1 > n2 ? 1 : n1 < n2 ? -1 : 0;
+    return (tw === rw ? winPts : 0) + (n1 === s1 ? 1 : 0) + (n2 === s2 ? 1 : 0);
+};
 const formatLsAge = iso => {
     if (!iso) return null;
     const mins = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
@@ -42,7 +53,7 @@ function TeamBlock({ code, isLeft }) {
     );
 }
 
-function TipsPanel({ gameId, isFinished }) {
+function TipsPanel({ gameId, isFinished, game }) {
     const [tips,    setTips]    = useState(null);
     const [loading, setLoading] = useState(false);
     const [err,     setErr]     = useState('');
@@ -70,7 +81,11 @@ function TipsPanel({ gameId, isFinished }) {
                 </tr>
             </thead>
             <tbody>
-                {tips.map(t => (
+                {tips.map(t => {
+                    const livePts = !isFinished && game && isLsLive(game.ls_status)
+                        ? calcLivePoints(t.tip1, t.tip2, game)
+                        : null;
+                    return (
                     <tr key={t.user_id} className={t.tip1 == null ? styles.tipRowUntipped : ''}>
                         <td className={styles.tipUser}>
                             {t.avatar
@@ -79,12 +94,13 @@ function TipsPanel({ gameId, isFinished }) {
                             {t.username}
                         </td>
                         <td className={styles.tipScore}>{t.tip1 != null ? `${t.tip1}:${t.tip2}` : '—'}</td>
-                        <td className={t.points != null && !isFinished ? styles.tipPtsLive : styles.tipPts}>
-                            {t.points != null ? `+${t.points}b` : '—'}
+                        <td className={livePts != null ? styles.tipPtsLive : styles.tipPts}>
+                            {livePts != null ? `+${livePts}b` : (t.points != null ? `+${t.points}b` : '—')}
                         </td>
                         <td className={styles.tipTime}>{t.updated_at ? new Date(t.updated_at).toLocaleString('sk-SK') : '—'}</td>
                     </tr>
-                ))}
+                    );
+                })}
             </tbody>
         </table>
     );
@@ -291,7 +307,7 @@ function ResultCard({ game: initGame }) {
             <button className={styles.toggleTips} onClick={() => setOpen(o => !o)}>
                 {open ? '▲ Skryť tipy' : '▼ Tipy hráčov'}
             </button>
-            {open && <TipsPanel gameId={game.id} isFinished={status === 'finished'} />}
+            {open && <TipsPanel gameId={game.id} isFinished={status === 'finished'} game={game} />}
         </div>
     );
 }
