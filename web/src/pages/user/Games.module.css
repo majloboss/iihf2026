@@ -126,6 +126,8 @@
     min-width: 36px;
     text-align: center;
 }
+.result { font-size: 1.4rem; font-weight: 700; color: #28a745; }
+.resultOT { font-size: 0.7rem; font-weight: 400; color: #888; }
 .live {
     background: #dc3545;
     color: #fff;

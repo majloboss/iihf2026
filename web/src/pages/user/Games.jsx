@@ -294,11 +294,19 @@ export default function Games() {
                                             <span className={styles.time}>{new Date(g.starts_at).toLocaleTimeString('sk-SK', { hour: '2-digit', minute: '2-digit' })}</span>
                                         </div>
                                         <div className={styles.matchRow}>
-                                            <TeamBlock code={g.team1} score={es === 'finished' ? g.score1 : null} isLeft />
+                                            <TeamBlock code={g.team1} isLeft />
                                             <div className={styles.vs}>
-                                                {es === 'live' ? <span className={styles.live}>LIVE</span> : 'vs'}
+                                                {es === 'live'
+                                                    ? <span className={styles.live}>LIVE</span>
+                                                    : es === 'finished' && g.score1 != null
+                                                        ? <span className={styles.result}>
+                                                            {g.final1 != null
+                                                                ? <>{g.final1}:{g.final2}<span className={styles.resultOT}> pp</span></>
+                                                                : <>{g.score1}:{g.score2}</>}
+                                                          </span>
+                                                        : 'vs'}
                                             </div>
-                                            <TeamBlock code={g.team2} score={es === 'finished' ? g.score2 : null} />
+                                            <TeamBlock code={g.team2} />
                                         </div>
                                         <div className={styles.venue}>
                                             {g.venue}
