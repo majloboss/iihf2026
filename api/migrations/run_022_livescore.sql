@@ -4,26 +4,27 @@
 
 -- ============================================================
 -- 1. iihf2026.teams — api_name (názov tímu v api-sports.io)
+--    Stĺpec code (nie team_code), api_name stĺpec už existuje z predchádzajúceho behu.
 -- ============================================================
 ALTER TABLE iihf2026.teams
     ADD COLUMN IF NOT EXISTS api_name VARCHAR(100);
 
-UPDATE iihf2026.teams SET api_name = 'Austria'        WHERE team_code = 'AUT';
-UPDATE iihf2026.teams SET api_name = 'Canada'         WHERE team_code = 'CAN';
-UPDATE iihf2026.teams SET api_name = 'Czech Republic' WHERE team_code = 'CZE';
-UPDATE iihf2026.teams SET api_name = 'Denmark'        WHERE team_code = 'DEN';
-UPDATE iihf2026.teams SET api_name = 'Finland'        WHERE team_code = 'FIN';
-UPDATE iihf2026.teams SET api_name = 'Germany'        WHERE team_code = 'GER';
-UPDATE iihf2026.teams SET api_name = 'Great Britain'  WHERE team_code = 'GBR';
-UPDATE iihf2026.teams SET api_name = 'Hungary'        WHERE team_code = 'HUN';
-UPDATE iihf2026.teams SET api_name = 'Italy'          WHERE team_code = 'ITA';
-UPDATE iihf2026.teams SET api_name = 'Latvia'         WHERE team_code = 'LAT';
-UPDATE iihf2026.teams SET api_name = 'Norway'         WHERE team_code = 'NOR';
-UPDATE iihf2026.teams SET api_name = 'Slovakia'       WHERE team_code = 'SVK';
-UPDATE iihf2026.teams SET api_name = 'Slovenia'       WHERE team_code = 'SLO';
-UPDATE iihf2026.teams SET api_name = 'Sweden'         WHERE team_code = 'SWE';
-UPDATE iihf2026.teams SET api_name = 'Switzerland'    WHERE team_code = 'SUI';
-UPDATE iihf2026.teams SET api_name = 'USA'            WHERE team_code = 'USA';
+UPDATE iihf2026.teams SET api_name = 'Austria'        WHERE code = 'AUT';
+UPDATE iihf2026.teams SET api_name = 'Canada'         WHERE code = 'CAN';
+UPDATE iihf2026.teams SET api_name = 'Czech Republic' WHERE code = 'CZE';
+UPDATE iihf2026.teams SET api_name = 'Denmark'        WHERE code = 'DEN';
+UPDATE iihf2026.teams SET api_name = 'Finland'        WHERE code = 'FIN';
+UPDATE iihf2026.teams SET api_name = 'Germany'        WHERE code = 'GER';
+UPDATE iihf2026.teams SET api_name = 'Great Britain'  WHERE code = 'GBR';
+UPDATE iihf2026.teams SET api_name = 'Hungary'        WHERE code = 'HUN';
+UPDATE iihf2026.teams SET api_name = 'Italy'          WHERE code = 'ITA';
+UPDATE iihf2026.teams SET api_name = 'Latvia'         WHERE code = 'LAT';
+UPDATE iihf2026.teams SET api_name = 'Norway'         WHERE code = 'NOR';
+UPDATE iihf2026.teams SET api_name = 'Slovakia'       WHERE code = 'SVK';
+UPDATE iihf2026.teams SET api_name = 'Slovenia'       WHERE code = 'SLO';
+UPDATE iihf2026.teams SET api_name = 'Sweden'         WHERE code = 'SWE';
+UPDATE iihf2026.teams SET api_name = 'Switzerland'    WHERE code = 'SUI';
+UPDATE iihf2026.teams SET api_name = 'USA'            WHERE code = 'USA';
 
 -- ============================================================
 -- 2. iihf2026.games — ls_* stĺpce (live score z api-sports)

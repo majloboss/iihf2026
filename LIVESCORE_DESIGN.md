@@ -94,7 +94,7 @@ ALTER TABLE iihf2026.teams ADD COLUMN api_name VARCHAR(100);
 
 PHP cron načíta mapping z DB (nie hardcoded):
 ```php
-$map = $pdo->query("SELECT api_name, team_code FROM iihf2026.teams")
+$map = $pdo->query("SELECT api_name, code FROM iihf2026.teams")
            ->fetchAll(PDO::FETCH_KEY_PAIR); // ["Finland" => "FIN", ...]
 ```
 
