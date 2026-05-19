@@ -578,10 +578,10 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 - 🟠 `iihf2026.livescore_daily`: tabuľka na denné počítanie API volaní (budget tracking)
 - 🟠 API kľúč api-sports.io uložený v `api/config/livescore_config.php`
 
-### 🟠 Livescore — backend cron (zatiaľ nie je)
-- 🔲 `api/cron/livescore_poll.php` — polling logika (každých 10 min, iba počas aktívnych zápasov)
-- 🔲 `api/cron/run_livescore.php` — HTTP wrapper s token autentifikáciou
-- 🔲 Nastavenie cron jobu na hostingu (`*/10 * * * *`)
+### 🟠 Livescore — backend cron
+- 🟠 `api/cron/livescore_poll.php` — polling logika: detekcia aktívnych zápasov, API volanie, update `ls_*` stĺpcov, OT/SO detekcia, denný budget limit (95 req/deň)
+- 🟠 `api/cron/run_livescore.php` — HTTP wrapper s `CRON_SECRET` token autentifikáciou
+- 🔲 Nastavenie cron jobu na hostingu (`*/10 * * * *` → URL run_livescore.php?token=...)
 
 ### 🟠 Livescore — Admin obrazovka (Výsledky)
 - 🟠 AdminResults: live score bar — červená+blikanie keď `ls_status != FT` a `ls_score1 != null`
@@ -598,4 +598,4 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 
 ---
 
-*Posledná aktualizácia: 2026-05-19 (v2.67)*
+*Posledná aktualizácia: 2026-05-19 (v2.68)*
