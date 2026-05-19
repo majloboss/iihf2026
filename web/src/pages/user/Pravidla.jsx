@@ -54,27 +54,6 @@ function TabBodovanie() {
             </div>
 
             <div className={styles.card}>
-                <h3 className={styles.cardTitle}>Príklady (základná časť)</h3>
-                <p className={styles.exampleDesc}>Skutočný výsledok: <strong>FIN 3:2 GER</strong></p>
-                <table className={styles.table}>
-                    <thead>
-                        <tr>
-                            <th>Tip</th>
-                            <th className={styles.center}>Body</th>
-                            <th>Dôvod</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr><td>FIN 3:2 GER</td><td className={styles.center}><span className={styles.pts3}>5</span></td><td>víťaz ✓, góly FIN ✓, góly GER ✓</td></tr>
-                        <tr><td>FIN 3:1 GER</td><td className={styles.center}><span className={styles.pts2}>4</span></td><td>víťaz ✓, góly FIN ✓, góly GER ✗</td></tr>
-                        <tr><td>FIN 2:1 GER</td><td className={styles.center}><span className={styles.pts1}>3</span></td><td>víťaz ✓, góly FIN ✗, góly GER ✗</td></tr>
-                        <tr><td>FIN 1:2 GER</td><td className={styles.center}><span className={styles.pts1}>1</span></td><td>víťaz ✗, góly GER ✓</td></tr>
-                        <tr><td>FIN 0:1 GER</td><td className={styles.center}><span className={styles.pts0}>0</span></td><td>—</td></tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div className={styles.card}>
                 <h3 className={styles.cardTitle}>Určovanie poradia</h3>
                 <p>Poradie sa určuje podľa kritérií v tomto poradí:</p>
                 <table className={styles.table}>
@@ -95,6 +74,27 @@ function TabBodovanie() {
                     </tbody>
                 </table>
                 <p className={styles.note}>Ak sú hráči zhodní aj po všetkých kritériách, zdieľajú rovnaké miesto v poradí.</p>
+            </div>
+
+            <div className={styles.card}>
+                <h3 className={styles.cardTitle}>Príklady (základná časť)</h3>
+                <p className={styles.exampleDesc}>Skutočný výsledok: <strong>FIN 3:2 GER</strong></p>
+                <table className={styles.table}>
+                    <thead>
+                        <tr>
+                            <th>Tip</th>
+                            <th className={styles.center}>Body</th>
+                            <th>Dôvod</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>FIN 3:2 GER</td><td className={styles.center}><span className={styles.pts3}>5</span></td><td>víťaz ✓, góly FIN ✓, góly GER ✓</td></tr>
+                        <tr><td>FIN 3:1 GER</td><td className={styles.center}><span className={styles.pts2}>4</span></td><td>víťaz ✓, góly FIN ✓, góly GER ✗</td></tr>
+                        <tr><td>FIN 2:1 GER</td><td className={styles.center}><span className={styles.pts1}>3</span></td><td>víťaz ✓, góly FIN ✗, góly GER ✗</td></tr>
+                        <tr><td>FIN 1:2 GER</td><td className={styles.center}><span className={styles.pts1}>1</span></td><td>víťaz ✗, góly GER ✓</td></tr>
+                        <tr><td>FIN 0:1 GER</td><td className={styles.center}><span className={styles.pts0}>0</span></td><td>—</td></tr>
+                    </tbody>
+                </table>
             </div>
 
             <div className={styles.card}>
