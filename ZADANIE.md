@@ -579,9 +579,9 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 - 🟠 API kľúč api-sports.io uložený v `api/config/livescore_config.php`
 
 ### 🟠 Livescore — backend cron
-- 🟠 `api/cron/livescore_poll.php` — polling logika: detekcia aktívnych zápasov, API volanie, update `ls_*` stĺpcov, OT/SO detekcia, denný budget limit (95 req/deň)
+- 🟠 `api/cron/livescore_poll.php` — polling logika: detekcia aktívnych zápasov, dynamický interval (next_poll_at), API volanie, update `ls_*` stĺpcov, OT/SO detekcia, denný budget limit (95 req/deň)
 - 🟠 `api/cron/run_livescore.php` — HTTP wrapper s `CRON_SECRET` token autentifikáciou
-- 🔲 Nastavenie cron jobu na hostingu (`*/10 * * * *` → URL run_livescore.php?token=...)
+- 🟠 Cron job nastavený na hostingu (`* * * * *` → DEV URL, script rozhoduje kedy volať API)
 
 ### 🟠 Livescore — Admin obrazovka (Výsledky)
 - 🟠 AdminResults: live score bar — červená+blikanie keď `ls_status != FT` a `ls_score1 != null`
@@ -598,4 +598,4 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 
 ---
 
-*Posledná aktualizácia: 2026-05-19 (v2.68)*
+*Posledná aktualizácia: 2026-05-19 (v2.69)*
