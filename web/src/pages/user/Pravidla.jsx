@@ -75,6 +75,29 @@ function TabBodovanie() {
             </div>
 
             <div className={styles.card}>
+                <h3 className={styles.cardTitle}>Určovanie poradia</h3>
+                <p>Poradie sa určuje podľa kritérií v tomto poradí:</p>
+                <table className={styles.table}>
+                    <thead>
+                        <tr>
+                            <th>Kritérium</th>
+                            <th>Popis</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><strong>1.</strong> Celkové body</td><td>Súčet bodov zo všetkých tipovaných zápasov</td></tr>
+                        <tr><td><strong>2.</strong> Počet tipov za 7 bodov</td><td>Presný výsledok v play-off (víťaz/remíza + oba góly)</td></tr>
+                        <tr><td><strong>3.</strong> Počet tipov za 6 bodov</td><td>Víťaz/Remíza v play-off + 1 správny počet gólov</td></tr>
+                        <tr><td><strong>4.</strong> Počet tipov za 5 bodov</td><td>Presný výsledok v základnej časti (víťaz/remíza + oba góly)</td></tr>
+                        <tr><td><strong>5.</strong> Počet tipov za 4 body</td><td>Víťaz/Remíza v základnej časti + 1 správny počet gólov</td></tr>
+                        <tr><td><strong>6.</strong> Počet tipov za 3 body</td><td>Správny víťaz/remíza, bez správnych gólov</td></tr>
+                        <tr><td><strong>7.</strong> Počet tipov za 1 bod</td><td>Jeden správny počet gólov</td></tr>
+                    </tbody>
+                </table>
+                <p className={styles.note}>Ak sú hráči zhodní aj po všetkých kritériách, zdieľajú rovnaké miesto v poradí.</p>
+            </div>
+
+            <div className={styles.card}>
                 <h3 className={styles.cardTitle}>Príklady (play-off)</h3>
                 <p className={styles.exampleDesc}>Skutočný výsledok: <strong>CAN 2:1 SVK</strong></p>
                 <table className={styles.table}>
