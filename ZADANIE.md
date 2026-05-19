@@ -588,6 +588,7 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 - 🟠 AdminResults: tlačidlo „↙ Prevziať Livescore" — predvyplní formulár z `ls_*` hodnôt
 - 🟠 AdminResults: tipy hráčov — body červené počas live zápasu (`.tipPtsLive`)
 - 🟠 AdminResults: počítadlo requestov `Livescore: X / Y req`
+- 🟠 AdminResults: manuálny vstup livescore — admin zadáva `ls_*` priamo (skóre + pp checkbox + „Uložiť live"); oddelené od finálneho výsledku; funguje aj bez automatického cronu
 
 ### 🟠 Livescore — User obrazovky
 - 🟠 Games (Zápasy): skóre presunuté do stredu (formát `3:1` zelené, OT zobrazuje `pp`)
@@ -598,4 +599,4 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 
 ---
 
-*Posledná aktualizácia: 2026-05-19 (v2.69)*
+*Posledná aktualizácia: 2026-05-19 (v2.70)*
