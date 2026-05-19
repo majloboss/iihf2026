@@ -94,15 +94,23 @@ function ResultCard({ game: initGame }) {
     const initEff = effectiveStatus(initGame);
     // s1/s2 = zobrazovaný výsledok (final ak OT, inak regulation)
     const initOT  = initGame.final1 != null;
-    const [game,   setGame]   = useState(initGame);
-    const [s1,     setS1]     = useState(initOT ? String(initGame.final1) : (initGame.score1 != null ? String(initGame.score1) : ''));
-    const [s2,     setS2]     = useState(initOT ? String(initGame.final2) : (initGame.score2 != null ? String(initGame.score2) : ''));
-    const [isOT,   setIsOT]   = useState(initOT);
-    const [status, setStatus] = useState(initEff);
-    const [saving, setSaving] = useState(false);
-    const [saved,  setSaved]  = useState(false);
-    const [err,    setErr]    = useState('');
-    const [open,   setOpen]   = useState(false);
+    const [game,     setGame]     = useState(initGame);
+    const [s1,       setS1]       = useState(initOT ? String(initGame.final1) : (initGame.score1 != null ? String(initGame.score1) : ''));
+    const [s2,       setS2]       = useState(initOT ? String(initGame.final2) : (initGame.score2 != null ? String(initGame.score2) : ''));
+    const [isOT,     setIsOT]     = useState(initOT);
+    const [status,   setStatus]   = useState(initEff);
+    const [saving,   setSaving]   = useState(false);
+    const [saved,    setSaved]    = useState(false);
+    const [err,      setErr]      = useState('');
+    const [open,     setOpen]     = useState(false);
+
+    const initLsOT = initGame.ls_final1 != null;
+    const [ls1,      setLs1]      = useState(initLsOT ? String(initGame.ls_final1) : (initGame.ls_score1 != null ? String(initGame.ls_score1) : '0'));
+    const [ls2,      setLs2]      = useState(initLsOT ? String(initGame.ls_final2) : (initGame.ls_score2 != null ? String(initGame.ls_score2) : '0'));
+    const [lsOT,     setLsOT]     = useState(initLsOT);
+    const [lsSaving, setLsSaving] = useState(false);
+    const [lsSaved,  setLsSaved]  = useState(false);
+    const [lsErr,    setLsErr]    = useState('');
 
     const started = initEff !== 'scheduled';
     const canEdit = status === 'finished';
@@ -125,6 +133,24 @@ function ResultCard({ game: initGame }) {
     const savedS2 = initOT ? (game.final2 != null ? String(game.final2) : '') : (game.score2 != null ? String(game.score2) : '');
     const dirty = status !== effectiveStatus(game) ||
         (canEdit && (s1 !== savedS1 || s2 !== savedS2 || isOT !== (game.final1 != null)));
+
+    const saveLs = async () => {
+        if (ls1 === '' || ls2 === '') { setLsErr('Zadaj oba góly'); return; }
+        const v1 = parseInt(ls1), v2 = parseInt(ls2);
+        if (lsOT && v1 === v2) { setLsErr('Po predĺžení musí byť víťaz'); return; }
+        if (lsOT && Math.abs(v1 - v2) !== 1) { setLsErr('Po predĺžení rozdiel musí byť 1 gól'); return; }
+        setLsSaving(true); setLsErr(''); setLsSaved(false);
+        const payload = lsOT
+            ? { ls_score1: Math.min(v1,v2), ls_score2: Math.min(v1,v2), ls_final1: v1, ls_final2: v2, ls_status: 'MANUAL' }
+            : { ls_score1: v1, ls_score2: v2, ls_final1: null, ls_final2: null, ls_status: 'MANUAL' };
+        try {
+            await updateGame(game.id, payload);
+            setGame(g => ({ ...g, ...payload, ls_updated_at: new Date().toISOString() }));
+            setLsSaved(true);
+            setTimeout(() => setLsSaved(false), 2000);
+        } catch (e) { setLsErr(e.message); }
+        finally { setLsSaving(false); }
+    };
 
     const save = async () => {
         if (canEdit && (s1 === '' || s2 === '')) { setErr('Zadaj oba góly'); return; }
@@ -194,6 +220,26 @@ function ResultCard({ game: initGame }) {
                         {game.ls_final1 != null && <span className={styles.lsOT}> (pp)</span>}
                     </span>
                     <span className={styles.lsTime}>{formatLsAge(game.ls_updated_at)}</span>
+                </div>
+            )}
+
+            {/* Manuálny livescore vstup */}
+            {started && status !== 'finished' && (
+                <div className={styles.lsManualBlock}>
+                    <span className={styles.lsManualLabel}>Manuálny live:</span>
+                    <div className={styles.lsManualRow}>
+                        <input type="number" min="0" max="30" value={ls1} onChange={e => setLs1(e.target.value)} className={styles.scoreIn} />
+                        <span className={styles.colon}>:</span>
+                        <input type="number" min="0" max="30" value={ls2} onChange={e => setLs2(e.target.value)} className={styles.scoreIn} />
+                        <label className={styles.otCheck}>
+                            <input type="checkbox" checked={lsOT} onChange={e => setLsOT(e.target.checked)} />
+                            pp
+                        </label>
+                        <button className={styles.btnSaveLs} onClick={saveLs} disabled={lsSaving}>
+                            {lsSaving ? '…' : lsSaved ? '✓' : 'Uložiť live'}
+                        </button>
+                        {lsErr && <span className={styles.errMsg}>{lsErr}</span>}
+                    </div>
                 </div>
             )}
 

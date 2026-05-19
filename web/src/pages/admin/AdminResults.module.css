@@ -249,3 +249,39 @@
     margin-top: 4px;
     text-align: right;
 }
+
+.lsManualBlock {
+    margin-top: 8px;
+    padding: 8px 10px;
+    background: #fff5f5;
+    border: 1px dashed #f5c6cb;
+    border-radius: 8px;
+}
+.lsManualLabel {
+    display: block;
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: #dc3545;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 6px;
+}
+.lsManualRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.btnSaveLs {
+    padding: 5px 12px;
+    background: #dc3545;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    white-space: nowrap;
+    transition: background 0.15s;
+}
+.btnSaveLs:hover:not(:disabled) { background: #b02a37; }
+.btnSaveLs:disabled { opacity: 0.45; cursor: default; }
