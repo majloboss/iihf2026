@@ -65,28 +65,40 @@ Po turnaji vyhodnotiť presnosť/spoľahlivosť live score dát oproti reálnym 
 
 Párovanie cez: **dátum + dvojica tímov** (po konverzii API mena → DB kódu)
 
-### Mapping tabuľka (overená, 16/16 tímov)
+### Mapping — uložený v DB
 
-| API `teams.*.name` | DB `team_code` |
-|---|---|
-| Austria | AUT |
-| Canada | CAN |
-| Czech Republic | CZE |
-| Denmark | DEN |
-| Finland | FIN |
-| Germany | GER |
-| Great Britain | GBR |
-| Hungary | HUN |
-| Italy | ITA |
-| Latvia | LAT |
-| Norway | NOR |
-| Slovakia | SVK |
-| Slovenia | SLO |
-| Sweden | SWE |
-| Switzerland | SUI |
-| USA | USA |
+Nový stĺpec `api_name` v tabuľke `iihf2026.teams` — presný názov tímu tak ako ho vracia api-sports.io.
 
-### SQL párovanie
+```sql
+ALTER TABLE iihf2026.teams ADD COLUMN api_name VARCHAR(100);
+```
+
+| `team_code` | `team_name` | `api_name` |
+|---|---|---|
+| AUT | Austria | Austria |
+| CAN | Canada | Canada |
+| CZE | Czech Republic | Czech Republic |
+| DEN | Denmark | Denmark |
+| FIN | Finland | Finland |
+| GER | Germany | Germany |
+| GBR | Great Britain | Great Britain |
+| HUN | Hungary | Hungary |
+| ITA | Italy | Italy |
+| LAT | Latvia | Latvia |
+| NOR | Norway | Norway |
+| SVK | Slovakia | Slovakia |
+| SLO | Slovenia | Slovenia |
+| SWE | Sweden | Sweden |
+| SUI | Switzerland | Switzerland |
+| USA | United States | USA |
+
+PHP cron načíta mapping z DB (nie hardcoded):
+```php
+$map = $pdo->query("SELECT api_name, team_code FROM iihf2026.teams")
+           ->fetchAll(PDO::FETCH_KEY_PAIR); // ["Finland" => "FIN", ...]
+```
+
+### SQL párovanie zápasu
 
 ```sql
 SELECT id FROM iihf2026.games
