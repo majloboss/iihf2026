@@ -31,12 +31,20 @@ curl_close($ch);
 echo "HTTP: $httpCode\n\n";
 
 $body = json_decode($resp, true);
-if (!isset($body['response'])) {
+if (!$body) {
     echo "Invalid response:\n$resp\n";
     exit;
 }
 
-echo "Games found: " . count($body['response']) . "\n\n";
+echo "Results: " . ($body['results'] ?? '?') . "\n";
+echo "Errors: "  . json_encode($body['errors'] ?? []) . "\n";
+echo "Paging: "  . json_encode($body['paging']  ?? []) . "\n\n";
+
+if (empty($body['response'])) {
+    echo "--- No games in response ---\n";
+    exit;
+}
+
 foreach ($body['response'] as $ag) {
     echo "--- " . ($ag['teams']['home']['name'] ?? '?') . " vs " . ($ag['teams']['away']['name'] ?? '?') . " ---\n";
     echo "Status: " . json_encode($ag['status']) . "\n";
