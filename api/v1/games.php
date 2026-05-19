@@ -36,7 +36,7 @@ if ($method === 'GET') {
         $stmt->execute([':uid' => $auth['user_id']]);
         $rows = $stmt->fetchAll();
     } catch (PDOException $e) {
-        // Fallback bez flashscore_url (run_014 nespustený)
+        // Fallback - chýbajú niektoré stĺpce (run_014 / run_022 nespustený)
         $stmt = $pdo->prepare("
             SELECT g.id, g.game_number, g.phase, g.team1, g.team2,
                    g.starts_at, g.venue, g.score1, g.score2, g.final1, g.final2, g.status,
@@ -47,7 +47,17 @@ if ($method === 'GET') {
         ");
         $stmt->execute([':uid' => $auth['user_id']]);
         $rows = $stmt->fetchAll();
-        foreach ($rows as &$r) { $r['flashscore_url'] = null; }
+        foreach ($rows as &$r) {
+            $r['flashscore_url']      = null;
+            $r['ls_score1']           = null;
+            $r['ls_score2']           = null;
+            $r['ls_final1']           = null;
+            $r['ls_final2']           = null;
+            $r['ls_status']           = null;
+            $r['ls_updated_at']       = null;
+            $r['ls_requests_expected'] = null;
+            $r['ls_requests_actual']   = null;
+        }
         unset($r);
     }
     json_ok($rows);
