@@ -45,7 +45,7 @@ if (!$anyActive) {
 }
 
 // 3. Načítaj/vytvor denný záznam — získaj api_calls + next_poll_at
-$pdo->prepare("INSERT INTO iihf2026.livescore_daily (date, api_calls) VALUES (?) ON CONFLICT DO NOTHING")
+$pdo->prepare("INSERT INTO iihf2026.livescore_daily (date, api_calls) VALUES (?, 0) ON CONFLICT DO NOTHING")
     ->execute([$today]);
 
 $dayStmt = $pdo->prepare("SELECT api_calls, next_poll_at FROM iihf2026.livescore_daily WHERE date = ?");
