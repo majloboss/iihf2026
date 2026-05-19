@@ -125,6 +125,8 @@ Dôvod: po turnaji vyhodnotíme presnosť/spoľahlivosť API dát.
 | `ls_status` | VARCHAR(10) | Live: raw status z API (`NS`, `1P`, `BT`, `FT`, …) |
 | `ls_api_game_id` | INT | ID zápasu v api-sports (pre priame dotazy, audit) |
 | `ls_updated_at` | TIMESTAMP | Kedy bol naposledy live score aktualizovaný |
+| `ls_requests_expected` | INT | Plánovaný počet pollov — vypočítané pri štarte zápasu |
+| `ls_requests_actual` | INT DEFAULT 0 | Reálny počet pollov kým bol zápas aktívny (nie FT) |
 
 ### Existujúce stĺpce (potvrdené výsledky — nemenia sa automaticky)
 
