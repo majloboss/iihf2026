@@ -63,7 +63,7 @@ function TipsPanel({ gameId }) {
             </thead>
             <tbody>
                 {tips.map(t => (
-                    <tr key={t.user_id}>
+                    <tr key={t.user_id} className={t.tip1 == null ? styles.tipRowUntipped : ''}>
                         <td className={styles.tipUser}>
                             {t.avatar
                                 ? <img src={t.avatar} className={styles.tipAvatar} alt="" />

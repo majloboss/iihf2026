@@ -9,9 +9,9 @@ if (!$game_id) json_error('Chýba game_id', 400);
 $stmt = db()->prepare("
     SELECT u.id AS user_id, u.username, u.avatar,
            t.tip1, t.tip2, t.points, t.updated_at
-    FROM iihf2026.tips t
-    JOIN admin.users u ON u.id = t.user_id
-    WHERE t.game_id = ?
+    FROM admin.users u
+    LEFT JOIN iihf2026.tips t ON t.user_id = u.id AND t.game_id = ?
+    WHERE u.is_active = TRUE AND u.role = 'user'
     ORDER BY t.points DESC NULLS LAST, u.username
 ");
 $stmt->execute([$game_id]);
