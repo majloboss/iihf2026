@@ -306,6 +306,10 @@ export default function Dashboard() {
             .then(([g, s, a, ah]) => { setGames(g); setStandings(s); setAnnouncement(a); setAnnouncementsHistory(ah); })
             .catch(() => {})
             .finally(() => setLoading(false));
+        const iv = setInterval(() => {
+            getGames().then(g => setGames(g)).catch(() => {});
+        }, 30000);
+        return () => clearInterval(iv);
     }, []);
 
     const handleTipSaved = useCallback((gameId, t1, t2) => {

@@ -171,18 +171,23 @@ export default function Games() {
     const todayCalBtn  = useRef(null);
 
     useEffect(() => {
-        getGames()
+        const load = (initial) => getGames()
             .then(data => {
                 setGames(data);
-                setLoading(false);
-                const PLAYOFF = ['QF', 'SF', 'BRONZE', 'GOLD'];
-                const live = data.find(g => g.status === 'live');
-                if (live && PLAYOFF.includes(live.phase)) { setPhase(live.phase); return; }
-                const now = Date.now();
-                const next = data.find(g => g.status === 'scheduled' && new Date(g.starts_at).getTime() > now);
-                if (next && PLAYOFF.includes(next.phase)) setPhase(next.phase);
+                if (initial) {
+                    setLoading(false);
+                    const PLAYOFF = ['QF', 'SF', 'BRONZE', 'GOLD'];
+                    const live = data.find(g => g.status === 'live');
+                    if (live && PLAYOFF.includes(live.phase)) { setPhase(live.phase); return; }
+                    const now = Date.now();
+                    const next = data.find(g => g.status === 'scheduled' && new Date(g.starts_at).getTime() > now);
+                    if (next && PLAYOFF.includes(next.phase)) setPhase(next.phase);
+                }
             })
-            .catch(e => { setError(e.message || 'Chyba API'); setLoading(false); });
+            .catch(e => { if (initial) { setError(e.message || 'Chyba API'); setLoading(false); } });
+        load(true);
+        const iv = setInterval(() => load(false), 30000);
+        return () => clearInterval(iv);
     }, []);
 
     // Auto-scroll calendar to today
