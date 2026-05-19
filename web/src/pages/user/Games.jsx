@@ -15,14 +15,15 @@ const formatLsAge = (ts) => {
     return m < 1 ? 'práve teraz' : `pred ${m} min`;
 };
 const calcLivePoints = (t1, t2, g) => {
-    const s1 = g.ls_final1 != null ? g.ls_final1 : g.ls_score1;
-    const s2 = g.ls_final2 != null ? g.ls_final2 : g.ls_score2;
+    const s1 = g.ls_final1 != null ? +g.ls_final1 : (g.ls_score1 != null ? +g.ls_score1 : null);
+    const s2 = g.ls_final2 != null ? +g.ls_final2 : (g.ls_score2 != null ? +g.ls_score2 : null);
     if (s1 == null || s2 == null || t1 == null || t2 == null) return null;
+    const n1 = +t1, n2 = +t2;
     const isPlayoff = ['QF','SF','BRONZE','GOLD'].includes(g.phase);
     const winPts = isPlayoff ? 5 : 3;
     const rw = s1 > s2 ? 1 : s1 < s2 ? -1 : 0;
-    const tw = t1 > t2 ? 1 : t1 < t2 ? -1 : 0;
-    return (tw === rw ? winPts : 0) + (t1 === s1 ? 1 : 0) + (t2 === s2 ? 1 : 0);
+    const tw = n1 > n2 ? 1 : n1 < n2 ? -1 : 0;
+    return (tw === rw ? winPts : 0) + (n1 === s1 ? 1 : 0) + (n2 === s2 ? 1 : 0);
 };
 const dayKey = (iso) => {
     const d = new Date(iso);
@@ -162,7 +163,7 @@ export default function Games() {
     const [loading, setLoading]           = useState(true);
     const [error, setError]               = useState('');
     const [phase, setPhase]               = useState('all');
-    const [selectedDay, setSelectedDay]   = useState(null);
+    const [selectedDay, setSelectedDay]   = useState(() => dayKey(new Date().toISOString()));
     const [selectedTeam, setSelectedTeam] = useState(location.state?.team ?? null);
     const [view, setView]                 = useState('games');
     const [showUntipped, setShowUntipped] = useState(false);
