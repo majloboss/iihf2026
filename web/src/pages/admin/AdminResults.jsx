@@ -7,6 +7,14 @@ import styles from './AdminResults.module.css';
 const PHASE_LABEL = { A: 'Skupina A', B: 'Skupina B', QF: 'Štvrťfinále', SF: 'Semifinále', BRONZE: 'O bronz', GOLD: 'Finále' };
 const PHASE_BTN   = { all: 'ALL', A: 'A', B: 'B', QF: 'QF', SF: 'SF', BRONZE: 'BR', GOLD: 'F' };
 const FLAG_URL    = code => `/flags/team_flag_${code?.toLowerCase()}.png`;
+const isLsLive    = ls => ls && ls !== 'NS' && ls !== 'FT';
+const formatLsAge = iso => {
+    if (!iso) return null;
+    const mins = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
+    if (mins < 1) return 'práve teraz';
+    if (mins === 1) return 'pred 1 min';
+    return `pred ${mins} min`;
+};
 const dayKey = (iso) => {
     const d = new Date(iso);
     return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -34,7 +42,7 @@ function TeamBlock({ code, isLeft }) {
     );
 }
 
-function TipsPanel({ gameId }) {
+function TipsPanel({ gameId, isFinished }) {
     const [tips,    setTips]    = useState(null);
     const [loading, setLoading] = useState(false);
     const [err,     setErr]     = useState('');
@@ -71,7 +79,9 @@ function TipsPanel({ gameId }) {
                             {t.username}
                         </td>
                         <td className={styles.tipScore}>{t.tip1 != null ? `${t.tip1}:${t.tip2}` : '—'}</td>
-                        <td className={styles.tipPts}>{t.points != null ? `+${t.points}b` : '—'}</td>
+                        <td className={t.points != null && !isFinished ? styles.tipPtsLive : styles.tipPts}>
+                            {t.points != null ? `+${t.points}b` : '—'}
+                        </td>
                         <td className={styles.tipTime}>{t.updated_at ? new Date(t.updated_at).toLocaleString('sk-SK') : '—'}</td>
                     </tr>
                 ))}
@@ -96,6 +106,19 @@ function ResultCard({ game: initGame }) {
 
     const started = initEff !== 'scheduled';
     const canEdit = status === 'finished';
+
+    const hasLS = game.ls_score1 != null;
+    const lsDisplay = game.ls_final1 != null
+        ? `${game.ls_final1}:${game.ls_final2}`
+        : (game.ls_score1 != null ? `${game.ls_score1}:${game.ls_score2}` : null);
+
+    const handleTakeLS = () => {
+        const hasOT = game.ls_final1 != null;
+        setS1(hasOT ? String(game.ls_final1) : String(game.ls_score1 ?? ''));
+        setS2(hasOT ? String(game.ls_final2) : String(game.ls_score2 ?? ''));
+        setIsOT(hasOT);
+        setStatus('finished');
+    };
 
     // Porovnanie voči uloženému stavu
     const savedS1 = initOT ? (game.final1 != null ? String(game.final1) : '') : (game.score1 != null ? String(game.score1) : '');
@@ -162,6 +185,18 @@ function ResultCard({ game: initGame }) {
                 )}
             </div>
 
+            {/* Live score bar */}
+            {hasLS && status !== 'finished' && (
+                <div className={styles.liveBar}>
+                    {isLsLive(game.ls_status) && <span className={styles.lsBadge}>LIVE</span>}
+                    <span className={styles.liveScore}>
+                        {lsDisplay}
+                        {game.ls_final1 != null && <span className={styles.lsOT}> (pp)</span>}
+                    </span>
+                    <span className={styles.lsTime}>{formatLsAge(game.ls_updated_at)}</span>
+                </div>
+            )}
+
             {/* Editácia stavu a skóre */}
             {started && (
                 <div className={styles.editBlock}>
@@ -188,8 +223,21 @@ function ResultCard({ game: initGame }) {
                         <button className={styles.btnSave} onClick={save} disabled={saving || !dirty}>
                             {saving ? '…' : saved ? '✓' : 'Uložiť'}
                         </button>
+                        {hasLS && status !== 'finished' && (
+                            <button className={styles.btnTakeLS} onClick={handleTakeLS}>
+                                ↙ Prevziať Livescore
+                            </button>
+                        )}
                         {err && <span className={styles.errMsg}>{err}</span>}
                     </div>
+                </div>
+            )}
+
+            {/* Request counter */}
+            {game.ls_requests_actual > 0 && (
+                <div className={styles.lsReqs}>
+                    Livescore: {game.ls_requests_actual}{game.ls_requests_expected ? ` / ${game.ls_requests_expected}` : ''} req
+                    {game.ls_updated_at && ` • ${new Date(game.ls_updated_at).toLocaleTimeString('sk-SK', { hour: '2-digit', minute: '2-digit' })}`}
                 </div>
             )}
 
@@ -197,7 +245,7 @@ function ResultCard({ game: initGame }) {
             <button className={styles.toggleTips} onClick={() => setOpen(o => !o)}>
                 {open ? '▲ Skryť tipy' : '▼ Tipy hráčov'}
             </button>
-            {open && <TipsPanel gameId={game.id} />}
+            {open && <TipsPanel gameId={game.id} isFinished={status === 'finished'} />}
         </div>
     );
 }
