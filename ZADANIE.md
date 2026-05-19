@@ -564,9 +564,9 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 
 
 **Admin — rozšírené filtrovanie výsledkov**
-- 🟠 AdminResults: kalendár dní, filter tímov (vlajky), farebné fázové tlačidlá (ako user stránka Zápasy)
-- 🟠 AdminResults: tipy hráčov zobrazujú aj nenatipovaných (šedý riadok s „—")
-- 🟠 AdminResults: tlačidlo „Prepočítať body" presunuté doprava pod vlajky tímov
+- ✅ AdminResults: kalendár dní, filter tímov (vlajky), farebné fázové tlačidlá (ako user stránka Zápasy)
+- ✅ AdminResults: tipy hráčov zobrazujú aj nenatipovaných (šedý riadok s „—")
+- ✅ AdminResults: tlačidlo „Prepočítať body" presunuté doprava pod vlajky tímov
 
 ---
 
