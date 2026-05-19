@@ -51,6 +51,24 @@ foreach (['score1', 'score2', 'final1', 'final2'] as $f) {
     }
 }
 
+// Manuálny livescore
+$ls_changed = false;
+foreach (['ls_score1', 'ls_score2', 'ls_final1', 'ls_final2'] as $f) {
+    if (array_key_exists($f, $body)) {
+        $sets[] = "$f = :$f";
+        $params[":$f"] = $body[$f] !== null && $body[$f] !== '' ? (int)$body[$f] : null;
+        $ls_changed = true;
+    }
+}
+if (array_key_exists('ls_status', $body)) {
+    $sets[] = 'ls_status = :ls_status';
+    $params[':ls_status'] = $body['ls_status'] ?: null;
+    $ls_changed = true;
+}
+if ($ls_changed) {
+    $sets[] = 'ls_updated_at = NOW()';
+}
+
 $has_fs_url = array_key_exists('flashscore_url', $body);
 if ($has_fs_url) {
     $sets[] = 'flashscore_url = :flashscore_url';
