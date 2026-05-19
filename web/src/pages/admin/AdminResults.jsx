@@ -319,7 +319,7 @@ export default function AdminResults() {
     const [loading,      setLoading]      = useState(true);
     const [error,        setError]        = useState('');
     const [phase,        setPhase]        = useState('all');
-    const [selectedDay,  setSelectedDay]  = useState(null);
+    const [selectedDay,  setSelectedDay]  = useState(() => dayKey(new Date().toISOString()));
     const [selectedTeam, setSelectedTeam] = useState(null);
     const [recalcing,    setRecalcing]    = useState(false);
     const [recalcMsg,    setRecalcMsg]    = useState('');
