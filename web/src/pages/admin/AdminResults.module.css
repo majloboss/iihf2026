@@ -104,6 +104,31 @@
 
 .errMsg { color: #dc3545; font-size: 0.8rem; }
 
+.recalcRow {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+    margin-top: 6px;
+    margin-bottom: 2px;
+}
+.btnRecalc {
+    padding: 4px 14px;
+    background: #1a3a6b;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    white-space: nowrap;
+    opacity: 0.75;
+    transition: opacity 0.15s;
+}
+.btnRecalc:hover:not(:disabled) { opacity: 1; }
+.btnRecalc:disabled { opacity: 0.35; cursor: default; }
+.recalcOk  { font-size: 0.8rem; color: #28a745; }
+.recalcErr { font-size: 0.8rem; color: #dc3545; }
+
 /* Tips panel */
 .toggleTips {
     display: block;

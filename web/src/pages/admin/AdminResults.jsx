@@ -274,23 +274,16 @@ export default function AdminResults() {
         <div className={gStyles.wrap} style={{maxWidth:700}}>
             <div className={gStyles.topBar}>
                 <h2>Výsledky</h2>
-                <div style={{display:'flex',alignItems:'center',gap:'8px',flexWrap:'wrap'}}>
-                    <div className={gStyles.filters}>
-                        {PHASES.map(p => (
-                            <button key={p}
-                                onClick={() => setPhase(p)}
-                                className={phaseBtnClass(p)}>
-                                {PHASE_BTN[p]}
-                            </button>
-                        ))}
-                    </div>
-                    <button className={styles.btnSave} onClick={handleRecalc} disabled={recalcing}
-                        style={{whiteSpace:'nowrap'}}>
-                        {recalcing ? '…' : '↺ Prepočítať body'}
-                    </button>
+                <div className={gStyles.filters}>
+                    {PHASES.map(p => (
+                        <button key={p}
+                            onClick={() => setPhase(p)}
+                            className={phaseBtnClass(p)}>
+                            {PHASE_BTN[p]}
+                        </button>
+                    ))}
                 </div>
             </div>
-            {recalcMsg && <p style={{fontSize:'0.85rem',color: recalcMsg.startsWith('✓') ? '#28a745' : '#dc3545', margin:'4px 0 8px'}}>{recalcMsg}</p>}
 
             {/* Kalendár */}
             <div className={gStyles.calRow} ref={calContainer}>
@@ -329,6 +322,12 @@ export default function AdminResults() {
                             <span className={gStyles.flagCode}>{team}</span>
                         </button>
                     ))}
+                </div>
+                <div className={styles.recalcRow}>
+                    <button className={styles.btnRecalc} onClick={handleRecalc} disabled={recalcing}>
+                        {recalcing ? '…' : '↺ Prepočítať body'}
+                    </button>
+                    {recalcMsg && <span className={recalcMsg.startsWith('✓') ? styles.recalcOk : styles.recalcErr}>{recalcMsg}</span>}
                 </div>
             )}
 
