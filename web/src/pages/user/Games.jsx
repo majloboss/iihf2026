@@ -14,6 +14,16 @@ const formatLsAge = (ts) => {
     const m = Math.floor((Date.now() - new Date(ts).getTime()) / 60000);
     return m < 1 ? 'práve teraz' : `pred ${m} min`;
 };
+const calcLivePoints = (t1, t2, g) => {
+    const s1 = g.ls_final1 != null ? g.ls_final1 : g.ls_score1;
+    const s2 = g.ls_final2 != null ? g.ls_final2 : g.ls_score2;
+    if (s1 == null || s2 == null || t1 == null || t2 == null) return null;
+    const isPlayoff = ['QF','SF','BRONZE','GOLD'].includes(g.phase);
+    const winPts = isPlayoff ? 5 : 3;
+    const rw = s1 > s2 ? 1 : s1 < s2 ? -1 : 0;
+    const tw = t1 > t2 ? 1 : t1 < t2 ? -1 : 0;
+    return (tw === rw ? winPts : 0) + (t1 === s1 ? 1 : 0) + (t2 === s2 ? 1 : 0);
+};
 const dayKey = (iso) => {
     const d = new Date(iso);
     return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -74,7 +84,7 @@ function TipInput({ game, onSaved }) {
     );
 }
 
-function GroupTips({ gameId }) {
+function GroupTips({ gameId, game }) {
     const [open,    setOpen]    = useState(false);
     const [groups,  setGroups]  = useState(null);
     const [loading, setLoading] = useState(false);
@@ -116,7 +126,11 @@ function GroupTips({ gameId }) {
                             <div className={styles.groupName}>{g.group_name}</div>
                             <table className={styles.tipsTable}>
                                 <tbody>
-                                    {g.members.map(m => (
+                                    {g.members.map(m => {
+                                        const livePts = isLsLive(game) && game.status !== 'finished'
+                                            ? calcLivePoints(m.tip1, m.tip2, game)
+                                            : null;
+                                        return (
                                         <tr key={m.user_id} className={m.is_me ? styles.tipsTableMe : ''}>
                                             <td>{m.username}{m.is_me ? ' (ty)' : ''}</td>
                                             <td>
@@ -125,10 +139,13 @@ function GroupTips({ gameId }) {
                                                     : <span className={styles.tipNoTip}>—</span>}
                                             </td>
                                             <td>
-                                                {m.points != null && <span className={styles.tipPts}>+{m.points}b</span>}
+                                                {livePts != null
+                                                    ? <span className={styles.tipPtsLive}>+{livePts}b</span>
+                                                    : m.points != null && <span className={styles.tipPts}>+{m.points}b</span>}
                                             </td>
                                         </tr>
-                                    ))}
+                                        );
+                                    })}
                                 </tbody>
                             </table>
                         </div>
@@ -340,7 +357,7 @@ export default function Games() {
                                             </div>
                                         )}
                                         <TipInput game={g} onSaved={handleSaved} />
-                                        {es !== 'scheduled' && <GroupTips gameId={g.id} />}
+                                        {es !== 'scheduled' && <GroupTips gameId={g.id} game={g} />}
                                     </div>
                                 );
                             })}

@@ -232,6 +232,7 @@
 .liveBar {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 10px;
     margin: 8px 0 4px;
     padding: 6px 10px;
@@ -253,7 +254,8 @@
     animation: blink 1.2s ease-in-out infinite;
 }
 .lsOT   { font-size: 0.75rem; font-weight: 400; }
-.lsTime { font-size: 0.75rem; color: #888; margin-left: auto; }
+.lsTime { font-size: 0.75rem; color: #888; }
+.tipPtsLive { color: #dc3545; font-size: 0.75rem; padding-left: 4px; }
 .ptsLive { background: #fde8e8; color: #dc3545; padding: 2px 7px; border-radius: 10px; font-size: 0.82rem; }
 
 /* Kalendár */
