@@ -8,6 +8,17 @@ import styles from './Dashboard.module.css';
 
 const FLAG_URL = code => `/flags/team_flag_${code?.toLowerCase()}.png`;
 const isLsLive = (g) => g.ls_score1 != null && g.ls_status && g.ls_status !== 'FT';
+const calcLivePoints = (t1, t2, g) => {
+    const s1 = g.ls_final1 != null ? +g.ls_final1 : (g.ls_score1 != null ? +g.ls_score1 : null);
+    const s2 = g.ls_final2 != null ? +g.ls_final2 : (g.ls_score2 != null ? +g.ls_score2 : null);
+    if (s1 == null || s2 == null || t1 == null || t2 == null) return null;
+    const n1 = +t1, n2 = +t2;
+    const isPlayoff = ['QF','SF','BRONZE','GOLD'].includes(g.phase);
+    const winPts = isPlayoff ? 5 : 3;
+    const rw = s1 > s2 ? 1 : s1 < s2 ? -1 : 0;
+    const tw = n1 > n2 ? 1 : n1 < n2 ? -1 : 0;
+    return (tw === rw ? winPts : 0) + (n1 === s1 ? 1 : 0) + (n2 === s2 ? 1 : 0);
+};
 const formatLsAge = (ts) => {
     if (!ts) return '';
     const m = Math.floor((Date.now() - new Date(ts).getTime()) / 60000);
@@ -143,7 +154,11 @@ function GameTipsModal({ game, onClose }) {
                         <div className={styles.tipsGroupName}>{grp.group_name}</div>
                         <table className={styles.tipsTable}>
                             <tbody>
-                                {grp.members.map(m => (
+                                {grp.members.map(m => {
+                                    const livePts = isLsLive(game) && game.status !== 'finished'
+                                        ? calcLivePoints(m.tip1, m.tip2, game)
+                                        : null;
+                                    return (
                                     <tr key={m.user_id} className={m.is_me ? styles.tipsMe : ''}>
                                         <td className={styles.tipsUser}>{m.username}{m.is_me && ' (ja)'}</td>
                                         <td className={styles.tipsTip}>
@@ -152,14 +167,17 @@ function GameTipsModal({ game, onClose }) {
                                                 : <span className={styles.tipNone}>—</span>}
                                         </td>
                                         <td className={styles.tipsPts}>
-                                            {m.points != null && (
-                                                <span className={`${styles.gamePts} ${m.points >= 3 ? styles.ptsGood : m.points > 0 ? styles.ptsMed : styles.ptsBad}`}>
-                                                    +{m.points}b
-                                                </span>
-                                            )}
+                                            {livePts != null
+                                                ? <span className={`${styles.gamePts} ${styles.ptsLive}`}>+{livePts}b</span>
+                                                : m.points != null && (
+                                                    <span className={`${styles.gamePts} ${m.points >= 3 ? styles.ptsGood : m.points > 0 ? styles.ptsMed : styles.ptsBad}`}>
+                                                        +{m.points}b
+                                                    </span>
+                                                )}
                                         </td>
                                     </tr>
-                                ))}
+                                    );
+                                })}
                             </tbody>
                         </table>
                     </div>
