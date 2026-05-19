@@ -1,11 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { getGames } from '../../api/games';
 import { updateGame, getAdminGameTips, recalcPoints } from '../../api/admin';
 import gStyles from '../user/Games.module.css';
 import styles from './AdminResults.module.css';
 
 const PHASE_LABEL = { A: 'Skupina A', B: 'Skupina B', QF: 'Štvrťfinále', SF: 'Semifinále', BRONZE: 'O bronz', GOLD: 'Finále' };
+const PHASE_BTN   = { all: 'ALL', A: 'A', B: 'B', QF: 'QF', SF: 'SF', BRONZE: 'BR', GOLD: 'F' };
 const FLAG_URL    = code => `/flags/team_flag_${code?.toLowerCase()}.png`;
+const dayKey = (iso) => {
+    const d = new Date(iso);
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+};
 
 function effectiveStatus(game) {
     if (game.status === 'finished') return 'finished';
@@ -198,15 +203,18 @@ function ResultCard({ game: initGame }) {
 }
 
 const PHASES = ['all', 'A', 'B', 'QF', 'SF', 'BRONZE', 'GOLD'];
-const PHASE_FILTER_LABEL = { all: 'Všetky', A: 'Sk. A', B: 'Sk. B', QF: 'Štvrťf.', SF: 'Semif.', BRONZE: 'Bronz', GOLD: 'Finále' };
 
 export default function AdminResults() {
-    const [games,     setGames]     = useState([]);
-    const [loading,   setLoading]   = useState(true);
-    const [error,     setError]     = useState('');
-    const [phase,     setPhase]     = useState('all');
-    const [recalcing, setRecalcing] = useState(false);
-    const [recalcMsg, setRecalcMsg] = useState('');
+    const [games,        setGames]        = useState([]);
+    const [loading,      setLoading]      = useState(true);
+    const [error,        setError]        = useState('');
+    const [phase,        setPhase]        = useState('all');
+    const [selectedDay,  setSelectedDay]  = useState(null);
+    const [selectedTeam, setSelectedTeam] = useState(null);
+    const [recalcing,    setRecalcing]    = useState(false);
+    const [recalcMsg,    setRecalcMsg]    = useState('');
+    const calContainer = useRef(null);
+    const todayCalBtn  = useRef(null);
 
     const handleRecalc = async () => {
         setRecalcing(true); setRecalcMsg('');
@@ -223,7 +231,21 @@ export default function AdminResults() {
             .catch(e   => { setError(e.message); setLoading(false); });
     }, []);
 
-    const filtered = (phase === 'all' ? games : games.filter(g => g.phase === phase))
+    useEffect(() => {
+        if (!todayCalBtn.current || !calContainer.current) return;
+        const c = calContainer.current;
+        const b = todayCalBtn.current;
+        c.scrollLeft = b.offsetLeft - c.offsetWidth / 2 + b.offsetWidth / 2;
+    }, [games]);
+
+    const todayK   = dayKey(new Date().toISOString());
+    const allDays  = [...new Set(games.map(g => dayKey(g.starts_at)))].sort();
+    const allTeams = [...new Set(games.flatMap(g => [g.team1, g.team2]).filter(Boolean))].sort();
+
+    const filtered = games
+        .filter(g => phase === 'all' || g.phase === phase)
+        .filter(g => !selectedDay  || dayKey(g.starts_at) === selectedDay)
+        .filter(g => !selectedTeam || g.team1 === selectedTeam || g.team2 === selectedTeam)
         .slice().sort((a, b) => a.game_number - b.game_number);
 
     const byDate = {};
@@ -232,6 +254,18 @@ export default function AdminResults() {
         if (!byDate[d]) byDate[d] = [];
         byDate[d].push(g);
     });
+
+    const phaseBtnClass = (p) => {
+        const base = p === 'QF' || p === 'SF' ? [gStyles.pBtn, gStyles.pPlayoff]
+                   : p === 'BRONZE'            ? [gStyles.pBtn, gStyles.pBronze]
+                   : p === 'GOLD'              ? [gStyles.pBtn, gStyles.pGold]
+                   : [gStyles.pBtn, gStyles.pGroup];
+        const active = p === 'QF' || p === 'SF' ? gStyles.pPlayoffOn
+                     : p === 'BRONZE'            ? gStyles.pBronzeOn
+                     : p === 'GOLD'              ? gStyles.pGoldOn
+                     : gStyles.pGroupOn;
+        return [...base, phase === p ? active : ''].join(' ');
+    };
 
     if (loading) return <p>Načítavam…</p>;
     if (error)   return <p style={{color:'red'}}>Chyba: {error}</p>;
@@ -244,8 +278,10 @@ export default function AdminResults() {
                     <div className={gStyles.filters}>
                         {PHASES.map(p => (
                             <button key={p}
-                                className={phase === p ? gStyles.btnFilterActive : gStyles.btnFilter}
-                                onClick={() => setPhase(p)}>{PHASE_FILTER_LABEL[p]}</button>
+                                onClick={() => setPhase(p)}
+                                className={phaseBtnClass(p)}>
+                                {PHASE_BTN[p]}
+                            </button>
                         ))}
                     </div>
                     <button className={styles.btnSave} onClick={handleRecalc} disabled={recalcing}
@@ -255,6 +291,46 @@ export default function AdminResults() {
                 </div>
             </div>
             {recalcMsg && <p style={{fontSize:'0.85rem',color: recalcMsg.startsWith('✓') ? '#28a745' : '#dc3545', margin:'4px 0 8px'}}>{recalcMsg}</p>}
+
+            {/* Kalendár */}
+            <div className={gStyles.calRow} ref={calContainer}>
+                {allDays.map(dk => {
+                    const d        = new Date(dk + 'T12:00:00');
+                    const isToday  = dk === todayK;
+                    const isActive = dk === selectedDay;
+                    return (
+                        <button
+                            key={dk}
+                            ref={isToday ? todayCalBtn : null}
+                            className={`${gStyles.calDay} ${isToday ? gStyles.calDayToday : ''} ${isActive ? gStyles.calDayActive : ''}`}
+                            onClick={() => setSelectedDay(selectedDay === dk ? null : dk)}
+                        >
+                            <span className={gStyles.calDayWeekday}>
+                                {d.toLocaleDateString('sk-SK', { weekday: 'short' })}
+                            </span>
+                            <span className={gStyles.calDayNum}>{d.getDate()}</span>
+                            <span className={gStyles.calDayMonth}>{d.getMonth() + 1}.</span>
+                        </button>
+                    );
+                })}
+            </div>
+
+            {/* Vlajky tímov */}
+            {allTeams.length > 0 && (
+                <div className={gStyles.flagsRow}>
+                    {allTeams.map(team => (
+                        <button
+                            key={team}
+                            className={`${gStyles.flagBtn} ${selectedTeam === team ? gStyles.flagBtnActive : ''}`}
+                            onClick={() => setSelectedTeam(selectedTeam === team ? null : team)}
+                        >
+                            <img className={gStyles.flagImg} src={FLAG_URL(team)} alt={team}
+                                onError={e => e.target.style.display='none'} />
+                            <span className={gStyles.flagCode}>{team}</span>
+                        </button>
+                    ))}
+                </div>
+            )}
 
             {Object.keys(byDate).length === 0
                 ? <p className={gStyles.empty}>Žiadne zápasy</p>
