@@ -145,6 +145,9 @@ foreach ($todayGames as $g) {
     $a    = $ag['scores']['away'] ?? [];
     $stat = $ag['status']['short'] ?? null;
 
+    // DEBUG — dočasné, odstrán po overení
+    echo "  [DEBUG] Game {$g['id']} scores: " . json_encode(['home' => $h, 'away' => $a, 'status' => $ag['status']]) . "\n";
+
     $total1 = isset($h['total']) ? (int)$h['total'] : null;
     $total2 = isset($a['total']) ? (int)$a['total'] : null;
     $ot1    = isset($h['overtime'])  && $h['overtime']  !== null ? (int)$h['overtime']  : null;
