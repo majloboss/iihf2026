@@ -347,7 +347,7 @@ export default function Games() {
                                                 </a>
                                             )}
                                         </div>
-                                        {isLsLive(g) && (
+                                        {isLsLive(g) && g.status !== 'finished' && (
                                             <div className={styles.liveBar}>
                                                 <span className={styles.lsBadge}>LIVE</span>
                                                 <span className={styles.liveScore}>

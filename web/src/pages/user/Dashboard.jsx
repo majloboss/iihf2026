@@ -211,7 +211,7 @@ function GameCard({ game, onTipClick, onGroupTipsClick }) {
                 </div>
             </div>
 
-            {isLsLive(game) && (
+            {isLsLive(game) && game.status !== 'finished' && (
                 <div className={styles.liveBar}>
                     <span className={styles.lsBadge}>LIVE</span>
                     <span className={styles.liveScore}>
