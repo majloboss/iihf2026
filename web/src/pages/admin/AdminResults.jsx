@@ -105,8 +105,8 @@ function ResultCard({ game: initGame }) {
     const [open,     setOpen]     = useState(false);
 
     const initLsOT = initGame.ls_final1 != null;
-    const [ls1,      setLs1]      = useState(initLsOT ? String(initGame.ls_final1) : (initGame.ls_score1 != null ? String(initGame.ls_score1) : ''));
-    const [ls2,      setLs2]      = useState(initLsOT ? String(initGame.ls_final2) : (initGame.ls_score2 != null ? String(initGame.ls_score2) : ''));
+    const [ls1,      setLs1]      = useState(initLsOT ? String(initGame.ls_final1) : (initGame.ls_score1 != null ? String(initGame.ls_score1) : '0'));
+    const [ls2,      setLs2]      = useState(initLsOT ? String(initGame.ls_final2) : (initGame.ls_score2 != null ? String(initGame.ls_score2) : '0'));
     const [lsOT,     setLsOT]     = useState(initLsOT);
     const [lsSaving, setLsSaving] = useState(false);
     const [lsSaved,  setLsSaved]  = useState(false);
