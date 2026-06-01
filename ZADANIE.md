@@ -614,6 +614,7 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 - ✅ `.github/workflows/deploy.yml` — API deploy rozdelený na main/develop kroky; `setup_once.php` vynechaný z main deployu
 - ✅ `api/config/db.php` na dev serveri aktualizovaný na `DB-DEV-BET`
 - 🟠 `web/src/sw.js` — service worker: denylist `/api/` z NavigationRoute (oprava: SW zachytával `/api/setup` navigáciu)
-- 🟠 `api/sync_from_prod.php` + route `sync-prod` — jednorazový sync dát z DB-BET → DB-DEV-BET (len dev, chránené CRON_SECRET + APP_URL check)
+- 🟠 `api/sync_from_prod.php` + route `sync-prod` — jednorazový sync dát z DB-BET → DB-DEV-BET (len dev, chránené CRON_SECRET + APP_URL check; opravené TRUNCATE + boolean normalizácia)
+- ✅ **Dev DB naplnená produkčnými dátami** (24 users, 1195 tipov, 64 zápasov, 2 skupiny)
 
-*Posledná aktualizácia: 2026-06-01 (v2.85)*
+*Posledná aktualizácia: 2026-06-01 (v2.88)*
