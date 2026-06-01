@@ -337,16 +337,17 @@ CREATE TABLE IF NOT EXISTS iihf2026.scoring_config (
     phase      VARCHAR(8) PRIMARY KEY,
     pts_winner SMALLINT   NOT NULL DEFAULT 1,
     pts_goals1 SMALLINT   NOT NULL DEFAULT 1,
-    pts_goals2 SMALLINT   NOT NULL DEFAULT 1
+    pts_goals2 SMALLINT   NOT NULL DEFAULT 1,
+    pts_exact  SMALLINT   NOT NULL DEFAULT 0
 );
 
-INSERT INTO iihf2026.scoring_config (phase, pts_winner, pts_goals1, pts_goals2) VALUES
-    ('A',      1, 1, 1),
-    ('B',      1, 1, 1),
-    ('QF',     3, 1, 1),
-    ('SF',     3, 1, 1),
-    ('BRONZE', 3, 1, 1),
-    ('GOLD',   3, 1, 1)
+INSERT INTO iihf2026.scoring_config (phase, pts_winner, pts_goals1, pts_goals2, pts_exact) VALUES
+    ('A',      3, 1, 1, 0),
+    ('B',      3, 1, 1, 0),
+    ('QF',     5, 1, 1, 0),
+    ('SF',     5, 1, 1, 0),
+    ('BRONZE', 5, 1, 1, 0),
+    ('GOLD',   5, 1, 1, 0)
 ON CONFLICT DO NOTHING;
 
 -- ============================================================
