@@ -32,6 +32,36 @@ jobs:
         env:
           VITE_API_URL: ${{ github.ref_name == 'main' && 'https://iihf2026.fellow.sk' || 'https://dev_iihf2026.fellow.sk' }}/api
 
+      - name: Create api/config/db.php (main)
+        if: github.ref_name == 'main'
+        run: |
+          cat > api/config/db.php << 'PHP'
+          <?php
+          define('DB_HOST',    '${{ secrets.MAIN_DB_HOST }}');
+          define('DB_PORT',    '5432');
+          define('DB_NAME',    '${{ secrets.MAIN_DB_NAME }}');
+          define('DB_USER',    '${{ secrets.MAIN_DB_USER }}');
+          define('DB_PASS',    '${{ secrets.MAIN_DB_PASS }}');
+          define('JWT_SECRET', '${{ secrets.MAIN_JWT_SECRET }}');
+          define('APP_URL',    'https://iihf2026.fellow.sk');
+          define('CRON_SECRET','${{ secrets.MAIN_CRON_SECRET }}');
+          PHP
+
+      - name: Create api/config/db.php (develop)
+        if: github.ref_name != 'main'
+        run: |
+          cat > api/config/db.php << 'PHP'
+          <?php
+          define('DB_HOST',    '${{ secrets.DEV_DB_HOST }}');
+          define('DB_PORT',    '5432');
+          define('DB_NAME',    '${{ secrets.DEV_DB_NAME }}');
+          define('DB_USER',    '${{ secrets.DEV_DB_USER }}');
+          define('DB_PASS',    '${{ secrets.DEV_DB_PASS }}');
+          define('JWT_SECRET', '${{ secrets.DEV_JWT_SECRET }}');
+          define('APP_URL',    'https://dev_iihf2026.fellow.sk');
+          define('CRON_SECRET','${{ secrets.DEV_CRON_SECRET }}');
+          PHP
+
       - name: Deploy web via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
@@ -57,4 +87,3 @@ jobs:
           exclude: |
             **/.git*
             **/.git*/**
-            **/config/db.php
