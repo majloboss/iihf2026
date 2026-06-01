@@ -82,6 +82,28 @@ $insertOrder = [
     'admin.notification_log',
 ];
 
+// Načítaj boolean stĺpce pre každú tabuľku (PHP PDO vracia bool false ako "" čo PostgreSQL odmietne)
+function getBoolCols(PDO $pdo, string $table): array {
+    [$schema, $tbl] = explode('.', $table);
+    $stmt = $pdo->prepare("
+        SELECT column_name FROM information_schema.columns
+        WHERE table_schema = ? AND table_name = ? AND data_type = 'boolean'
+    ");
+    $stmt->execute([$schema, $tbl]);
+    return array_column($stmt->fetchAll(PDO::FETCH_ASSOC), 'column_name');
+}
+
+function normalizeRow(array $row, array $boolCols): array {
+    foreach ($boolCols as $col) {
+        if (!array_key_exists($col, $row)) continue;
+        $v = $row[$col];
+        if ($v === null) continue;
+        // PDO/pgsql vracia bool ako "t"/"f" alebo PHP true/false alebo ""
+        $row[$col] = ($v === true || $v === 't' || $v === '1' || $v === 'true') ? 'true' : 'false';
+    }
+    return $row;
+}
+
 $results = [];
 
 $dev->beginTransaction();
@@ -97,13 +119,14 @@ try {
             continue;
         }
 
+        $boolCols    = getBoolCols($prod, $table);
         $cols        = array_keys($rows[0]);
         $colList     = implode(', ', array_map(fn($c) => '"' . $c . '"', $cols));
         $placeholders = implode(', ', array_map(fn($c) => ':' . $c, $cols));
 
         $stmt = $dev->prepare("INSERT INTO $table ($colList) VALUES ($placeholders)");
         foreach ($rows as $row) {
-            $stmt->execute($row);
+            $stmt->execute(normalizeRow($row, $boolCols));
         }
         $results[$table] = count($rows);
     }
