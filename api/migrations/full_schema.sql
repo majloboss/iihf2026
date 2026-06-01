@@ -73,7 +73,7 @@ CREATE TABLE IF NOT EXISTS admin.friend_groups (
 );
 
 ALTER TABLE admin.invites
-    ADD CONSTRAINT IF NOT EXISTS fk_invites_group
+    ADD CONSTRAINT fk_invites_group
     FOREIGN KEY (group_id) REFERENCES admin.friend_groups(id) ON DELETE SET NULL;
 
 -- ============================================================
@@ -312,7 +312,7 @@ ON CONFLICT DO NOTHING;
 
 -- FK z notification_log na games (teraz keď games existuje)
 ALTER TABLE admin.notification_log
-    ADD CONSTRAINT IF NOT EXISTS fk_notif_log_game
+    ADD CONSTRAINT fk_notif_log_game
     FOREIGN KEY (game_id) REFERENCES iihf2026.games(id) ON DELETE SET NULL;
 
 -- ============================================================
