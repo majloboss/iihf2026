@@ -86,9 +86,8 @@ $results = [];
 
 $dev->beginTransaction();
 try {
-    foreach (array_unique($truncateOrder) as $table) {
-        $dev->exec("TRUNCATE TABLE $table");
-    }
+    // Jediný TRUNCATE pre všetky tabuľky naraz — PostgreSQL to vyžaduje pri FK vzťahoch
+    $dev->exec("TRUNCATE TABLE " . implode(', ', array_unique($truncateOrder)));
 
     foreach ($insertOrder as $table) {
         $rows = $prod->query("SELECT * FROM $table")->fetchAll(PDO::FETCH_ASSOC);
