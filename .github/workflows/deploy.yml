@@ -61,6 +61,7 @@ jobs:
             **/.git*/**
             **/config/db.php
             setup_once.php
+            sync_from_prod.php
 
       - name: Deploy API via FTP (develop)
         if: github.ref_name != 'main'
