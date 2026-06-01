@@ -75,15 +75,31 @@ jobs:
             **/.git*
             **/.git*/**
 
-      - name: Deploy API via FTP
+      - name: Deploy API via FTP (main)
+        if: github.ref_name == 'main'
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: fellow.sk
           username: ftp.fellow.sk
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: api/
-          server-dir: ${{ github.ref_name == 'main' && '/sub/iihf2026/api/' || '/sub/dev_iihf2026/api/' }}
-          state-name: ${{ github.ref_name == 'main' && '.ftp-deploy-sync-api.json' || '.ftp-deploy-sync-dev-api.json' }}
+          server-dir: /sub/iihf2026/api/
+          state-name: .ftp-deploy-sync-api.json
+          exclude: |
+            **/.git*
+            **/.git*/**
+            setup_once.php
+
+      - name: Deploy API via FTP (develop)
+        if: github.ref_name != 'main'
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: fellow.sk
+          username: ftp.fellow.sk
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: api/
+          server-dir: /sub/dev_iihf2026/api/
+          state-name: .ftp-deploy-sync-dev-api.json
           exclude: |
             **/.git*
             **/.git*/**
