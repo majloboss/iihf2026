@@ -603,14 +603,16 @@ Admin má **samostatnú obrazovku** (oddelenú od bežného UI).
 
 ---
 
-## Zmeny 1.6.2026 — Dev databáza (v2.79–v2.81, develop)
+## Zmeny 1.6.2026 — Dev databáza (v2.79–v2.84, develop)
 
 ### ✅ Oddelená databáza pre develop
 - ✅ `DB-DEV-BET` — nová PostgreSQL databáza na fellow.sk pre develop/test prostredie
 - ✅ `api/migrations/full_schema.sql` — kompletná inicializácia novej DB (všetky migrácie 001–023 v jednom súbore)
 - ✅ `api/migrations/dev_seed.sql` — návod na vytvorenie prvého admin účtu
 - ✅ `api/setup_once.php` — jednorazový endpoint na vytvorenie admin účtu (len na prázdnej DB)
+- ✅ `api/index.php` — pridaná route `setup` pre `setup_once.php`
 - ✅ `.github/workflows/deploy.yml` — API deploy rozdelený na main/develop kroky; `setup_once.php` vynechaný z main deployu
 - ✅ `api/config/db.php` na dev serveri aktualizovaný na `DB-DEV-BET`
+- 🟠 `web/src/sw.js` — service worker: denylist `/api/` z NavigationRoute (oprava: SW zachytával `/api/setup` navigáciu)
 
-*Posledná aktualizácia: 2026-06-01 (v2.81)*
+*Posledná aktualizácia: 2026-06-01 (v2.84)*
