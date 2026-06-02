@@ -3,6 +3,8 @@ import { useLocation } from 'react-router-dom';
 import { getGames } from '../../api/games';
 import { saveTip, getGameTips } from '../../api/tips';
 import GroupStandings from './GroupStandings';
+import FifaGames from './FifaGames';
+import { useCompetition } from '../../context/CompetitionContext';
 import styles from './Games.module.css';
 
 const PHASE_LABEL = { A: 'Skupina A', B: 'Skupina B', QF: 'Štvrťfinále', SF: 'Semifinále', BRONZE: 'O bronz', GOLD: 'Finále' };
@@ -158,6 +160,9 @@ function GroupTips({ gameId, game }) {
 }
 
 export default function Games() {
+    const { activeCompetition } = useCompetition();
+    if (activeCompetition?.slug === 'fifa2026') return <FifaGames />;
+
     const location = useLocation();
     const [games, setGames]               = useState([]);
     const [loading, setLoading]           = useState(true);
