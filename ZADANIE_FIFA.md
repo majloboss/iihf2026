@@ -98,6 +98,17 @@ Profil → záložka Súťaže → výber aktívneho turnaja
           (zobrazujú dáta pre zvolený turnaj)
 ```
 
+### DB architektúra — záväzné pravidlo
+
+> **Každá súťaž má vlastnú DB schému. Spoločné tabuľky sú výhradne v schéme `admin`.**
+
+| Schema | Obsah |
+|---|---|
+| `admin` | users, invites, friend_groups, group_members, notification_settings, notification_log, login_logs, mail_log, announcements, user_push_subscriptions, **competitions** |
+| `iihf2026` | teams, games, tips, scoring_config, group_standings, livescore_daily, games_pdf |
+| `fifa2026` | teams, games, tips, scoring_config, group_standings *(+ FIFA-špecifické)* |
+| *(budúce súťaže)* | každá dostane vlastnú schému |
+
 ### Čo sa zdieľa (z IIHF — hotové)
 
 - ✅ Registrácia cez invite link + prihlásenie (JWT)
@@ -105,7 +116,7 @@ Profil → záložka Súťaže → výber aktívneho turnaja
 - ✅ Admin — správa používateľov, invite kódy
 - ✅ Push notifikácie, email notifikácie
 - ✅ CI/CD — GitHub Actions → FTP
-- ✅ DB — PostgreSQL DB-BET (schema `admin` pre users/groups)
+- ✅ DB — PostgreSQL DB-BET (schema `admin` pre zdieľané tabuľky)
 
 ---
 
