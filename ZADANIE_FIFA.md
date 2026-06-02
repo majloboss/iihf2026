@@ -111,11 +111,30 @@ Profil → záložka Súťaže → výber aktívneho turnaja
 
 ## Čo treba vytvoriť
 
-### 1. Multi-turnaj infraštruktúra
+### 1. Multi-turnaj infraštruktúra — DB migrácia
 
-- 🔲 DB: tabuľka `competitions` — zoznam turnajov (id, name, slug, season, active)
-- 🔲 DB: `users.active_competition_id` — ktorý turnaj má user aktuálne nastavený
-- 🔲 Backend: API endpoint na zoznam turnajov + nastavenie aktívneho
+Cieľ: pridať vrstvu `competitions` bez straty IIHF dát. Existujúce záznamy dostanú `competition_id = 1` (IIHF 2026).
+
+**Nové / zmenené tabuľky:**
+
+| Tabuľka | Zmena | Poznámka |
+|---|---|---|
+| `admin.competitions` | **NOVÁ** | id, slug, name, sport, season, is_active |
+| `admin.users` | `+ active_competition_id` (FK → competitions, DEFAULT 1) | Aktívny turnaj usera |
+| `admin.friend_groups` | `+ competition_id` (FK → competitions, DEFAULT 1) | Skupiny sú per-turnaj; existujúce IIHF skupiny = 1 |
+| `admin.notification_log` | `+ competition_id`, zrušiť FK na `iihf2026.games` | game_id ostane int, ale bez hard FK |
+| `iihf2026.*` | bez zmeny | Teams, games, tips, scoring_config, group_standings ostávajú ako sú |
+| `fifa2026.*` | **NOVÁ schema** | Rovnaká štruktúra ako iihf2026 — teams, games, tips, scoring_config, group_standings |
+
+**Postup migrácie (v správnom poradí):**
+1. Vytvoriť `admin.competitions`, vložiť `(1, 'iihf2026', 'IIHF MS 2026', 'hockey', 2026, false)`
+2. `ALTER TABLE admin.friend_groups ADD COLUMN competition_id INT DEFAULT 1 REFERENCES admin.competitions(id)` — existujúce skupiny automaticky dostanú IIHF
+3. `ALTER TABLE admin.users ADD COLUMN active_competition_id INT DEFAULT 1 REFERENCES admin.competitions(id)` — existujúci useri defaultne vidia IIHF
+4. `ALTER TABLE admin.notification_log DROP CONSTRAINT fk_notif_log_game; ALTER TABLE admin.notification_log ADD COLUMN competition_id INT DEFAULT 1` — generická väzba
+5. Vytvoriť schema `fifa2026` s tabuľkami teams, games, tips, scoring_config, group_standings
+6. Vložiť FIFA 2026 do `admin.competitions` ako `(2, 'fifa2026', 'FIFA MS 2026', 'football', 2026, true)`
+
+- 🔲 Backend: API endpoint na zoznam turnajov + nastavenie aktívneho (`/api/v1/competitions`)
 - 🔲 Frontend: záložka **Súťaže** v Profile — výber aktívneho turnaja
 - 🔲 Frontend: `CompetitionContext` — globálny kontext aktívneho turnaja, všetky stránky ho čítajú
 - 🔲 Frontend: badge/label aktívneho turnaja v sidebari (napr. „🏒 IIHF 2026" alebo „⚽ FIFA 2026")
