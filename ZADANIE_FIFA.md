@@ -18,9 +18,15 @@
 
 ---
 
-## Prehľad
+## Prehľad — BetClub platforma
 
-Tipovačka FIFA Majstrovstiev sveta 2026 pre skupinu priateľov. Rovnaká aplikácia ako IIHF2026, nové stránky/sekcia pre FIFA. Zdieľaný používateľský systém — registrácia, prihlásenie, profil, skupiny priateľov sú spoločné pre IIHF aj FIFA.
+Aplikácia sa volá **BetClub** — multi-turnajová tipovačka pre skupinu priateľov.
+
+- Úvodná stránka / domov = rozcestník s kartami turnajov: **Hokej MS 2026**, **FIFA MS 2026**, atď.
+- Každý turnaj má vlastnú sekciu (vlastné routes, vlastné skupiny priateľov, vlastné tipy)
+- Používateľský systém (registrácia, login, profil, avatar) je spoločný pre celú platformu
+- Skupiny priateľov sú per-turnaj — každá tipovačka má vlastné skupiny
+- Praktická funkcia: autor skupiny v jednej tipovačke môže jedným klikom pozvať všetkých jej členov do novej skupiny v inej tipovačke
 
 ---
 
@@ -32,73 +38,109 @@ Tipovačka FIFA Majstrovstiev sveta 2026 pre skupinu priateľov. Rovnaká aplik�
 - **Zápasy celkom:** 104
 - **Formát:**
   - Skupinová fáza: 12 skupín (A–L) po 4 tímy = 72 zápasov
-  - Postup: top 2 z každej skupiny + 8 najlepších 3. miest = 32 tímov
-  - Round of 32 (osemfinále?): 16 zápasov
+  - Postup: top 2 z každej skupiny + 8 najlepších 3. miest → 32 tímov
+  - Round of 32: 16 zápasov
   - Round of 16: 8 zápasov
   - Štvrťfinále: 4 zápasy
   - Semifinále: 2 zápasy
   - Zápas o 3. miesto + Finále
+  - **Celkom: 104 zápasov**
 
 ---
 
-## Architektúra — čo sa zdieľa s IIHF
+## Bodovací systém
 
-### ✅ Zdieľané (z IIHF — hotové, netreba robiť)
+Rovnaký princíp ako IIHF 2026:
 
-- Registrácia cez invite link (admin generuje kódy)
-- Prihlásenie / odhlásenie (JWT auth)
-- Profil — avatar, meno, priezvisko, email, telefón, zmena hesla, zmazanie účtu
-- Skupiny priateľov — vytvorenie, vstup, odchod, zrušenie, pozvanie
-- Pozvánky — odosielanie, akceptovanie
-- Admin — správa používateľov, invite kódy, mail log, login logy
-- Push notifikácie (web push)
-- CI/CD — GitHub Actions → FTP deploy na fellow.sk
-- Databáza — PostgreSQL (schema `admin` pre users/groups, nová schema pre FIFA)
+| Situácia | Body |
+|---|---|
+| Presný výsledok (napr. 3:1) | **3 body** |
+| Správny víťaz + správny rozdiel (napr. tip 2:0, reál 3:1) | **2 body** |
+| Správny víťaz (napr. tip 2:0, reál 1:0) | **1 bod** |
+| Remíza tipovaná správne (bez ohľadu na skóre) | **2 body** |
+| Nesprávny výsledok | **0 bodov** |
+
+*(Play-off zápasy — rovnaký systém; predĺženie/penalty treba definovať)*
 
 ---
 
-## Čo treba vytvoriť — FIFA modul
+## Skupiny priateľov
 
-### Backend (PHP API)
+- Skupiny sú **per-turnaj** — pre IIHF a FIFA sú to oddelené skupiny
+- Autor skupiny môže **jedným klikom pozvať všetkých členov** z existujúcej skupiny (z iného turnaja alebo rovnakého) do novej skupiny — hromadná pozvánka
+- Ostatné pravidlá skupín rovnaké ako pri IIHF (pending → accepted, odchod, zrušenie)
 
-- 🔲 DB migrácia — `fifa2026` schema: tímy, skupiny, zápasy, tipy, bodovanie
+---
+
+## Live výsledky
+
+- **Manuálne** — admin zadáva výsledky zápasov cez admin rozhranie
+- (Automatická integrácia API-Sports nie je plánovaná)
+
+---
+
+## Architektúra — BetClub
+
+### Navigácia
+
+```
+/ (domov / rozcestník)
+  → /iihf/          IIHF MS 2026 sekcia
+  → /fifa/          FIFA MS 2026 sekcia
+  → /profil         Spoločný profil
+  → /skupiny        Skupiny (per-turnaj filtered)
+```
+
+### Čo sa zdieľa (z IIHF — hotové)
+
+- ✅ Registrácia cez invite link + prihlásenie (JWT)
+- ✅ Profil — avatar, meno, email, telefón, zmena hesla
+- ✅ Admin — správa používateľov, invite kódy
+- ✅ Push notifikácie, email notifikácie
+- ✅ CI/CD — GitHub Actions → FTP
+- ✅ DB — PostgreSQL DB-BET (schema `admin` pre users/groups)
+
+---
+
+## Čo treba vytvoriť
+
+### 1. BetClub rebrand a navigácia
+
+- 🔲 Domovská stránka — rozcestník s kartami turnajov (IIHF, FIFA, ...)
+- 🔲 Sidebar / navigácia — prepínanie medzi turnajmi
+- 🔲 Branding: názov „BetClub", nové logo/farby (ak treba)
+
+### 2. Skupiny — hromadná pozvánka
+
+- 🔲 Backend: endpoint „pozvať všetkých z inej skupiny" — vytvorí pozvánky pre všetkých členov naraz
+- 🔲 Frontend: tlačidlo „Pozvať skupinu" pri zakladaní novej skupiny — výber existujúcej skupiny → potvrdenie
+
+### 3. FIFA backend (PHP API)
+
+- 🔲 DB migrácia — schema `fifa2026`: tímy (48), skupiny (A–L), zápasy (104), tipy, bodovanie
 - 🔲 Import 48 tímov a 104 zápasov do DB
 - 🔲 API: zoznam zápasov (`/api/v1/fifa/games`)
-- 🔲 API: tipy — zadanie, editácia, uzavretie pred zápasom (`/api/v1/fifa/tips`)
-- 🔲 API: výsledky skupinovej fázy — tabuľky 12 skupín
+- 🔲 API: tipy — zadanie, editácia, uzavretie 5 min pred zápasom (`/api/v1/fifa/tips`)
 - 🔲 API: poradie tipérov — celkové aj per-skupina priateľov
+- 🔲 API: skupinové tabuľky MS (12 skupín A–L) — priebežné výsledky tímov
 - 🔲 API: admin — zadanie výsledku zápasu, prepočet bodov
-- 🔲 Bodovací systém (definovať — napr. presné skóre, správny víťaz, správny počet gólov)
-- 🔲 Live score integrácia (voliteľné — ako pri IIHF)
+- 🔲 API: admin — finalizácia postupu zo skupín (kto postúpil)
 
-### Frontend (React)
+### 4. FIFA frontend (React)
 
-- 🔲 Navigácia — prepínač IIHF / FIFA (alebo spoločný sidebar s oboma sekciami)
 - 🔲 Stránka Zápasy — 104 zápasov, filter podľa fázy/skupiny, vlajky, dátumy
 - 🔲 Tipovanie — presné skóre pred zápasom, editácia, uzavretie 5 min pred štartom
 - 🔲 Tipy skupín — po začiatku zápasu viditeľné tipy všetkých členov skupiny
 - 🔲 Tabuľka poradia — per skupina priateľov, celkové
-- 🔲 Skupinové tabuľky MS (12 skupín A–L) — priebežné výsledky tímov
-- 🔲 Dashboard — najbližšie zápasy s tipom/bez, posledné výsledky, skrátené poradie
+- 🔲 Skupinové tabuľky MS (12 skupín A–L) — živé výsledky tímov
+- 🔲 Dashboard FIFA — najbližšie zápasy s tipom/bez, posledné výsledky, skrátené poradie
 - 🔲 Admin — zadávanie výsledkov, prepočet bodov
-
----
-
-## Bodovací systém (návrh — potvrdiť)
-
-*(zatiaľ nedefinovaný — dohodnúť s používateľom)*
-
-Možnosti:
-- Presné skóre: 3 body
-- Správny víťaz + rozdiel gólov: 2 body
-- Správny víťaz: 1 bod
-- Remíza tipovaná správne: 2 body
 
 ---
 
 ## Platforma
 
-- 🔲 Web aplikácia — React + Vite PWA (v rovnakom webe ako IIHF)
+- 🔲 Web aplikácia — React + Vite PWA (rozšírenie existujúceho webu)
 - 🔲 Android aplikácia — Kotlin (voliteľné, neskôr)
 
 ---
@@ -108,15 +150,14 @@ Možnosti:
 - **Hosting:** fellow.sk (rovnaký server ako IIHF)
 - **Databáza:** PostgreSQL — DB-BET, nová schema `fifa2026`
 - **Backend:** PHP REST API — nový prefix `/api/v1/fifa/`
-- **Deploy:** GitHub Actions → FTP (rovnaký workflow ako IIHF)
-- **Web URL:** iihf2026.fellow.sk (rovnaká doména — FIFA ako sekcia)
+- **Deploy:** GitHub Actions → FTP (rovnaký workflow)
+- **Web URL:** iihf2026.fellow.sk → prebranding na betclub.fellow.sk? *(upresniť)*
 
 ---
 
 ## Otvorené otázky
 
-1. **Navigácia:** Bude FIFA sekcia v rovnakej aplikácii (nové routes `/fifa/...`) alebo samostatná doména?
-2. **Bodovací systém:** Aké presne sú pravidlá bodovania?
-3. **Tímy:** Treba vlajky pre všetkých 48 tímov (máme len 16 z IIHF)?
-4. **Live score:** Integrovať automatické výsledky (API-Sports) alebo ručne admin?
-5. **Skupiny:** Rovnaké skupiny priateľov ako pri IIHF, alebo nové FIFA skupiny?
+1. **Doména:** Zostane iihf2026.fellow.sk alebo nová doména pre BetClub?
+2. **Play-off bodovanie:** Predĺženie a penalty — počíta sa výsledok po riadnom čase alebo po celom zápase?
+3. **Vlajky:** Treba vlajky pre všetkých 48 FIFA tímov (máme len 16 z IIHF — iný set krajín)
+4. **Poradie 3. miest:** Komplexné pravidlá FIFA pre výber 8 najlepších 3. miest — implementovať automaticky alebo admin rozhoduje?
