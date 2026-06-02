@@ -46,13 +46,12 @@ function HomeRedirect() {
 export default function App() {
     return (
         <AuthProvider>
-            <CompetitionProvider>
             <BrowserRouter>
                 <Routes>
                     <Route path="/login"    element={<Login />} />
                     <Route path="/register" element={<Register />} />
 
-                    <Route element={<PrivateUserRoute><UserLayout /></PrivateUserRoute>}>
+                    <Route element={<PrivateUserRoute><CompetitionProvider><UserLayout /></CompetitionProvider></PrivateUserRoute>}>
                         <Route path="/dashboard" element={<Dashboard />} />
                         <Route path="/games"     element={<Games />} />
                         <Route path="/tabulky"   element={<GroupStandings />} />
@@ -81,7 +80,6 @@ export default function App() {
                     <Route path="*" element={<HomeRedirect />} />
                 </Routes>
             </BrowserRouter>
-            </CompetitionProvider>
         </AuthProvider>
     );
 }
