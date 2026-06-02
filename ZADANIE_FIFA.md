@@ -83,12 +83,19 @@ Rovnaký princíp ako IIHF 2026:
 
 ### Navigácia
 
+Menu sa **nemení** — zostáva rovnaká štruktúra ako pri IIHF (Zápasy, Skupiny, Poradie, Dashboard...).
+
+V **Profile** pribudne nová záložka **Súťaže**:
+- Zoznam dostupných turnajov (napr. „IIHF MS 2026", „FIFA MS 2026")
+- User si vyberie aktívny turnaj → uloží sa do jeho profilu (napr. `localStorage` alebo DB)
+- Všetky stránky (Zápasy, Skupiny, Poradie, Dashboard) sa automaticky prepínajú na kontext zvoleného turnaja
+- Aktívny turnaj je viditeľný napr. v headeri/sidebari (malý badge alebo názov)
+
 ```
-/ (domov / rozcestník)
-  → /iihf/          IIHF MS 2026 sekcia
-  → /fifa/          FIFA MS 2026 sekcia
-  → /profil         Spoločný profil
-  → /skupiny        Skupiny (per-turnaj filtered)
+Profil → záložka Súťaže → výber aktívneho turnaja
+                            ↓
+          Zápasy / Skupiny / Poradie / Dashboard
+          (zobrazujú dáta pre zvolený turnaj)
 ```
 
 ### Čo sa zdieľa (z IIHF — hotové)
@@ -104,11 +111,14 @@ Rovnaký princíp ako IIHF 2026:
 
 ## Čo treba vytvoriť
 
-### 1. BetClub rebrand a navigácia
+### 1. Multi-turnaj infraštruktúra
 
-- 🔲 Domovská stránka — rozcestník s kartami turnajov (IIHF, FIFA, ...)
-- 🔲 Sidebar / navigácia — prepínanie medzi turnajmi
-- 🔲 Branding: názov „BetClub", nové logo/farby (ak treba)
+- 🔲 DB: tabuľka `competitions` — zoznam turnajov (id, name, slug, season, active)
+- 🔲 DB: `users.active_competition_id` — ktorý turnaj má user aktuálne nastavený
+- 🔲 Backend: API endpoint na zoznam turnajov + nastavenie aktívneho
+- 🔲 Frontend: záložka **Súťaže** v Profile — výber aktívneho turnaja
+- 🔲 Frontend: `CompetitionContext` — globálny kontext aktívneho turnaja, všetky stránky ho čítajú
+- 🔲 Frontend: badge/label aktívneho turnaja v sidebari (napr. „🏒 IIHF 2026" alebo „⚽ FIFA 2026")
 
 ### 2. Skupiny — hromadná pozvánka
 
