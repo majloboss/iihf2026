@@ -195,9 +195,9 @@ Poradie migrácie:
 - 🟠 `POST /api/v1/competitions/active` — nastavenie aktívneho turnaja usera
 - 🟠 `GET /api/v1/profile` — vracia aj `active_competition_id`
 - 🔲 Upraviť existujúce IIHF endpointy aby akceptovali `competition_id` (alebo zostanú IIHF-only)
-- 🔲 FIFA endpointy: `/api/v1/fifa/games`, `/api/v1/fifa/tips`, `/api/v1/fifa/standings`
+- 🟠 FIFA endpointy: `/api/v1/fifa/games`, `/api/v1/fifa/tips` — hotovo; standings neskôr
 - 🔲 Admin FIFA: zadanie výsledku, prepočet bodov, finalizácia skupín, zadanie play-off zápasov
-- 🔲 Import 48 tímov a 104 zápasov FIFA do DB
+- 🟠 Import 48 tímov a 104 zápasov FIFA do DB
 
 ### FÁZA 4 — Frontend React
 
