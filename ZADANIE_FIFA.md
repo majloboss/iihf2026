@@ -189,8 +189,8 @@ Cieľ: pridať vrstvu `competitions` bez straty IIHF dát. Existujúce záznamy 
 
 | | Dev (develop vetva) | Prod (main vetva) |
 |---|---|---|
-| **Web URL** | dev_iihf2026.fellow.sk | betclub.fellow.sk *(treba nastaviť)* |
-| **API** | dev_iihf2026.fellow.sk/api | betclub.fellow.sk/api |
+| **Web URL** | dev_betclub.fellow.sk | betclub.fellow.sk |
+| **API** | dev_betclub.fellow.sk/api | betclub.fellow.sk/api |
 | **Databáza** | DB-DEV-BET | DB-BET |
 | **db.php** | manuálne na dev serveri | manuálne na prod serveri |
 | **Deploy** | GitHub Actions → FTP (develop push) | GitHub Actions → FTP (main push, manuálne) |

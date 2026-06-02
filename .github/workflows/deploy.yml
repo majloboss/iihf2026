@@ -30,7 +30,7 @@ jobs:
         run: npm run build
         working-directory: web
         env:
-          VITE_API_URL: ${{ github.ref_name == 'main' && 'https://iihf2026.fellow.sk' || 'https://dev_iihf2026.fellow.sk' }}/api
+          VITE_API_URL: ${{ github.ref_name == 'main' && 'https://iihf2026.fellow.sk' || 'https://dev_betclub.fellow.sk' }}/api
 
 
       - name: Deploy web via FTP
@@ -40,8 +40,8 @@ jobs:
           username: ftp.fellow.sk
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: web/dist/
-          server-dir: ${{ github.ref_name == 'main' && '/sub/iihf2026/' || '/sub/dev_iihf2026/' }}
-          state-name: ${{ github.ref_name == 'main' && '.ftp-deploy-sync-web.json' || '.ftp-deploy-sync-dev-web.json' }}
+          server-dir: ${{ github.ref_name == 'main' && '/sub/iihf2026/' || '/sub/dev_betclub/' }}
+          state-name: ${{ github.ref_name == 'main' && '.ftp-deploy-sync-web.json' || '.ftp-deploy-sync-dev-betclub-web.json' }}
           exclude: |
             **/.git*
             **/.git*/**
@@ -71,8 +71,8 @@ jobs:
           username: ftp.fellow.sk
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: api/
-          server-dir: /sub/dev_iihf2026/api/
-          state-name: .ftp-deploy-sync-dev-api.json
+          server-dir: /sub/dev_betclub/api/
+          state-name: .ftp-deploy-sync-dev-betclub-api.json
           exclude: |
             **/.git*
             **/.git*/**
