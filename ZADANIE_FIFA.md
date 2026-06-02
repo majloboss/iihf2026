@@ -205,7 +205,8 @@ Poradie migrácie:
 - 🟠 Záložka **Súťaže** v Profile — zoznam turnajov, výber aktívneho
 - 🟠 Badge aktívneho turnaja v sidebari
 - 🔲 Prepojenie všetkých stránok na CompetitionContext (Zápasy, Skupiny, Poradie, Dashboard)
-- 🔲 FIFA stránky: Zápasy (104), Tipovanie, Poradie, Skupinové tabuľky (A–L), Dashboard
+- 🟠 FIFA stránky: Zápasy (104) + Tipovanie — hotovo
+- 🔲 FIFA stránky: Poradie, Skupinové tabuľky (A–L), Dashboard
 - 🔲 Admin FIFA: zadávanie výsledkov, prepočet, play-off zápasy
 
 ### FÁZA 5 — Skupiny — hromadná pozvánka
