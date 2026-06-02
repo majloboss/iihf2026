@@ -161,11 +161,11 @@ define('APP_URL',    'https://dev_betclub.fellow.sk');
 
 ### FÁZA 1 — Nastavenie projektu (pred kódovaním)
 
-- 🔲 Premenovať `iihf2026` → `betclub` (manuálne v Prieskumníkovi)
-- 🔲 `git checkout main` v `betclub\`
-- 🔲 `git worktree add ..\dev_betclub develop`
-- 🔲 Nakopírovať `db.php` (DB-DEV-BET) do `dev_betclub\api\config\`
-- 🔲 Manuálne nahrať `db.php` (DB-DEV-BET) na dev server `/sub/dev_betclub/api/config/`
+- ✅ Premenovať `iihf2026` → `betclub` (manuálne v Prieskumníkovi)
+- ✅ `git checkout main` v `betclub\`
+- ✅ `git worktree add ..\dev_betclub develop`
+- ✅ Nakopírovať `db.php` (DB-DEV-BET) do `dev_betclub\api\config\`
+- ✅ Manuálne nahrať `db.php` (DB-DEV-BET) na dev server `/sub/dev_betclub/api/config/`
 
 ### FÁZA 2 — Multi-turnaj DB migrácia (024_competitions.sql)
 
@@ -187,7 +187,8 @@ Poradie migrácie:
 4. ALTER `admin.notification_log` — drop FK, add `competition_id` DEFAULT 1
 5. CREATE SCHEMA `fifa2026` + tabuľky
 
-- 🔲 Napísať a spustiť `api/migrations/024_competitions.sql` na DB-DEV-BET
+- 🟠 Napísať `api/migrations/024_competitions.sql` — ✅ hotovo
+- 🔲 Spustiť migráciu: zavolaj `POST /api/v1/admin/run-migration` (admin JWT)
 
 ### FÁZA 3 — Backend API
 
