@@ -92,6 +92,7 @@
 }
 .gameTeam {
     display: flex;
+    flex-direction: row;
     align-items: center;
     gap: 7px;
     flex: 1;
@@ -99,16 +100,15 @@
     font-weight: 700;
     color: #1a3a6b;
     min-width: 0;
+    overflow: hidden;
 }
-.gameTeamRight { flex-direction: row-reverse; justify-content: flex-start; }
+.gameTeamRight { flex-direction: row-reverse; }
 .gameFlag {
     width: 32px;
     height: 21px;
     object-fit: cover;
     border-radius: 2px;
     flex-shrink: 0;
-    vertical-align: middle;
-    display: block;
 }
 .tbd { color: #aaa; font-weight: 400; font-size: 0.82rem; }
 
