@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { getFifaGames, saveFifaTip } from '../../api/fifaGames';
+import FifaGroupStandings from './FifaGroupStandings';
 import styles from './Games.module.css';
 
 const GROUP_CODES = ['A','B','C','D','E','F','G','H','I','J','K','L'];
@@ -217,10 +218,12 @@ export default function FifaGames() {
             </div>
 
             {view === 'standings' && (
-                <div style={{padding:'40px 0', textAlign:'center', color:'#888'}}>
-                    <div style={{fontSize:'2rem', marginBottom:8}}>⚽</div>
-                    <div>Skupinové tabuľky — pripravujeme</div>
-                </div>
+                <FifaGroupStandings onTeamClick={(team) => {
+                    setSelectedTeam(team);
+                    setPhase('GRP');
+                    setGroupFilter(null);
+                    setView('games');
+                }} />
             )}
 
             {view === 'games' && <>

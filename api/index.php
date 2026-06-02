@@ -46,6 +46,7 @@ try {
         $path === 'v1/competitions/active' => require __DIR__ . '/v1/competitions.php',
         $path === 'v1/fifa/games'          => require __DIR__ . '/v1/fifa/games.php',
         $path === 'v1/fifa/tips'           => require __DIR__ . '/v1/fifa/tips.php',
+        $path === 'v1/fifa/standings'      => require __DIR__ . '/v1/fifa/standings.php',
         $path === 'v1/games'               => require __DIR__ . '/v1/games.php',
         $path === 'v1/tips'                => require __DIR__ . '/v1/tips.php',
         $path === 'v1/standings'           => require __DIR__ . '/v1/standings.php',
