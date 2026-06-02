@@ -60,7 +60,7 @@ Rovnaký princíp ako IIHF 2026:
 | Remíza tipovaná správne (bez ohľadu na skóre) | **2 body** |
 | Nesprávny výsledok | **0 bodov** |
 
-*(Play-off zápasy — rovnaký systém; predĺženie/penalty treba definovať)*
+**Play-off zápasy:** Výsledok sa porovnáva s výsledkom **po riadnom čase (90 min)**. Ak tip znie 1:1 a zápas ide do predĺženia, tip sa hodnotí ako remíza = **2 body** (správna remíza po 90 min). Skóre predĺženia a penalty sa do tipu nepočítajú.
 
 ---
 
@@ -150,14 +150,27 @@ Rovnaký princíp ako IIHF 2026:
 - **Hosting:** fellow.sk (rovnaký server ako IIHF)
 - **Databáza:** PostgreSQL — DB-BET, nová schema `fifa2026`
 - **Backend:** PHP REST API — nový prefix `/api/v1/fifa/`
-- **Deploy:** GitHub Actions → FTP (rovnaký workflow)
-- **Web URL:** iihf2026.fellow.sk → prebranding na betclub.fellow.sk? *(upresniť)*
+- **Deploy:** GitHub Actions → FTP (nový workflow pre betclub.fellow.sk)
+- **Web URL (prod):** betclub.fellow.sk *(nová subdoména — treba nastaviť na fellow.sk)*
+- **Web URL (dev):** dev_betclub.fellow.sk *(alebo dev_iihf2026.fellow.sk zostáva ako dev)*
+
+---
+
+## Postup zo skupín a play-off zápasy
+
+**Problém:** Na rozdiel od IIHF, v play-off FIFA nie sú zápasy vopred definované — závisia od skupinových výsledkov.
+
+**Riešenie:**
+1. Skupinová fáza prebehne, systém automaticky vypočíta poradie v 12 skupinách
+2. Systém automaticky navrhne 8 postupujúcich 3. miest (podľa FIFA pravidiel: body → skóre → strelené góly → abeceda)
+3. Admin skontroluje návrh a **potvrdí** postup (môže upraviť)
+4. Admin **ručne zadá** zápasy Round of 32 (kto hrá s kým) — systém vie len tímové kódy, nie bracket
+5. Rovnaký postup pre Round of 16, QF, SF — admin zakladá zápasy po skončení predchádzajúceho kola
+6. Tipéri tipujú play-off zápasy rovnako ako skupinové
 
 ---
 
 ## Otvorené otázky
 
-1. **Doména:** Zostane iihf2026.fellow.sk alebo nová doména pre BetClub?
-2. **Play-off bodovanie:** Predĺženie a penalty — počíta sa výsledok po riadnom čase alebo po celom zápase?
-3. **Vlajky:** Treba vlajky pre všetkých 48 FIFA tímov (máme len 16 z IIHF — iný set krajín)
-4. **Poradie 3. miest:** Komplexné pravidlá FIFA pre výber 8 najlepších 3. miest — implementovať automaticky alebo admin rozhoduje?
+1. **Vlajky:** Treba vlajky pre všetkých 48 FIFA tímov (máme len 16 z IIHF — iný set krajín, treba stiahnuť/pripraviť)
+2. **Dev subdoména:** dev_betclub.fellow.sk alebo zostáva dev_iihf2026.fellow.sk pre dev prostredie?
