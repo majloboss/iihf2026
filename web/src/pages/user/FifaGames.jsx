@@ -81,6 +81,7 @@ export default function FifaGames() {
     const [selectedTeam, setSelectedTeam] = useState(null);
     const [selectedDay, setSelectedDay]   = useState(null);
     const [showUntipped, setShowUntipped] = useState(false);
+    const [view, setView]                 = useState('games'); // 'games'|'standings'
     const calContainer = useRef(null);
 
     useEffect(() => {
@@ -187,24 +188,24 @@ export default function FifaGames() {
                     >ALL</button>
                     <button
                         className={[styles.pBtn, styles.pGroup, grpActive ? styles.pGroupOn : ''].join(' ')}
-                        onClick={() => { setPhase('GRP'); setSelectedTeam(null); setSelectedDay(null); }}
+                        onClick={() => { setPhase('GRP'); setSelectedTeam(null); setSelectedDay(null); setView('games'); }}
                     >GRP</button>
                     {KNOCKOUT.map(p => (
                         <button key={p} className={pBtnClass(p)}
-                            onClick={() => { setPhase(p); setGroupFilter(null); setSelectedTeam(null); setSelectedDay(null); }}
+                            onClick={() => { setPhase(p); setGroupFilter(null); setSelectedTeam(null); setSelectedDay(null); setView('games'); }}
                         >
                             {p === 'BM' ? 'BR' : p}
                         </button>
                     ))}
+                    <button
+                        className={`${view === 'standings' ? styles.btnTabulkyActive : styles.btnTabulky} ${styles.btnTabulkyInline}`}
+                        onClick={() => setView(v => v === 'standings' ? 'games' : 'standings')}
+                    >TAB</button>
                 </div>
 
                 {/* Riadok 2: skupiny A–L (len keď GRP aktívne) */}
                 {grpActive && (
                     <div className={styles.filters} style={{marginTop: 4}}>
-                        <button
-                            className={[styles.pBtn, styles.pGroup, phase === 'GRP' && !groupFilter ? styles.pGroupOn : ''].join(' ')}
-                            onClick={() => { setGroupFilter(null); setSelectedTeam(null); }}
-                        >VSE</button>
                         {GROUP_CODES.map(g => (
                             <button key={g}
                                 className={[styles.pBtn, styles.pGroup, groupFilter === g ? styles.pGroupOn : ''].join(' ')}
@@ -214,6 +215,15 @@ export default function FifaGames() {
                     </div>
                 )}
             </div>
+
+            {view === 'standings' && (
+                <div style={{padding:'40px 0', textAlign:'center', color:'#888'}}>
+                    <div style={{fontSize:'2rem', marginBottom:8}}>⚽</div>
+                    <div>Skupinové tabuľky — pripravujeme</div>
+                </div>
+            )}
+
+            {view === 'games' && <>
 
             {/* Vlajky tímov */}
             {flagTeams.length > 0 && (
@@ -282,6 +292,8 @@ export default function FifaGames() {
             ))}
 
             {filtered.length === 0 && <p className={styles.empty}>Žiadne zápasy</p>}
+
+            </>}
         </div>
     );
 }
