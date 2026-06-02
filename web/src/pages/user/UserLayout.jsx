@@ -21,8 +21,7 @@ export default function UserLayout() {
         <div className={styles.layout}>
             <aside className={styles.sidebar}>
                 <div className={styles.brand}>
-                    <img src="/logo.png" alt="BetClub" />
-                    <span>BetClub</span>
+                    <img src="/logo.png" alt="BetClub" style={{width:60, height:60, borderRadius:'50%'}} />
                 </div>
                 {activeCompetition && (
                     <div className={styles.competitionBadge}>

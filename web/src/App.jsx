@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { CompetitionProvider } from './context/CompetitionContext';
+import { CompetitionProvider, useCompetition } from './context/CompetitionContext';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Profile from './pages/Profile';
@@ -17,6 +17,8 @@ import AdminMailLog from './pages/admin/AdminMailLog';
 import AdminAnnouncements from './pages/admin/AdminAnnouncements';
 import UserLayout from './pages/user/UserLayout';
 import Games from './pages/user/Games';
+import FifaGames from './pages/user/FifaGames';
+import FifaDashboard from './pages/user/FifaDashboard';
 import GroupStandings from './pages/user/GroupStandings';
 import Standings from './pages/user/Standings';
 import Pravidla from './pages/user/Pravidla';
@@ -36,6 +38,16 @@ function PrivateAdminRoute({ children }) {
     return children;
 }
 
+function DashboardRouter() {
+    const { activeCompetition } = useCompetition();
+    return activeCompetition?.slug === 'fifa2026' ? <FifaDashboard /> : <Dashboard />;
+}
+
+function GamesRouter() {
+    const { activeCompetition } = useCompetition();
+    return activeCompetition?.slug === 'fifa2026' ? <FifaGames /> : <Games />;
+}
+
 function HomeRedirect() {
     const { user } = useAuth();
     if (!user) return <Navigate to="/login" replace />;
@@ -52,8 +64,8 @@ export default function App() {
                     <Route path="/register" element={<Register />} />
 
                     <Route element={<PrivateUserRoute><CompetitionProvider><UserLayout /></CompetitionProvider></PrivateUserRoute>}>
-                        <Route path="/dashboard" element={<Dashboard />} />
-                        <Route path="/games"     element={<Games />} />
+                        <Route path="/dashboard" element={<DashboardRouter />} />
+                        <Route path="/games"     element={<GamesRouter />} />
                         <Route path="/tabulky"   element={<GroupStandings />} />
                         <Route path="/groups"    element={<Navigate to="/profile" replace />} />
                         <Route path="/standings" element={<Standings />} />
