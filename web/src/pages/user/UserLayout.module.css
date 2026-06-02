@@ -30,6 +30,20 @@
 
 .brand img { width: 36px; }
 
+.competitionBadge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0 12px 4px;
+    padding: 6px 10px;
+    background: rgba(255,255,255,0.12);
+    border-radius: 8px;
+    font-size: 0.78rem;
+    color: rgba(255,255,255,0.9);
+    font-weight: 600;
+    cursor: default;
+}
+
 /* scoped to sidebar so it doesn't conflict with bottomNav */
 .sidebar nav { display: flex; flex-direction: column; padding: 12px 0; }
 

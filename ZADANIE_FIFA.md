@@ -201,9 +201,9 @@ Poradie migrácie:
 
 ### FÁZA 4 — Frontend React
 
-- 🔲 `CompetitionContext` — globálny kontext aktívneho turnaja
-- 🔲 Záložka **Súťaže** v Profile — zoznam turnajov, výber aktívneho
-- 🔲 Badge aktívneho turnaja v sidebari
+- 🟠 `CompetitionContext` — globálny kontext aktívneho turnaja
+- 🟠 Záložka **Súťaže** v Profile — zoznam turnajov, výber aktívneho
+- 🟠 Badge aktívneho turnaja v sidebari
 - 🔲 Prepojenie všetkých stránok na CompetitionContext (Zápasy, Skupiny, Poradie, Dashboard)
 - 🔲 FIFA stránky: Zápasy (104), Tipovanie, Poradie, Skupinové tabuľky (A–L), Dashboard
 - 🔲 Admin FIFA: zadávanie výsledkov, prepočet, play-off zápasy

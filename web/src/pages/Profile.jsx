@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useCompetition } from '../context/CompetitionContext';
 import { getProfile, updateProfile, changePassword, deleteAccount, uploadAvatar } from '../api/profile';
 import Groups from './user/Groups';
 import Notifications from './user/Notifications';
@@ -11,6 +12,8 @@ export default function Profile() {
     const { signOut } = useAuth();
     const navigate    = useNavigate();
     const fileRef     = useRef(null);
+    const { competitions, activeCompetition, switchCompetition } = useCompetition();
+    const [switchingId, setSwitchingId] = useState(null);
 
     const [tab, setTab]       = useState('profil');
     const [form, setForm]     = useState({ first_name: '', last_name: '', email: '', phone: '' });
@@ -78,7 +81,15 @@ export default function Profile() {
         finally { setBusy(''); }
     };
 
+    const handleSwitch = async (id) => {
+        setSwitchingId(id);
+        try { await switchCompetition(id); } catch {}
+        setSwitchingId(null);
+    };
+
     if (loading) return <div className={styles.wrap}><p>Načítavam…</p></div>;
+
+    const SPORT_EMOJI = { hockey: '🏒', football: '⚽' };
 
     return (
         <div className={styles.wrap}>
@@ -86,6 +97,7 @@ export default function Profile() {
                 <div className={styles.tabsRow}>
                     <div className={styles.tabs}>
                         <button className={tab === 'profil'     ? styles.tabActive : styles.tab} onClick={() => setTab('profil')}>Profil</button>
+                        <button className={tab === 'sutaze'     ? styles.tabActive : styles.tab} onClick={() => setTab('sutaze')}>Súťaže</button>
                         <button className={tab === 'skupiny'    ? styles.tabActive : styles.tab} onClick={() => setTab('skupiny')}>Skupiny</button>
                         <button className={tab === 'pozvanky'   ? styles.tabActive : styles.tab} onClick={() => setTab('pozvanky')}>Pozvánky</button>
                         <button className={tab === 'notif'      ? styles.tabActive : styles.tab} onClick={() => setTab('notif')}>Notif</button>
@@ -93,6 +105,52 @@ export default function Profile() {
                     </div>
                 </div>
 
+                {tab === 'sutaze' && (
+                    <div className={styles.tabContent}>
+                        <section className={styles.section}>
+                            <h3>Aktívna súťaž</h3>
+                            <p style={{ color: '#666', fontSize: '0.9rem', margin: 0 }}>
+                                Všetky stránky (Zápasy, Tabuľky, Poradie) zobrazujú dáta pre vybranú súťaž.
+                            </p>
+                        </section>
+                        <section className={styles.section}>
+                            {competitions.map(c => {
+                                const isActive = activeCompetition?.id === c.id;
+                                return (
+                                    <div key={c.id} className={styles.competitionCard} style={{
+                                        border: `2px solid ${isActive ? '#1a3a6b' : '#e0e0e0'}`,
+                                        borderRadius: 10,
+                                        padding: '16px 20px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between',
+                                        background: isActive ? '#f0f4fb' : '#fafafa',
+                                        gap: 12,
+                                    }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                            <span style={{ fontSize: '1.8rem' }}>{SPORT_EMOJI[c.sport] ?? '🏆'}</span>
+                                            <div>
+                                                <div style={{ fontWeight: 700, color: '#1a3a6b', fontSize: '0.95rem' }}>{c.name}</div>
+                                                <div style={{ fontSize: '0.8rem', color: '#888' }}>{c.starts_at} – {c.ends_at}</div>
+                                            </div>
+                                        </div>
+                                        {isActive
+                                            ? <span style={{ color: '#27ae60', fontWeight: 700, fontSize: '0.85rem' }}>✓ Aktívna</span>
+                                            : <button
+                                                className={styles.btn}
+                                                style={{ padding: '7px 16px', fontSize: '0.82rem' }}
+                                                disabled={switchingId === c.id}
+                                                onClick={() => handleSwitch(c.id)}
+                                              >
+                                                {switchingId === c.id ? 'Prepínam…' : 'Prepnúť'}
+                                              </button>
+                                        }
+                                    </div>
+                                );
+                            })}
+                        </section>
+                    </div>
+                )}
                 {tab === 'skupiny'    && <div className={styles.tabContent}><Groups /></div>}
                 {tab === 'pozvanky'  && <div className={styles.tabContent}><UserInvites /></div>}
                 {tab === 'notif'     && <div className={styles.tabContent}><Notifications /></div>}
