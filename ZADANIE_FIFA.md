@@ -187,12 +187,15 @@ Cieľ: pridať vrstvu `competitions` bez straty IIHF dát. Existujúce záznamy 
 
 ## Infraštruktúra
 
-- **Hosting:** fellow.sk (rovnaký server ako IIHF)
-- **Databáza:** PostgreSQL — DB-BET, nová schema `fifa2026`
-- **Backend:** PHP REST API — nový prefix `/api/v1/fifa/`
-- **Deploy:** GitHub Actions → FTP (nový workflow pre betclub.fellow.sk)
-- **Web URL (prod):** betclub.fellow.sk *(nová subdoména — treba nastaviť na fellow.sk)*
-- **Web URL (dev):** dev_betclub.fellow.sk *(alebo dev_iihf2026.fellow.sk zostáva ako dev)*
+| | Dev (develop vetva) | Prod (main vetva) |
+|---|---|---|
+| **Web URL** | dev_iihf2026.fellow.sk | betclub.fellow.sk *(treba nastaviť)* |
+| **API** | dev_iihf2026.fellow.sk/api | betclub.fellow.sk/api |
+| **Databáza** | DB-DEV-BET | DB-BET |
+| **db.php** | manuálne na dev serveri | manuálne na prod serveri |
+| **Deploy** | GitHub Actions → FTP (develop push) | GitHub Actions → FTP (main push, manuálne) |
+
+> **Pravidlo:** Všetko vyvíjame na `develop` → deploy do dev prostredia (DB-DEV-BET). Na `main` / DB-BET nikdy automaticky.
 
 ---
 
