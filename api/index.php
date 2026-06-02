@@ -42,6 +42,8 @@ try {
         $path === 'v1/admin/recalc-points'   => require __DIR__ . '/v1/admin/recalc_points.php',
         $path === 'v1/admin/test-setup'      => require __DIR__ . '/v1/admin/test_setup.php',
         $path === 'v1/game-tips'           => require __DIR__ . '/v1/game_tips.php',
+        $path === 'v1/competitions'        => require __DIR__ . '/v1/competitions.php',
+        $path === 'v1/competitions/active' => require __DIR__ . '/v1/competitions.php',
         $path === 'v1/games'               => require __DIR__ . '/v1/games.php',
         $path === 'v1/tips'                => require __DIR__ . '/v1/tips.php',
         $path === 'v1/standings'           => require __DIR__ . '/v1/standings.php',

@@ -187,13 +187,13 @@ Poradie migrácie:
 4. ALTER `admin.notification_log` — drop FK, add `competition_id` DEFAULT 1
 5. CREATE SCHEMA `fifa2026` + tabuľky
 
-- 🟠 Napísať `api/migrations/024_competitions.sql` — ✅ hotovo
-- 🔲 Spustiť migráciu: zavolaj `POST /api/v1/admin/run-migration` (admin JWT)
+- 🟠 Napísať a spustiť `api/migrations/024_competitions.sql` na DB-DEV-BET — ✅ hotovo
 
 ### FÁZA 3 — Backend API
 
-- 🔲 `GET /api/v1/competitions` — zoznam turnajov
-- 🔲 `POST /api/v1/competitions/active` — nastavenie aktívneho turnaja usera
+- 🟠 `GET /api/v1/competitions` — zoznam turnajov
+- 🟠 `POST /api/v1/competitions/active` — nastavenie aktívneho turnaja usera
+- 🟠 `GET /api/v1/profile` — vracia aj `active_competition_id`
 - 🔲 Upraviť existujúce IIHF endpointy aby akceptovali `competition_id` (alebo zostanú IIHF-only)
 - 🔲 FIFA endpointy: `/api/v1/fifa/games`, `/api/v1/fifa/tips`, `/api/v1/fifa/standings`
 - 🔲 Admin FIFA: zadanie výsledku, prepočet bodov, finalizácia skupín, zadanie play-off zápasov
