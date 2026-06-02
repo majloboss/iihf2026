@@ -22,6 +22,11 @@ export async function apiFetch(path, options = {}) {
             ...(options.headers ?? {})
         }
     });
+    if (res.status === 401) {
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+        return;
+    }
     const json = await res.json();
     if (!json.ok) throw new Error(json.error ?? 'Chyba servera');
     return json.data;
