@@ -199,31 +199,34 @@ Poradie migrácie:
 4. ALTER `admin.notification_log` — drop FK, add `competition_id` DEFAULT 1
 5. CREATE SCHEMA `fifa2026` + tabuľky
 
-- 🟠 Napísať a spustiť `api/migrations/024_competitions.sql` na DB-DEV-BET — ✅ hotovo
+- ✅ Napísať a spustiť `api/migrations/024–028` na DB-DEV-BET — hotovo
 
 ### FÁZA 3 — Backend API
 
-- 🟠 `GET /api/v1/competitions` — zoznam turnajov
-- 🟠 `POST /api/v1/competitions/active` — nastavenie aktívneho turnaja usera
-- 🟠 `GET /api/v1/profile` — vracia aj `active_competition_id`
-- 🟠 IIHF endpointy zostávajú IIHF-only (rozhodnuté)
-- 🟠 FIFA endpointy: `/api/v1/fifa/games`, `/api/v1/fifa/tips`, `/api/v1/fifa/standings` — hotovo
-- 🟠 Admin FIFA backend: `fifa-game-update`, `fifa-recalc`, scoring_config — hotovo (UI neskôr)
-- 🟠 Import 48 tímov a 104 zápasov FIFA do DB
+- ✅ `GET /api/v1/competitions` — zoznam turnajov (aktívna vždy prvá)
+- ✅ `POST /api/v1/competitions/active` — nastavenie aktívneho turnaja usera
+- ✅ `GET /api/v1/profile` — vracia aj `active_competition_id`
+- ✅ IIHF endpointy zostávajú IIHF-only (rozhodnuté)
+- ✅ FIFA endpointy: `/api/v1/fifa/games`, `/api/v1/fifa/tips`, `/api/v1/fifa/standings`
+- ✅ Admin FIFA backend: `fifa-game-update`, `fifa-recalc`, scoring_config
+- ✅ Import 48 tímov a 104 zápasov FIFA do DB
+- ✅ Pozvánky: kontrola duplikátov (čakajúce aj použité, s menom hráča), zrušenie pozvánky
 
 ### FÁZA 4 — Frontend React
 
-- 🟠 `CompetitionContext` — globálny kontext aktívneho turnaja
-- 🟠 Záložka **Súťaže** v Profile — zoznam turnajov, výber aktívneho, loga turnajov
-- 🟠 Badge (loga) aktívneho turnaja v sidebari
-- 🟠 Prepojenie všetkých stránok na CompetitionContext (Zápasy, Skupiny, Poradie, Dashboard, Tabuľky)
-- 🟠 FIFA stránky: Zápasy, Tipovanie, Skupinové tabuľky A–L, Prehľad, Poradie — všetko hotovo
-- 🔲 Admin FIFA: zadávanie výsledkov, prepočet bodov, play-off zápasy (neskôr)
+- ✅ `CompetitionContext` — globálny kontext aktívneho turnaja
+- ✅ Záložka **Súťaže** v Profile — loga turnajov, aktívna vždy prvá
+- ✅ Loga BetClub + turnaja v sidebari, názov turnaja pod nimi
+- ✅ Dispatcher pre všetky stránky (Zápasy, Skupiny, Poradie, Dashboard, Tabuľky)
+- ✅ FIFA stránky: Zápasy (filtre GRP/A–L/knockout, vlajky), Tabuľky A–L, Prehľad, Poradie
+- ✅ Dashboard: nearest games + standings len pre aktívny turnaj
+- ✅ Poradie: per-competition, bodovanie FIFA 7-6-5-4-3-2-1-0
+- 🔲 Admin FIFA UI: zadávanie výsledkov, prepočet bodov, play-off zápasy (neskôr)
 
 ### FÁZA 5 — Skupiny — hromadná pozvánka
 
-- 🟠 Backend: `group-invite-bulk` endpoint
-- 🟠 Frontend: UI v Profil → Skupiny — Pozvať zo skupiny (cross-competition)
+- ✅ Backend: `group-invite-bulk` — status=invited, refresh po pozvaní
+- ✅ Frontend: Pozvať zo skupiny (cross-competition), Zrušiť pozvánku, per-competition filter skupín
 
 ---
 
