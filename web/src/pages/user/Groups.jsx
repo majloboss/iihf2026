@@ -105,10 +105,9 @@ export default function Groups() {
     const openBulkInvite = async (groupId) => {
         if (bulkOpenFor === groupId) { setBulkOpenFor(null); return; }
         setBulkOpenFor(groupId); setBulkSource(''); setBulkResult(null); setBulkErr('');
-        if (!allMyGroups) {
-            const data = await getAllMyGroups().catch(() => []);
-            setAllMyGroups(data);
-        }
+        setAllMyGroups(null);
+        const data = await getAllMyGroups().catch(() => []);
+        setAllMyGroups(data);
     };
 
     const doBulkInvite = async (groupId) => {
