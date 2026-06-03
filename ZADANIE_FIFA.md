@@ -194,25 +194,24 @@ Poradie migrácie:
 - 🟠 `GET /api/v1/competitions` — zoznam turnajov
 - 🟠 `POST /api/v1/competitions/active` — nastavenie aktívneho turnaja usera
 - 🟠 `GET /api/v1/profile` — vracia aj `active_competition_id`
-- 🔲 Upraviť existujúce IIHF endpointy aby akceptovali `competition_id` (alebo zostanú IIHF-only)
-- 🟠 FIFA endpointy: `/api/v1/fifa/games`, `/api/v1/fifa/tips` — hotovo; standings neskôr
-- 🔲 Admin FIFA: zadanie výsledku, prepočet bodov, finalizácia skupín, zadanie play-off zápasov
+- 🟠 IIHF endpointy zostávajú IIHF-only (rozhodnuté)
+- 🟠 FIFA endpointy: `/api/v1/fifa/games`, `/api/v1/fifa/tips`, `/api/v1/fifa/standings` — hotovo
+- 🟠 Admin FIFA backend: `fifa-game-update`, `fifa-recalc`, scoring_config — hotovo (UI neskôr)
 - 🟠 Import 48 tímov a 104 zápasov FIFA do DB
 
 ### FÁZA 4 — Frontend React
 
 - 🟠 `CompetitionContext` — globálny kontext aktívneho turnaja
-- 🟠 Záložka **Súťaže** v Profile — zoznam turnajov, výber aktívneho
-- 🟠 Badge aktívneho turnaja v sidebari
-- 🔲 Prepojenie všetkých stránok na CompetitionContext (Zápasy, Skupiny, Poradie, Dashboard)
-- 🟠 FIFA stránky: Zápasy (104) + Tipovanie + Skupinové tabuľky (A–L) + Prehľad Dashboard — hotovo
-- 🔲 FIFA stránky: Poradie (standings v skupinách priateľov)
-- 🔲 Admin FIFA: zadávanie výsledkov, prepočet bodov, play-off zápasy
+- 🟠 Záložka **Súťaže** v Profile — zoznam turnajov, výber aktívneho, loga turnajov
+- 🟠 Badge (loga) aktívneho turnaja v sidebari
+- 🟠 Prepojenie všetkých stránok na CompetitionContext (Zápasy, Skupiny, Poradie, Dashboard, Tabuľky)
+- 🟠 FIFA stránky: Zápasy, Tipovanie, Skupinové tabuľky A–L, Prehľad, Poradie — všetko hotovo
+- 🔲 Admin FIFA: zadávanie výsledkov, prepočet bodov, play-off zápasy (neskôr)
 
 ### FÁZA 5 — Skupiny — hromadná pozvánka
 
-- 🔲 Backend: endpoint „pozvať všetkých z inej skupiny"
-- 🔲 Frontend: UI pri zakladaní skupiny — výber existujúcej skupiny → hromadná pozvánka
+- 🟠 Backend: `group-invite-bulk` endpoint
+- 🟠 Frontend: UI v Profil → Skupiny — Pozvať zo skupiny (cross-competition)
 
 ---
 
