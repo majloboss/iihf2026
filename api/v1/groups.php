@@ -6,19 +6,30 @@ $auth = require_auth();
 $pdo  = db();
 
 if ($method === 'GET') {
+    // all_competitions=1 vráti skupiny vo všetkých súťažiach (pre bulk invite výber zdroja)
+    $allComp = ($_GET['all_competitions'] ?? '') === '1';
+    $cid     = $allComp ? null : (isset($_GET['competition_id']) ? (int)$_GET['competition_id'] : null);
+
+    $where = $cid ? 'WHERE fg.competition_id = :cid' : '';
+    $params = [':uid' => $auth['user_id']];
+    if ($cid) $params[':cid'] = $cid;
+
     $stmt = $pdo->prepare("
-        SELECT fg.id, fg.name, fg.created_by, fg.created_at,
+        SELECT fg.id, fg.name, fg.created_by, fg.created_at, fg.competition_id,
                u.username AS creator_username,
+               c.name AS competition_name, c.slug AS competition_slug,
                COUNT(gm.user_id) FILTER (WHERE gm.status = 'accepted') AS member_count,
                (SELECT gm2.status FROM admin.group_members gm2
                 WHERE gm2.group_id = fg.id AND gm2.user_id = :uid) AS my_status
         FROM admin.friend_groups fg
         JOIN admin.users u ON u.id = fg.created_by
         LEFT JOIN admin.group_members gm ON gm.group_id = fg.id
-        GROUP BY fg.id, u.username
+        LEFT JOIN admin.competitions c ON c.id = fg.competition_id
+        $where
+        GROUP BY fg.id, u.username, c.name, c.slug
         ORDER BY fg.name
     ");
-    $stmt->execute([':uid' => $auth['user_id']]);
+    $stmt->execute($params);
     json_ok($stmt->fetchAll());
 }
 
@@ -27,12 +38,15 @@ if ($method === 'POST') {
     $name = trim($body['name'] ?? '');
     if (strlen($name) < 3) json_error('Názov musí mať aspoň 3 znaky', 400);
 
+    $competition_id = (int)($body['competition_id'] ?? 0);
+    if (!$competition_id) json_error('Chýba competition_id', 400);
+
     try {
         $pdo->beginTransaction();
         $stmt = $pdo->prepare(
-            'INSERT INTO admin.friend_groups (name, created_by, created_at) VALUES (?, ?, NOW()) RETURNING id'
+            'INSERT INTO admin.friend_groups (name, created_by, competition_id, created_at) VALUES (?, ?, ?, NOW()) RETURNING id'
         );
-        $stmt->execute([$name, $auth['user_id']]);
+        $stmt->execute([$name, $auth['user_id'], $competition_id]);
         $id = $stmt->fetchColumn();
 
         // Zakladatel je automaticky clen
@@ -41,7 +55,7 @@ if ($method === 'POST') {
         )->execute([$id, $auth['user_id']]);
 
         $pdo->commit();
-        json_ok(['id' => $id, 'name' => $name], 201);
+        json_ok(['id' => $id, 'name' => $name, 'competition_id' => $competition_id], 201);
     } catch (PDOException $e) {
         $pdo->rollBack();
         if (str_contains($e->getMessage(), 'unique') || str_contains($e->getMessage(), 'duplicate')) {

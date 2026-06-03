@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { getGroups, createGroup, disbandGroup, joinGroup, leaveGroup, getMembers, memberAction, inviteMember, acceptGroupInvite } from '../../api/groups';
+import { useCompetition } from '../../context/CompetitionContext';
+import { getGroups, getAllMyGroups, createGroup, disbandGroup, joinGroup, leaveGroup, getMembers, memberAction, inviteMember, acceptGroupInvite, bulkInvite } from '../../api/groups';
 import { getUser, getUsers } from '../../api/users';
 import styles from './Groups.module.css';
 
@@ -12,9 +13,12 @@ function Avatar({ src, name, size = 32 }) {
 
 export default function Groups() {
     const { user } = useAuth();
+    const { activeCompetition } = useCompetition();
+    const compId = activeCompetition?.id ?? null;
+
     const [groups, setGroups]       = useState([]);
     const [loading, setLoading]     = useState(true);
-    const [myOnly, setMyOnly]       = useState(false);
+    const [myOnly, setMyOnly]       = useState(true);
     const [creating, setCreating]   = useState(false);
     const [newName, setNewName]     = useState('');
     const [createErr, setCreateErr] = useState('');
@@ -30,8 +34,16 @@ export default function Groups() {
     const [inviteBusy, setInviteBusy]       = useState('');
     const [inviteErr, setInviteErr]         = useState('');
 
-    const load = () => getGroups().then(setGroups).finally(() => setLoading(false));
-    useEffect(() => { load(); }, []);
+    // Bulk invite state
+    const [bulkOpenFor, setBulkOpenFor]     = useState(null);   // group_id pre ktorú je otvorený panel
+    const [allMyGroups, setAllMyGroups]     = useState(null);   // všetky skupiny usera naprieč súťažami
+    const [bulkSource, setBulkSource]       = useState('');     // vybraná zdrojová skupina
+    const [bulkBusy, setBulkBusy]           = useState(false);
+    const [bulkResult, setBulkResult]       = useState(null);   // { invited, skipped }
+    const [bulkErr, setBulkErr]             = useState('');
+
+    const load = () => getGroups(compId).then(setGroups).finally(() => setLoading(false));
+    useEffect(() => { load(); }, [compId]);
 
     useEffect(() => {
         setInviteQuery('');
@@ -81,12 +93,33 @@ export default function Groups() {
 
     const doCreate = async () => {
         if (!newName.trim()) return;
+        if (!compId) { setCreateErr('Najprv vyber súťaž v Profile'); return; }
         setBusy('create'); setCreateErr('');
         try {
-            await createGroup(newName.trim());
+            await createGroup(newName.trim(), compId);
             setNewName(''); setCreating(false); load();
         } catch (e) { setCreateErr(e.message); }
         finally { setBusy(''); }
+    };
+
+    const openBulkInvite = async (groupId) => {
+        if (bulkOpenFor === groupId) { setBulkOpenFor(null); return; }
+        setBulkOpenFor(groupId); setBulkSource(''); setBulkResult(null); setBulkErr('');
+        if (!allMyGroups) {
+            const data = await getAllMyGroups().catch(() => []);
+            setAllMyGroups(data);
+        }
+    };
+
+    const doBulkInvite = async (groupId) => {
+        if (!bulkSource) { setBulkErr('Vyber zdrojovú skupinu'); return; }
+        setBulkBusy(true); setBulkErr(''); setBulkResult(null);
+        try {
+            const res = await bulkInvite(groupId, parseInt(bulkSource));
+            setBulkResult(res);
+            load();
+        } catch (e) { setBulkErr(e.message); }
+        finally { setBulkBusy(false); }
     };
 
     const doJoin = async (id) => {
@@ -276,6 +309,56 @@ export default function Groups() {
                                                 </button>
                                             </div>
                                             {inviteErr && <p className={styles.inviteErr}>{inviteErr}</p>}
+
+                                            {/* Bulk invite — len zakladateľ */}
+                                            {isFounder && (
+                                                <div className={styles.bulkInviteSection}>
+                                                    <button
+                                                        className={styles.btnBulk}
+                                                        onClick={() => openBulkInvite(g.id)}
+                                                    >
+                                                        {bulkOpenFor === g.id ? '▲ Zrušiť hromadnú pozvánku' : '👥 Pozvať z inej skupiny'}
+                                                    </button>
+                                                    {bulkOpenFor === g.id && (
+                                                        <div className={styles.bulkPanel}>
+                                                            {!allMyGroups
+                                                                ? <p className={styles.emptySmall}>Načítavam skupiny…</p>
+                                                                : <>
+                                                                    <select
+                                                                        className={styles.bulkSelect}
+                                                                        value={bulkSource}
+                                                                        onChange={e => { setBulkSource(e.target.value); setBulkResult(null); setBulkErr(''); }}
+                                                                    >
+                                                                        <option value="">— vyber zdrojovú skupinu —</option>
+                                                                        {allMyGroups
+                                                                            .filter(sg => sg.id !== g.id && sg.my_status === 'accepted')
+                                                                            .map(sg => (
+                                                                                <option key={sg.id} value={sg.id}>
+                                                                                    {sg.name} {sg.competition_name ? `(${sg.competition_name})` : ''}
+                                                                                </option>
+                                                                            ))
+                                                                        }
+                                                                    </select>
+                                                                    <button
+                                                                        className={styles.btnBulkSend}
+                                                                        disabled={!bulkSource || bulkBusy}
+                                                                        onClick={() => doBulkInvite(g.id)}
+                                                                    >
+                                                                        {bulkBusy ? 'Pozývam…' : 'Pozvať všetkých'}
+                                                                    </button>
+                                                                    {bulkErr && <p className={styles.inviteErr}>{bulkErr}</p>}
+                                                                    {bulkResult && (
+                                                                        <p className={styles.bulkOk}>
+                                                                            ✓ {bulkResult.invited} pozvaniek odoslaných
+                                                                            {bulkResult.skipped > 0 && `, ${bulkResult.skipped} preskočených (už v skupine)`}
+                                                                        </p>
+                                                                    )}
+                                                                </>
+                                                            }
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
                                         </div>
                                     )}
                                     {!grpMembers ? (
