@@ -78,3 +78,16 @@
     transition: background 0.15s;
 }
 .btnCopy:hover { background: #f8f9fa; color: #1a3a6b; }
+
+.btnRevoke {
+    background: none;
+    border: 1px solid #f5c6cb;
+    border-radius: 6px;
+    padding: 4px 12px;
+    cursor: pointer;
+    font-size: 0.78rem;
+    color: #c0392b;
+    transition: background 0.15s;
+}
+.btnRevoke:hover:not(:disabled) { background: #fdecea; }
+.btnRevoke:disabled { opacity: 0.5; cursor: not-allowed; }

@@ -141,4 +141,18 @@ if ($method === 'POST') {
              'email_sent' => $email_sent, 'email_err' => $email_err], 201);
 }
 
+if ($method === 'DELETE') {
+    $body = json_decode(file_get_contents('php://input'), true) ?? [];
+    $id   = (int)($body['id'] ?? 0);
+    if (!$id) json_error('Chýba id', 400);
+
+    // Len vlastné, nepoužité pozvánky
+    $stmt = $pdo->prepare("SELECT id FROM admin.invites WHERE id = ? AND created_by = ? AND used_at IS NULL");
+    $stmt->execute([$id, $auth['user_id']]);
+    if (!$stmt->fetch()) json_error('Pozvánka neexistuje alebo už bola použitá', 404);
+
+    $pdo->prepare("DELETE FROM admin.invites WHERE id = ?")->execute([$id]);
+    json_ok(['deleted' => true]);
+}
+
 json_error('Method not allowed', 405);

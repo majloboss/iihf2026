@@ -47,6 +47,7 @@ export default function UserInvites() {
     const [myUsername, setMyUsername] = useState('');
     const [loading,    setLoading]    = useState(true);
     const [sending,    setSending]    = useState(false);
+    const [revoking,   setRevoking]   = useState(null);
     const [sentTo,     setSentTo]     = useState('');
     const [groupId,    setGroupId]    = useState('');
     const [info,       setInfo]       = useState('');
@@ -65,6 +66,16 @@ export default function UserInvites() {
     };
 
     useEffect(() => { load(); }, []);
+
+    const revoke = async (id) => {
+        if (!confirm('Zrušiť pozvánku? Link bude zneplatnený.')) return;
+        setRevoking(id);
+        try {
+            await apiFetch('v1/invites', { method: 'DELETE', body: JSON.stringify({ id }) });
+            load();
+        } catch (e) { setError(e.message); }
+        finally { setRevoking(null); }
+    };
 
     const send = async () => {
         setSending(true); setInfo(''); setError('');
@@ -154,7 +165,18 @@ export default function UserInvites() {
                                     <span className={styles.mailSent} title="Email odoslaný">✉</span>
                                 )}
                             </div>
-                            {!inv.used_at && <CopyBtn text={buildInviteText(inv, myUsername)} />}
+                            {!inv.used_at && (
+                                <div style={{display:'flex', gap:8, marginTop:8}}>
+                                    <CopyBtn text={buildInviteText(inv, myUsername)} />
+                                    <button
+                                        onClick={() => revoke(inv.id)}
+                                        disabled={revoking === inv.id}
+                                        className={styles.btnRevoke}
+                                    >
+                                        {revoking === inv.id ? '…' : 'Zrušiť pozvánku'}
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     ))}
                 </div>
