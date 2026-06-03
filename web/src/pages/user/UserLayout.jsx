@@ -22,12 +22,12 @@ export default function UserLayout() {
             <aside className={styles.sidebar}>
                 <div className={styles.brand}>
                     <div className={styles.brandLogos}>
-                        <img src="/logo.png" alt="BetClub" className={styles.brandLogo} />
+                        <img src="/logo.png" alt="BetClub" className={styles.brandLogoBC} />
                         {activeCompetition && (
                             <img
                                 src={`/logos/tournament_logo_${activeCompetition.slug}.png`}
                                 alt={activeCompetition.name}
-                                className={styles.brandLogo}
+                                className={styles.brandLogoTournament}
                                 onError={e => e.target.style.display = 'none'}
                             />
                         )}
