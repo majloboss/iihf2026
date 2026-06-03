@@ -89,7 +89,7 @@ export default function Profile() {
 
     if (loading) return <div className={styles.wrap}><p>Načítavam…</p></div>;
 
-    const SPORT_EMOJI = { hockey: '🏒', football: '⚽' };
+    const TOURNAMENT_LOGO = (slug) => `/logos/tournament_logo_${slug}.png`;
 
     return (
         <div className={styles.wrap}>
@@ -127,8 +127,13 @@ export default function Profile() {
                                         background: isActive ? '#f0f4fb' : '#fafafa',
                                         gap: 12,
                                     }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                                            <span style={{ fontSize: '1.8rem' }}>{SPORT_EMOJI[c.sport] ?? '🏆'}</span>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                                            <img
+                                                src={TOURNAMENT_LOGO(c.slug)}
+                                                alt={c.name}
+                                                style={{ height: 64, width: 'auto', objectFit: 'contain', flexShrink: 0 }}
+                                                onError={e => e.target.style.display = 'none'}
+                                            />
                                             <div>
                                                 <div style={{ fontWeight: 700, color: '#1a3a6b', fontSize: '0.95rem' }}>{c.name}</div>
                                                 <div style={{ fontSize: '0.8rem', color: '#888' }}>{c.starts_at} – {c.ends_at}</div>
