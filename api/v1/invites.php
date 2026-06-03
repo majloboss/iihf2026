@@ -72,9 +72,9 @@ if ($method === 'POST') {
     // Kontrola duplicitnej čakajúcej pozvánky pre rovnaký email
     if ($sent_to && filter_var($sent_to, FILTER_VALIDATE_EMAIL)) {
         $dup = $pdo->prepare(
-            "SELECT id FROM admin.invites WHERE created_by = ? AND sent_to = ? AND used_at IS NULL"
+            "SELECT id FROM admin.invites WHERE sent_to = ? AND used_at IS NULL"
         );
-        $dup->execute([$auth['user_id'], $sent_to]);
+        $dup->execute([$sent_to]);
         if ($dup->fetch()) json_error('Pre tento email už existuje čakajúca pozvánka', 409);
     }
 
