@@ -12,7 +12,7 @@ if ($method === 'GET') {
         FROM admin.competitions c
         JOIN admin.users u ON u.id = :uid
         WHERE c.is_active = TRUE
-        ORDER BY c.id
+        ORDER BY (u.active_competition_id = c.id) DESC, c.starts_at
     ");
     $stmt->execute([':uid' => $auth['user_id']]);
     $rows = $stmt->fetchAll();
