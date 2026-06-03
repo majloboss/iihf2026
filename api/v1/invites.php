@@ -72,10 +72,19 @@ if ($method === 'POST') {
     // Kontrola duplicitnej čakajúcej pozvánky pre rovnaký email
     if ($sent_to && filter_var($sent_to, FILTER_VALIDATE_EMAIL)) {
         $dup = $pdo->prepare(
-            "SELECT id FROM admin.invites WHERE sent_to = ? AND used_at IS NULL"
+            "SELECT i.id, i.created_by, u.username
+             FROM admin.invites i
+             JOIN admin.users u ON u.id = i.created_by
+             WHERE i.sent_to = ? AND i.used_at IS NULL"
         );
         $dup->execute([$sent_to]);
-        if ($dup->fetch()) json_error('Pre tento email už existuje čakajúca pozvánka', 409);
+        if ($row = $dup->fetch()) {
+            if ((int)$row['created_by'] === (int)$auth['user_id']) {
+                json_error('Pre tento email už existuje tvoja čakajúca pozvánka', 409);
+            } else {
+                json_error('Pozvánku na tento email už odoslal hráč ' . $row['username'], 409);
+            }
+        }
     }
 
     // Overit ze user je členom skupiny
