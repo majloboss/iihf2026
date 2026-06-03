@@ -117,7 +117,7 @@ export default function Groups() {
         try {
             const res = await bulkInvite(groupId, parseInt(bulkSource));
             setBulkResult(res);
-            load();
+            load(); loadMembers(groupId);
         } catch (e) { setBulkErr(e.message); }
         finally { setBulkBusy(false); }
     };
