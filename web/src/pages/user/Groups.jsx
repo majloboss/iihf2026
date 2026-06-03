@@ -264,7 +264,7 @@ export default function Groups() {
                                                 <div className={styles.inviteInputWrap}>
                                                     <input
                                                         className={styles.inviteInput}
-                                                        placeholder="pozvi nového člena"
+                                                        placeholder="meno alebo email"
                                                         value={inviteQuery}
                                                         onChange={async e => {
                                                             const q = e.target.value;
@@ -307,56 +307,56 @@ export default function Groups() {
                                                 >
                                                     {inviteBusy === `invite-${g.id}` ? '…' : 'Pozvať'}
                                                 </button>
-                                            </div>
-                                            {inviteErr && <p className={styles.inviteErr}>{inviteErr}</p>}
-
-                                            {/* Bulk invite — len zakladateľ */}
-                                            {isFounder && (
-                                                <div className={styles.bulkInviteSection}>
+                                                {isFounder && (
                                                     <button
                                                         className={styles.btnBulk}
                                                         onClick={() => openBulkInvite(g.id)}
                                                     >
-                                                        {bulkOpenFor === g.id ? '▲ Zrušiť hromadnú pozvánku' : '👥 Pozvať z inej skupiny'}
+                                                        {bulkOpenFor === g.id ? '▲ Zavrieť' : 'Pozvať zo skupiny'}
                                                     </button>
-                                                    {bulkOpenFor === g.id && (
-                                                        <div className={styles.bulkPanel}>
-                                                            {!allMyGroups
-                                                                ? <p className={styles.emptySmall}>Načítavam skupiny…</p>
-                                                                : <>
-                                                                    <select
-                                                                        className={styles.bulkSelect}
-                                                                        value={bulkSource}
-                                                                        onChange={e => { setBulkSource(e.target.value); setBulkResult(null); setBulkErr(''); }}
-                                                                    >
-                                                                        <option value="">— vyber zdrojovú skupinu —</option>
-                                                                        {allMyGroups
-                                                                            .filter(sg => sg.id !== g.id && sg.my_status === 'accepted')
-                                                                            .map(sg => (
-                                                                                <option key={sg.id} value={sg.id}>
-                                                                                    {sg.name} {sg.competition_name ? `(${sg.competition_name})` : ''}
-                                                                                </option>
-                                                                            ))
-                                                                        }
-                                                                    </select>
-                                                                    <button
-                                                                        className={styles.btnBulkSend}
-                                                                        disabled={!bulkSource || bulkBusy}
-                                                                        onClick={() => doBulkInvite(g.id)}
-                                                                    >
-                                                                        {bulkBusy ? 'Pozývam…' : 'Pozvať všetkých'}
-                                                                    </button>
-                                                                    {bulkErr && <p className={styles.inviteErr}>{bulkErr}</p>}
-                                                                    {bulkResult && (
-                                                                        <p className={styles.bulkOk}>
-                                                                            ✓ {bulkResult.invited} pozvaniek odoslaných
-                                                                            {bulkResult.skipped > 0 && `, ${bulkResult.skipped} preskočených (už v skupine)`}
-                                                                        </p>
-                                                                    )}
-                                                                </>
-                                                            }
-                                                        </div>
-                                                    )}
+                                                )}
+                                            </div>
+                                            {inviteErr && <p className={styles.inviteErr}>{inviteErr}</p>}
+
+                                            {/* Bulk invite panel — len zakladateľ */}
+                                            {isFounder && bulkOpenFor === g.id && (
+                                                <div className={styles.bulkPanel}>
+                                                    {!allMyGroups
+                                                        ? <p className={styles.emptySmall}>Načítavam skupiny…</p>
+                                                        : <>
+                                                            <div className={styles.bulkRow}>
+                                                                <select
+                                                                    className={styles.bulkSelect}
+                                                                    value={bulkSource}
+                                                                    onChange={e => { setBulkSource(e.target.value); setBulkResult(null); setBulkErr(''); }}
+                                                                >
+                                                                    <option value="">— vyber zdrojovú skupinu —</option>
+                                                                    {allMyGroups
+                                                                        .filter(sg => sg.id !== g.id && sg.my_status === 'accepted')
+                                                                        .map(sg => (
+                                                                            <option key={sg.id} value={sg.id}>
+                                                                                {sg.name} {sg.competition_name ? `(${sg.competition_name})` : ''}
+                                                                            </option>
+                                                                        ))
+                                                                    }
+                                                                </select>
+                                                                <button
+                                                                    className={styles.btnBulkSend}
+                                                                    disabled={!bulkSource || bulkBusy}
+                                                                    onClick={() => doBulkInvite(g.id)}
+                                                                >
+                                                                    {bulkBusy ? 'Pozývam…' : 'Pozvať členov'}
+                                                                </button>
+                                                            </div>
+                                                            {bulkErr && <p className={styles.inviteErr}>{bulkErr}</p>}
+                                                            {bulkResult && (
+                                                                <p className={styles.bulkOk}>
+                                                                    ✓ {bulkResult.invited} pozvaniek odoslaných
+                                                                    {bulkResult.skipped > 0 && `, ${bulkResult.skipped} preskočených (už v skupine)`}
+                                                                </p>
+                                                            )}
+                                                        </>
+                                                    }
                                                 </div>
                                             )}
                                         </div>
@@ -385,7 +385,9 @@ export default function Groups() {
                                                 <button className={styles.btnAccept} onClick={() => doAcceptInvite(g.id)} disabled={busy === `accept-${g.id}`}>Akceptovať</button>
                                             )}
                                             {m.status === 'invited' && Number(m.user_id) !== Number(user.user_id) && (
-                                                <span className={styles.badgeInvited}>pozvaný</span>
+                                                isFounder
+                                                    ? <button className={styles.btnCancelInvite} onClick={() => doMemberAction(g.id, m.user_id, 'cancel_invite')} disabled={busy === `m-${m.user_id}`}>Zrušiť pozvánku</button>
+                                                    : <span className={styles.badgeInvited}>pozvaný</span>
                                             )}
                                         </div>
                                     ))}

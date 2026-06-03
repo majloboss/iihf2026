@@ -398,7 +398,19 @@
 .inviteErr { font-size: 0.82rem; color: #c0392b; margin: 5px 0 0; }
 
 /* Bulk invite */
-.bulkInviteSection { margin-top: 10px; border-top: 1px dashed #e0e0e0; padding-top: 10px; }
+.btnCancelInvite {
+    padding: 4px 10px;
+    border: 1px solid #f5c6cb;
+    border-radius: 6px;
+    background: #fdecea;
+    color: #c0392b;
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: background 0.12s;
+}
+.btnCancelInvite:hover:not(:disabled) { background: #fbd0d0; }
+.btnCancelInvite:disabled { opacity: 0.5; }
+
 .btnBulk {
     background: none;
     border: 1px solid #c5d3eb;
@@ -410,9 +422,11 @@
     transition: background 0.12s;
 }
 .btnBulk:hover { background: #f0f4fb; }
-.bulkPanel { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+.bulkPanel { margin-top: 8px; display: flex; flex-direction: column; gap: 8px; border-top: 1px dashed #e0e0e0; padding-top: 8px; }
+.bulkRow { display: flex; gap: 8px; align-items: center; }
 .bulkSelect {
-    width: 100%;
+    flex: 1;
+    min-width: 0;
     padding: 8px 10px;
     border: 1px solid #ddd;
     border-radius: 7px;

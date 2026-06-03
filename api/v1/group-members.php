@@ -70,7 +70,12 @@ if ($method === 'POST') {
     if ((int)$group['created_by'] !== (int)$auth['user_id']) json_error('Len zakladateľ môže spravovať členov', 403);
 
     $user_id = (int)($body['user_id'] ?? 0);
-    if (!$user_id || !in_array($action, ['approve', 'reject'])) json_error('Neplatné parametre', 400);
+    if (!$user_id || !in_array($action, ['approve', 'reject', 'cancel_invite'])) json_error('Neplatné parametre', 400);
+
+    if ($action === 'cancel_invite') {
+        $pdo->prepare("DELETE FROM admin.group_members WHERE group_id=? AND user_id=? AND status='invited'")->execute([$group_id, $user_id]);
+        json_ok(['done' => true]);
+    }
 
     if ($action === 'approve') {
         $pdo->prepare("UPDATE admin.group_members SET status='accepted', joined_at=NOW() WHERE group_id=? AND user_id=?")->execute([$group_id, $user_id]);
