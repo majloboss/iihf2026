@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS admin.competitions (
 
 INSERT INTO admin.competitions (id, slug, name, sport, season, is_active, starts_at, ends_at)
 VALUES
-    (1, 'iihf2026', 'MS v ľadovom hokeji 2026', 'hockey',   '2026', TRUE, '2026-05-09', '2026-05-25'),
+    (1, 'iihf2026', 'IIHF World Championship 2026', 'hockey',   '2026', TRUE, '2026-05-09', '2026-05-25'),
     (2, 'fifa2026',  'FIFA World Cup 2026',       'football', '2026', TRUE, '2026-06-11', '2026-07-19')
 ON CONFLICT (id) DO NOTHING;
 

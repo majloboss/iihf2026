@@ -21,14 +21,21 @@ export default function UserLayout() {
         <div className={styles.layout}>
             <aside className={styles.sidebar}>
                 <div className={styles.brand}>
-                    <img src="/logo.png" alt="BetClub" style={{width:60, height:60, borderRadius:'50%'}} />
-                </div>
-                {activeCompetition && (
-                    <div className={styles.competitionBadge}>
-                        <span>{competitionEmoji}</span>
-                        <span>{activeCompetition.name}</span>
+                    <div className={styles.brandLogos}>
+                        <img src="/logo.png" alt="BetClub" className={styles.brandLogo} />
+                        {activeCompetition && (
+                            <img
+                                src={`/logos/tournament_logo_${activeCompetition.slug}.png`}
+                                alt={activeCompetition.name}
+                                className={styles.brandLogo}
+                                onError={e => e.target.style.display = 'none'}
+                            />
+                        )}
                     </div>
-                )}
+                    {activeCompetition && (
+                        <div className={styles.brandName}>{activeCompetition.name}</div>
+                    )}
+                </div>
                 <nav>
                     <NavLink to="/dashboard" className={({ isActive }) => isActive ? styles.active : ''}>
                         🏠 Prehľad
