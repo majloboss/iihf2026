@@ -41,7 +41,7 @@ $skipped = 0;
 
 $ins = $pdo->prepare(
     "INSERT INTO admin.group_members (group_id, user_id, status, joined_at)
-     VALUES (?, ?, 'pending', NOW())
+     VALUES (?, ?, 'invited', NOW())
      ON CONFLICT (group_id, user_id) DO NOTHING"
 );
 
