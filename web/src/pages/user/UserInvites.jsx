@@ -110,7 +110,9 @@ export default function UserInvites() {
                         >
                             <option value="">— bez skupiny —</option>
                             {groups.map(g => (
-                                <option key={g.id} value={g.id}>{g.name}</option>
+                                <option key={g.id} value={g.id}>
+                                    {g.name}{g.competition_name ? ` (${g.competition_name})` : ''}
+                                </option>
                             ))}
                         </select>
                     </div>

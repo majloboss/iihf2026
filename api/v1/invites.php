@@ -48,9 +48,10 @@ if ($method === 'GET') {
 
     // Skupiny kde je user členom (pre dropdown)
     $gStmt = $pdo->prepare(
-        "SELECT fg.id, fg.name
+        "SELECT fg.id, fg.name, c.name AS competition_name
          FROM admin.friend_groups fg
          JOIN admin.group_members gm ON gm.group_id = fg.id AND gm.user_id = ? AND gm.status = 'accepted'
+         LEFT JOIN admin.competitions c ON c.id = fg.competition_id
          ORDER BY fg.name"
     );
     $gStmt->execute([$auth['user_id']]);

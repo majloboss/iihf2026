@@ -22,8 +22,11 @@ export function CompetitionProvider({ children }) {
 
     const switchCompetition = useCallback(async (id) => {
         await setActiveCompetition(id);
-        setCompetitions(prev => prev.map(c => ({ ...c, is_selected: c.id === id })));
-        setActive(prev => competitions.find(c => c.id === id) ?? prev);
+        setCompetitions(prev => {
+            const updated = prev.map(c => ({ ...c, is_selected: c.id === id }));
+            return updated.sort((a, b) => b.is_selected - a.is_selected);
+        });
+        setActive(competitions.find(c => c.id === id) ?? null);
     }, [competitions]);
 
     const competitionEmoji = activeCompetition
