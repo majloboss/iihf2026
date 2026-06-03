@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { getFifaGames } from '../../api/fifaGames';
 import { apiFetch } from '../../api/client';
 import { useAuth } from '../../context/AuthContext';
+import { useCompetition } from '../../context/CompetitionContext';
 import styles from './Dashboard.module.css';
 
 const FLAG_URL = code => `/flags/fifa_flag_${code?.toLowerCase()}.png`;
@@ -104,6 +105,8 @@ function StandingsCard({ group, currentUserId }) {
 
 export default function FifaDashboard() {
     const { user } = useAuth();
+    const { activeCompetition } = useCompetition();
+    const compId = activeCompetition?.id ?? 2;
     const [games, setGames]           = useState([]);
     const [standings, setStandings]   = useState([]);
     const [announcement, setAnnouncement] = useState(null);
@@ -112,7 +115,7 @@ export default function FifaDashboard() {
     useEffect(() => {
         Promise.all([
             getFifaGames(),
-            apiFetch('v1/standings').catch(() => []),
+            apiFetch(`v1/standings?competition_id=${compId}`).catch(() => []),
             apiFetch('v1/announcement').catch(() => null),
         ])
             .then(([g, s, a]) => { setGames(g); setStandings(s); setAnnouncement(a); })

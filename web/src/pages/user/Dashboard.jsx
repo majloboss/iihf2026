@@ -317,7 +317,7 @@ export default function Dashboard() {
     useEffect(() => {
         Promise.all([
             getGames(),
-            apiFetch('v1/standings'),
+            apiFetch('v1/standings?competition_id=1'),
             apiFetch('v1/announcement').catch(() => null),
             apiFetch('v1/announcements').catch(() => []),
         ])
