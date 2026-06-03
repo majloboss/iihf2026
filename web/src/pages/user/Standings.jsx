@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
 import { apiFetch } from '../../api/client';
 import { useAuth } from '../../context/AuthContext';
+import { useCompetition } from '../../context/CompetitionContext';
 import styles from './Standings.module.css';
 
 function GroupTable({ group, currentUserId }) {
+    const maxPts  = group.max_pts ?? 7;
+    const ptsHeader = maxPts === 3 ? '3-2-1-0' : '7-6-5-4-3-2-1-0';
     return (
         <div className={styles.groupCard}>
             <div className={styles.groupName}>{group.name}</div>
@@ -13,7 +16,7 @@ function GroupTable({ group, currentUserId }) {
                         <th>#</th>
                         <th>Hráč</th>
                         <th className={styles.right}>Body</th>
-                        <th className={styles.right}>7-6-5-4-3-2-1-0</th>
+                        <th className={styles.right}>{ptsHeader}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -31,7 +34,11 @@ function GroupTable({ group, currentUserId }) {
                                 </div>
                             </td>
                             <td className={`${styles.right} ${styles.pts}`}>{m.total_points}</td>
-                            <td className={`${styles.right} ${styles.tipsCount}`}>{m.pts7}-{m.pts6}-{m.pts5}-{m.pts4}-{m.pts3}-{m.pts2}-{m.pts1}-{m.pts0}</td>
+                            <td className={`${styles.right} ${styles.tipsCount}`}>
+                                {maxPts === 3
+                                    ? `${m.pts3}-${m.pts2}-${m.pts1}-${m.pts0}`
+                                    : `${m.pts7}-${m.pts6}-${m.pts5}-${m.pts4}-${m.pts3}-${m.pts2}-${m.pts1}-${m.pts0}`}
+                            </td>
                         </tr>
                     ))}
                 </tbody>
@@ -42,15 +49,20 @@ function GroupTable({ group, currentUserId }) {
 
 export default function Standings() {
     const { user } = useAuth();
+    const { activeCompetition } = useCompetition();
+    const compId = activeCompetition?.id ?? null;
+
     const [groups,  setGroups]  = useState([]);
     const [loading, setLoading] = useState(true);
     const [error,   setError]   = useState('');
 
     useEffect(() => {
-        apiFetch('v1/standings')
+        setLoading(true);
+        const url = compId ? `v1/standings?competition_id=${compId}` : 'v1/standings';
+        apiFetch(url)
             .then(data => { setGroups(data); setLoading(false); })
             .catch(e   => { setError(e.message); setLoading(false); });
-    }, []);
+    }, [compId]);
 
     if (loading) return <p>Načítavam…</p>;
     if (error)   return <p style={{color:'red'}}>Chyba: {error}</p>;
