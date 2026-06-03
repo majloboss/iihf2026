@@ -118,17 +118,29 @@ define('APP_URL',    'https://dev_betclub.fellow.sk');
 
 ---
 
-## Bodovací systém (FIFA — rovnaký ako IIHF)
+## Bodovací systém FIFA
+
+Hodnotí sa vždy **90-minútový výsledok** (výhra/remíza/prehra). Predĺženie a penalty sa do tipu nepočítajú.
+
+### Skupinová fáza
 
 | Situácia | Body |
 |---|---|
-| Presný výsledok (napr. 2:1) | **3 body** |
-| Správny víťaz + správny rozdiel | **2 body** |
-| Správny víťaz | **1 bod** |
-| Remíza tipovaná správne | **2 body** |
-| Nesprávny výsledok | **0 bodov** |
+| Správny výsledok (V / R / P) | **3 body** |
+| Správny počet gólov domácich | **+1 bod** |
+| Správny počet gólov hostí | **+1 bod** |
+| **Maximum za zápas** | **5 bodov** |
 
-**Play-off:** Výsledok sa hodnotí podľa skóre **po 90 min** (predĺženie/penalty sa nepočíta do skóre tipu).
+### Play-off (R32, R16, QF, SF, Bronz, Finále)
+
+| Situácia | Body |
+|---|---|
+| Správny výsledok (V / R / P po 90 min) | **5 bodov** |
+| Správny počet gólov domácich (90 min) | **+1 bod** |
+| Správny počet gólov hostí (90 min) | **+1 bod** |
+| **Maximum za zápas** | **7 bodov** |
+
+> **Poznámka k play-off:** Admin zadáva dva výsledky — skóre po 90 min (základ pre vyhodnotenie tipu) a finálny výsledok po ET/penalties (len informačne). V predĺžení nie je zlatý gól — môže byť napr. 0:0 po 90 min a 2:1 po ET.
 
 ---
 
