@@ -6,7 +6,6 @@ import styles from './Standings.module.css';
 
 function GroupTable({ group, currentUserId }) {
     const maxPts  = group.max_pts ?? 7;
-    const ptsHeader = maxPts === 3 ? '3-2-1-0' : '7-6-5-4-3-2-1-0';
     return (
         <div className={styles.groupCard}>
             <div className={styles.groupName}>{group.name}</div>
@@ -16,7 +15,7 @@ function GroupTable({ group, currentUserId }) {
                         <th>#</th>
                         <th>Hráč</th>
                         <th className={styles.right}>Body</th>
-                        <th className={styles.right}>{ptsHeader}</th>
+                        <th className={styles.right}>7-6-5-4-3-2-1-0</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -35,9 +34,7 @@ function GroupTable({ group, currentUserId }) {
                             </td>
                             <td className={`${styles.right} ${styles.pts}`}>{m.total_points}</td>
                             <td className={`${styles.right} ${styles.tipsCount}`}>
-                                {maxPts === 3
-                                    ? `${m.pts3}-${m.pts2}-${m.pts1}-${m.pts0}`
-                                    : `${m.pts7}-${m.pts6}-${m.pts5}-${m.pts4}-${m.pts3}-${m.pts2}-${m.pts1}-${m.pts0}`}
+                                {m.pts7}-{m.pts6}-{m.pts5}-{m.pts4}-{m.pts3}-{m.pts2}-{m.pts1}-{m.pts0}
                             </td>
                         </tr>
                     ))}
