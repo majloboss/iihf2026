@@ -69,6 +69,15 @@ if ($method === 'POST') {
     $group_id = isset($body['group_id']) ? (int)$body['group_id'] : null;
     $token    = bin2hex(random_bytes(24));
 
+    // Kontrola duplicitnej čakajúcej pozvánky pre rovnaký email
+    if ($sent_to && filter_var($sent_to, FILTER_VALIDATE_EMAIL)) {
+        $dup = $pdo->prepare(
+            "SELECT id FROM admin.invites WHERE created_by = ? AND sent_to = ? AND used_at IS NULL"
+        );
+        $dup->execute([$auth['user_id'], $sent_to]);
+        if ($dup->fetch()) json_error('Pre tento email už existuje čakajúca pozvánka', 409);
+    }
+
     // Overit ze user je členom skupiny
     if ($group_id) {
         $chk = $pdo->prepare(
