@@ -182,7 +182,7 @@ export default function FifaGames() {
                         className={showUntipped ? styles.untippedBtnOn : styles.untippedBtn}
                         onClick={() => setShowUntipped(v => !v)}
                         title="Nenatipované"
-                    >✓</button>
+                    >1<span style={{fontSize:'0.7em',verticalAlign:'middle'}}>x</span>2</button>
                     <button
                         className={[styles.pBtn, styles.pGroup, phase === 'all' && !groupFilter && !selectedTeam ? styles.pGroupOn : ''].join(' ')}
                         onClick={() => { setPhase('all'); setGroupFilter(null); setSelectedTeam(null); setSelectedDay(null); }}

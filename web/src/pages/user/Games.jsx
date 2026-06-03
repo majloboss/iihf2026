@@ -249,7 +249,7 @@ export default function Games() {
                         className={showUntipped ? styles.untippedBtnOn : styles.untippedBtn}
                         onClick={() => setShowUntipped(v => !v)}
                         title="Nenatipované zápasy"
-                    >✓</button>
+                    >1<span style={{fontSize:'0.7em',verticalAlign:'middle'}}>x</span>2</button>
                     {phases.map(p => (
                         <button key={p}
                             onClick={() => { setPhase(p); setView('games'); }}
