@@ -69,17 +69,28 @@ if ($method === 'POST') {
     $group_id = isset($body['group_id']) ? (int)$body['group_id'] : null;
     $token    = bin2hex(random_bytes(24));
 
-    // Kontrola duplicitnej čakajúcej pozvánky pre rovnaký email
+    // Kontrola či email nie je už zaregistrovaný alebo má pozvánku
     if ($sent_to && filter_var($sent_to, FILTER_VALIDATE_EMAIL)) {
+        // 1. Je už registrovaný ako používateľ?
+        $regChk = $pdo->prepare("SELECT username FROM admin.users WHERE email = ? AND is_active = TRUE");
+        $regChk->execute([$sent_to]);
+        if ($reg = $regChk->fetch()) {
+            json_error('Hráč s týmto emailom je už zaregistrovaný (@' . $reg['username'] . ')', 409);
+        }
+
+        // 2. Existuje pozvánka (čakajúca alebo použitá)?
         $dup = $pdo->prepare(
-            "SELECT i.id, i.created_by, u.username
+            "SELECT i.id, i.created_by, i.used_at, u.username
              FROM admin.invites i
              JOIN admin.users u ON u.id = i.created_by
-             WHERE i.sent_to = ? AND i.used_at IS NULL"
+             WHERE i.sent_to = ?
+             ORDER BY i.created_at DESC LIMIT 1"
         );
         $dup->execute([$sent_to]);
         if ($row = $dup->fetch()) {
-            if ((int)$row['created_by'] === (int)$auth['user_id']) {
+            if ($row['used_at']) {
+                json_error('Tento email je už zaregistrovaný — pozvánku použil hráč pozvaný od ' . $row['username'], 409);
+            } elseif ((int)$row['created_by'] === (int)$auth['user_id']) {
                 json_error('Pre tento email už existuje tvoja čakajúca pozvánka', 409);
             } else {
                 json_error('Pozvánku na tento email už odoslal hráč ' . $row['username'], 409);
