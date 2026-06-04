@@ -92,12 +92,21 @@ export default function FifaAdminGames() {
                             </td>
                             <td style={{fontSize:'0.8rem', color:'#888'}}>{g.venue}</td>
                             <td>
-                                <button onClick={() => setEditing(g)}
-                                    style={{padding:'3px 10px', borderRadius:6, cursor:'pointer',
-                                        border:'1px solid #1a3a6b', background:'#fff', color:'#1a3a6b',
-                                        fontSize:'0.78rem', whiteSpace:'nowrap'}}>
-                                    Upraviť
-                                </button>
+                                <div style={{display:'flex', alignItems:'center', gap:8, justifyContent:'flex-end'}}>
+                                    {g.flashscore_url && (
+                                        <a href={g.flashscore_url} target="_blank" rel="noopener noreferrer"
+                                            title="Sledovať na FlashScore" style={{display:'inline-flex'}}>
+                                            <img src="/flashscore.png" alt="FlashScore"
+                                                style={{width:18, height:18, borderRadius:4}} />
+                                        </a>
+                                    )}
+                                    <button onClick={() => setEditing(g)}
+                                        style={{padding:'3px 10px', borderRadius:6, cursor:'pointer',
+                                            border:'1px solid #1a3a6b', background:'#fff', color:'#1a3a6b',
+                                            fontSize:'0.78rem', whiteSpace:'nowrap'}}>
+                                        Upraviť
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     ))}
