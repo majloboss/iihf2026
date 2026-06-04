@@ -65,10 +65,9 @@ export default function FifaGameModal({ game, teams, onClose, onSaved }) {
                 payload.away_score_final = (isPlayoff && hasET && aFin !== '') ? parseInt(aFin) : null;
             }
             await editFifaGame(payload);
-            setSuccess('Uložené.');
             onSaved();
-        } catch (e) { setError(e.message); }
-        finally { setSaving(false); }
+            onClose();
+        } catch (e) { setError(e.message); setSaving(false); }
     };
 
     return (
