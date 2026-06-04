@@ -13,12 +13,18 @@ const GEN_ACTIONS = [
     { key: 'final', label: 'Finále + Bronz' },
 ];
 
+const TABS = [
+    { key: 'common', label: 'Common' },
+    { key: 'notif',  label: 'Notifikácie' },
+    { key: 'fifa',   label: 'FIFA 2026' },
+    { key: 'iihf',   label: 'IIHF 2026' },
+];
+
 export default function AdminTools() {
+    const [tab, setTab]               = useState('common');
     const [running,    setRunning]    = useState(null);
     const [results,    setResults]    = useState({});
     const [errors,     setErrors]     = useState({});
-    const [migrating,  setMigrating]  = useState(false);
-    const [migrateRes, setMigrateRes] = useState('');
     const [confirm,  setConfirm]  = useState(null); // 'init' | 'reset' | null
     const [syncRes,  setSyncRes]  = useState(null);
     const [syncErr,  setSyncErr]  = useState('');
@@ -60,16 +66,7 @@ export default function AdminTools() {
         }
     };
 
-    const busy = running !== null || syncing || migrating;
-
-    const runMigrations = async () => {
-        setMigrating(true); setMigrateRes('');
-        try {
-            const r = await apiFetch('v1/admin/run-migration', { method: 'POST' });
-            setMigrateRes('✓ Hotovo: ' + r.migrations.join(', '));
-        } catch (e) { setMigrateRes('✗ ' + e.message); }
-        finally { setMigrating(false); }
-    };
+    const busy = running !== null || syncing;
 
     const sendTestMail = async () => {
         setTestMailing(true); setTestMailRes('');
@@ -169,22 +166,23 @@ export default function AdminTools() {
         <div className={styles.toolsWrap}>
             <h2>Nástroje</h2>
 
-            {/* ── DB Migrácie ─────────────────────────────────────────── */}
-            <div className={styles.card} style={{ padding: 20, marginTop: 16, borderLeft: '4px solid #fd7e14' }}>
-                <h3 style={{ margin: '0 0 4px', fontSize: '1rem', color: '#fd7e14' }}>🗄 DB Migrácie</h3>
-                <p style={{ margin: '0 0 12px', fontSize: '0.82rem', color: '#666' }}>
-                    Spustí všetky pending migrácie (run_012, run_013...). Bezpečné — prikazy su IF NOT EXISTS.
-                </p>
-                <button className={styles.btn} style={{ background: '#fd7e14' }} onClick={runMigrations} disabled={busy}>
-                    {migrating ? 'Spustam...' : '▶ Spustit migracie'}
-                </button>
-                {migrateRes && (
-                    <p style={{ marginTop: 8, fontSize: '0.85rem', color: migrateRes.startsWith('✓') ? '#28a745' : '#dc3545' }}>
-                        {migrateRes}
-                    </p>
-                )}
+            {/* ── Záložky ─────────────────────────────────────────────── */}
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', margin: '16px 0 4px', borderBottom: '2px solid #e9ecef' }}>
+                {TABS.map(t => (
+                    <button key={t.key} onClick={() => setTab(t.key)}
+                        style={{
+                            padding: '8px 18px', border: 'none', background: 'none', cursor: 'pointer',
+                            fontSize: '0.9rem', fontWeight: 600, marginBottom: -2,
+                            borderBottom: '2px solid ' + (tab === t.key ? '#1a3a6b' : 'transparent'),
+                            color: tab === t.key ? '#1a3a6b' : '#999',
+                        }}>
+                        {t.label}
+                    </button>
+                ))}
             </div>
 
+            {/* ════════ COMMON ════════ */}
+            {tab === 'common' && <>
             {/* ── Sync výsledkov z API-Sports ─────────────────────────── */}
             <div className={styles.card} style={{ padding: 20, marginTop: 16, borderLeft: '4px solid #1a3a6b' }}>
                 <h3 style={{ margin: '0 0 4px', fontSize: '1rem', color: '#1a3a6b' }}>🌐 Sync výsledkov (API-Sports)</h3>
@@ -204,6 +202,10 @@ export default function AdminTools() {
                 )}
             </div>
 
+            </>}
+
+            {/* ════════ NOTIFIKÁCIE ════════ */}
+            {tab === 'notif' && <>
             {/* ── Test emailu ────────────────────────────────────────── */}
             <div className={styles.card} style={{ padding: 20, marginTop: 16, borderLeft: '4px solid #6f42c1' }}>
                 <h3 style={{ margin: '0 0 4px', fontSize: '1rem', color: '#6f42c1' }}>📧 Test emailu (SMTP)</h3>
@@ -287,6 +289,19 @@ export default function AdminTools() {
                 </div>
             )}
 
+            </>}
+
+            {/* ════════ FIFA 2026 ════════ */}
+            {tab === 'fifa' && (
+                <div className={styles.card} style={{ padding: 20, marginTop: 16, borderLeft: '4px solid #1a3a6b' }}>
+                    <p style={{ margin: 0, fontSize: '0.88rem', color: '#888' }}>
+                        Zatiaľ žiadne FIFA nástroje.
+                    </p>
+                </div>
+            )}
+
+            {/* ════════ IIHF 2026 ════════ */}
+            {tab === 'iihf' && <>
             {/* ── Generovanie testovacích dát ─────────────────────────── */}
             <div className={styles.card} style={{ padding: 20, marginTop: 16 }}>
                 <h3 style={{ margin: '0 0 4px', fontSize: '1rem' }}>Generovanie testovacích dát</h3>
@@ -353,6 +368,10 @@ export default function AdminTools() {
                 <ResultArea keys={['reset']} results={results} errors={errors} />
             </div>
 
+            </>}
+
+            {/* ════════ COMMON (Inicializácia) ════════ */}
+            {tab === 'common' && <>
             {/* ── Inicializácia systému ───────────────────────────────── */}
             <div className={styles.card} style={{ padding: 20, marginTop: 12, borderLeft: '4px solid #dc3545' }}>
                 <h3 style={{ margin: '0 0 4px', fontSize: '1rem', color: '#dc3545' }}>⚠ Inicializácia systému</h3>
@@ -376,6 +395,7 @@ export default function AdminTools() {
                 }
                 <ResultArea keys={['init']} results={results} errors={errors} />
             </div>
+            </>}
         </div>
     );
 }
