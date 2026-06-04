@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { apiFetch } from '../../api/client';
+import { useCompetition } from '../../context/CompetitionContext';
 
 const BASE = import.meta.env.VITE_API_URL ?? '/api';
 import styles from './Admin.module.css';
@@ -14,14 +15,16 @@ const GEN_ACTIONS = [
 ];
 
 const TABS = [
-    { key: 'common', label: 'Common' },
-    { key: 'notif',  label: 'Notifikácie' },
     { key: 'fifa',   label: 'FIFA 2026' },
     { key: 'iihf',   label: 'IIHF 2026' },
+    { key: 'notif',  label: 'Notifikácie' },
+    { key: 'common', label: 'Common' },
 ];
 
 export default function AdminTools() {
-    const [tab, setTab]               = useState('common');
+    const { activeCompetition } = useCompetition();
+    const defaultTab = activeCompetition?.slug === 'fifa2026' ? 'fifa' : 'iihf';
+    const [tab, setTab]               = useState(defaultTab);
     const [running,    setRunning]    = useState(null);
     const [results,    setResults]    = useState({});
     const [errors,     setErrors]     = useState({});
