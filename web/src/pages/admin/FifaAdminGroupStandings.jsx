@@ -123,7 +123,9 @@ export default function FifaAdminGroupStandings() {
         });
     }, []);
 
-    const thirdsFinalized = thirds.some(t => t.finalized);
+    // Finalizácia tretích miest závisí LEN od uložených '3RD' riadkov,
+    // nie od finalizácie zdrojových skupín.
+    const thirdsFinalized = (data?.['3RD']?.length ?? 0) > 0;
 
     const handleThirdsMove = useCallback((fromIdx, toIdx) => {
         setThirds(prev => {
