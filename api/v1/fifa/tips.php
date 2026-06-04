@@ -40,7 +40,8 @@ if ($method === 'POST') {
     if (!$game) json_error('Zápas neexistuje', 404);
     if (!$game['tips_open']) json_error('Tipovanie pre tento zápas je uzavreté', 409);
 
-    $deadline = (new DateTime($game['start_time']))->modify('-5 minutes');
+    // start_time je uložený ako naive UTC — interpretuj ho výslovne ako UTC
+    $deadline = (new DateTime($game['start_time'], new DateTimeZone('UTC')))->modify('-5 minutes');
     if (new DateTime('now', new DateTimeZone('UTC')) > $deadline) {
         $pdo->prepare("UPDATE fifa2026.games SET tips_open = FALSE WHERE game_id = ?")
             ->execute([$game_id]);
