@@ -20,6 +20,8 @@ import Games from './pages/user/Games';
 import FifaGames from './pages/user/FifaGames';
 import FifaDashboard from './pages/user/FifaDashboard';
 import FifaAdminResults from './pages/admin/FifaAdminResults';
+import FifaAdminGames from './pages/admin/FifaAdminGames';
+import FifaGroupStandings from './pages/user/FifaGroupStandings';
 import GroupStandings from './pages/user/GroupStandings';
 import Standings from './pages/user/Standings';
 import Pravidla from './pages/user/Pravidla';
@@ -54,6 +56,18 @@ function AdminResultsRouter() {
     return activeCompetition?.slug === 'fifa2026' ? <FifaAdminResults /> : <AdminResults />;
 }
 
+function AdminGamesRouter() {
+    const { activeCompetition } = useCompetition();
+    return activeCompetition?.slug === 'fifa2026' ? <FifaAdminGames /> : <AdminGames />;
+}
+
+function AdminGroupStandingsRouter() {
+    const { activeCompetition } = useCompetition();
+    return activeCompetition?.slug === 'fifa2026'
+        ? <div style={{padding:'8px 0'}}><h2 style={{color:'#1a3a6b', marginBottom:16}}>Tabuľky skupín</h2><FifaGroupStandings /></div>
+        : <AdminGroupStandings />;
+}
+
 function HomeRedirect() {
     const { user } = useAuth();
     if (!user) return <Navigate to="/login" replace />;
@@ -85,9 +99,9 @@ export default function App() {
                         <Route index          element={<Navigate to="users" replace />} />
                         <Route path="users"   element={<Users />} />
                         <Route path="invites" element={<Invites />} />
-                        <Route path="games"     element={<AdminGames />} />
+                        <Route path="games"     element={<AdminGamesRouter />} />
                         <Route path="results"        element={<AdminResultsRouter />} />
-                        <Route path="group-standings" element={<AdminGroupStandings />} />
+                        <Route path="group-standings" element={<AdminGroupStandingsRouter />} />
                         <Route path="standings"      element={<AdminStandings />} />
                         <Route path="tools"     element={<AdminTools />} />
                         <Route path="login-logs" element={<AdminLoginLogs />} />

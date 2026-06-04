@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { apiFetch } from '../../api/client';
+import { useCompetition } from '../../context/CompetitionContext';
 import styles from '../user/Standings.module.css';
 
 function GroupTable({ group }) {
@@ -40,15 +41,19 @@ function GroupTable({ group }) {
 }
 
 export default function AdminStandings() {
+    const { activeCompetition } = useCompetition();
+    const compId = activeCompetition?.id ?? null;
     const [groups,  setGroups]  = useState([]);
     const [loading, setLoading] = useState(true);
     const [error,   setError]   = useState('');
 
     useEffect(() => {
-        apiFetch('v1/admin/standings')
+        setLoading(true);
+        const url = compId ? `v1/admin/standings?competition_id=${compId}` : 'v1/admin/standings';
+        apiFetch(url)
             .then(data => { setGroups(data); setLoading(false); })
             .catch(e   => { setError(e.message); setLoading(false); });
-    }, []);
+    }, [compId]);
 
     if (loading) return <p>Načítavam…</p>;
     if (error)   return <p style={{color:'red'}}>Chyba: {error}</p>;
