@@ -19,6 +19,7 @@ import UserLayout from './pages/user/UserLayout';
 import Games from './pages/user/Games';
 import FifaGames from './pages/user/FifaGames';
 import FifaDashboard from './pages/user/FifaDashboard';
+import FifaAdminResults from './pages/admin/FifaAdminResults';
 import GroupStandings from './pages/user/GroupStandings';
 import Standings from './pages/user/Standings';
 import Pravidla from './pages/user/Pravidla';
@@ -48,6 +49,11 @@ function GamesRouter() {
     return activeCompetition?.slug === 'fifa2026' ? <FifaGames /> : <Games />;
 }
 
+function AdminResultsRouter() {
+    const { activeCompetition } = useCompetition();
+    return activeCompetition?.slug === 'fifa2026' ? <FifaAdminResults /> : <AdminResults />;
+}
+
 function HomeRedirect() {
     const { user } = useAuth();
     if (!user) return <Navigate to="/login" replace />;
@@ -74,13 +80,13 @@ export default function App() {
                     </Route>
 
                     <Route path="/admin" element={
-                        <PrivateAdminRoute><AdminLayout /></PrivateAdminRoute>
+                        <PrivateAdminRoute><CompetitionProvider><AdminLayout /></CompetitionProvider></PrivateAdminRoute>
                     }>
                         <Route index          element={<Navigate to="users" replace />} />
                         <Route path="users"   element={<Users />} />
                         <Route path="invites" element={<Invites />} />
                         <Route path="games"     element={<AdminGames />} />
-                        <Route path="results"        element={<AdminResults />} />
+                        <Route path="results"        element={<AdminResultsRouter />} />
                         <Route path="group-standings" element={<AdminGroupStandings />} />
                         <Route path="standings"      element={<AdminStandings />} />
                         <Route path="tools"     element={<AdminTools />} />

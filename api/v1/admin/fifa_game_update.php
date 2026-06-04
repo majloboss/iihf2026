@@ -25,17 +25,18 @@ $stmt->execute([$gid]);
 $game = $stmt->fetch();
 if (!$game) json_error('Zápas neexistuje', 404);
 
+$approvedSql = $approve ? 'TRUE' : 'FALSE';
 $pdo->prepare("
     UPDATE fifa2026.games SET
         home_score_regular = ?,
         away_score_regular = ?,
         home_score_final   = ?,
         away_score_final   = ?,
-        result_approved    = ?,
+        result_approved    = $approvedSql,
         tips_open          = FALSE,
         updated_at         = NOW()
     WHERE game_id = ?
 ")->execute([(int)$h90, (int)$a90, $hFin !== null ? (int)$hFin : null,
-             $aFin !== null ? (int)$aFin : null, $approve ? 'TRUE' : 'FALSE', $gid]);
+             $aFin !== null ? (int)$aFin : null, $gid]);
 
 json_ok(['game_id' => $gid, 'saved' => true]);

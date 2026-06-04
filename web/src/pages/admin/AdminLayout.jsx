@@ -1,15 +1,22 @@
 import { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useCompetition } from '../../context/CompetitionContext';
 import styles from './AdminLayout.module.css';
 
 export default function AdminLayout() {
     const { signOut } = useAuth();
     const navigate    = useNavigate();
     const [menuOpen, setMenuOpen] = useState(false);
+    const { competitions, activeCompetition, switchCompetition } = useCompetition();
 
     const handleLogout = () => { signOut(); navigate('/login'); };
     const close = () => setMenuOpen(false);
+
+    const onSwitchComp = async (e) => {
+        const id = parseInt(e.target.value);
+        if (id && id !== activeCompetition?.id) await switchCompetition(id);
+    };
 
     return (
         <div className={styles.layout}>
@@ -27,9 +34,19 @@ export default function AdminLayout() {
 
             <aside className={`${styles.sidebar} ${menuOpen ? styles.sidebarOpen : ''}`}>
                 <div className={styles.brand}>
-                    <img src="/logo.png" alt="IIHF 2026" />
+                    <img src="/logo.png" alt="BetClub" />
                     <span>Admin</span>
                 </div>
+                {competitions.length > 0 && (
+                    <div className={styles.compSwitch}>
+                        <label className={styles.compLabel}>Súťaž</label>
+                        <select className={styles.compSelect} value={activeCompetition?.id ?? ''} onChange={onSwitchComp}>
+                            {competitions.map(c => (
+                                <option key={c.id} value={c.id}>{c.name}</option>
+                            ))}
+                        </select>
+                    </div>
+                )}
                 <nav>
                     <div className={styles.navSection}>Správa</div>
                     <NavLink to="/admin/users"         className={({ isActive }) => isActive ? styles.active : ''} onClick={close}>👤 Používatelia</NavLink>
