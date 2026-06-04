@@ -298,6 +298,12 @@ export default function FifaGames() {
                                     <TeamBlock code={g.away_code} />
                                 </div>
                                 <div className={styles.venue}>{g.venue}</div>
+                                {!finished && g.ls_home != null && (
+                                    <div className={styles.liveBar}>
+                                        <span className={styles.lsBadge}>LIVE</span>
+                                        <span className={styles.liveScore}>{g.ls_home}:{g.ls_away}</span>
+                                    </div>
+                                )}
                                 <TipInput game={g} onSaved={handleSaved} />
                             </div>
                         );

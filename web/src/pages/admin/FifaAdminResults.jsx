@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getFifaGames } from '../../api/fifaGames';
-import { getFifaTeams, getFifaAdminTips, updateFifaResult, setFifaGameTeams, recalcFifa } from '../../api/fifaAdmin';
+import { getFifaTeams, getFifaAdminTips, updateFifaResult, setFifaGameTeams, recalcFifa, setFifaLive, clearFifaLive } from '../../api/fifaAdmin';
 import gStyles from '../user/Games.module.css';
 import styles from './AdminResults.module.css';
 
@@ -87,6 +87,33 @@ function ResultCard({ game: initGame, teams, onChanged }) {
     const [err, setErr]       = useState('');
     const [open, setOpen]     = useState(false);
 
+    // Živé skóre
+    const [ls1, setLs1]       = useState(game.ls_home != null ? String(game.ls_home) : '0');
+    const [ls2, setLs2]       = useState(game.ls_away != null ? String(game.ls_away) : '0');
+    const [lsSaving, setLsSaving] = useState(false);
+    const [lsErr, setLsErr]   = useState('');
+
+    const started = new Date(game.start_time + 'Z') <= new Date();
+
+    const saveLs = async () => {
+        if (ls1 === '' || ls2 === '') { setLsErr('Zadaj skóre'); return; }
+        setLsSaving(true); setLsErr('');
+        try {
+            await setFifaLive(game.game_id, parseInt(ls1), parseInt(ls2));
+            setGame(g => ({ ...g, ls_home: parseInt(ls1), ls_away: parseInt(ls2), ls_status: 'LIVE', ls_updated_at: new Date().toISOString() }));
+        } catch (e) { setLsErr(e.message); }
+        finally { setLsSaving(false); }
+    };
+
+    const clearLs = async () => {
+        setLsSaving(true); setLsErr('');
+        try {
+            await clearFifaLive(game.game_id);
+            setGame(g => ({ ...g, ls_home: null, ls_away: null, ls_status: null, ls_updated_at: null }));
+        } catch (e) { setLsErr(e.message); }
+        finally { setLsSaving(false); }
+    };
+
     // Playoff bracket — výber tímov
     const teamsSet = game.home_code && game.away_code;
     const [homeId, setHomeId] = useState('');
@@ -160,6 +187,27 @@ function ResultCard({ game: initGame, teams, onChanged }) {
                 <TeamBlock code={game.away_code} />
             </div>
             <div className={styles.cardVenue}><span>{game.venue}</span></div>
+
+            {/* Živé skóre — keď zápas začal, ešte nie je odohraný a tímy sú známe */}
+            {teamsSet && !finished && started && (
+                <div className={styles.lsManualBlock}>
+                    <span className={styles.lsManualLabel}>
+                        Živé skóre {game.ls_home != null && <span style={{color:'#dc3545'}}>· LIVE {game.ls_home}:{game.ls_away}</span>}
+                    </span>
+                    <div className={styles.lsManualRow}>
+                        <input type="number" min="0" max="30" value={ls1} onChange={e => setLs1(e.target.value)} className={styles.scoreIn} />
+                        <span className={styles.colon}>:</span>
+                        <input type="number" min="0" max="30" value={ls2} onChange={e => setLs2(e.target.value)} className={styles.scoreIn} />
+                        <button className={styles.btnSaveLs} onClick={saveLs} disabled={lsSaving}>
+                            {lsSaving ? '…' : 'Uložiť live'}
+                        </button>
+                        {game.ls_home != null && (
+                            <button className={styles.btnSave} style={{background:'#6c757d'}} onClick={clearLs} disabled={lsSaving}>Zrušiť live</button>
+                        )}
+                        {lsErr && <span className={styles.errMsg}>{lsErr}</span>}
+                    </div>
+                </div>
+            )}
 
             {/* Playoff: výber tímov keď nie sú nastavené */}
             {isPlayoff && !teamsSet && (

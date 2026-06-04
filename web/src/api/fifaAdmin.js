@@ -24,3 +24,9 @@ export const resetFifaStandings   = (phase) => apiFetch(
 export const fifaTestSetup        = (action) => apiFetch('v1/admin/fifa-test-setup', {
     method: 'POST', body: JSON.stringify({ action })
 });
+export const setFifaLive          = (game_id, ls_home, ls_away) => apiFetch('v1/admin/fifa-game-live', {
+    method: 'POST', body: JSON.stringify({ game_id, ls_home, ls_away })
+});
+export const clearFifaLive        = (game_id) => apiFetch('v1/admin/fifa-game-live', {
+    method: 'POST', body: JSON.stringify({ game_id, clear: true })
+});

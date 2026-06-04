@@ -52,6 +52,7 @@ try {
         $path === 'v1/admin/fifa-recalc'      => require __DIR__ . '/v1/admin/fifa_recalc.php',
         str_starts_with($path, 'v1/admin/fifa-group-standings') => require __DIR__ . '/v1/admin/fifa_group_standings.php',
         $path === 'v1/admin/fifa-test-setup'  => require __DIR__ . '/v1/admin/fifa_test_setup.php',
+        $path === 'v1/admin/fifa-game-live'   => require __DIR__ . '/v1/admin/fifa_game_live.php',
         $path === 'v1/admin/impersonate'      => require __DIR__ . '/v1/admin/impersonate.php',
         $path === 'v1/fifa/teams'          => require __DIR__ . '/v1/fifa/teams.php',
         $path === 'v1/fifa/games'          => require __DIR__ . '/v1/fifa/games.php',
