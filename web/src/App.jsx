@@ -21,7 +21,7 @@ import FifaGames from './pages/user/FifaGames';
 import FifaDashboard from './pages/user/FifaDashboard';
 import FifaAdminResults from './pages/admin/FifaAdminResults';
 import FifaAdminGames from './pages/admin/FifaAdminGames';
-import FifaGroupStandings from './pages/user/FifaGroupStandings';
+import FifaAdminGroupStandings from './pages/admin/FifaAdminGroupStandings';
 import GroupStandings from './pages/user/GroupStandings';
 import Standings from './pages/user/Standings';
 import Pravidla from './pages/user/Pravidla';
@@ -63,9 +63,7 @@ function AdminGamesRouter() {
 
 function AdminGroupStandingsRouter() {
     const { activeCompetition } = useCompetition();
-    return activeCompetition?.slug === 'fifa2026'
-        ? <div style={{padding:'8px 0'}}><h2 style={{color:'#1a3a6b', marginBottom:16}}>Tabuľky skupín</h2><FifaGroupStandings /></div>
-        : <AdminGroupStandings />;
+    return activeCompetition?.slug === 'fifa2026' ? <FifaAdminGroupStandings /> : <AdminGroupStandings />;
 }
 
 function HomeRedirect() {

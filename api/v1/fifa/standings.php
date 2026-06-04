@@ -9,7 +9,9 @@ $stmt = $pdo->query("
            t.team_name
     FROM fifa2026.group_standings s
     JOIN fifa2026.teams t ON t.team_code = s.team
-    ORDER BY s.phase, s.pts DESC, (s.gf - s.ga) DESC, s.gf DESC, s.team
+    ORDER BY s.phase,
+             CASE WHEN s.rank > 0 THEN s.rank ELSE 9999 END,
+             s.pts DESC, (s.gf - s.ga) DESC, s.gf DESC, s.team
 ");
 
 $rows = $stmt->fetchAll();

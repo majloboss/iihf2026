@@ -15,3 +15,9 @@ export const editFifaGame      = (data) => apiFetch('v1/admin/fifa-game-edit', {
 export const recalcFifa        = (game_id = null) => apiFetch('v1/admin/fifa-recalc', {
     method: 'POST', body: JSON.stringify(game_id ? { game_id } : {})
 });
+export const syncFifaStandings    = () => apiFetch('v1/admin/fifa-group-standings', { method: 'POST' });
+export const updateFifaStanding   = (data) => apiFetch('v1/admin/fifa-group-standings', { method: 'PUT', body: JSON.stringify(data) });
+export const resetFifaStandings   = (phase) => apiFetch(
+    phase ? `v1/admin/fifa-group-standings/${phase}` : 'v1/admin/fifa-group-standings',
+    { method: 'DELETE' }
+);
