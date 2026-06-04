@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { apiFetch } from '../../api/client';
+import { fifaTestSetup } from '../../api/fifaAdmin';
 import { useCompetition } from '../../context/CompetitionContext';
 
 const BASE = import.meta.env.VITE_API_URL ?? '/api';
@@ -43,6 +44,9 @@ export default function AdminTools() {
     const [subMsg,        setSubMsg]        = useState('');
     const [sendLoading,   setSendLoading]   = useState(false);
     const [sendMsg,       setSendMsg]       = useState('');
+    const [fifaAction,    setFifaAction]    = useState(null);
+    const [fifaConfirm,   setFifaConfirm]   = useState(null);
+    const [fifaMsg,       setFifaMsg]       = useState('');
 
     useEffect(() => {
         fetch(BASE + '/v1/push-config')
@@ -159,6 +163,17 @@ export default function AdminTools() {
             setSendMsg('✓ Push odoslaný — mal by sa zobraziť do pár sekúnd.');
         } catch (e) { setSendMsg('✗ ' + e.message); }
         finally { setSendLoading(false); }
+    };
+
+    const runFifa = async (action) => {
+        setFifaConfirm(null); setFifaAction(action); setFifaMsg('');
+        try {
+            const r = await fifaTestSetup(action);
+            if (action === 'load_master')      setFifaMsg(`✓ Rozpis načítaný z master: ${r.games_loaded} zápasov`);
+            else if (action === 'reset')       setFifaMsg(`✓ Súťaž spustená: ${r.games_reset} zápasov obnovených, tipy a tabuľky vymazané`);
+            else if (action === 'gen_group')   setFifaMsg(`✓ Základná časť: ${r.games} zápasov, ${r.users} hráčov, ${r.tips} tipov (posun ${r.offset_days} dní)`);
+        } catch (e) { setFifaMsg('✗ ' + e.message); }
+        finally { setFifaAction(null); }
     };
 
     const syncScores = async () => {
@@ -300,13 +315,54 @@ export default function AdminTools() {
             </>}
 
             {/* ════════ FIFA 2026 ════════ */}
-            {tab === 'fifa' && (
-                <div className={styles.card} style={{ padding: 20, marginTop: 16, borderLeft: '4px solid #1a3a6b' }}>
-                    <p style={{ margin: 0, fontSize: '0.88rem', color: '#888' }}>
-                        Zatiaľ žiadne FIFA nástroje.
+            {tab === 'fifa' && <>
+                {/* Generovanie základnej časti */}
+                <div className={styles.card} style={{ padding: 20, marginTop: 16 }}>
+                    <h3 style={{ margin: '0 0 4px', fontSize: '1rem' }}>⚽ Vygenerovať základnú časť</h3>
+                    <p style={{ margin: '0 0 12px', fontSize: '0.82rem', color: '#666' }}>
+                        Posunie dátumy tak, aby skupinová fáza skončila <strong>včera</strong> a play-off začalo <strong>dnes</strong>.
+                        Odohrá všetky skupinové zápasy (podľa ratingu) a vygeneruje tipy hráčov.
                     </p>
+                    {fifaConfirm === 'gen_group'
+                        ? <ConfirmInline text="Vygenerovať skupinovú fázu a tipy? Prepíše existujúce skóre a tipy skupín."
+                            onYes={() => runFifa('gen_group')} onNo={() => setFifaConfirm(null)} />
+                        : <button className={styles.btn} onClick={() => setFifaConfirm('gen_group')} disabled={!!fifaAction}>
+                            {fifaAction === 'gen_group' ? 'Generujem…' : '⚽ Vygenerovať základnú časť'}
+                          </button>}
                 </div>
-            )}
+
+                {/* Načítať master */}
+                <div className={styles.card} style={{ padding: 20, marginTop: 12, borderLeft: '4px solid #0891b2' }}>
+                    <h3 style={{ margin: '0 0 4px', fontSize: '1rem', color: '#0891b2' }}>📥 Načítať rozpis z master</h3>
+                    <p style={{ margin: '0 0 12px', fontSize: '0.82rem', color: '#666' }}>
+                        Obnoví rozpis zápasov z <code>games_pdf</code> (tímy, časy, štadióny, FlashScore).
+                        Skóre sa vynuluje, <strong>tipy ostávajú</strong>.
+                    </p>
+                    {fifaConfirm === 'load_master'
+                        ? <ConfirmInline text="Obnoviť rozpis z master? Existujúce skóre sa vynuluje."
+                            onYes={() => runFifa('load_master')} onNo={() => setFifaConfirm(null)} />
+                        : <button className={styles.btn} style={{ background: '#0891b2' }} onClick={() => setFifaConfirm('load_master')} disabled={!!fifaAction}>
+                            {fifaAction === 'load_master' ? 'Načítavam…' : '📥 Načítať master'}
+                          </button>}
+                </div>
+
+                {/* Spustenie súťaže */}
+                <div className={styles.card} style={{ padding: 20, marginTop: 12, borderLeft: '4px solid #28a745' }}>
+                    <h3 style={{ margin: '0 0 4px', fontSize: '1rem', color: '#28a745' }}>▶ Spustenie súťaže</h3>
+                    <p style={{ margin: '0 0 12px', fontSize: '0.82rem', color: '#666' }}>
+                        Obnoví rozpis z master a <strong>vymaže všetky tipy a tabuľky</strong>.
+                        Useri, skupiny a pozvánky zostávajú. <strong>Nezvratné!</strong>
+                    </p>
+                    {fifaConfirm === 'reset'
+                        ? <ConfirmInline text="Naozaj spustiť súťaž a vymazať tipy + tabuľky?"
+                            onYes={() => runFifa('reset')} onNo={() => setFifaConfirm(null)} />
+                        : <button className={styles.btn} style={{ background: '#28a745' }} onClick={() => setFifaConfirm('reset')} disabled={!!fifaAction}>
+                            {fifaAction === 'reset' ? 'Prebieha…' : '▶ Spustiť súťaž'}
+                          </button>}
+                </div>
+
+                {fifaMsg && <p style={{ marginTop: 12, fontSize: '0.88rem', color: fifaMsg.startsWith('✓') ? '#28a745' : '#dc3545' }}>{fifaMsg}</p>}
+            </>}
 
             {/* ════════ IIHF 2026 ════════ */}
             {tab === 'iihf' && <>

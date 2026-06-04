@@ -21,3 +21,6 @@ export const resetFifaStandings   = (phase) => apiFetch(
     phase ? `v1/admin/fifa-group-standings/${phase}` : 'v1/admin/fifa-group-standings',
     { method: 'DELETE' }
 );
+export const fifaTestSetup        = (action) => apiFetch('v1/admin/fifa-test-setup', {
+    method: 'POST', body: JSON.stringify({ action })
+});
