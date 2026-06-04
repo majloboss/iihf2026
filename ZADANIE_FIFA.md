@@ -1,5 +1,6 @@
 # BetClub — Zadanie platformy (FIFA 2026 + IIHF 2026)
-
+## LIVESCORE
+https://dashboard.sportdb.dev/api-keys: 2sJeeo35xgIMNx0mNZumlDFc2YKBpiUyKmBE0VV0
 > **Legenda:** ✅ = hotovo v `main` (produkcia) &nbsp;|&nbsp; 🟠 = hotovo v `develop`, čaká na deploy &nbsp;|&nbsp; 🔲 = nie je implementované
 
 ---
@@ -14,7 +15,9 @@
 
 ## STAV IMPLEMENTÁCIE — PREHĽAD
 
-🔲 *BetClub infraštruktúra a FIFA modul — plánujeme, zatiaľ nezačaté*
+🟠 *BetClub platforma + FIFA modul kompletný na `develop` (dev_betclub.fellow.sk).*
+Web funkčný: multi-turnaj, FIFA zápasy/tipy/tabuľky/poradie/tretie miesta, admin (výsledky, živé skóre, bracket, finalizácia), generovanie testovacích dát, impersonácia.
+Zostáva: notifikácie pre FIFA, deploy na produkciu (main), Android.
 
 ---
 
@@ -199,7 +202,9 @@ Poradie migrácie:
 4. ALTER `admin.notification_log` — drop FK, add `competition_id` DEFAULT 1
 5. CREATE SCHEMA `fifa2026` + tabuľky
 
-- ✅ Napísať a spustiť `api/migrations/024–028` na DB-DEV-BET — hotovo
+- ✅ Napísať a spustiť `api/migrations/024–034` na DB-DEV-BET — hotovo
+  - 024 competitions, 025 FIFA dáta, 026 standings seed, 027 rename IIHF, 028 scoring,
+    029 flashscore, 030 renumber, 031 games_pdf master, 032 knockout fix, 033 renumber po fix, 034 livescore
 
 ### FÁZA 3 — Backend API
 
@@ -207,36 +212,47 @@ Poradie migrácie:
 - ✅ `POST /api/v1/competitions/active` — nastavenie aktívneho turnaja usera
 - ✅ `GET /api/v1/profile` — vracia aj `active_competition_id`
 - ✅ IIHF endpointy zostávajú IIHF-only (rozhodnuté)
-- ✅ FIFA endpointy: `/api/v1/fifa/games`, `/api/v1/fifa/tips`, `/api/v1/fifa/standings`
-- ✅ Admin FIFA backend: `fifa-game-update`, `fifa-recalc`, scoring_config
+- ✅ FIFA endpointy: `/api/v1/fifa/games`, `/api/v1/fifa/tips`, `/api/v1/fifa/standings`, `/api/v1/fifa/teams`
+- ✅ Admin FIFA backend: `fifa-game-update`, `fifa-game-edit`, `fifa-game-teams`, `fifa-game-tips`, `fifa-game-live`, `fifa-recalc`, `fifa-group-standings`, `fifa-test-setup`, scoring_config
 - ✅ Import 48 tímov a 104 zápasov FIFA do DB
+- ✅ Knockout rozpis opravený podľa oficiálneho rozpisu (časy/štadióny), zápasy prečíslované podľa dátumu
 - ✅ Pozvánky: kontrola duplikátov (čakajúce aj použité, s menom hráča), zrušenie pozvánky
+- ✅ Impersonácia: `/api/v1/admin/impersonate` (admin prihlásenie ako iný user)
 
 ### FÁZA 4 — Frontend React
 
 - ✅ `CompetitionContext` — globálny kontext aktívneho turnaja
 - ✅ Záložka **Súťaže** v Profile — loga turnajov, aktívna vždy prvá
 - ✅ Loga BetClub + turnaja v sidebari, názov turnaja pod nimi
-- ✅ Dispatcher pre všetky stránky (Zápasy, Skupiny, Poradie, Dashboard, Tabuľky)
-- ✅ FIFA stránky: Zápasy (filtre GRP/A–L/knockout, vlajky), Tabuľky A–L, Prehľad, Poradie
-- ✅ Dashboard: nearest games + standings len pre aktívny turnaj
-- ✅ Poradie: per-competition, bodovanie FIFA 7-6-5-4-3-2-1-0
-- 🔲 Admin FIFA UI: zadávanie výsledkov, prepočet bodov, play-off zápasy (neskôr)
+- ✅ Dispatcher pre všetky stránky (Zápasy, Skupiny, Poradie, Dashboard, Tabuľky, admin)
+- ✅ FIFA stránky: Zápasy (filtre GRP/A–L/knockout, vlajky, vlajkový filter, default kolo podľa dátumu, LIVE bar), Tabuľky A–L + tabuľka tretích miest, Prehľad (tip modal), Poradie
+- ✅ Dashboard: nearest games + standings len pre aktívny turnaj, tip modal po kliknutí
+- ✅ Poradie: per-competition, bodovanie FIFA (group 3+1+1, playoff 5+1+1)
+- ✅ Admin FIFA UI: Zápasy (jednotná tabuľka, Upraviť modal s tímami/stavom/výsledkom/flashscore), Výsledky (90 min + ET, bracket výber, živé skóre), Tabuľky (sync/reset/finalizácia/presúvanie + tabuľka tretích miest), Skupiny
+- ✅ Admin Nástroje: záložky (Prihlasovanie/FIFA/IIHF/Common), FIFA generovanie základnej časti + Načítať master + Spustenie súťaže
 
 ### FÁZA 5 — Skupiny — hromadná pozvánka
 
 - ✅ Backend: `group-invite-bulk` — status=invited, refresh po pozvaní
 - ✅ Frontend: Pozvať zo skupiny (cross-competition), Zrušiť pozvánku, per-competition filter skupín
 
+### Tabuľka tretích miest (8 najlepších postupuje)
+
+- ✅ User: Tabuľky aj Zápasy → TAB
+- ✅ Admin: presúvanie + samostatná finalizácia (povolená až po finalizácii všetkých skupín), uloženie ako phase `3P`
+
 ---
 
 ## Platforma
 
-- 🔲 Web aplikácia — React + Vite PWA (rozšírenie existujúceho webu)
+- 🟠 Web aplikácia — React + Vite PWA — funkčné na dev_betclub.fellow.sk
 - 🔲 Android aplikácia — Kotlin (neskôr, nie je priorita)
+- 🔲 Deploy na produkciu (betclub.fellow.sk / main) — zatiaľ iba develop
 
 ---
 
-## Otvorené otázky
+## Otvorené otázky / TODO
 
-1. **Vlajky:** Treba vlajky pre všetkých 48 FIFA tímov — iný set krajín ako IIHF, treba pripraviť
+1. ✅ **Vlajky:** 48 FIFA vlajok pripravených (`fifa_flag_*.png`)
+2. 🔲 **Notifikácie pre FIFA** — push/email pre FIFA zápasy (zatiaľ len IIHF)
+3. 🔲 **Deploy na main** — až na explicitný pokyn
