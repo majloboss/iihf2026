@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { getFifaGames } from '../../api/fifaGames';
 import { getFifaTeams } from '../../api/fifaAdmin';
 import FifaGameModal from './FifaGameModal';
+import AdminGamesTable from './AdminGamesTable';
 import styles from './Admin.module.css';
 
 const GROUP_CODES = ['A','B','C','D','E','F','G','H','I','J','K','L'];
@@ -68,50 +69,29 @@ export default function FifaAdminGames() {
                 </div>
             </div>
 
-            <table className={styles.table}>
-                <thead>
-                    <tr>
-                        <th>#</th><th>Fáza</th><th>Dátum</th><th>Domáci</th><th></th><th>Hostia</th><th>Výsledok</th><th>Štadión</th><th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {filtered.map(g => (
-                        <tr key={g.game_id}>
-                            <td>{g.game_id}</td>
-                            <td>{PHASE_LABEL[g.game_type_code] || g.game_type_code}</td>
-                            <td style={{whiteSpace:'nowrap'}}>{fmt(g.start_time)}</td>
-                            <td style={{textAlign:'right', whiteSpace:'nowrap'}}>
-                                {g.home_code ? <>{g.home_name} <img src={FLAG_URL(g.home_code)} alt="" style={{width:22,height:14,verticalAlign:'middle',marginLeft:4}} onError={e=>e.target.style.display='none'} /></> : <span style={{color:'#bbb'}}>TBD</span>}
-                            </td>
-                            <td style={{textAlign:'center', color:'#aaa'}}>–</td>
-                            <td style={{whiteSpace:'nowrap'}}>
-                                {g.away_code ? <><img src={FLAG_URL(g.away_code)} alt="" style={{width:22,height:14,verticalAlign:'middle',marginRight:4}} onError={e=>e.target.style.display='none'} /> {g.away_name}</> : <span style={{color:'#bbb'}}>TBD</span>}
-                            </td>
-                            <td style={{textAlign:'center', fontWeight:700, color: g.result_approved ? '#28a745' : '#ccc'}}>
-                                {g.result_approved && g.home_score_regular != null ? `${g.home_score_regular}:${g.away_score_regular}` : '—'}
-                            </td>
-                            <td style={{fontSize:'0.8rem', color:'#888'}}>{g.venue}</td>
-                            <td>
-                                <div style={{display:'flex', alignItems:'center', gap:8, justifyContent:'flex-end'}}>
-                                    {g.flashscore_url && (
-                                        <a href={g.flashscore_url} target="_blank" rel="noopener noreferrer"
-                                            title="Sledovať na FlashScore" style={{display:'inline-flex'}}>
-                                            <img src="/flashscore.png" alt="FlashScore"
-                                                style={{width:18, height:18, borderRadius:4}} />
-                                        </a>
-                                    )}
-                                    <button onClick={() => setEditing(g)}
-                                        style={{padding:'3px 10px', borderRadius:6, cursor:'pointer',
-                                            border:'1px solid #1a3a6b', background:'#fff', color:'#1a3a6b',
-                                            fontSize:'0.78rem', whiteSpace:'nowrap'}}>
-                                        Upraviť
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+            <AdminGamesTable
+                rows={filtered.map(g => {
+                    const teamCell = (code, name) => code
+                        ? <span style={{display:'inline-flex', alignItems:'center', gap:6}}>
+                            <img src={FLAG_URL(code)} alt="" style={{width:22, height:14, borderRadius:2}} onError={e => e.target.style.display='none'} />{code}
+                          </span>
+                        : <span style={{color:'#aaa'}}>TBD</span>;
+                    return {
+                        key: g.game_id,
+                        number: g.game_id,
+                        phaseLabel: PHASE_LABEL[g.game_type_code] || g.game_type_code,
+                        dateLocal: fmt(g.start_time),
+                        homeCell: teamCell(g.home_code, g.home_name),
+                        awayCell: teamCell(g.away_code, g.away_name),
+                        result: g.result_approved && g.home_score_regular != null ? `${g.home_score_regular}:${g.away_score_regular}` : null,
+                        venue: g.venue,
+                        status: g.result_approved ? 'finished' : 'scheduled',
+                        flashscore_url: g.flashscore_url,
+                        raw: g,
+                    };
+                })}
+                onEdit={setEditing}
+            />
         </div>
     );
 }
