@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { apiFetch } from '../../api/client';
 import { syncFifaStandings, updateFifaStanding, resetFifaStandings } from '../../api/fifaAdmin';
+import FifaThirdPlaced from '../user/FifaThirdPlaced';
 import styles from './AdminGroupStandings.module.css';
 import gsStyles from '../user/GroupStandings.module.css';
 
@@ -145,6 +146,7 @@ export default function FifaAdminGroupStandings() {
                         finalized={isFinalized(g)} onMove={handleMove}
                         onFinalize={handleFinalize} busy={busy} />
                 ))}
+                <FifaThirdPlaced data={data} />
             </div>
         </div>
     );

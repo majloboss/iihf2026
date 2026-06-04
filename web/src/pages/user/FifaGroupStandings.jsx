@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { apiFetch } from '../../api/client';
+import FifaThirdPlaced from './FifaThirdPlaced';
 import styles from './GroupStandings.module.css';
 
 const GROUP_CODES = ['A','B','C','D','E','F','G','H','I','J','K','L'];
@@ -82,6 +83,7 @@ export default function FifaGroupStandings({ onTeamClick }) {
             {GROUP_CODES.map(g => (
                 <GroupTable key={g} phase={g} teams={data[g] || []} onTeamClick={onTeamClick} />
             ))}
+            <FifaThirdPlaced data={data} onTeamClick={onTeamClick} />
         </div>
     );
 }
