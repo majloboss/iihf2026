@@ -38,12 +38,12 @@ export default function FifaAdminGames() {
     if (loading) return <p>Načítavam…</p>;
     if (error)   return <p style={{color:'red'}}>Chyba: {error}</p>;
 
-    const phases = ['all', ...GROUP_CODES, 'R32','R16','QF','SF','BM','F'];
-    const filtered = games.filter(g => {
-        if (phase === 'all') return true;
-        if (GROUP_CODES.includes(phase)) return g.game_type_code === `GROUP_${phase}`;
-        return g.game_type_code === phase;
-    }).sort((a, b) => a.game_id - b.game_id);
+    const phases = ['all', ...GROUP_CODES.map(g => `GROUP_${g}`), 'R32','R16','QF','SF','BM','F'];
+    const phaseLabel = (p) => p === 'all' ? 'Všetky'
+        : p.startsWith('GROUP_') ? p.slice(6)
+        : p === 'BM' ? 'Bronz' : p;
+    const filtered = games.filter(g => phase === 'all' || g.game_type_code === phase)
+        .sort((a, b) => a.game_id - b.game_id);
 
     return (
         <div>
@@ -63,7 +63,7 @@ export default function FifaAdminGames() {
                                 background: phase === p ? '#1a3a6b' : '#fff',
                                 color: phase === p ? '#fff' : '#555',
                             }}>
-                            {p === 'all' ? 'Všetky' : p === 'BM' ? 'Bronz' : p}
+                            {phaseLabel(p)}
                         </button>
                     ))}
                 </div>

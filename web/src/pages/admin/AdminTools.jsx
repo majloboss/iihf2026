@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { apiFetch } from '../../api/client';
 import { fifaTestSetup } from '../../api/fifaAdmin';
+import { getUsers, impersonate } from '../../api/admin';
 import { useCompetition } from '../../context/CompetitionContext';
 
 const BASE = import.meta.env.VITE_API_URL ?? '/api';
@@ -16,6 +17,7 @@ const GEN_ACTIONS = [
 ];
 
 const TABS = [
+    { key: 'login',  label: 'Prihlasovanie' },
     { key: 'fifa',   label: 'FIFA 2026' },
     { key: 'iihf',   label: 'IIHF 2026' },
     { key: 'notif',  label: 'Notifikácie' },
@@ -47,6 +49,10 @@ export default function AdminTools() {
     const [fifaAction,    setFifaAction]    = useState(null);
     const [fifaConfirm,   setFifaConfirm]   = useState(null);
     const [fifaMsg,       setFifaMsg]       = useState('');
+    const [userList,      setUserList]      = useState([]);
+    const [selUserId,     setSelUserId]     = useState('');
+    const [impBusy,       setImpBusy]       = useState(false);
+    const [impMsg,        setImpMsg]        = useState('');
 
     useEffect(() => {
         fetch(BASE + '/v1/push-config')
@@ -165,6 +171,23 @@ export default function AdminTools() {
         finally { setSendLoading(false); }
     };
 
+    useEffect(() => {
+        if (tab === 'login' && userList.length === 0) {
+            getUsers().then(setUserList).catch(() => {});
+        }
+    }, [tab]);
+
+    const doImpersonate = async () => {
+        if (!selUserId) return;
+        setImpBusy(true); setImpMsg('');
+        try {
+            const r = await impersonate(parseInt(selUserId));
+            window.open('/impersonate#' + r.token, '_blank');
+            setImpMsg('✓ Otvorené nové okno ako ' + r.username);
+        } catch (e) { setImpMsg('✗ ' + e.message); }
+        finally { setImpBusy(false); }
+    };
+
     const runFifa = async (action) => {
         setFifaConfirm(null); setFifaAction(action); setFifaMsg('');
         try {
@@ -203,6 +226,32 @@ export default function AdminTools() {
                     </button>
                 ))}
             </div>
+
+            {/* ════════ PRIHLASOVANIE (impersonácia) ════════ */}
+            {tab === 'login' && (
+                <div className={styles.card} style={{ padding: 20, marginTop: 16, borderLeft: '4px solid #6f42c1' }}>
+                    <h3 style={{ margin: '0 0 4px', fontSize: '1rem', color: '#6f42c1' }}>🔓 Prihlásiť sa ako iný používateľ</h3>
+                    <p style={{ margin: '0 0 12px', fontSize: '0.82rem', color: '#666' }}>
+                        Vyber používateľa a klikni Login — aplikácia sa otvorí v novom okne prihlásená ako on.
+                        Tvoje admin prihlásenie v tomto okne ostáva nedotknuté.
+                    </p>
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                        <select value={selUserId} onChange={e => setSelUserId(e.target.value)}
+                            style={{ padding: '8px 10px', border: '1px solid #ccc', borderRadius: 6, fontSize: '0.88rem', flex: 1, minWidth: 220 }}>
+                            <option value="">— vyber používateľa —</option>
+                            {userList.filter(u => u.is_active).map(u => (
+                                <option key={u.id} value={u.id}>
+                                    {u.username}{(u.first_name || u.last_name) ? ` (${[u.first_name, u.last_name].filter(Boolean).join(' ')})` : ''}{u.role === 'admin' ? ' · admin' : ''}
+                                </option>
+                            ))}
+                        </select>
+                        <button className={styles.btn} style={{ background: '#6f42c1' }} onClick={doImpersonate} disabled={impBusy || !selUserId}>
+                            {impBusy ? '…' : '🔓 Login'}
+                        </button>
+                    </div>
+                    {impMsg && <p style={{ marginTop: 8, fontSize: '0.85rem', color: impMsg.startsWith('✓') ? '#28a745' : '#dc3545' }}>{impMsg}</p>}
+                </div>
+            )}
 
             {/* ════════ COMMON ════════ */}
             {tab === 'common' && <>

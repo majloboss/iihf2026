@@ -1,6 +1,9 @@
 import { apiFetch } from './client';
 
 export const getUsers      = () => apiFetch('v1/admin/users');
+export const impersonate   = (user_id) => apiFetch('v1/admin/impersonate', {
+    method: 'POST', body: JSON.stringify({ user_id })
+});
 export const updateUser    = (id, data) => apiFetch('v1/admin/user-update', {
     method: 'POST', body: JSON.stringify({ id, ...data })
 });

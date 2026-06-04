@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { CompetitionProvider, useCompetition } from './context/CompetitionContext';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Impersonate from './pages/Impersonate';
 import Profile from './pages/Profile';
 import AdminLayout from './pages/admin/AdminLayout';
 import Users from './pages/admin/Users';
@@ -79,6 +80,7 @@ export default function App() {
             <BrowserRouter>
                 <Routes>
                     <Route path="/login"    element={<Login />} />
+                    <Route path="/impersonate" element={<Impersonate />} />
                     <Route path="/register" element={<Register />} />
 
                     <Route element={<PrivateUserRoute><CompetitionProvider><UserLayout /></CompetitionProvider></PrivateUserRoute>}>
