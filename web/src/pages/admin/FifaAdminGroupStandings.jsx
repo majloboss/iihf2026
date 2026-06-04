@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { apiFetch } from '../../api/client';
 import { syncFifaStandings, updateFifaStanding, resetFifaStandings } from '../../api/fifaAdmin';
-import FifaThirdPlaced from '../user/FifaThirdPlaced';
+import FifaThirdPlaced, { computeThirds } from '../user/FifaThirdPlaced';
 import styles from './AdminGroupStandings.module.css';
 import gsStyles from '../user/GroupStandings.module.css';
 
@@ -73,11 +73,12 @@ export default function FifaAdminGroupStandings() {
     const [error, setError]     = useState('');
     const [busy, setBusy]       = useState(false);
     const [msg, setMsg]         = useState('');
+    const [thirds, setThirds]   = useState([]);
 
     const load = useCallback(() => {
         setLoading(true);
         apiFetch('v1/fifa/standings')
-            .then(d => { setData(d); setLoading(false); })
+            .then(d => { setData(d); setThirds(computeThirds(d)); setLoading(false); })
             .catch(e => { setError(e.message); setLoading(false); });
     }, []);
 
@@ -122,6 +123,31 @@ export default function FifaAdminGroupStandings() {
         });
     }, []);
 
+    const thirdsFinalized = thirds.some(t => t.finalized);
+
+    const handleThirdsMove = useCallback((fromIdx, toIdx) => {
+        setThirds(prev => {
+            const arr = [...prev];
+            [arr[fromIdx], arr[toIdx]] = [arr[toIdx], arr[fromIdx]];
+            return arr;
+        });
+    }, []);
+
+    const handleThirdsFinalize = async () => {
+        setBusy(true); setMsg('');
+        try {
+            for (let i = 0; i < thirds.length; i++) {
+                const t = thirds[i];
+                await updateFifaStanding({ phase: '3RD', team: t.team, rank: i + 1, finalized: true,
+                    gp: t.gp, w: t.w, d: t.d, l: t.l, gf: t.gf, ga: t.ga, pts: t.pts });
+            }
+            setThirds(prev => prev.map((t, i) => ({ ...t, rank: i + 1, finalized: true })));
+            setMsg('✓ Tabuľka tretích miest finalizovaná');
+            load();
+        } catch (e) { setMsg('Chyba: ' + e.message); }
+        finally { setBusy(false); }
+    };
+
     if (loading) return <p>Načítavam…</p>;
     if (error)   return <p style={{color:'red'}}>Chyba: {error}</p>;
     if (!data)   return null;
@@ -146,7 +172,14 @@ export default function FifaAdminGroupStandings() {
                         finalized={isFinalized(g)} onMove={handleMove}
                         onFinalize={handleFinalize} busy={busy} />
                 ))}
-                <FifaThirdPlaced data={data} />
+                <FifaThirdPlaced
+                    thirds={thirds}
+                    admin
+                    finalized={thirdsFinalized}
+                    onMove={handleThirdsMove}
+                    onFinalize={handleThirdsFinalize}
+                    busy={busy}
+                />
             </div>
         </div>
     );

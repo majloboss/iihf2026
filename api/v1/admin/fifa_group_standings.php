@@ -70,6 +70,9 @@ if ($method === 'POST') {
             ]);
         }
     }
+    // Sync prepočítal skupiny → derivovaná tabuľka tretích sa zruší (re-deriduje sa)
+    $pdo->exec("DELETE FROM fifa2026.group_standings WHERE phase='3RD'");
+
     json_ok(['synced' => true]);
 
 } elseif ($method === 'PUT') {
@@ -97,10 +100,15 @@ if ($method === 'POST') {
 } elseif ($method === 'DELETE') {
     $parts = explode('/', $path);
     $ph = strtoupper(end($parts));
-    if (in_array($ph, $GROUPS)) {
+    if ($ph === '3RD') {
+        // Tabuľka tretích — derivovaná, pri resete riadky zmaž
+        $pdo->exec("DELETE FROM fifa2026.group_standings WHERE phase='3RD'");
+    } elseif (in_array($ph, $GROUPS)) {
         $pdo->prepare("UPDATE fifa2026.group_standings SET gp=0,w=0,d=0,l=0,gf=0,ga=0,pts=0,rank=0,finalized=FALSE,updated_at=NOW() WHERE phase=?")->execute([$ph]);
     } else {
-        $pdo->exec("UPDATE fifa2026.group_standings SET gp=0,w=0,d=0,l=0,gf=0,ga=0,pts=0,rank=0,finalized=FALSE,updated_at=NOW()");
+        // Reset všetkého: vynuluj skupiny + zmaž derivované tretie miesta
+        $pdo->exec("UPDATE fifa2026.group_standings SET gp=0,w=0,d=0,l=0,gf=0,ga=0,pts=0,rank=0,finalized=FALSE,updated_at=NOW() WHERE phase IN ('A','B','C','D','E','F','G','H','I','J','K','L')");
+        $pdo->exec("DELETE FROM fifa2026.group_standings WHERE phase='3RD'");
     }
     json_ok(['reset' => true]);
 

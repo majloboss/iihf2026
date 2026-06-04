@@ -6,7 +6,7 @@ $pdo = db();
 $stmt = $pdo->query("
     SELECT s.phase, s.team, s.rank, s.gp, s.w, s.d, s.l,
            s.gf, s.ga, (s.gf - s.ga) AS gd, s.pts, s.finalized,
-           t.team_name
+           t.team_name, t.group_name
     FROM fifa2026.group_standings s
     JOIN fifa2026.teams t ON t.team_code = s.team
     ORDER BY s.phase,
