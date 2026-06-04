@@ -239,7 +239,9 @@ export default function AdminTools() {
                         <select value={selUserId} onChange={e => setSelUserId(e.target.value)}
                             style={{ padding: '8px 10px', border: '1px solid #ccc', borderRadius: 6, fontSize: '0.88rem', flex: 1, minWidth: 220 }}>
                             <option value="">— vyber používateľa —</option>
-                            {userList.filter(u => u.is_active).map(u => (
+                            {userList.filter(u => u.is_active)
+                                .slice().sort((a, b) => a.username.localeCompare(b.username, 'sk'))
+                                .map(u => (
                                 <option key={u.id} value={u.id}>
                                     {u.username}{(u.first_name || u.last_name) ? ` (${[u.first_name, u.last_name].filter(Boolean).join(' ')})` : ''}{u.role === 'admin' ? ' · admin' : ''}
                                 </option>
