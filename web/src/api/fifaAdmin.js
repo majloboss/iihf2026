@@ -9,6 +9,9 @@ export const updateFifaResult  = (data) => apiFetch('v1/admin/fifa-game-update',
 export const setFifaGameTeams  = (game_id, home_team_id, away_team_id) => apiFetch('v1/admin/fifa-game-teams', {
     method: 'POST', body: JSON.stringify({ game_id, home_team_id, away_team_id })
 });
+export const editFifaGame      = (data) => apiFetch('v1/admin/fifa-game-edit', {
+    method: 'POST', body: JSON.stringify(data)
+});
 export const recalcFifa        = (game_id = null) => apiFetch('v1/admin/fifa-recalc', {
     method: 'POST', body: JSON.stringify(game_id ? { game_id } : {})
 });

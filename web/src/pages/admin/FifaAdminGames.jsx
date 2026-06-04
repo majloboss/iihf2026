@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react';
 import { getFifaGames } from '../../api/fifaGames';
+import { getFifaTeams } from '../../api/fifaAdmin';
+import FifaGameModal from './FifaGameModal';
 import styles from './Admin.module.css';
+
+const GROUP_CODES = ['A','B','C','D','E','F','G','H','I','J','K','L'];
 
 const PHASE_LABEL = {
     GROUP_A:'Sk. A', GROUP_B:'Sk. B', GROUP_C:'Sk. C', GROUP_D:'Sk. D',
@@ -18,41 +22,47 @@ function fmt(iso) {
 
 export default function FifaAdminGames() {
     const [games, setGames]     = useState([]);
+    const [teams, setTeams]     = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError]     = useState('');
     const [phase, setPhase]     = useState('all');
+    const [editing, setEditing] = useState(null);
 
-    useEffect(() => {
-        getFifaGames()
-            .then(d => { setGames(d); setLoading(false); })
-            .catch(e => { setError(e.message); setLoading(false); });
-    }, []);
+    const load = () => Promise.all([getFifaGames(), getFifaTeams()])
+        .then(([g, t]) => { setGames(g); setTeams(t); setLoading(false); })
+        .catch(e => { setError(e.message); setLoading(false); });
+
+    useEffect(() => { load(); }, []);
 
     if (loading) return <p>Načítavam…</p>;
     if (error)   return <p style={{color:'red'}}>Chyba: {error}</p>;
 
-    const phases = ['all','GROUP','R32','R16','QF','SF','BM','F'];
+    const phases = ['all', ...GROUP_CODES, 'R32','R16','QF','SF','BM','F'];
     const filtered = games.filter(g => {
         if (phase === 'all') return true;
-        if (phase === 'GROUP') return g.game_type_code.startsWith('GROUP_');
+        if (GROUP_CODES.includes(phase)) return g.game_type_code === `GROUP_${phase}`;
         return g.game_type_code === phase;
     }).sort((a, b) => a.game_id - b.game_id);
 
     return (
         <div>
+            {editing && (
+                <FifaGameModal game={editing} teams={teams}
+                    onClose={() => setEditing(null)} onSaved={load} />
+            )}
             <div className={styles.header}>
                 <h2>Zápasy FIFA</h2>
-                <div style={{display:'flex', gap:6, flexWrap:'wrap'}}>
+                <div style={{display:'flex', gap:4, flexWrap:'wrap'}}>
                     {phases.map(p => (
                         <button key={p} onClick={() => setPhase(p)}
                             style={{
-                                padding:'4px 10px', borderRadius:6, cursor:'pointer',
-                                fontSize:'0.8rem', fontWeight:600,
+                                padding:'4px 9px', borderRadius:6, cursor:'pointer',
+                                fontSize:'0.8rem', fontWeight:600, minWidth:30,
                                 border:'1px solid ' + (phase === p ? '#1a3a6b' : '#dee2e6'),
                                 background: phase === p ? '#1a3a6b' : '#fff',
                                 color: phase === p ? '#fff' : '#555',
                             }}>
-                            {p === 'all' ? 'Všetky' : p === 'GROUP' ? 'Skupiny' : p === 'BM' ? 'Bronz' : p}
+                            {p === 'all' ? 'Všetky' : p === 'BM' ? 'Bronz' : p}
                         </button>
                     ))}
                 </div>
@@ -61,7 +71,7 @@ export default function FifaAdminGames() {
             <table className={styles.table}>
                 <thead>
                     <tr>
-                        <th>#</th><th>Fáza</th><th>Dátum</th><th>Domáci</th><th></th><th>Hostia</th><th>Výsledok</th><th>Štadión</th>
+                        <th>#</th><th>Fáza</th><th>Dátum</th><th>Domáci</th><th></th><th>Hostia</th><th>Výsledok</th><th>Štadión</th><th></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -81,6 +91,14 @@ export default function FifaAdminGames() {
                                 {g.result_approved && g.home_score_regular != null ? `${g.home_score_regular}:${g.away_score_regular}` : '—'}
                             </td>
                             <td style={{fontSize:'0.8rem', color:'#888'}}>{g.venue}</td>
+                            <td>
+                                <button onClick={() => setEditing(g)}
+                                    style={{padding:'3px 10px', borderRadius:6, cursor:'pointer',
+                                        border:'1px solid #1a3a6b', background:'#fff', color:'#1a3a6b',
+                                        fontSize:'0.78rem', whiteSpace:'nowrap'}}>
+                                    Upraviť
+                                </button>
+                            </td>
                         </tr>
                     ))}
                 </tbody>

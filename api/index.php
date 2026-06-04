@@ -46,6 +46,7 @@ try {
         $path === 'v1/competitions'        => require __DIR__ . '/v1/competitions.php',
         $path === 'v1/competitions/active' => require __DIR__ . '/v1/competitions.php',
         $path === 'v1/admin/fifa-game-update' => require __DIR__ . '/v1/admin/fifa_game_update.php',
+        $path === 'v1/admin/fifa-game-edit'   => require __DIR__ . '/v1/admin/fifa_game_edit.php',
         $path === 'v1/admin/fifa-game-tips'   => require __DIR__ . '/v1/admin/fifa_game_tips.php',
         $path === 'v1/admin/fifa-game-teams'  => require __DIR__ . '/v1/admin/fifa_game_teams.php',
         $path === 'v1/admin/fifa-recalc'      => require __DIR__ . '/v1/admin/fifa_recalc.php',
