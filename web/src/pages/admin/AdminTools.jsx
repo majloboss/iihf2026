@@ -194,7 +194,7 @@ export default function AdminTools() {
             const r = await fifaTestSetup(action);
             if (action === 'load_master')      setFifaMsg(`✓ Rozpis načítaný z master: ${r.games_loaded} zápasov`);
             else if (action === 'reset')       setFifaMsg(`✓ Súťaž spustená: ${r.games_reset} zápasov obnovených, tipy a tabuľky vymazané`);
-            else if (action === 'gen_group')   setFifaMsg(`✓ Základná časť: ${r.games} zápasov, ${r.users} hráčov, ${r.tips} tipov (posun ${r.offset_days} dní)`);
+            else if (action === 'gen_group')   setFifaMsg(`✓ Základná časť: ${r.games} zápasov, ${r.users} hráčov, ${r.tips} tipov`);
         } catch (e) { setFifaMsg('✗ ' + e.message); }
         finally { setFifaAction(null); }
     };

@@ -109,15 +109,40 @@ if ($action === 'reset') {
 
 // ════════════════════════════════════════════════════════════════════════════
 if ($action === 'gen_group') {
-    // 1. Posun dátumov: playoff začne dnes, skupinová fáza skončí včera
+    // 1. Prepíš dátumy do čistých denných slotov (testovacie).
+    //    Skupinová fáza končí včera; R32 prvý zápas o 1h po spustení; ostatné v slotoch.
+    $slots = ['12:00:00', '15:00:00', '20:00:00'];   // UTC sloty
+    $nSlots = count($slots);
     $today  = new DateTime('today UTC');
-    $pfRaw  = $pdo->query("SELECT MIN(start_time) FROM fifa2026.games WHERE game_type_code NOT LIKE 'GROUP_%'")->fetchColumn();
-    if (!$pfRaw) json_error('Žiadne play-off zápasy', 400);
-    $pfDate = new DateTime(substr($pfRaw, 0, 10) . ' UTC');
-    $offsetDays = (int) round(($today->getTimestamp() - $pfDate->getTimestamp()) / 86400);
 
-    $pdo->prepare("UPDATE fifa2026.games SET start_time = start_time + (? || ' days')::interval, updated_at = NOW()")
-        ->execute([$offsetDays]);
+    $setDate = $pdo->prepare("UPDATE fifa2026.games SET start_time = ?::timestamp, updated_at = NOW() WHERE game_id = ?");
+
+    // Skupinové zápasy — končia VČERA, plnia sloty odzadu
+    $groupIds = $pdo->query("SELECT game_id FROM fifa2026.games WHERE game_type_code LIKE 'GROUP_%' ORDER BY game_id")->fetchAll(PDO::FETCH_COLUMN);
+    $nGroup    = count($groupIds);
+    $groupDays = (int) ceil($nGroup / $nSlots);
+    $firstGroupDay = (clone $today)->modify('-' . $groupDays . ' days'); // posledný deň = včera
+    foreach ($groupIds as $gi => $gid) {
+        $day  = intdiv($gi, $nSlots);
+        $slot = $gi % $nSlots;
+        $dt   = (clone $firstGroupDay)->modify("+$day days");
+        $setDate->execute([$dt->format('Y-m-d') . ' ' . $slots[$slot], $gid]);
+    }
+
+    // Knockout zápasy — prvý o 1h po spustení, ostatné v slotoch od zajtra
+    $koIds = $pdo->query("SELECT game_id FROM fifa2026.games WHERE game_type_code NOT LIKE 'GROUP_%' ORDER BY game_id")->fetchAll(PDO::FETCH_COLUMN);
+    $nowPlus1h = (new DateTime('now UTC'))->modify('+1 hour');
+    foreach ($koIds as $ki => $gid) {
+        if ($ki === 0) {
+            $st = $nowPlus1h->format('Y-m-d H:i:00');
+        } else {
+            $day  = intdiv($ki - 1, $nSlots);
+            $slot = ($ki - 1) % $nSlots;
+            $dt   = (clone $today)->modify('+' . ($day + 1) . ' days'); // od zajtra
+            $st   = $dt->format('Y-m-d') . ' ' . $slots[$slot];
+        }
+        $setDate->execute([$st, $gid]);
+    }
 
     // 2. Simuluj výsledky skupinových zápasov podľa ratingu
     $run = mt_rand(1, 999983);
@@ -160,11 +185,10 @@ if ($action === 'gen_group') {
     $rc = fifa_recalc_game($pdo, null);
 
     json_ok([
-        'action'      => 'gen_group',
-        'games'       => count($games),
-        'users'       => count($users),
-        'tips'        => count($users) * count($scored),
-        'offset_days' => $offsetDays,
+        'action' => 'gen_group',
+        'games'  => count($games),
+        'users'  => count($users),
+        'tips'   => count($users) * count($scored),
     ]);
 }
 

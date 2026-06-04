@@ -4,6 +4,6 @@ require_auth();
 $stmt = db()->query("
     SELECT team_id, team_code, team_name, group_name
     FROM fifa2026.teams
-    ORDER BY group_name, team_name
+    ORDER BY team_name
 ");
 json_ok($stmt->fetchAll());
