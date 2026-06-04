@@ -76,6 +76,13 @@ $params[] = $gid;
 
 $pdo->prepare("UPDATE fifa2026.games SET " . implode(', ', $sets) . " WHERE game_id = ?")->execute($params);
 
+// Otvor/zatvor tipovanie podľa stavu: otvorené keď sú oba tímy známe a zápas nie je odohraný
+$pdo->prepare("
+    UPDATE fifa2026.games
+    SET tips_open = (home_team_id IS NOT NULL AND away_team_id IS NOT NULL AND result_approved = FALSE)
+    WHERE game_id = ?
+")->execute([$gid]);
+
 // Prepočítaj body pri finished
 if ($finished) {
     require __DIR__ . '/../../helpers/fifa_recalc_fn.php';
