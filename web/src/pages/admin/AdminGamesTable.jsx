@@ -39,7 +39,7 @@ export default function AdminGamesTable({ rows, onEdit }) {
                             {r.venue}
                         </td>
                         <td data-label="Stav"><span className={statusClass(r.status)}>{STATUS_LABEL[r.status] || r.status}</span></td>
-                        <td data-label="" style={{display:'flex', alignItems:'center', gap:6, justifyContent:'flex-end'}}>
+                        <td data-label="" style={{display:'flex', alignItems:'center', gap:16, justifyContent:'flex-end'}}>
                             {r.flashscore_url && (
                                 <a href={r.flashscore_url} target="_blank" rel="noopener noreferrer" title="FlashScore">
                                     <img src="/flashscore.png" alt="FS" style={{width:18, height:18, borderRadius:4, opacity:0.85, verticalAlign:'middle'}} />
