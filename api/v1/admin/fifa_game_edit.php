@@ -1,7 +1,10 @@
 <?php
 // POST /v1/admin/fifa-game-edit
-// Úprava metadát zápasu: dátum/čas, štadión, tímy (playoff)
-// Body: { game_id, start_time?, venue?, home_team_id?, away_team_id? }
+// Komplexná úprava zápasu (parita s IIHF GameModal):
+//   start_time, venue, home_team_id, away_team_id, flashscore_url,
+//   status ('scheduled'|'finished'),
+//   home_score_regular, away_score_regular, home_score_final, away_score_final
+// Pri status=finished sa nastaví result_approved=TRUE a prepočítajú body.
 require_auth(true);
 $pdo = db();
 
@@ -16,29 +19,53 @@ $stmt->execute([$gid]);
 $game = $stmt->fetch();
 if (!$game) json_error('Zápas neexistuje', 404);
 
-$isGroup = str_starts_with($game['game_type_code'], 'GROUP_');
+$isPlayoff = !str_starts_with($game['game_type_code'], 'GROUP_');
 
-$sets = [];
+$sets   = [];
 $params = [];
 
-if (array_key_exists('start_time', $body) && $body['start_time']) {
+if (!empty($body['start_time'])) {
     $sets[] = "start_time = ?";
-    $params[] = $body['start_time'];  // očakáva sa 'YYYY-MM-DD HH:MM:00' v UTC
+    $params[] = $body['start_time'];
 }
 if (array_key_exists('venue', $body)) {
     $sets[] = "venue = ?";
     $params[] = trim($body['venue'] ?? '');
 }
+if (array_key_exists('flashscore_url', $body)) {
+    $sets[] = "flashscore_url = ?";
+    $params[] = $body['flashscore_url'] ?: null;
+}
+if (array_key_exists('home_team_id', $body)) {
+    $sets[] = "home_team_id = ?";
+    $params[] = ($body['home_team_id'] !== '' && $body['home_team_id'] !== null) ? (int)$body['home_team_id'] : null;
+}
+if (array_key_exists('away_team_id', $body)) {
+    $sets[] = "away_team_id = ?";
+    $params[] = ($body['away_team_id'] !== '' && $body['away_team_id'] !== null) ? (int)$body['away_team_id'] : null;
+}
 
-// Tímy meníme len pri play-off
-if (!$isGroup) {
-    if (array_key_exists('home_team_id', $body)) {
-        $sets[] = "home_team_id = ?";
-        $params[] = $body['home_team_id'] !== '' && $body['home_team_id'] !== null ? (int)$body['home_team_id'] : null;
-    }
-    if (array_key_exists('away_team_id', $body)) {
-        $sets[] = "away_team_id = ?";
-        $params[] = $body['away_team_id'] !== '' && $body['away_team_id'] !== null ? (int)$body['away_team_id'] : null;
+$status   = $body['status'] ?? null;
+$finished = $status === 'finished';
+
+if ($status !== null) {
+    if ($finished) {
+        $h90 = $body['home_score_regular'] ?? null;
+        $a90 = $body['away_score_regular'] ?? null;
+        if (!is_numeric($h90) || !is_numeric($a90)) json_error('Zadaj skóre po 90 min', 400);
+        $sets[] = "home_score_regular = ?"; $params[] = (int)$h90;
+        $sets[] = "away_score_regular = ?"; $params[] = (int)$a90;
+
+        $hFin = $body['home_score_final'] ?? null;
+        $aFin = $body['away_score_final'] ?? null;
+        $sets[] = "home_score_final = ?"; $params[] = is_numeric($hFin) ? (int)$hFin : null;
+        $sets[] = "away_score_final = ?"; $params[] = is_numeric($aFin) ? (int)$aFin : null;
+
+        $sets[] = "result_approved = TRUE";
+        $sets[] = "tips_open = FALSE";
+    } else {
+        // scheduled — zruš výsledok
+        $sets[] = "result_approved = FALSE";
     }
 }
 
@@ -48,5 +75,11 @@ $sets[] = "updated_at = NOW()";
 $params[] = $gid;
 
 $pdo->prepare("UPDATE fifa2026.games SET " . implode(', ', $sets) . " WHERE game_id = ?")->execute($params);
+
+// Prepočítaj body pri finished
+if ($finished) {
+    require __DIR__ . '/../../helpers/fifa_recalc_fn.php';
+    fifa_recalc_game($pdo, $gid);
+}
 
 json_ok(['game_id' => $gid, 'saved' => true]);

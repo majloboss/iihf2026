@@ -14,6 +14,7 @@ if ($id) {
                g.home_score_regular, g.away_score_regular,
                g.home_score_final, g.away_score_final,
                g.result_approved, g.game_type_code, g.game_type_name,
+           g.home_team_id, g.away_team_id, g.flashscore_url,
                ht.team_code AS home_code, ht.team_name AS home_name, ht.group_name AS home_group,
                at.team_code AS away_code, at.team_name AS away_name, at.group_name AS away_group,
                t.home_score_tip, t.away_score_tip, t.points_earned
@@ -34,6 +35,7 @@ $stmt = $pdo->prepare("
            g.home_score_regular, g.away_score_regular,
            g.home_score_final,   g.away_score_final,
            g.result_approved, g.game_type_code, g.game_type_name,
+           g.home_team_id, g.away_team_id, g.flashscore_url,
            ht.team_code AS home_code, ht.team_name AS home_name,
            at.team_code AS away_code, at.team_name AS away_name,
            t.home_score_tip, t.away_score_tip, t.points_earned
