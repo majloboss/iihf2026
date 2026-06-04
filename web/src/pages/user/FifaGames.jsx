@@ -87,7 +87,18 @@ export default function FifaGames() {
 
     useEffect(() => {
         getFifaGames()
-            .then(data => { setGames(data); setLoading(false); })
+            .then(data => {
+                setGames(data);
+                // Default kolo podľa dátumu: aktuálne kolo; pred/po turnaji → ALL
+                const sorted = [...data].sort((a, b) => new Date(a.start_time + 'Z') - new Date(b.start_time + 'Z'));
+                const firstStart = sorted.length ? new Date(sorted[0].start_time + 'Z') : null;
+                const nextUnfinished = sorted.find(g => !g.result_approved);
+                if (nextUnfinished && firstStart && new Date() >= firstStart) {
+                    const code = nextUnfinished.game_type_code;
+                    setPhase(code.startsWith('GROUP_') ? 'GRP' : code);
+                }
+                setLoading(false);
+            })
             .catch(e => { setError(e.message || 'Chyba API'); setLoading(false); });
     }, []);
 
