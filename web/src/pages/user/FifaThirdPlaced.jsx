@@ -9,8 +9,8 @@ const tiebreak = (a, b) =>
 
 // Zostav zoznam 12 tretích tímov. Ak existuje uložená/finalizovaná '3RD' tabuľka, použi ju.
 export function computeThirds(data) {
-    if (data['3RD']?.length) {
-        return data['3RD'].map(t => ({ ...t, group: t.group_name }));
+    if (data['3P']?.length) {
+        return data['3P'].map(t => ({ ...t, group: t.group_name }));
     }
     return GROUP_CODES
         .map(g => data[g]?.[2] ? { ...data[g][2], group: g } : null)
@@ -18,7 +18,7 @@ export function computeThirds(data) {
         .sort(tiebreak);
 }
 
-export default function FifaThirdPlaced({ data, thirds: thirdsProp, onTeamClick, admin, finalized, onMove, onFinalize, busy }) {
+export default function FifaThirdPlaced({ data, thirds: thirdsProp, onTeamClick, admin, finalized, onMove, onFinalize, busy, canFinalize = true }) {
     const thirds = thirdsProp ?? computeThirds(data);
     if (!thirds.length) return null;
 
@@ -37,7 +37,10 @@ export default function FifaThirdPlaced({ data, thirds: thirdsProp, onTeamClick,
                 </span>
                 {admin && !finalized && (
                     <button className={aStyles.btnFinalize} style={{ padding: '3px 10px', fontSize: '0.72rem' }}
-                        onClick={onFinalize} disabled={busy}>✓ Finalizovať</button>
+                        onClick={onFinalize} disabled={busy || !canFinalize}
+                        title={!canFinalize ? 'Najprv finalizuj všetky skupiny A–L' : ''}>
+                        ✓ Finalizovať
+                    </button>
                 )}
             </div>
             <div className={styles.tableWrap}>

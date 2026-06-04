@@ -123,9 +123,11 @@ export default function FifaAdminGroupStandings() {
         });
     }, []);
 
-    // Finalizácia tretích miest závisí LEN od uložených '3RD' riadkov,
+    // Finalizácia tretích miest závisí LEN od uložených '3P' riadkov,
     // nie od finalizácie zdrojových skupín.
-    const thirdsFinalized = (data?.['3RD']?.length ?? 0) > 0;
+    const thirdsFinalized   = (data?.['3P']?.length ?? 0) > 0;
+    // Povoliť finalizáciu tretích až keď sú finalizované všetky skupiny A–L.
+    const allGroupsFinalized = GROUP_CODES.every(g => data?.[g]?.some(t => t.finalized));
 
     const handleThirdsMove = useCallback((fromIdx, toIdx) => {
         setThirds(prev => {
@@ -140,7 +142,7 @@ export default function FifaAdminGroupStandings() {
         try {
             for (let i = 0; i < thirds.length; i++) {
                 const t = thirds[i];
-                await updateFifaStanding({ phase: '3RD', team: t.team, rank: i + 1, finalized: true,
+                await updateFifaStanding({ phase: '3P', team: t.team, rank: i + 1, finalized: true,
                     gp: t.gp, w: t.w, d: t.d, l: t.l, gf: t.gf, ga: t.ga, pts: t.pts });
             }
             setThirds(prev => prev.map((t, i) => ({ ...t, rank: i + 1, finalized: true })));
@@ -178,6 +180,7 @@ export default function FifaAdminGroupStandings() {
                     thirds={thirds}
                     admin
                     finalized={thirdsFinalized}
+                    canFinalize={allGroupsFinalized}
                     onMove={handleThirdsMove}
                     onFinalize={handleThirdsFinalize}
                     busy={busy}
