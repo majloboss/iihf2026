@@ -154,7 +154,12 @@ function ResultCard({ game: initGame, teams, onChanged }) {
 
     const save = async () => {
         if (h90 === '' || a90 === '') { setErr('Zadaj skóre po 90 min'); return; }
-        if (hasET && (hFin === '' || aFin === '')) { setErr('Zadaj finálne skóre'); return; }
+        if (hasET) {
+            if (hFin === '' || aFin === '') { setErr('Zadaj konečný výsledok'); return; }
+            const H90 = +h90, A90 = +a90, HF = +hFin, AF = +aFin;
+            if (HF < H90 || AF < A90) { setErr('Konečný výsledok nemôže byť nižší ako po 90 min'); return; }
+            if (HF === H90 && AF === A90) { setErr('Po predĺžení musí aspoň jeden tím skórovať navyše'); return; }
+        }
         setSaving(true); setErr(''); setSaved(false);
         const payload = {
             game_id: game.game_id,

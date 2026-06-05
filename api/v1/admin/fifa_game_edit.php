@@ -58,6 +58,14 @@ if ($status !== null) {
 
         $hFin = $body['home_score_final'] ?? null;
         $aFin = $body['away_score_final'] ?? null;
+        if (is_numeric($hFin) && is_numeric($aFin)) {
+            if ((int)$hFin < (int)$h90 || (int)$aFin < (int)$a90) {
+                json_error('Konečný výsledok nemôže byť nižší ako po 90 min', 400);
+            }
+            if ((int)$hFin === (int)$h90 && (int)$aFin === (int)$a90) {
+                json_error('Po predĺžení musí aspoň jeden tím skórovať navyše', 400);
+            }
+        }
         $sets[] = "home_score_final = ?"; $params[] = is_numeric($hFin) ? (int)$hFin : null;
         $sets[] = "away_score_final = ?"; $params[] = is_numeric($aFin) ? (int)$aFin : null;
 

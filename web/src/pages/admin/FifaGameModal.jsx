@@ -47,6 +47,12 @@ export default function FifaGameModal({ game, teams, onClose, onSaved }) {
     const showScore = status === 'finished';
 
     const save = async () => {
+        if (showScore && isPlayoff && hasET) {
+            const H90 = +h90, A90 = +a90, HF = +hFin, AF = +aFin;
+            if (hFin === '' || aFin === '') { setError('Zadaj konečný výsledok'); return; }
+            if (HF < H90 || AF < A90) { setError('Konečný výsledok nemôže byť nižší ako po 90 min'); return; }
+            if (HF === H90 && AF === A90) { setError('Po predĺžení musí aspoň jeden tím skórovať navyše'); return; }
+        }
         setSaving(true); setError(''); setSuccess('');
         try {
             const payload = {

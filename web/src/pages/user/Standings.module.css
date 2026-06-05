@@ -93,6 +93,25 @@
 .pts { font-weight: 700; color: #1a3a6b; font-size: 0.95rem; }
 .tipsCount { color: #aaa; font-size: 0.82rem; white-space: nowrap; }
 
+/* Zarovnaný rozpad bodov 7..0 — každé číslo v pevnom stĺpci pod sebou */
+.bucketRow {
+    display: inline-flex;
+    justify-content: flex-end;
+}
+.bucketHead, .bucketCell {
+    display: inline-block;
+    width: 26px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+}
+.bucketHead { color: #bbb; font-weight: 600; }
+.bucketCell { color: #777; font-size: 0.82rem; }
+.bucketZero { color: #d5d5d5; }
+
+@media (max-width: 480px) {
+    .bucketHead, .bucketCell { width: 19px; font-size: 0.72rem; }
+}
+
 .empty { color: #aaa; text-align: center; padding: 40px 0; }
 
 @media (max-width: 480px) {
