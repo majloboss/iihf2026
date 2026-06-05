@@ -30,3 +30,9 @@ export const setFifaLive          = (game_id, ls_home, ls_away) => apiFetch('v1/
 export const clearFifaLive        = (game_id) => apiFetch('v1/admin/fifa-game-live', {
     method: 'POST', body: JSON.stringify({ game_id, clear: true })
 });
+export const freezeFifa90         = (game_id, reg_home, reg_away) => apiFetch('v1/admin/fifa-game-live', {
+    method: 'POST', body: JSON.stringify({ game_id, freeze90: true, reg_home, reg_away })
+});
+export const unfreezeFifa90       = (game_id) => apiFetch('v1/admin/fifa-game-live', {
+    method: 'POST', body: JSON.stringify({ game_id, unfreeze90: true })
+});

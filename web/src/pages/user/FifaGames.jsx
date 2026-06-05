@@ -6,7 +6,9 @@ import styles from './Games.module.css';
 const PLAYOFF_CODES = ['R32','R16','QF','SF','BM','F'];
 // Živé body podľa aktuálneho livescore (group 3+1+1, playoff 5+1+1)
 const calcLiveFifaPoints = (tip1, tip2, game) => {
-    const s1 = game.ls_home, s2 = game.ls_away;
+    // Zmrazený 90-min základ má prednosť (počas predĺženia), inak aktuálne živé skóre
+    const s1 = game.home_score_regular != null ? game.home_score_regular : game.ls_home;
+    const s2 = game.away_score_regular != null ? game.away_score_regular : game.ls_away;
     if (s1 == null || s2 == null || tip1 == null || tip2 == null) return null;
     const isPlayoff = PLAYOFF_CODES.includes(game.game_type_code);
     const winPts = isPlayoff ? 5 : 3;
@@ -21,7 +23,7 @@ function GroupTips({ game }) {
     const [loading, setLoading] = useState(false);
     const [err, setErr]         = useState('');
 
-    const isLive = game.ls_home != null && !game.result_approved;
+    const isLive = !game.result_approved && (game.ls_home != null || game.home_score_regular != null);
 
     const toggle = async () => {
         if (!open && groups === null) {

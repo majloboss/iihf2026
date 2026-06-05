@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getFifaGames } from '../../api/fifaGames';
-import { getFifaTeams, getFifaAdminTips, updateFifaResult, setFifaGameTeams, recalcFifa, setFifaLive, clearFifaLive } from '../../api/fifaAdmin';
+import { getFifaTeams, getFifaAdminTips, updateFifaResult, setFifaGameTeams, recalcFifa, setFifaLive, clearFifaLive, freezeFifa90, unfreezeFifa90 } from '../../api/fifaAdmin';
 import gStyles from '../user/Games.module.css';
 import styles from './AdminResults.module.css';
 
@@ -16,7 +16,8 @@ const PHASE_LABEL = {
 const FLAG_URL = code => `/flags/fifa_flag_${code?.toLowerCase()}.png`;
 // Priebežné body podľa livescore (group 3+1+1, playoff 5+1+1)
 const calcLiveFifaPoints = (tip1, tip2, game) => {
-    const s1 = game.ls_home, s2 = game.ls_away;
+    const s1 = game.home_score_regular != null ? game.home_score_regular : game.ls_home;
+    const s2 = game.away_score_regular != null ? game.away_score_regular : game.ls_away;
     if (s1 == null || s2 == null || tip1 == null || tip2 == null) return null;
     const winPts = PLAYOFF.has(game.game_type_code) ? 5 : 3;
     const rw = s1 > s2 ? 1 : s1 < s2 ? -1 : 0;
@@ -57,7 +58,7 @@ function TipsPanel({ gameId, game }) {
     if (err)     return <div className={styles.tipsErr}>{err}</div>;
     if (!tips || tips.length === 0) return <div className={styles.tipsEmpty}>Žiadne tipy</div>;
 
-    const isLive = game && game.ls_home != null && !game.result_approved;
+    const isLive = game && !game.result_approved && (game.ls_home != null || game.home_score_regular != null);
 
     return (
         <table className={styles.tipsTable}>
@@ -129,6 +130,28 @@ function ResultCard({ game: initGame, teams, onChanged }) {
         try {
             await clearFifaLive(game.game_id);
             setGame(g => ({ ...g, ls_home: null, ls_away: null, ls_status: null, ls_updated_at: null }));
+        } catch (e) { setLsErr(e.message); }
+        finally { setLsSaving(false); }
+    };
+
+    // Zmrazenie 90-min základu (pre priebežné body počas predĺženia)
+    const [reg1, setReg1] = useState(game.home_score_regular != null ? String(game.home_score_regular) : '');
+    const [reg2, setReg2] = useState(game.away_score_regular != null ? String(game.away_score_regular) : '');
+    const freeze90 = async () => {
+        if (reg1 === '' || reg2 === '') { setLsErr('Zadaj 90-min skóre'); return; }
+        setLsSaving(true); setLsErr('');
+        try {
+            await freezeFifa90(game.game_id, parseInt(reg1), parseInt(reg2));
+            setGame(g => ({ ...g, home_score_regular: parseInt(reg1), away_score_regular: parseInt(reg2) }));
+            setH90(reg1); setA90(reg2);
+        } catch (e) { setLsErr(e.message); }
+        finally { setLsSaving(false); }
+    };
+    const unfreeze90 = async () => {
+        setLsSaving(true); setLsErr('');
+        try {
+            await unfreezeFifa90(game.game_id);
+            setGame(g => ({ ...g, home_score_regular: null, away_score_regular: null }));
         } catch (e) { setLsErr(e.message); }
         finally { setLsSaving(false); }
     };
@@ -232,6 +255,23 @@ function ResultCard({ game: initGame, teams, onChanged }) {
                         )}
                         {lsErr && <span className={styles.errMsg}>{lsErr}</span>}
                     </div>
+                    {/* Zmrazenie 90-min základu — pre priebežné body počas predĺženia (len play-off) */}
+                    {isPlayoff && (
+                        <div className={styles.lsManualRow} style={{marginTop:8}}>
+                            <span style={{fontSize:'0.72rem', color:'#888', minWidth:90}}>
+                                Po 90 min {game.home_score_regular != null && <span style={{color:'#1a3a6b', fontWeight:700}}>· zmrazené {game.home_score_regular}:{game.away_score_regular}</span>}
+                            </span>
+                            <input type="number" min="0" max="30" value={reg1} onChange={e => setReg1(e.target.value)} className={styles.scoreIn} />
+                            <span className={styles.colon}>:</span>
+                            <input type="number" min="0" max="30" value={reg2} onChange={e => setReg2(e.target.value)} className={styles.scoreIn} />
+                            <button className={styles.btnSave} onClick={freeze90} disabled={lsSaving} title="Zmraziť 90-min základ pre priebežné body">
+                                ❄ Zmraziť 90 min
+                            </button>
+                            {game.home_score_regular != null && (
+                                <button className={styles.btnSave} style={{background:'#6c757d'}} onClick={unfreeze90} disabled={lsSaving}>Zrušiť</button>
+                            )}
+                        </div>
+                    )}
                 </div>
             )}
 

@@ -9,7 +9,8 @@ import styles from './Dashboard.module.css';
 const FLAG_URL = code => `/flags/fifa_flag_${code?.toLowerCase()}.png`;
 const PLAYOFF_CODES = ['R32','R16','QF','SF','BM','F'];
 const calcLiveFifaPoints = (tip1, tip2, game) => {
-    const s1 = game.ls_home, s2 = game.ls_away;
+    const s1 = game.home_score_regular != null ? game.home_score_regular : game.ls_home;
+    const s2 = game.away_score_regular != null ? game.away_score_regular : game.ls_away;
     if (s1 == null || s2 == null || tip1 == null || tip2 == null) return null;
     const winPts = PLAYOFF_CODES.includes(game.game_type_code) ? 5 : 3;
     const rw = s1 > s2 ? 1 : s1 < s2 ? -1 : 0;
@@ -99,7 +100,7 @@ function TipModal({ game, onClose, onSaved }) {
 function GameTipsModal({ game, onClose }) {
     const [groups, setGroups] = useState(null);
     const [err, setErr]       = useState('');
-    const isLive = game.ls_home != null && !game.result_approved;
+    const isLive = !game.result_approved && (game.ls_home != null || game.home_score_regular != null);
 
     useEffect(() => {
         getFifaGameTips(game.game_id).then(setGroups).catch(e => setErr(e.message));
