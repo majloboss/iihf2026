@@ -14,6 +14,15 @@ const PHASE_LABEL = {
     R32:'Round of 32', R16:'Round of 16', QF:'Štvrťfinále', SF:'Semifinále', BM:'O bronz', F:'Finále',
 };
 const FLAG_URL = code => `/flags/fifa_flag_${code?.toLowerCase()}.png`;
+// Priebežné body podľa livescore (group 3+1+1, playoff 5+1+1)
+const calcLiveFifaPoints = (tip1, tip2, game) => {
+    const s1 = game.ls_home, s2 = game.ls_away;
+    if (s1 == null || s2 == null || tip1 == null || tip2 == null) return null;
+    const winPts = PLAYOFF.has(game.game_type_code) ? 5 : 3;
+    const rw = s1 > s2 ? 1 : s1 < s2 ? -1 : 0;
+    const tw = tip1 > tip2 ? 1 : tip1 < tip2 ? -1 : 0;
+    return (tw === rw ? winPts : 0) + (tip1 === s1 ? 1 : 0) + (tip2 === s2 ? 1 : 0);
+};
 const dayKey   = iso => {
     const d = new Date(iso);
     return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -34,7 +43,7 @@ function TeamBlock({ code, isLeft }) {
     );
 }
 
-function TipsPanel({ gameId }) {
+function TipsPanel({ gameId, game }) {
     const [tips, setTips]       = useState(null);
     const [loading, setLoading] = useState(false);
     const [err, setErr]         = useState('');
@@ -48,23 +57,30 @@ function TipsPanel({ gameId }) {
     if (err)     return <div className={styles.tipsErr}>{err}</div>;
     if (!tips || tips.length === 0) return <div className={styles.tipsEmpty}>Žiadne tipy</div>;
 
+    const isLive = game && game.ls_home != null && !game.result_approved;
+
     return (
         <table className={styles.tipsTable}>
             <thead><tr><th>Hráč</th><th>Tip</th><th>Body</th><th>Čas tipu</th></tr></thead>
             <tbody>
-                {tips.map(t => (
-                    <tr key={t.user_id} className={t.tip1 == null ? styles.tipRowUntipped : ''}>
-                        <td className={styles.tipUser}>
-                            {t.avatar
-                                ? <img src={t.avatar} className={styles.tipAvatar} alt="" />
-                                : <span className={styles.tipAvatarPh}>{t.username[0].toUpperCase()}</span>}
-                            {t.username}
-                        </td>
-                        <td className={styles.tipScore}>{t.tip1 != null ? `${t.tip1}:${t.tip2}` : '—'}</td>
-                        <td className={styles.tipPts}>{t.points != null ? `+${t.points}b` : '—'}</td>
-                        <td className={styles.tipTime}>{t.updated_at ? new Date(t.updated_at).toLocaleString('sk-SK') : '—'}</td>
-                    </tr>
-                ))}
+                {tips.map(t => {
+                    const livePts = isLive ? calcLiveFifaPoints(t.tip1, t.tip2, game) : null;
+                    return (
+                        <tr key={t.user_id} className={t.tip1 == null ? styles.tipRowUntipped : ''}>
+                            <td className={styles.tipUser}>
+                                {t.avatar
+                                    ? <img src={t.avatar} className={styles.tipAvatar} alt="" />
+                                    : <span className={styles.tipAvatarPh}>{t.username[0].toUpperCase()}</span>}
+                                {t.username}
+                            </td>
+                            <td className={styles.tipScore}>{t.tip1 != null ? `${t.tip1}:${t.tip2}` : '—'}</td>
+                            <td className={livePts != null ? styles.tipPtsLive : styles.tipPts}>
+                                {livePts != null ? `+${livePts}b` : (t.points != null ? `+${t.points}b` : '—')}
+                            </td>
+                            <td className={styles.tipTime}>{t.updated_at ? new Date(t.updated_at).toLocaleString('sk-SK') : '—'}</td>
+                        </tr>
+                    );
+                })}
             </tbody>
         </table>
     );
@@ -231,8 +247,13 @@ function ResultCard({ game: initGame, teams, onChanged }) {
                 </div>
             )}
 
-            {/* Zadanie výsledku — keď sú tímy známe */}
-            {teamsSet && (
+            {/* Zápas ešte nezačal — žiadne zadávanie výsledku */}
+            {teamsSet && !started && !finished && (
+                <div className={styles.cardVenue} style={{color:'#aaa'}}>Zápas ešte nezačal</div>
+            )}
+
+            {/* Zadanie výsledku — len keď zápas začal alebo je odohraný */}
+            {teamsSet && (started || finished) && (
                 <div className={styles.editBlock}>
                     <div className={styles.editRow}>
                         <span style={{fontSize:'0.78rem', color:'#888', minWidth:60}}>Po 90 min:</span>
@@ -250,6 +271,11 @@ function ResultCard({ game: initGame, teams, onChanged }) {
                         <button className={styles.btnSave} onClick={save} disabled={saving}>
                             {saving ? '…' : saved ? '✓ Uložené' : 'Uložiť výsledok'}
                         </button>
+                        {!finished && game.ls_home != null && (
+                            <button className={styles.btnTakeLS} onClick={() => { setH90(String(game.ls_home)); setA90(String(game.ls_away)); }}>
+                                ↙ Prevziať Livescore
+                            </button>
+                        )}
                         {err && <span className={styles.errMsg}>{err}</span>}
                     </div>
                     {isPlayoff && hasET && (
@@ -269,7 +295,7 @@ function ResultCard({ game: initGame, teams, onChanged }) {
             <button className={styles.toggleTips} onClick={() => setOpen(o => !o)}>
                 {open ? '▲ Skryť tipy' : '▼ Tipy hráčov'}
             </button>
-            {open && <TipsPanel gameId={game.game_id} />}
+            {open && <TipsPanel gameId={game.game_id} game={game} />}
         </div>
     );
 }
