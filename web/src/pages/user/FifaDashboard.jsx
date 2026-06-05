@@ -195,6 +195,11 @@ function GameCard({ game, onTipClick, onShowTips }) {
                         : <span className={styles.tbd}>TBD</span>}
                 </div>
             </div>
+            {finished && game.home_score_final != null && (
+                <div style={{textAlign:'center', fontSize:'0.72rem', color:'#888', marginTop:2}}>
+                    po predĺžení/penaltách: {game.home_score_final}:{game.away_score_final}
+                </div>
+            )}
             {game.home_score_tip != null && (
                 <div className={styles.gameTip}>
                     <span className={styles.tipCheck}>✓</span> Môj tip: {game.home_score_tip}:{game.away_score_tip}

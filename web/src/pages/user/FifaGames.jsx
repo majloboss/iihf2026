@@ -364,7 +364,10 @@ export default function FifaGames() {
                                     <TeamBlock code={g.home_code} isLeft />
                                     <div className={styles.vs}>
                                         {finished && g.home_score_regular != null
-                                            ? <span className={styles.result}>{g.home_score_regular}:{g.away_score_regular}</span>
+                                            ? <span className={styles.result}>
+                                                {g.home_score_regular}:{g.away_score_regular}
+                                                {g.home_score_final != null && <span className={styles.resultOT}> ({g.home_score_final}:{g.away_score_final} pp)</span>}
+                                              </span>
                                             : live ? <span className={styles.live}>LIVE</span> : 'vs'}
                                     </div>
                                     <TeamBlock code={g.away_code} />
