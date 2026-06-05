@@ -45,9 +45,11 @@ export default function FifaGameModal({ game, teams, onClose, onSaved }) {
     const [success, setSuccess] = useState('');
 
     const showScore = status === 'finished';
+    const isDraw90  = h90 !== '' && a90 !== '' && parseInt(h90) === parseInt(a90);
 
     const save = async () => {
         if (showScore && isPlayoff && hasET) {
+            if (!isDraw90) { setError('Predĺženie je možné len pri remíze po 90 min'); return; }
             const H90 = +h90, A90 = +a90, HF = +hFin, AF = +aFin;
             if (hFin === '' || aFin === '') { setError('Zadaj konečný výsledok'); return; }
             if (HF < H90 || AF < A90) { setError('Konečný výsledok nemôže byť nižší ako po 90 min'); return; }
@@ -134,11 +136,13 @@ export default function FifaGameModal({ game, teams, onClose, onSaved }) {
                     </div>
                     {showScore && isPlayoff && (
                         <div style={{marginTop:10}}>
-                            <label style={{display:'flex', alignItems:'center', gap:8, fontSize:'0.85rem', color:'#555'}}>
-                                <input type="checkbox" checked={hasET} onChange={e => setHasET(e.target.checked)} />
+                            <label style={{display:'flex', alignItems:'center', gap:8, fontSize:'0.85rem', color:'#555', opacity: isDraw90 ? 1 : 0.5}}
+                                title={!isDraw90 ? 'Len pri remíze po 90 min' : ''}>
+                                <input type="checkbox" checked={hasET && isDraw90} disabled={!isDraw90}
+                                    onChange={e => setHasET(e.target.checked)} />
                                 Predĺženie / penalty (konečný výsledok)
                             </label>
-                            {hasET && (
+                            {hasET && isDraw90 && (
                                 <div className={styles.grid} style={{marginTop:8}}>
                                     <label>Domáci – konečné
                                         <input type="number" min="0" max="30" value={hFin} onChange={e => setHFin(e.target.value)} style={SELECT_STYLE} />

@@ -103,6 +103,9 @@ function ResultCard({ game: initGame, teams, onChanged }) {
     const [err, setErr]       = useState('');
     const [open, setOpen]     = useState(false);
 
+    // Predĺženie je možné len pri remíze po 90 min
+    const isDraw90 = h90 !== '' && a90 !== '' && parseInt(h90) === parseInt(a90);
+
     // Živé skóre
     const [ls1, setLs1]       = useState(game.ls_home != null ? String(game.ls_home) : '0');
     const [ls2, setLs2]       = useState(game.ls_away != null ? String(game.ls_away) : '0');
@@ -155,6 +158,7 @@ function ResultCard({ game: initGame, teams, onChanged }) {
     const save = async () => {
         if (h90 === '' || a90 === '') { setErr('Zadaj skóre po 90 min'); return; }
         if (hasET) {
+            if (!isDraw90) { setErr('Predĺženie je možné len pri remíze po 90 min'); return; }
             if (hFin === '' || aFin === '') { setErr('Zadaj konečný výsledok'); return; }
             const H90 = +h90, A90 = +a90, HF = +hFin, AF = +aFin;
             if (HF < H90 || AF < A90) { setErr('Konečný výsledok nemôže byť nižší ako po 90 min'); return; }
@@ -268,8 +272,10 @@ function ResultCard({ game: initGame, teams, onChanged }) {
                             <input type="number" min="0" max="30" value={a90} onChange={e => setA90(e.target.value)} className={styles.scoreIn} />
                         </div>
                         {isPlayoff && (
-                            <label className={styles.otCheck}>
-                                <input type="checkbox" checked={hasET} onChange={e => setHasET(e.target.checked)} />
+                            <label className={styles.otCheck} title={!isDraw90 ? 'Len pri remíze po 90 min' : ''}
+                                style={!isDraw90 ? {opacity:0.5} : undefined}>
+                                <input type="checkbox" checked={hasET && isDraw90} disabled={!isDraw90}
+                                    onChange={e => setHasET(e.target.checked)} />
                                 Predĺženie/penalty
                             </label>
                         )}
@@ -283,7 +289,7 @@ function ResultCard({ game: initGame, teams, onChanged }) {
                         )}
                         {err && <span className={styles.errMsg}>{err}</span>}
                     </div>
-                    {isPlayoff && hasET && (
+                    {isPlayoff && hasET && isDraw90 && (
                         <div className={styles.editRow} style={{marginTop:8}}>
                             <span style={{fontSize:'0.78rem', color:'#888', minWidth:60}}>Konečný:</span>
                             <div className={styles.scoreBox}>

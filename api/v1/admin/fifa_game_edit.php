@@ -59,6 +59,9 @@ if ($status !== null) {
         $hFin = $body['home_score_final'] ?? null;
         $aFin = $body['away_score_final'] ?? null;
         if (is_numeric($hFin) && is_numeric($aFin)) {
+            if ((int)$h90 !== (int)$a90) {
+                json_error('Predĺženie je možné len pri remíze po 90 min', 400);
+            }
             if ((int)$hFin < (int)$h90 || (int)$aFin < (int)$a90) {
                 json_error('Konečný výsledok nemôže byť nižší ako po 90 min', 400);
             }

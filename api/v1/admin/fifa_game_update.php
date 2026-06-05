@@ -28,6 +28,9 @@ if (!$game) json_error('Zápas neexistuje', 404);
 // Validácia predĺženia: konečný výsledok nesmie byť nižší ako po 90 min,
 // a aspoň jeden tím musí skórovať navyše.
 if ($hFin !== null && $aFin !== null && is_numeric($hFin) && is_numeric($aFin)) {
+    if ((int)$h90 !== (int)$a90) {
+        json_error('Predĺženie je možné len pri remíze po 90 min', 400);
+    }
     if ((int)$hFin < (int)$h90 || (int)$aFin < (int)$a90) {
         json_error('Konečný výsledok nemôže byť nižší ako po 90 min', 400);
     }
