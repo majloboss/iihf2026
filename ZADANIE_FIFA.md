@@ -228,7 +228,7 @@ Poradie migrácie:
 - ✅ FIFA stránky: Zápasy (filtre GRP/A–L/knockout, vlajky, vlajkový filter, default kolo podľa dátumu, LIVE bar), Tabuľky A–L + tabuľka tretích miest, Prehľad (tip modal), Poradie
 - ✅ Dashboard: nearest games + standings len pre aktívny turnaj, tip modal po kliknutí
 - ✅ Poradie: per-competition, bodovanie FIFA (group 3+1+1, playoff 5+1+1)
-- ✅ Admin FIFA UI: Zápasy (jednotná tabuľka, Upraviť modal s tímami/stavom/výsledkom/flashscore), Výsledky (90 min + ET, bracket výber, živé skóre), Tabuľky (sync/reset/finalizácia/presúvanie + tabuľka tretích miest), Skupiny
+- ✅ Admin FIFA UI: Zápasy (jednotná tabuľka, Upraviť modal s tímami/stavom/výsledkom/flashscore), Výsledky (90 min + ET, bracket výber, živé skóre, Prevziať Livescore, priebežné body), Tabuľky (sync/reset/finalizácia/presúvanie + tabuľka tretích miest + globálna tabuľka všetkých tipérov), Skupiny
 - ✅ Admin Nástroje: záložky (Prihlasovanie/FIFA/IIHF/Common), FIFA generovanie základnej časti + Načítať master + Spustenie súťaže
 
 ### FÁZA 5 — Skupiny — hromadná pozvánka
@@ -241,6 +241,24 @@ Poradie migrácie:
 - ✅ User: Tabuľky aj Zápasy → TAB
 - ✅ Admin: presúvanie + samostatná finalizácia (povolená až po finalizácii všetkých skupín), uloženie ako phase `3P`
 
+### Tipy skupín so živými bodmi (parita s IIHF)
+
+- ✅ Zápasy (live + uzavreté) → ▼ Tipy skupín; Prehľad → klik na zápas otvorí modal
+- ✅ Priebežné body z livescore (group 3+1+1 / playoff 5+1+1); len skupiny daného turnaja
+
+### Bodovanie / validácie FIFA
+
+- ✅ Predĺženie len pri remíze po 90 min; konečný výsledok musí mať víťaza, nesmie byť nižší ako 90 min (FE+BE)
+- ✅ Zákaz zadania výsledku pred začiatkom zápasu
+- ✅ Zarovnaný rozpad bodov 7–0 (mriežka) v Poradí aj admin Skupinách
+- ✅ Zobrazenie konečného výsledku po predĺžení userom (`X:Y (A:B pp)`) v Zápasoch aj Prehľade
+
+### Migrácie spustené na DB-DEV-BET
+
+024 competitions · 025 FIFA dáta · 026 standings seed · 027 rename IIHF · 028 scoring ·
+029 flashscore · 030 renumber · 031 games_pdf master · 032 knockout fix · 033 renumber po fix ·
+034 livescore (`ls_*`)
+
 ---
 
 ## Platforma
@@ -251,8 +269,9 @@ Poradie migrácie:
 
 ---
 
-## Otvorené otázky / TODO
+## Čo zostáva (TODO)
 
-1. ✅ **Vlajky:** 48 FIFA vlajok pripravených (`fifa_flag_*.png`)
-2. 🔲 **Notifikácie pre FIFA** — push/email pre FIFA zápasy (zatiaľ len IIHF)
-3. 🔲 **Deploy na main** — až na explicitný pokyn
+1. 🔲 **Notifikácie pre FIFA** — push/email (začiatok zápasu, nenatipované, výsledok); zatiaľ len IIHF (`send_notifications.php` rieši iba `iihf2026.*`)
+2. 🔲 **Deploy na produkciu (main → betclub.fellow.sk)** — merge develop→main (na pokyn), spustiť migrácie 024–034 na **DB-BET**, nahrať `db.php` (prod) + `vapid.php` na prod server
+3. 🔲 **Android aplikácia** (Kotlin) — neskôr, nie priorita
+4. 🟡 *Nice-to-have:* auto-refresh livescore na user stránkach (IIHF mal 30s polling); automatické párovanie knockout bracketu z víťazov skupín (teraz manuálne)
