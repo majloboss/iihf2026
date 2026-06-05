@@ -58,19 +58,22 @@ if ($status !== null) {
 
         $hFin = $body['home_score_final'] ?? null;
         $aFin = $body['away_score_final'] ?? null;
-        if (is_numeric($hFin) && is_numeric($aFin)) {
-            if ((int)$h90 !== (int)$a90) {
-                json_error('Predĺženie je možné len pri remíze po 90 min', 400);
+        $isDraw90 = (int)$h90 === (int)$a90;
+        if ($isPlayoff && $isDraw90) {
+            if (!is_numeric($hFin) || !is_numeric($aFin)) {
+                json_error('Remíza v play-off — zadaj konečný výsledok (po ET/penaltách)', 400);
             }
             if ((int)$hFin < (int)$h90 || (int)$aFin < (int)$a90) {
                 json_error('Konečný výsledok nemôže byť nižší ako po 90 min', 400);
             }
-            if ((int)$hFin === (int)$h90 && (int)$aFin === (int)$a90) {
-                json_error('Po predĺžení musí aspoň jeden tím skórovať navyše', 400);
+            if ((int)$hFin === (int)$aFin) {
+                json_error('Po ET/penaltách musí byť víťaz (nie remíza)', 400);
             }
+        } elseif (is_numeric($hFin) && is_numeric($aFin)) {
+            json_error('Predĺženie je možné len pri remíze po 90 min', 400);
         }
-        $sets[] = "home_score_final = ?"; $params[] = is_numeric($hFin) ? (int)$hFin : null;
-        $sets[] = "away_score_final = ?"; $params[] = is_numeric($aFin) ? (int)$aFin : null;
+        $sets[] = "home_score_final = ?"; $params[] = ($isPlayoff && $isDraw90 && is_numeric($hFin)) ? (int)$hFin : null;
+        $sets[] = "away_score_final = ?"; $params[] = ($isPlayoff && $isDraw90 && is_numeric($aFin)) ? (int)$aFin : null;
 
         $sets[] = "result_approved = TRUE";
         $sets[] = "tips_open = FALSE";

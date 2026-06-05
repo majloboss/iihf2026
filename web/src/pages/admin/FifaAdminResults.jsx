@@ -155,22 +155,23 @@ function ResultCard({ game: initGame, teams, onChanged }) {
         finally { setTeamSaving(false); }
     };
 
+    const needsET = isPlayoff && isDraw90;  // play-off remíza → povinné predĺženie s víťazom
+
     const save = async () => {
         if (h90 === '' || a90 === '') { setErr('Zadaj skóre po 90 min'); return; }
-        if (hasET) {
-            if (!isDraw90) { setErr('Predĺženie je možné len pri remíze po 90 min'); return; }
-            if (hFin === '' || aFin === '') { setErr('Zadaj konečný výsledok'); return; }
+        if (needsET) {
+            if (hFin === '' || aFin === '') { setErr('Remíza v play-off — zadaj konečný výsledok (po ET/penaltách)'); return; }
             const H90 = +h90, A90 = +a90, HF = +hFin, AF = +aFin;
             if (HF < H90 || AF < A90) { setErr('Konečný výsledok nemôže byť nižší ako po 90 min'); return; }
-            if (HF === H90 && AF === A90) { setErr('Po predĺžení musí aspoň jeden tím skórovať navyše'); return; }
+            if (HF === AF) { setErr('Po ET/penaltách musí byť víťaz (nie remíza)'); return; }
         }
         setSaving(true); setErr(''); setSaved(false);
         const payload = {
             game_id: game.game_id,
             home_score_regular: parseInt(h90),
             away_score_regular: parseInt(a90),
-            home_score_final: hasET ? parseInt(hFin) : null,
-            away_score_final: hasET ? parseInt(aFin) : null,
+            home_score_final: needsET ? parseInt(hFin) : null,
+            away_score_final: needsET ? parseInt(aFin) : null,
             result_approved: true,
         };
         try {
@@ -271,14 +272,6 @@ function ResultCard({ game: initGame, teams, onChanged }) {
                             <span className={styles.colon}>:</span>
                             <input type="number" min="0" max="30" value={a90} onChange={e => setA90(e.target.value)} className={styles.scoreIn} />
                         </div>
-                        {isPlayoff && (
-                            <label className={styles.otCheck} title={!isDraw90 ? 'Len pri remíze po 90 min' : ''}
-                                style={!isDraw90 ? {opacity:0.5} : undefined}>
-                                <input type="checkbox" checked={hasET && isDraw90} disabled={!isDraw90}
-                                    onChange={e => setHasET(e.target.checked)} />
-                                Predĺženie/penalty
-                            </label>
-                        )}
                         <button className={styles.btnSave} onClick={save} disabled={saving}>
                             {saving ? '…' : saved ? '✓ Uložené' : 'Uložiť výsledok'}
                         </button>
@@ -289,15 +282,16 @@ function ResultCard({ game: initGame, teams, onChanged }) {
                         )}
                         {err && <span className={styles.errMsg}>{err}</span>}
                     </div>
-                    {isPlayoff && hasET && isDraw90 && (
+                    {/* Play-off pri remíze po 90 min — povinný konečný výsledok s víťazom */}
+                    {isPlayoff && isDraw90 && (
                         <div className={styles.editRow} style={{marginTop:8}}>
-                            <span style={{fontSize:'0.78rem', color:'#888', minWidth:60}}>Konečný:</span>
+                            <span style={{fontSize:'0.78rem', color:'#dc3545', minWidth:60}}>Po ET/pen:</span>
                             <div className={styles.scoreBox}>
                                 <input type="number" min="0" max="30" value={hFin} onChange={e => setHFin(e.target.value)} className={styles.scoreIn} />
                                 <span className={styles.colon}>:</span>
                                 <input type="number" min="0" max="30" value={aFin} onChange={e => setAFin(e.target.value)} className={styles.scoreIn} />
                             </div>
-                            <span style={{fontSize:'0.72rem', color:'#bbb'}}>(po ET/penalty — len informačne, tip sa hodnotí podľa 90 min)</span>
+                            <span style={{fontSize:'0.72rem', color:'#bbb'}}>remíza v play-off → zadaj víťaza (po predĺžení/penaltách)</span>
                         </div>
                     )}
                 </div>

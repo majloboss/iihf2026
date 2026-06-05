@@ -46,14 +46,14 @@ export default function FifaGameModal({ game, teams, onClose, onSaved }) {
 
     const showScore = status === 'finished';
     const isDraw90  = h90 !== '' && a90 !== '' && parseInt(h90) === parseInt(a90);
+    const needsET   = showScore && isPlayoff && isDraw90;  // play-off remíza → povinný víťaz po ET
 
     const save = async () => {
-        if (showScore && isPlayoff && hasET) {
-            if (!isDraw90) { setError('Predĺženie je možné len pri remíze po 90 min'); return; }
+        if (needsET) {
+            if (hFin === '' || aFin === '') { setError('Remíza v play-off — zadaj konečný výsledok (po ET/penaltách)'); return; }
             const H90 = +h90, A90 = +a90, HF = +hFin, AF = +aFin;
-            if (hFin === '' || aFin === '') { setError('Zadaj konečný výsledok'); return; }
             if (HF < H90 || AF < A90) { setError('Konečný výsledok nemôže byť nižší ako po 90 min'); return; }
-            if (HF === H90 && AF === A90) { setError('Po predĺžení musí aspoň jeden tím skórovať navyše'); return; }
+            if (HF === AF) { setError('Po ET/penaltách musí byť víťaz (nie remíza)'); return; }
         }
         setSaving(true); setError(''); setSuccess('');
         try {
@@ -69,8 +69,8 @@ export default function FifaGameModal({ game, teams, onClose, onSaved }) {
             if (showScore) {
                 payload.home_score_regular = h90 !== '' ? parseInt(h90) : null;
                 payload.away_score_regular = a90 !== '' ? parseInt(a90) : null;
-                payload.home_score_final = (isPlayoff && hasET && hFin !== '') ? parseInt(hFin) : null;
-                payload.away_score_final = (isPlayoff && hasET && aFin !== '') ? parseInt(aFin) : null;
+                payload.home_score_final = needsET ? parseInt(hFin) : null;
+                payload.away_score_final = needsET ? parseInt(aFin) : null;
             }
             await editFifaGame(payload);
             onSaved();
@@ -134,24 +134,19 @@ export default function FifaGameModal({ game, teams, onClose, onSaved }) {
                             </label>
                         </>}
                     </div>
-                    {showScore && isPlayoff && (
+                    {needsET && (
                         <div style={{marginTop:10}}>
-                            <label style={{display:'flex', alignItems:'center', gap:8, fontSize:'0.85rem', color:'#555', opacity: isDraw90 ? 1 : 0.5}}
-                                title={!isDraw90 ? 'Len pri remíze po 90 min' : ''}>
-                                <input type="checkbox" checked={hasET && isDraw90} disabled={!isDraw90}
-                                    onChange={e => setHasET(e.target.checked)} />
-                                Predĺženie / penalty (konečný výsledok)
-                            </label>
-                            {hasET && isDraw90 && (
-                                <div className={styles.grid} style={{marginTop:8}}>
-                                    <label>Domáci – konečné
-                                        <input type="number" min="0" max="30" value={hFin} onChange={e => setHFin(e.target.value)} style={SELECT_STYLE} />
-                                    </label>
-                                    <label>Hostia – konečné
-                                        <input type="number" min="0" max="30" value={aFin} onChange={e => setAFin(e.target.value)} style={SELECT_STYLE} />
-                                    </label>
-                                </div>
-                            )}
+                            <p style={{fontSize:'0.82rem', color:'#dc3545', margin:'0 0 6px'}}>
+                                Remíza v play-off → zadaj víťaza po predĺžení/penaltách:
+                            </p>
+                            <div className={styles.grid} style={{marginTop:0}}>
+                                <label>Domáci – konečné
+                                    <input type="number" min="0" max="30" value={hFin} onChange={e => setHFin(e.target.value)} style={SELECT_STYLE} />
+                                </label>
+                                <label>Hostia – konečné
+                                    <input type="number" min="0" max="30" value={aFin} onChange={e => setAFin(e.target.value)} style={SELECT_STYLE} />
+                                </label>
+                            </div>
                             <p style={{fontSize:'0.72rem', color:'#aaa', margin:'6px 0 0'}}>
                                 Tip sa hodnotí podľa skóre po 90 min. Konečný výsledok je len informačný.
                             </p>
