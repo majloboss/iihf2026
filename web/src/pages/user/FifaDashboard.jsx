@@ -1,12 +1,21 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { getFifaGames, saveFifaTip } from '../../api/fifaGames';
+import { getFifaGames, saveFifaTip, getFifaGameTips } from '../../api/fifaGames';
 import { apiFetch } from '../../api/client';
 import { useAuth } from '../../context/AuthContext';
 import { useCompetition } from '../../context/CompetitionContext';
 import styles from './Dashboard.module.css';
 
 const FLAG_URL = code => `/flags/fifa_flag_${code?.toLowerCase()}.png`;
+const PLAYOFF_CODES = ['R32','R16','QF','SF','BM','F'];
+const calcLiveFifaPoints = (tip1, tip2, game) => {
+    const s1 = game.ls_home, s2 = game.ls_away;
+    if (s1 == null || s2 == null || tip1 == null || tip2 == null) return null;
+    const winPts = PLAYOFF_CODES.includes(game.game_type_code) ? 5 : 3;
+    const rw = s1 > s2 ? 1 : s1 < s2 ? -1 : 0;
+    const tw = tip1 > tip2 ? 1 : tip1 < tip2 ? -1 : 0;
+    return (tw === rw ? winPts : 0) + (tip1 === s1 ? 1 : 0) + (tip2 === s2 ? 1 : 0);
+};
 
 const PHASE_LABEL = {
     GROUP_A:'Sk. A', GROUP_B:'Sk. B', GROUP_C:'Sk. C', GROUP_D:'Sk. D',
@@ -87,16 +96,78 @@ function TipModal({ game, onClose, onSaved }) {
     );
 }
 
-function GameCard({ game, onTipClick }) {
+function GameTipsModal({ game, onClose }) {
+    const [groups, setGroups] = useState(null);
+    const [err, setErr]       = useState('');
+    const isLive = game.ls_home != null && !game.result_approved;
+
+    useEffect(() => {
+        getFifaGameTips(game.game_id).then(setGroups).catch(e => setErr(e.message));
+    }, [game.game_id]);
+
+    const finished = game.result_approved;
+    return (
+        <div className={styles.modalOverlay} onClick={onClose}>
+            <div className={styles.modal} onClick={e => e.stopPropagation()}>
+                <button className={styles.modalClose} onClick={onClose}>✕</button>
+                <div className={styles.modalHeader}>
+                    <span className={styles.modalPhase}>{PHASE_LABEL[game.game_type_code] ?? game.game_type_code}</span>
+                    <div className={styles.modalTeams}>
+                        <span className={styles.modalTeam}>
+                            <img src={FLAG_URL(game.home_code)} className={styles.modalFlag} alt="" onError={e => e.target.style.display='none'} />{game.home_code}
+                        </span>
+                        <span className={styles.modalScore}>
+                            {isLive ? `${game.ls_home}:${game.ls_away}`
+                                : finished && game.home_score_regular != null ? `${game.home_score_regular}:${game.away_score_regular}` : 'vs'}
+                        </span>
+                        <span className={`${styles.modalTeam} ${styles.modalTeamRight}`}>
+                            {game.away_code}<img src={FLAG_URL(game.away_code)} className={styles.modalFlag} alt="" onError={e => e.target.style.display='none'} />
+                        </span>
+                    </div>
+                </div>
+                <div className={styles.modalBody}>
+                    {isLive && <p style={{textAlign:'center', color:'#dc3545', fontWeight:700, margin:'0 0 10px'}}>● LIVE — priebežné body</p>}
+                    {err && <p className={styles.modalErr}>{err}</p>}
+                    {!groups && !err && <p className={styles.modalLoading}>Načítavam…</p>}
+                    {groups && groups.map(grp => (
+                        <div key={grp.group_id} className={styles.tipsGroup}>
+                            <div className={styles.tipsGroupName}>{grp.group_name}</div>
+                            <table className={styles.tipsTable}>
+                                <tbody>
+                                    {grp.members.map(m => {
+                                        const livePts = isLive ? calcLiveFifaPoints(m.tip1, m.tip2, game) : null;
+                                        return (
+                                            <tr key={m.user_id} className={m.is_me ? styles.tipsMe : ''}>
+                                                <td className={styles.tipsUser}>{m.username}{m.is_me && ' (ja)'}</td>
+                                                <td className={styles.tipsTip}>{m.tip1 != null ? <span className={styles.tipVal}>{m.tip1}:{m.tip2}</span> : <span className={styles.tipNone}>—</span>}</td>
+                                                <td className={styles.tipsPts}>{livePts != null
+                                                    ? <span className={`${styles.gamePts} ${styles.ptsLive}`}>+{livePts}b</span>
+                                                    : m.points != null && <span className={`${styles.gamePts} ${m.points >= 3 ? styles.ptsGood : m.points > 0 ? styles.ptsMed : styles.ptsBad}`}>+{m.points}b</span>}</td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function GameCard({ game, onTipClick, onShowTips }) {
     const start    = new Date(game.start_time + 'Z');
     const finished = game.result_approved;
     const live     = !finished && start <= new Date();
     const timeStr  = start.toLocaleString('sk-SK', { day:'numeric', month:'numeric', hour:'2-digit', minute:'2-digit' });
     const canTip   = canTipGame(game);
+    const started  = live || finished;
+    const onClick  = canTip ? () => onTipClick(game) : started ? () => onShowTips(game) : undefined;
 
     return (
-        <div className={`${styles.gameCard} ${finished ? styles.finished : live ? styles.live : ''} ${canTip ? styles.clickable : ''}`}
-            onClick={canTip ? () => onTipClick(game) : undefined}>
+        <div className={`${styles.gameCard} ${finished ? styles.finished : live ? styles.live : ''} ${onClick ? styles.clickable : ''}`}
+            onClick={onClick}>
             <div className={styles.gameCardTop}>
                 <span className={styles.gamePhase}>{PHASE_LABEL[game.game_type_code] ?? game.game_type_code}</span>
                 {live
@@ -112,6 +183,8 @@ function GameCard({ game, onTipClick }) {
                 <div className={styles.gameScore}>
                     {finished && game.home_score_regular != null
                         ? <><span>{game.home_score_regular}</span><span className={styles.scoreSep}>:</span><span>{game.away_score_regular}</span></>
+                        : live && game.ls_home != null
+                            ? <span style={{color:'#dc3545'}}>{game.ls_home}<span className={styles.scoreSep}>:</span>{game.ls_away}</span>
                         : live ? <span className={styles.vs}>LIVE</span>
                         : <span className={styles.vs}>vs</span>}
                 </div>
@@ -134,6 +207,7 @@ function GameCard({ game, onTipClick }) {
             {game.home_score_tip == null && canTip && (
                 <div className={`${styles.gameTip} ${styles.tipMissing}`}>⚠ Bez tipu — klikni pre tip</div>
             )}
+            {started && <div className={styles.tapHint}>Klikni pre tipy skupín</div>}
         </div>
     );
 }
@@ -184,6 +258,7 @@ export default function FifaDashboard() {
     const [announcement, setAnnouncement] = useState(null);
     const [loading, setLoading]       = useState(true);
     const [tipGame, setTipGame]       = useState(null);
+    const [tipsGame, setTipsGame]     = useState(null);
 
     useEffect(() => {
         Promise.all([
@@ -224,6 +299,7 @@ export default function FifaDashboard() {
     return (
         <div className={styles.wrap}>
             {tipGame && <TipModal game={tipGame} onClose={() => setTipGame(null)} onSaved={handleTipSaved} />}
+            {tipsGame && <GameTipsModal game={tipsGame} onClose={() => setTipsGame(null)} />}
             {announcement && (
                 <div className={styles.announcement}>
                     <div className={styles.announcementHead}>
@@ -242,7 +318,7 @@ export default function FifaDashboard() {
                         <span>Nenatipované zápasy</span>
                         <Link to="/games" className={styles.more}>Všetky →</Link>
                     </div>
-                    {untipped.map(g => <GameCard key={g.game_id} game={g} onTipClick={setTipGame} />)}
+                    {untipped.map(g => <GameCard key={g.game_id} game={g} onTipClick={setTipGame} onShowTips={setTipsGame} />)}
                 </section>
             )}
 
@@ -254,7 +330,7 @@ export default function FifaDashboard() {
                                 <span>Najbližšie zápasy</span>
                                 <Link to="/games" className={styles.more}>Všetky →</Link>
                             </div>
-                            {upcoming.map(g => <GameCard key={g.game_id} game={g} onTipClick={setTipGame} />)}
+                            {upcoming.map(g => <GameCard key={g.game_id} game={g} onTipClick={setTipGame} onShowTips={setTipsGame} />)}
                         </>
                     )}
                     {finished.length > 0 && (
@@ -263,7 +339,7 @@ export default function FifaDashboard() {
                                 <span>Posledné výsledky</span>
                                 <Link to="/games" className={styles.more}>Všetky →</Link>
                             </div>
-                            {finished.map(g => <GameCard key={g.game_id} game={g} onTipClick={setTipGame} />)}
+                            {finished.map(g => <GameCard key={g.game_id} game={g} onTipClick={setTipGame} onShowTips={setTipsGame} />)}
                         </>
                     )}
                     {upcoming.length === 0 && finished.length === 0 && (

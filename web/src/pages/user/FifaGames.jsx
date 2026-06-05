@@ -1,7 +1,77 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { getFifaGames, saveFifaTip } from '../../api/fifaGames';
+import { getFifaGames, saveFifaTip, getFifaGameTips } from '../../api/fifaGames';
 import FifaGroupStandings from './FifaGroupStandings';
 import styles from './Games.module.css';
+
+const PLAYOFF_CODES = ['R32','R16','QF','SF','BM','F'];
+// Živé body podľa aktuálneho livescore (group 3+1+1, playoff 5+1+1)
+const calcLiveFifaPoints = (tip1, tip2, game) => {
+    const s1 = game.ls_home, s2 = game.ls_away;
+    if (s1 == null || s2 == null || tip1 == null || tip2 == null) return null;
+    const isPlayoff = PLAYOFF_CODES.includes(game.game_type_code);
+    const winPts = isPlayoff ? 5 : 3;
+    const rw = s1 > s2 ? 1 : s1 < s2 ? -1 : 0;
+    const tw = tip1 > tip2 ? 1 : tip1 < tip2 ? -1 : 0;
+    return (tw === rw ? winPts : 0) + (tip1 === s1 ? 1 : 0) + (tip2 === s2 ? 1 : 0);
+};
+
+function GroupTips({ game }) {
+    const [open, setOpen]       = useState(false);
+    const [groups, setGroups]   = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [err, setErr]         = useState('');
+
+    const isLive = game.ls_home != null && !game.result_approved;
+
+    const toggle = async () => {
+        if (!open && groups === null) {
+            setLoading(true);
+            try { setGroups(await getFifaGameTips(game.game_id)); }
+            catch (e) {
+                if (e.message?.includes('začiatku')) { setGroups([]); setErr('Tipy budú viditeľné po začiatku zápasu.'); }
+                else setErr(e.message);
+            }
+            finally { setLoading(false); }
+        }
+        setOpen(o => !o);
+    };
+
+    return (
+        <>
+            <button className={styles.showTipsBtn} onClick={toggle}>
+                {open ? '▲ Skryť tipy skupín' : '▼ Tipy skupín'}
+            </button>
+            {open && (
+                <div className={styles.groupTips}>
+                    {loading && <div className={styles.tipsLoading}>Načítavam…</div>}
+                    {err && <div className={styles.tipsErr}>{err}</div>}
+                    {groups && groups.length === 0 && !err && <div className={styles.tipsLoading}>Nie si v žiadnej skupine</div>}
+                    {groups && groups.map(grp => (
+                        <div key={grp.group_id} className={styles.groupSection}>
+                            <div className={styles.groupName}>{grp.group_name}</div>
+                            <table className={styles.tipsTable}>
+                                <tbody>
+                                    {grp.members.map(m => {
+                                        const livePts = isLive ? calcLiveFifaPoints(m.tip1, m.tip2, game) : null;
+                                        return (
+                                            <tr key={m.user_id} className={m.is_me ? styles.tipsTableMe : ''}>
+                                                <td>{m.username}{m.is_me ? ' (ty)' : ''}</td>
+                                                <td>{m.tip1 != null ? <span className={styles.tipScore2}>{m.tip1}:{m.tip2}</span> : <span className={styles.tipNoTip}>—</span>}</td>
+                                                <td>{livePts != null
+                                                    ? <span className={styles.tipPtsLive}>+{livePts}b</span>
+                                                    : m.points != null && <span className={styles.tipPts}>+{m.points}b</span>}</td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
+                    ))}
+                </div>
+            )}
+        </>
+    );
+}
 
 const GROUP_CODES = ['A','B','C','D','E','F','G','H','I','J','K','L'];
 const PHASE_LABEL = {
@@ -305,6 +375,7 @@ export default function FifaGames() {
                                     </div>
                                 )}
                                 <TipInput game={g} onSaved={handleSaved} />
+                                {(finished || live) && <GroupTips game={g} />}
                             </div>
                         );
                     })}

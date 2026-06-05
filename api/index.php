@@ -56,6 +56,7 @@ try {
         $path === 'v1/admin/impersonate'      => require __DIR__ . '/v1/admin/impersonate.php',
         $path === 'v1/fifa/teams'          => require __DIR__ . '/v1/fifa/teams.php',
         $path === 'v1/fifa/games'          => require __DIR__ . '/v1/fifa/games.php',
+        $path === 'v1/fifa/game-tips'      => require __DIR__ . '/v1/fifa/game_tips.php',
         $path === 'v1/fifa/tips'           => require __DIR__ . '/v1/fifa/tips.php',
         $path === 'v1/fifa/standings'      => require __DIR__ . '/v1/fifa/standings.php',
         $path === 'v1/games'               => require __DIR__ . '/v1/games.php',
