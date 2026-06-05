@@ -3,6 +3,9 @@ import { apiFetch } from '../../api/client';
 import { useCompetition } from '../../context/CompetitionContext';
 import styles from '../user/Standings.module.css';
 
+const BUCKETS = ['pts7','pts6','pts5','pts4','pts3','pts2','pts1','pts0'];
+const BUCKET_LABELS = ['7','6','5','4','3','2','1','0'];
+
 function GroupTable({ group }) {
     return (
         <div className={styles.groupCard}>
@@ -13,7 +16,11 @@ function GroupTable({ group }) {
                         <th>#</th>
                         <th>Hráč</th>
                         <th className={styles.right}>Body</th>
-                        <th className={styles.right}>7-6-5-4-3-2-1-0</th>
+                        <th className={styles.right}>
+                            <div className={styles.bucketRow}>
+                                {BUCKET_LABELS.map(l => <span key={l} className={styles.bucketHead}>{l}</span>)}
+                            </div>
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
@@ -31,7 +38,13 @@ function GroupTable({ group }) {
                                 </div>
                             </td>
                             <td className={`${styles.right} ${styles.pts}`}>{m.total_points}</td>
-                            <td className={`${styles.right} ${styles.tipsCount}`}>{m.pts7}-{m.pts6}-{m.pts5}-{m.pts4}-{m.pts3}-{m.pts2}-{m.pts1}-{m.pts0}</td>
+                            <td className={styles.right}>
+                                <div className={styles.bucketRow}>
+                                    {BUCKETS.map(b => (
+                                        <span key={b} className={`${styles.bucketCell} ${m[b] ? '' : styles.bucketZero}`}>{m[b]}</span>
+                                    ))}
+                                </div>
+                            </td>
                         </tr>
                     ))}
                 </tbody>

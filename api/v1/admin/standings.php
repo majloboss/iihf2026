@@ -68,4 +68,42 @@ foreach ($rows->fetchAll() as $r) {
     ];
 }
 
-json_ok(array_values($groups));
+// Globálna tabuľka — všetci aktívni tipéri (akoby jedna spoločná skupina)
+$globalSql = "
+    SELECT u.id AS user_id, u.username, u.avatar,
+           COALESCE(SUM($ptsCol), 0)                AS total_points,
+           COUNT($ptsCol)                            AS scored_tips,
+           COUNT(CASE WHEN $ptsCol = 7 THEN 1 END)  AS pts7,
+           COUNT(CASE WHEN $ptsCol = 6 THEN 1 END)  AS pts6,
+           COUNT(CASE WHEN $ptsCol = 5 THEN 1 END)  AS pts5,
+           COUNT(CASE WHEN $ptsCol = 4 THEN 1 END)  AS pts4,
+           COUNT(CASE WHEN $ptsCol = 3 THEN 1 END)  AS pts3,
+           COUNT(CASE WHEN $ptsCol = 2 THEN 1 END)  AS pts2,
+           COUNT(CASE WHEN $ptsCol = 1 THEN 1 END)  AS pts1,
+           COUNT(CASE WHEN $ptsCol = 0 THEN 1 END)  AS pts0
+    FROM admin.users u
+    $tipsJoin
+    WHERE u.is_active = TRUE AND u.role = 'user'
+    GROUP BY u.id, u.username, u.avatar
+    ORDER BY total_points DESC, pts7 DESC, pts6 DESC, pts5 DESC,
+             pts4 DESC, pts3 DESC, pts2 DESC, pts1 DESC, u.username
+";
+$globalMembers = [];
+foreach ($pdo->query($globalSql)->fetchAll() as $r) {
+    $globalMembers[] = [
+        'user_id'     => (int)$r['user_id'],
+        'username'    => $r['username'],
+        'avatar'      => $r['avatar'],
+        'total_points'=> (int)$r['total_points'],
+        'scored_tips' => (int)$r['scored_tips'],
+        'pts7' => (int)$r['pts7'], 'pts6' => (int)$r['pts6'],
+        'pts5' => (int)$r['pts5'], 'pts4' => (int)$r['pts4'],
+        'pts3' => (int)$r['pts3'], 'pts2' => (int)$r['pts2'],
+        'pts1' => (int)$r['pts1'], 'pts0' => (int)$r['pts0'],
+    ];
+}
+
+$result = array_values($groups);
+array_unshift($result, ['id' => 0, 'name' => '🌍 Všetci tipéri', 'members' => $globalMembers, 'global' => true]);
+
+json_ok($result);
