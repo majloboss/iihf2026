@@ -275,6 +275,12 @@ export default function FifaDashboard() {
             .then(([g, s, a]) => { setGames(g); setStandings(s); setAnnouncement(a); })
             .catch(() => {})
             .finally(() => setLoading(false));
+
+        // Auto-refresh zápasov každých 30s (live skóre, body)
+        const iv = setInterval(() => {
+            getFifaGames().then(setGames).catch(() => {});
+        }, 30000);
+        return () => clearInterval(iv);
     }, []);
 
     const handleTipSaved = useCallback((gameId, h, a) => {

@@ -172,6 +172,12 @@ export default function FifaGames() {
                 setLoading(false);
             })
             .catch(e => { setError(e.message || 'Chyba API'); setLoading(false); });
+
+        // Auto-refresh každých 30s (live skóre, body) — bez resetu filtrov
+        const iv = setInterval(() => {
+            getFifaGames().then(setGames).catch(() => {});
+        }, 30000);
+        return () => clearInterval(iv);
     }, []);
 
     const handleSaved = useCallback((gameId, h, a) => {
