@@ -15,7 +15,7 @@ if ($method === 'GET') {
     if ($cid) $params[':cid'] = $cid;
 
     $stmt = $pdo->prepare("
-        SELECT fg.id, fg.name, fg.created_by, fg.created_at, fg.competition_id,
+        SELECT fg.id, fg.name, fg.description, fg.created_by, fg.created_at, fg.competition_id,
                u.username AS creator_username,
                c.name AS competition_name, c.slug AS competition_slug,
                COUNT(gm.user_id) FILTER (WHERE gm.status = 'accepted') AS member_count,
@@ -37,6 +37,8 @@ if ($method === 'POST') {
     $body = json_decode(file_get_contents('php://input'), true);
     $name = trim($body['name'] ?? '');
     if (strlen($name) < 3) json_error('Názov musí mať aspoň 3 znaky', 400);
+    $description = isset($body['description']) ? trim($body['description']) : null;
+    if ($description === '') $description = null;
 
     $competition_id = (int)($body['competition_id'] ?? 0);
     if (!$competition_id) json_error('Chýba competition_id', 400);
@@ -44,9 +46,9 @@ if ($method === 'POST') {
     try {
         $pdo->beginTransaction();
         $stmt = $pdo->prepare(
-            'INSERT INTO admin.friend_groups (name, created_by, competition_id, created_at) VALUES (?, ?, ?, NOW()) RETURNING id'
+            'INSERT INTO admin.friend_groups (name, description, created_by, competition_id, created_at) VALUES (?, ?, ?, ?, NOW()) RETURNING id'
         );
-        $stmt->execute([$name, $auth['user_id'], $competition_id]);
+        $stmt->execute([$name, $description, $auth['user_id'], $competition_id]);
         $id = $stmt->fetchColumn();
 
         // Zakladatel je automaticky clen
@@ -63,6 +65,24 @@ if ($method === 'POST') {
         }
         throw $e;
     }
+}
+
+if ($method === 'PATCH') {
+    // Úprava popisu / podmienky vstupu — len zakladateľ
+    $body     = json_decode(file_get_contents('php://input'), true);
+    $group_id = (int)($body['group_id'] ?? 0);
+    if (!$group_id) json_error('Chýba group_id', 400);
+
+    $stmt = $pdo->prepare('SELECT created_by FROM admin.friend_groups WHERE id = ?');
+    $stmt->execute([$group_id]);
+    $group = $stmt->fetch();
+    if (!$group) json_error('Skupina neexistuje', 404);
+    if ((int)$group['created_by'] !== (int)$auth['user_id']) json_error('Len zakladateľ môže upraviť popis', 403);
+
+    $description = isset($body['description']) ? trim($body['description']) : null;
+    if ($description === '') $description = null;
+    $pdo->prepare('UPDATE admin.friend_groups SET description = ? WHERE id = ?')->execute([$description, $group_id]);
+    json_ok(['updated' => true, 'description' => $description]);
 }
 
 if ($method === 'DELETE') {

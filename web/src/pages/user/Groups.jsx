@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useCompetition } from '../../context/CompetitionContext';
-import { getGroups, getAllMyGroups, createGroup, disbandGroup, joinGroup, leaveGroup, getMembers, memberAction, inviteMember, acceptGroupInvite, bulkInvite } from '../../api/groups';
+import { getGroups, getAllMyGroups, createGroup, disbandGroup, joinGroup, leaveGroup, getMembers, memberAction, inviteMember, acceptGroupInvite, bulkInvite, updateGroupDescription } from '../../api/groups';
 import { getUser, getUsers } from '../../api/users';
 import styles from './Groups.module.css';
 
@@ -21,8 +21,11 @@ export default function Groups() {
     const [myOnly, setMyOnly]       = useState(true);
     const [creating, setCreating]   = useState(false);
     const [newName, setNewName]     = useState('');
+    const [newDesc, setNewDesc]     = useState('');
     const [createErr, setCreateErr] = useState('');
     const [busy, setBusy]           = useState('');
+    const [editDescId, setEditDescId] = useState(null);
+    const [editDescVal, setEditDescVal] = useState('');
     const [expanded, setExpanded]   = useState(null);
     const [members, setMembers]     = useState({});
     const [userDetail, setUserDetail] = useState(null);
@@ -96,9 +99,18 @@ export default function Groups() {
         if (!compId) { setCreateErr('Najprv vyber súťaž v Profile'); return; }
         setBusy('create'); setCreateErr('');
         try {
-            await createGroup(newName.trim(), compId);
-            setNewName(''); setCreating(false); load();
+            await createGroup(newName.trim(), compId, newDesc.trim() || null);
+            setNewName(''); setNewDesc(''); setCreating(false); load();
         } catch (e) { setCreateErr(e.message); }
+        finally { setBusy(''); }
+    };
+
+    const saveDesc = async (groupId) => {
+        setBusy(`desc-${groupId}`);
+        try {
+            await updateGroupDescription(groupId, editDescVal.trim() || null);
+            setEditDescId(null); load();
+        } catch (e) { alert(e.message); }
         finally { setBusy(''); }
     };
 
@@ -199,6 +211,14 @@ export default function Groups() {
                     <input autoFocus placeholder="Názov skupiny" value={newName}
                         onChange={e => setNewName(e.target.value)}
                         onKeyDown={e => e.key === 'Enter' && doCreate()} />
+                    <textarea
+                        placeholder="Popis / podmienka vstupu (voliteľné)"
+                        value={newDesc}
+                        onChange={e => setNewDesc(e.target.value)}
+                        maxLength={500}
+                        rows={2}
+                        style={{ width:'100%', boxSizing:'border-box', padding:'8px 10px', border:'1px solid #ddd', borderRadius:6, fontSize:'0.88rem', resize:'vertical', marginTop:8 }}
+                    />
                     <button className={styles.btn} onClick={doCreate} disabled={busy === 'create'}>
                         {busy === 'create' ? 'Vytváram…' : 'Vytvoriť'}
                     </button>
@@ -231,6 +251,11 @@ export default function Groups() {
                                             {g.member_count} {Number(g.member_count) === 1 ? 'člen' : 'členov'}
                                             {' · '}zakladateľ: {g.creator_username}
                                         </span>
+                                        {g.description && (
+                                            <span className={styles.meta} style={{ color:'#555', fontStyle:'italic', whiteSpace:'pre-wrap' }}>
+                                                {g.description}
+                                            </span>
+                                        )}
                                     </div>
                                     {isFounder && pendingCnt > 0 && (
                                         <span className={styles.badgePending}>{pendingCnt} čaká</span>
@@ -257,6 +282,27 @@ export default function Groups() {
 
                             {isOpen && (
                                 <div className={styles.membersList}>
+                                    {isFounder && (
+                                        <div className={styles.inviteSection}>
+                                            {editDescId === g.id ? (
+                                                <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
+                                                    <textarea value={editDescVal} onChange={e => setEditDescVal(e.target.value)}
+                                                        maxLength={500} rows={2} placeholder="Popis / podmienka vstupu"
+                                                        style={{ width:'100%', boxSizing:'border-box', padding:'8px 10px', border:'1px solid #ddd', borderRadius:6, fontSize:'0.88rem', resize:'vertical' }} />
+                                                    <div style={{ display:'flex', gap:8 }}>
+                                                        <button className={styles.btnInvite} disabled={busy === `desc-${g.id}`} onClick={() => saveDesc(g.id)}>
+                                                            {busy === `desc-${g.id}` ? '…' : 'Uložiť popis'}
+                                                        </button>
+                                                        <button className={styles.btnLeave} onClick={() => setEditDescId(null)}>Zrušiť</button>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <button className={styles.btnBulk} onClick={() => { setEditDescId(g.id); setEditDescVal(g.description || ''); }}>
+                                                    ✎ {g.description ? 'Upraviť popis / podmienku' : 'Pridať popis / podmienku vstupu'}
+                                                </button>
+                                            )}
+                                        </div>
+                                    )}
                                     {canInvite && (
                                         <div className={styles.inviteSection}>
                                             <div className={styles.inviteRow}>
