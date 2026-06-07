@@ -171,9 +171,7 @@ function GameCard({ game, onTipClick, onShowTips }) {
             onClick={onClick}>
             <div className={styles.gameCardTop}>
                 <span className={styles.gamePhase}>{PHASE_LABEL[game.game_type_code] ?? game.game_type_code}</span>
-                {live
-                    ? <span className={styles.liveBadge}>LIVE</span>
-                    : <span className={styles.gameTime}>{timeStr}</span>}
+                <span className={styles.gameTime}>{timeStr}</span>
             </div>
             <div className={styles.gameRow}>
                 <div className={styles.gameTeam}>
@@ -186,7 +184,7 @@ function GameCard({ game, onTipClick, onShowTips }) {
                         ? <><span>{game.home_score_regular}</span><span className={styles.scoreSep}>:</span><span>{game.away_score_regular}</span></>
                         : live && game.ls_home != null
                             ? <span style={{color:'#dc3545'}}>{game.ls_home}<span className={styles.scoreSep}>:</span>{game.ls_away}</span>
-                        : live ? <span className={styles.vs}>LIVE</span>
+                        : live ? <span className={styles.liveBadge}>LIVE</span>
                         : <span className={styles.vs}>vs</span>}
                 </div>
                 <div className={`${styles.gameTeam} ${styles.gameTeamRight}`}>
