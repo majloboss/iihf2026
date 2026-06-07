@@ -271,7 +271,10 @@ Poradie migrácie:
 
 ## Čo zostáva (TODO)
 
-1. 🔲 **Notifikácie pre FIFA** — push/email (začiatok zápasu, nenatipované, výsledok); zatiaľ len IIHF (`send_notifications.php` rieši iba `iihf2026.*`)
-2. 🔲 **Deploy na produkciu (main → betclub.fellow.sk)** — merge develop→main (na pokyn), spustiť migrácie 024–034 na **DB-BET**, nahrať `db.php` (prod) + `vapid.php` na prod server
+1. ✅ **Notifikácie pre FIFA** — `send_notifications_fifa.php` (game_start/untipped/result_entered), zdielané nastavenia, dedup `fifa_` prefix
+2. 🔲 **Deploy na produkciu (main → betclub.fellow.sk)** — merge develop→main (na pokyn), spustiť migrácie 024–035 na **DB-BET**, nahrať `db.php` (prod) + `vapid.php` na prod server
 3. 🔲 **Android aplikácia** (Kotlin) — neskôr, nie priorita
-4. 🟡 *Nice-to-have:* auto-refresh livescore na user stránkach (IIHF mal 30s polling); automatické párovanie knockout bracketu z víťazov skupín (teraz manuálne)
+4. 🔲 **Token-versioning** — pridať `token_version` per user (inkrement pri zmene hesla / „odhlásiť všade") → zneplatní všetky staré JWT. Dnes je revoke len cez deaktiváciu usera; zmena hesla staré tokeny nezruší. Pri dlhej platnosti tokenu (30–100 dní) je to bezpečnejšie. *(zatiaľ nerobíme)*
+5. 🟡 *Nice-to-have:* automatické párovanie knockout bracketu z víťazov skupín (teraz manuálne)
+
+> **DOČASNÉ:** login token expirácia je teraz nastavená na **5 min** (test) — vrátiť na finálnu hodnotu (`time() + 86400 * 30` alebo `* 100`) v `api/v1/auth/login.php`.
