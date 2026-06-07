@@ -293,13 +293,13 @@ export default function FifaGames() {
                     >TAB</button>
                 </div>
 
-                {/* Riadok 2: skupiny A–L (len keď GRP aktívne) — kompaktné, všetky na obrazovku */}
+                {/* Riadok 2: skupiny A–L (len keď GRP aktívne) — všetkých 12 v jednom riadku */}
                 {grpActive && (
-                    <div style={{display:'flex', flexWrap:'wrap', gap:4, marginTop:4}}>
+                    <div style={{display:'flex', flexWrap:'nowrap', gap:3, marginTop:4}}>
                         {GROUP_CODES.map(g => (
                             <button key={g}
                                 className={[styles.pBtn, styles.pGroup, groupFilter === g ? styles.pGroupOn : ''].join(' ')}
-                                style={{flex:'1 1 auto', minWidth:30, padding:'5px 0'}}
+                                style={{flex:'1 1 0', minWidth:0, padding:'5px 0', fontSize:'0.78rem'}}
                                 onClick={() => { setPhase('GRP'); setGroupFilter(g); setSelectedTeam(null); setSelectedDay(null); }}
                             >{g}</button>
                         ))}
