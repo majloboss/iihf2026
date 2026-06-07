@@ -33,6 +33,7 @@ foreach ($grouped as $phase => &$teams) {
         $t['l']    = (int)$t['l'];
         $t['gf']   = (int)$t['gf'];
         $t['ga']   = (int)$t['ga'];
+        $t['finalized'] = ($t['finalized'] === true || $t['finalized'] === 't' || $t['finalized'] === '1' || $t['finalized'] === 1);
     }
 }
 unset($teams, $t);

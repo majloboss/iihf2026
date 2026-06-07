@@ -16,4 +16,11 @@ $stmt = db()->prepare("
     ORDER BY t.points_earned DESC NULLS LAST, u.username
 ");
 $stmt->execute([$game_id]);
-json_ok($stmt->fetchAll());
+$rows = $stmt->fetchAll();
+foreach ($rows as &$r) {
+    $r['tip1']   = $r['tip1']   === null ? null : (int)$r['tip1'];
+    $r['tip2']   = $r['tip2']   === null ? null : (int)$r['tip2'];
+    $r['points'] = $r['points'] === null ? null : (int)$r['points'];
+}
+unset($r);
+json_ok($rows);

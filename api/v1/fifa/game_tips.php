@@ -47,9 +47,9 @@ foreach ($stmt->fetchAll() as $r) {
         'user_id'  => (int)$uid,
         'username' => $r['username'],
         'avatar'   => $r['avatar'],
-        'tip1'     => $r['tip1'],
-        'tip2'     => $r['tip2'],
-        'points'   => $r['points'],
+        'tip1'     => $r['tip1'] === null ? null : (int)$r['tip1'],
+        'tip2'     => $r['tip2'] === null ? null : (int)$r['tip2'],
+        'points'   => $r['points'] === null ? null : (int)$r['points'],
         'is_me'    => (int)$uid === (int)$auth['user_id'],
     ];
 }

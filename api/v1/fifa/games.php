@@ -6,6 +6,17 @@ $pdo  = db();
 
 if ($method !== 'GET') json_error('Method not allowed', 405);
 
+// Deterministické typy (PDO pgsql môže vracať bool ako 't'/'f' a int ako string)
+function fifa_cast_game(?array $r): ?array {
+    if ($r === null) return null;
+    $ints  = ['game_id','home_score_regular','away_score_regular','home_score_final','away_score_final',
+              'home_team_id','away_team_id','ls_home','ls_away','home_score_tip','away_score_tip','points_earned'];
+    $bools = ['result_approved','tips_open'];
+    foreach ($ints  as $c) if (array_key_exists($c, $r)) $r[$c] = $r[$c] === null ? null : (int)$r[$c];
+    foreach ($bools as $c) if (array_key_exists($c, $r)) $r[$c] = ($r[$c] === true || $r[$c] === 't' || $r[$c] === '1' || $r[$c] === 1);
+    return $r;
+}
+
 $id = isset($_GET['id']) ? (int)$_GET['id'] : null;
 
 if ($id) {
@@ -28,7 +39,7 @@ if ($id) {
     $stmt->execute([':uid' => $auth['user_id'], ':id' => $id]);
     $row = $stmt->fetch();
     if (!$row) json_error('Zápas neexistuje', 404);
-    json_ok($row);
+    json_ok(fifa_cast_game($row));
 }
 
 $stmt = $pdo->prepare("
@@ -48,4 +59,4 @@ $stmt = $pdo->prepare("
     ORDER BY g.start_time, g.game_id
 ");
 $stmt->execute([':uid' => $auth['user_id']]);
-json_ok($stmt->fetchAll());
+json_ok(array_map('fifa_cast_game', $stmt->fetchAll()));
