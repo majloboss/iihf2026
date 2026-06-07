@@ -182,9 +182,11 @@ function GameCard({ game, onTipClick, onShowTips }) {
                 <div className={styles.gameScore}>
                     {finished && game.home_score_regular != null
                         ? <><span>{game.home_score_regular}</span><span className={styles.scoreSep}>:</span><span>{game.away_score_regular}</span></>
-                        : live && game.ls_home != null
-                            ? <span style={{color:'#dc3545'}}>{game.ls_home}<span className={styles.scoreSep}>:</span>{game.ls_away}</span>
-                        : live ? <span className={styles.liveBadge}>LIVE</span>
+                        : live
+                            ? <div style={{display:'flex', flexDirection:'column', alignItems:'center', lineHeight:1.05}}>
+                                <span className={styles.liveBadge}>LIVE</span>
+                                {game.ls_home != null && <span style={{color:'#dc3545', fontWeight:800, fontSize:'1.1rem'}}>{game.ls_home}:{game.ls_away}</span>}
+                              </div>
                         : <span className={styles.vs}>vs</span>}
                 </div>
                 <div className={`${styles.gameTeam} ${styles.gameTeamRight}`}>
