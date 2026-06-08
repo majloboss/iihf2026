@@ -55,7 +55,7 @@ foreach ($sourceMembers as $uid) {
     $ins->execute([$group_id, $uid]);
     if ($ins->rowCount() > 0) {
         $invited++;
-        require_once __DIR__ . '/../../helpers/notify_group_event.php';
+        require_once __DIR__ . '/../helpers/notify_group_event.php';
         notify_group_event($pdo, (int)$uid, 'Pozvánka do skupiny', $inviter_username . ' Ťa pozval do skupiny "' . $target_group_name . '"');
     } else $skipped++;
 }
