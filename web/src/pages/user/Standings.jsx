@@ -56,7 +56,7 @@ function PlayerTips({ userId, compId }) {
                                     <div style={{display:'flex', alignItems:'center', gap:3}}>
                                         <img src={flag(t.team1)} alt={t.team1} style={{width:16, height:11, objectFit:'cover', flexShrink:0}} onError={e => e.target.style.display='none'} />
                                         <span style={{fontSize:'0.75rem'}}>{t.team1}</span>
-                                        <span style={{color:'#aaa', margin:'0 1px', fontSize:'0.75rem'}}>–</span>
+                                        <span style={{color:'#555', margin:'0 2px', fontSize:'0.75rem'}}>:</span>
                                         <img src={flag(t.team2)} alt={t.team2} style={{width:16, height:11, objectFit:'cover', flexShrink:0}} onError={e => e.target.style.display='none'} />
                                         <span style={{fontSize:'0.75rem'}}>{t.team2}</span>
                                     </div>
