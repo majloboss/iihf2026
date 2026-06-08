@@ -16,7 +16,7 @@ https://dashboard.sportdb.dev/api-keys: 2sJeeo35xgIMNx0mNZumlDFc2YKBpiUyKmBE0VV0
 ## STAV IMPLEMENTÁCIE — PREHĽAD
 
 ✅ *BetClub platforma + FIFA modul nasadený na produkciu (betclub.fellow.sk).*
-Web funkčný: multi-turnaj, FIFA zápasy/tipy/tabuľky/poradie/tretie miesta, admin (výsledky, živé skóre, bracket, finalizácia), generovanie testovacích dát, impersonácia, token-versioning, flashscore ikony, BetClub favicon.
+Web funkčný: multi-turnaj, FIFA zápasy/tipy/tabuľky/poradie/tretie miesta, admin (výsledky, živé skóre, bracket, finalizácia), generovanie testovacích dát, impersonácia, token-versioning, flashscore ikony, BetClub favicon + PWA ikony, pozvánky (soft delete, BetClub text), impersonácia opravená (tv claim).
 Zostáva: Android.
 
 ---
@@ -260,6 +260,7 @@ Poradie migrácie:
 | 024–036 | ✅ | ✅ |
 | 037 FIFA flashscore URL | ✅ | ✅ |
 | 038 group description 1000 | ✅ | ✅ |
+| 039 invites cancelled_at | ✅ | ⚠️ spustiť |
 
 ---
 
@@ -279,9 +280,14 @@ Poradie migrácie:
 5. ✅ **FIFA flashscore URL** — skupinová fáza (game_id 1–72), migrácia 037; R32+ doplniť po zostavení parov
 6. ✅ **Admin Skupiny** — klik na názov zobrazí popis skupiny (▼/▲)
 7. ✅ **Popis skupiny 1000 znakov** — migrácia 038, frontend maxLength
-8. ✅ **Text pozvánky** — aktualizovaný na BetClub (všeobecný, vykanie)
+8. ✅ **Text pozvánky** — aktualizovaný na BetClub (všeobecný, vykanie), admin aj user, text kopírovania
 9. ✅ **Všetci useri** — active_competition_id nastavené na FIFA (id=2)
-10. 🔲 **Android aplikácia** (Kotlin) — neskôr, nie priorita
-11. 🟡 *Nice-to-have:* automatické párovanie knockout bracketu z víťazov skupín (teraz manuálne)
+10. ✅ **PWA manifest** — BetClub názov, ikony 192/512 (prod + dev variant)
+11. ✅ **Impersonácia opravená** — chýbajúci `tv` claim spôsoboval okamžitý logout (v4.11)
+12. ✅ **Pozvánky soft delete** — cancelled_at, stav Zrušená, duplicita ignoruje zrušené, admin aj user môže zrušiť (migrácia 039)
+13. ✅ **Skupiny default filter** — Všetky namiesto Moje
+14. ⚠️ **Migrácia 039** — spustiť na **DB-BET** (prod)
+15. 🔲 **Android aplikácia** (Kotlin) — neskôr, nie priorita
+16. 🟡 *Nice-to-have:* automatické párovanie knockout bracketu z víťazov skupín (teraz manuálne)
 
 > Login token expirácia: **7 dní** (`time() + 86400 * 7`). Test expirácie + auto-redirect na /login overený (✅).
