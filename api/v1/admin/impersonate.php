@@ -9,7 +9,7 @@ $body = json_decode(file_get_contents('php://input'), true) ?? [];
 $uid  = (int)($body['user_id'] ?? 0);
 if (!$uid) json_error('Chýba user_id', 400);
 
-$stmt = db()->prepare("SELECT id, username, role, is_active, username_changed FROM admin.users WHERE id = ?");
+$stmt = db()->prepare("SELECT id, username, role, is_active, username_changed, token_version FROM admin.users WHERE id = ?");
 $stmt->execute([$uid]);
 $u = $stmt->fetch();
 if (!$u) json_error('Používateľ neexistuje', 404);
@@ -19,6 +19,7 @@ $token = jwt_create([
     'user_id'          => (int)$u['id'],
     'role'             => $u['role'],
     'username_changed' => (bool)$u['username_changed'],
+    'tv'               => (int)$u['token_version'],
     'imp_by'           => (int)$auth['user_id'],   // audit: kto impersonuje
     'exp'              => time() + 86400 * 2,        // 2 dni
 ]);
