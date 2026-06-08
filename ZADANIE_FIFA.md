@@ -15,9 +15,9 @@ https://dashboard.sportdb.dev/api-keys: 2sJeeo35xgIMNx0mNZumlDFc2YKBpiUyKmBE0VV0
 
 ## STAV IMPLEMENTÁCIE — PREHĽAD
 
-🟠 *BetClub platforma + FIFA modul kompletný na `develop` (dev_betclub.fellow.sk).*
-Web funkčný: multi-turnaj, FIFA zápasy/tipy/tabuľky/poradie/tretie miesta, admin (výsledky, živé skóre, bracket, finalizácia), generovanie testovacích dát, impersonácia.
-Zostáva: notifikácie pre FIFA, deploy na produkciu (main), Android.
+✅ *BetClub platforma + FIFA modul nasadený na produkciu (betclub.fellow.sk).*
+Web funkčný: multi-turnaj, FIFA zápasy/tipy/tabuľky/poradie/tretie miesta, admin (výsledky, živé skóre, bracket, finalizácia), generovanie testovacích dát, impersonácia, token-versioning, flashscore ikony, BetClub favicon.
+Zostáva: Android.
 
 ---
 
@@ -253,28 +253,35 @@ Poradie migrácie:
 - ✅ Zarovnaný rozpad bodov 7–0 (mriežka) v Poradí aj admin Skupinách
 - ✅ Zobrazenie konečného výsledku po predĺžení userom (`X:Y (A:B pp)`) v Zápasoch aj Prehľade
 
-### Migrácie spustené na DB-DEV-BET
+### Migrácie spustené
 
-024 competitions · 025 FIFA dáta · 026 standings seed · 027 rename IIHF · 028 scoring ·
-029 flashscore · 030 renumber · 031 games_pdf master · 032 knockout fix · 033 renumber po fix ·
-034 livescore (`ls_*`)
+| Migrácia | DB-DEV-BET | DB-BET (prod) |
+|---|---|---|
+| 024–036 | ✅ | ✅ |
+| 037 FIFA flashscore URL | ✅ | ✅ |
+| 038 group description 1000 | ✅ | ✅ |
 
 ---
 
 ## Platforma
 
-- 🟠 Web aplikácia — React + Vite PWA — funkčné na dev_betclub.fellow.sk
+- ✅ Web aplikácia — React + Vite PWA — betclub.fellow.sk (prod) + dev_betclub.fellow.sk (dev)
 - 🔲 Android aplikácia — Kotlin (neskôr, nie je priorita)
-- 🔲 Deploy na produkciu (betclub.fellow.sk / main) — zatiaľ iba develop
 
 ---
 
 ## Čo zostáva (TODO)
 
 1. ✅ **Notifikácie pre FIFA** — `send_notifications_fifa.php` (game_start/untipped/result_entered), zdielané nastavenia, dedup `fifa_` prefix
-2. 🟠 **Deploy na produkciu (main → betclub.fellow.sk)** — merge develop→main (na pokyn), spustiť migrácie 024–036 na **DB-BET**, nahrať `db.php` (prod) + `vapid.php` na prod server
-3. 🔲 **Android aplikácia** (Kotlin) — neskôr, nie priorita
-4. ✅ **Token-versioning** — `token_version` per user; inkrement pri zmene hesla aj admin-revoke; tokeny bez `tv` odmietnuté; zmena hesla vracia nový token (aktuálna session zostáva); admin „Odhlásiť zo všetkých zariadení"; migrácia 036
-5. 🟡 *Nice-to-have:* automatické párovanie knockout bracketu z víťazov skupín (teraz manuálne)
+2. ✅ **Deploy na produkciu** — betclub.fellow.sk, DB-BET, migrácie 024–038 spustené, db.php nastavený
+3. ✅ **Token-versioning** — `token_version` per user; inkrement pri zmene hesla aj admin-revoke; tokeny bez `tv` odmietnuté; migrácia 036
+4. ✅ **BetClub favicon** — kruhové logo z betclub_logo_source.png
+5. ✅ **FIFA flashscore URL** — skupinová fáza (game_id 1–72), migrácia 037; R32+ doplniť po zostavení parov
+6. ✅ **Admin Skupiny** — klik na názov zobrazí popis skupiny (▼/▲)
+7. ✅ **Popis skupiny 1000 znakov** — migrácia 038, frontend maxLength
+8. ✅ **Text pozvánky** — aktualizovaný na BetClub (všeobecný, vykanie)
+9. ✅ **Všetci useri** — active_competition_id nastavené na FIFA (id=2)
+10. 🔲 **Android aplikácia** (Kotlin) — neskôr, nie priorita
+11. 🟡 *Nice-to-have:* automatické párovanie knockout bracketu z víťazov skupín (teraz manuálne)
 
 > Login token expirácia: **7 dní** (`time() + 86400 * 7`). Test expirácie + auto-redirect na /login overený (✅).

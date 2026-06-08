@@ -16,9 +16,9 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,png,svg,ico}'],
       },
       manifest: {
-        name: isDev ? 'IIHF 2026 DEV' : 'IIHF 2026 Tipovačka',
-        short_name: isDev ? 'IIHF DEV' : 'IIHF2026',
-        description: 'Tipovačka MS v ľadovom hokeji 2026',
+        name: isDev ? 'BetClub DEV' : 'BetClub',
+        short_name: isDev ? 'BetClub DEV' : 'BetClub',
+        description: 'Tipovačka športových zápasov pre teba a tvojich kamošov',
         theme_color: isDev ? '#28a745' : '#1a3a6b',
         background_color: '#ffffff',
         display: 'standalone',
