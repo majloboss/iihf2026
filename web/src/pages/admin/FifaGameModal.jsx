@@ -48,6 +48,22 @@ export default function FifaGameModal({ game, teams, onClose, onSaved }) {
     const isDraw90  = h90 !== '' && a90 !== '' && parseInt(h90) === parseInt(a90);
     const needsET   = showScore && isPlayoff && isDraw90;  // play-off remíza → povinný víťaz po ET
 
+    // Keď vznikne remíza v play-off a polia konečného skóre sú prázdne, predvyplň ich hodnotou po 90 min
+    const onH90Change = (val) => {
+        setH90(val);
+        if (isPlayoff && val !== '' && a90 !== '' && parseInt(val) === parseInt(a90)) {
+            if (hFin === '') setHFin(val);
+            if (aFin === '') setAFin(a90);
+        }
+    };
+    const onA90Change = (val) => {
+        setA90(val);
+        if (isPlayoff && h90 !== '' && val !== '' && parseInt(h90) === parseInt(val)) {
+            if (hFin === '') setHFin(h90);
+            if (aFin === '') setAFin(val);
+        }
+    };
+
     const save = async () => {
         if (needsET) {
             if (hFin === '' || aFin === '') { setError('Remíza v play-off — zadaj konečný výsledok (po ET/penaltách)'); return; }
@@ -127,10 +143,10 @@ export default function FifaGameModal({ game, teams, onClose, onSaved }) {
                         </label>
                         {showScore && <>
                             <label>Domáci – góly (90 min)
-                                <input type="number" min="0" max="30" value={h90} onChange={e => setH90(e.target.value)} style={SELECT_STYLE} />
+                                <input type="number" min="0" max="30" value={h90} onChange={e => onH90Change(e.target.value)} style={SELECT_STYLE} />
                             </label>
                             <label>Hostia – góly (90 min)
-                                <input type="number" min="0" max="30" value={a90} onChange={e => setA90(e.target.value)} style={SELECT_STYLE} />
+                                <input type="number" min="0" max="30" value={a90} onChange={e => onA90Change(e.target.value)} style={SELECT_STYLE} />
                             </label>
                         </>}
                     </div>
