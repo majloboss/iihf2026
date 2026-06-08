@@ -24,7 +24,7 @@ $compFilter = $cid ? "WHERE fg.competition_id = :cid" : "";
 $params = $cid ? [':cid' => $cid] : [];
 
 $sql = "
-    SELECT fg.id AS group_id, fg.name AS group_name,
+    SELECT fg.id AS group_id, fg.name AS group_name, fg.description AS group_description,
            u.id AS user_id, u.username, u.avatar,
            COALESCE(SUM($ptsCol), 0)                AS total_points,
            COUNT($ptsCol)                            AS scored_tips,
@@ -53,7 +53,7 @@ $groups = [];
 foreach ($rows->fetchAll() as $r) {
     $gid = $r['group_id'];
     if (!isset($groups[$gid])) {
-        $groups[$gid] = ['id' => $gid, 'name' => $r['group_name'], 'members' => []];
+        $groups[$gid] = ['id' => $gid, 'name' => $r['group_name'], 'description' => $r['group_description'], 'members' => []];
     }
     $groups[$gid]['members'][] = [
         'user_id'     => (int)$r['user_id'],
