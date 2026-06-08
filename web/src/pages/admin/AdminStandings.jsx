@@ -7,9 +7,22 @@ const BUCKETS = ['pts7','pts6','pts5','pts4','pts3','pts2','pts1','pts0'];
 const BUCKET_LABELS = ['7','6','5','4','3','2','1','0'];
 
 function GroupTable({ group }) {
+    const [open, setOpen] = useState(false);
     return (
         <div className={styles.groupCard}>
-            <div className={styles.groupName}>{group.name}</div>
+            <div
+                className={styles.groupName}
+                style={{ cursor: group.description ? 'pointer' : 'default' }}
+                onClick={() => group.description && setOpen(o => !o)}
+                title={group.description ? (open ? 'Skryť popis' : 'Zobraziť popis') : undefined}
+            >
+                {group.name}{group.description ? (open ? ' ▲' : ' ▼') : ''}
+            </div>
+            {open && group.description && (
+                <div style={{ padding: '8px 12px', whiteSpace: 'pre-wrap', fontSize: '0.9em', color: '#555', borderBottom: '1px solid #eee' }}>
+                    {group.description}
+                </div>
+            )}
             <table className={styles.table}>
                 <thead>
                     <tr>
