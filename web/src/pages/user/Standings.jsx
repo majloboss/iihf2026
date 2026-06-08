@@ -53,12 +53,12 @@ function PlayerTips({ userId, compId }) {
                             <tr key={t.game_id} style={{borderBottom:'1px solid #dee2e6'}}>
                                 <td style={{padding:'3px 6px', color:'#888', whiteSpace:'nowrap', fontSize:'0.73rem'}}>{fmtDate(t.starts_at)}</td>
                                 <td style={{padding:'3px 6px'}}>
-                                    <div style={{display:'flex', alignItems:'center', gap:3}}>
-                                        <img src={flag(t.team1)} alt={t.team1} style={{width:16, height:11, objectFit:'cover', flexShrink:0}} onError={e => e.target.style.display='none'} />
-                                        <span style={{fontSize:'0.75rem'}}>{t.team1}</span>
-                                        <span style={{color:'#555', margin:'0 2px', fontSize:'0.75rem'}}>:</span>
-                                        <img src={flag(t.team2)} alt={t.team2} style={{width:16, height:11, objectFit:'cover', flexShrink:0}} onError={e => e.target.style.display='none'} />
-                                        <span style={{fontSize:'0.75rem'}}>{t.team2}</span>
+                                    <div style={{display:'grid', gridTemplateColumns:'16px 30px 8px 16px 30px', alignItems:'center', gap:'0 3px'}}>
+                                        <img src={flag(t.team1)} alt={t.team1} style={{width:16, height:11, objectFit:'cover'}} onError={e => e.target.style.display='none'} />
+                                        <span style={{fontSize:'0.75rem', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap'}}>{t.team1}</span>
+                                        <span style={{fontSize:'0.75rem', textAlign:'center', color:'#555'}}>:</span>
+                                        <img src={flag(t.team2)} alt={t.team2} style={{width:16, height:11, objectFit:'cover'}} onError={e => e.target.style.display='none'} />
+                                        <span style={{fontSize:'0.75rem', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap'}}>{t.team2}</span>
                                     </div>
                                 </td>
                                 <td style={{padding:'3px 4px', textAlign:'center', fontSize:'0.75rem', whiteSpace:'nowrap'}}>
