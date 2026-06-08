@@ -48,9 +48,10 @@ if ($method === 'GET') {
 
     // Skupiny kde je user členom (pre dropdown)
     $gStmt = $pdo->prepare(
-        "SELECT fg.id, fg.name
+        "SELECT fg.id, fg.name, c.name AS competition_name
          FROM admin.friend_groups fg
          JOIN admin.group_members gm ON gm.group_id = fg.id AND gm.user_id = ? AND gm.status = 'accepted'
+         LEFT JOIN admin.competitions c ON c.id = fg.competition_id
          ORDER BY fg.name"
     );
     $gStmt->execute([$auth['user_id']]);
@@ -67,6 +68,35 @@ if ($method === 'POST') {
     $sent_to  = isset($body['sent_to']) ? trim($body['sent_to']) : null;
     $group_id = isset($body['group_id']) ? (int)$body['group_id'] : null;
     $token    = bin2hex(random_bytes(24));
+
+    // Kontrola či email nie je už zaregistrovaný alebo má pozvánku
+    if ($sent_to && filter_var($sent_to, FILTER_VALIDATE_EMAIL)) {
+        // 1. Je už registrovaný ako používateľ?
+        $regChk = $pdo->prepare("SELECT username FROM admin.users WHERE email = ? AND is_active = TRUE");
+        $regChk->execute([$sent_to]);
+        if ($reg = $regChk->fetch()) {
+            json_error('Hráč s týmto emailom je už zaregistrovaný (@' . $reg['username'] . ')', 409);
+        }
+
+        // 2. Existuje pozvánka (čakajúca alebo použitá)?
+        $dup = $pdo->prepare(
+            "SELECT i.id, i.created_by, i.used_at, u.username
+             FROM admin.invites i
+             JOIN admin.users u ON u.id = i.created_by
+             WHERE i.sent_to = ?
+             ORDER BY i.created_at DESC LIMIT 1"
+        );
+        $dup->execute([$sent_to]);
+        if ($row = $dup->fetch()) {
+            if ($row['used_at']) {
+                json_error('Tento email je už zaregistrovaný — pozvánku použil hráč pozvaný od ' . $row['username'], 409);
+            } elseif ((int)$row['created_by'] === (int)$auth['user_id']) {
+                json_error('Pre tento email už existuje tvoja čakajúca pozvánka', 409);
+            } else {
+                json_error('Pozvánku na tento email už odoslal hráč ' . $row['username'], 409);
+            }
+        }
+    }
 
     // Overit ze user je členom skupiny
     if ($group_id) {
@@ -138,6 +168,20 @@ if ($method === 'POST') {
     json_ok(['id' => $id, 'token' => $token, 'link' => $link,
              'sent_to' => $sent_to, 'group_id' => $group_id,
              'email_sent' => $email_sent, 'email_err' => $email_err], 201);
+}
+
+if ($method === 'DELETE') {
+    $body = json_decode(file_get_contents('php://input'), true) ?? [];
+    $id   = (int)($body['id'] ?? 0);
+    if (!$id) json_error('Chýba id', 400);
+
+    // Len vlastné, nepoužité pozvánky
+    $stmt = $pdo->prepare("SELECT id FROM admin.invites WHERE id = ? AND created_by = ? AND used_at IS NULL");
+    $stmt->execute([$id, $auth['user_id']]);
+    if (!$stmt->fetch()) json_error('Pozvánka neexistuje alebo už bola použitá', 404);
+
+    $pdo->prepare("DELETE FROM admin.invites WHERE id = ?")->execute([$id]);
+    json_ok(['deleted' => true]);
 }
 
 json_error('Method not allowed', 405);

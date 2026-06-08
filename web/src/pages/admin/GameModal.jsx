@@ -66,7 +66,6 @@ export default function GameModal({ game, onClose, onSaved }) {
                 score2: showScore && score2 !== '' ? parseInt(score2) : null,
                 flashscore_url: fsUrl || null,
             });
-            setSuccess('Uložené.');
             onSaved({
                 ...game,
                 starts_at: starts_at ?? game.starts_at,
@@ -78,8 +77,8 @@ export default function GameModal({ game, onClose, onSaved }) {
                 score2: showScore && score2 !== '' ? parseInt(score2) : null,
                 flashscore_url: fsUrl || null,
             });
-        } catch (e) { setError(e.message); }
-        finally { setSaving(false); }
+            onClose();
+        } catch (e) { setError(e.message); setSaving(false); }
     };
 
     return (

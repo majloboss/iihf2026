@@ -33,6 +33,14 @@
     font-size: 0.9rem;
 }
 
+.appTitle {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1a3a6b;
+    margin: 0 0 20px;
+    white-space: nowrap;
+}
+
 .input {
     display: block;
     width: 100%;

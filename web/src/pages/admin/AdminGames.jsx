@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { getGames } from '../../api/games';
 import GameModal from './GameModal';
+import AdminGamesTable from './AdminGamesTable';
 import styles from './Admin.module.css';
 
 const PHASE_LABEL = { A: 'Sk. A', B: 'Sk. B', QF: 'Štvrťf.', SF: 'Semif.', BRONZE: 'Bronz', GOLD: 'Finále' };
+const FLAG_IIHF = code => `/flags/team_flag_${code?.toLowerCase()}.png`;
 
 function effectiveStatus(g) {
     if (g.status === 'finished') return 'finished';
@@ -58,41 +60,33 @@ export default function AdminGames() {
                 </div>
             </div>
 
-            <table className={styles.table}>
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Fáza</th>
-                        <th>Dátum / čas</th>
-                        <th>Tím 1</th>
-                        <th>Tím 2</th>
-                        <th className={styles.hideOnMobile}>Miesto</th>
-                        <th>Stav</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {filtered.map(g => (
-                        <tr key={g.id}>
-                            <td data-label="#">{g.game_number}</td>
-                            <td data-label="Fáza"><span className={styles.badge}>{PHASE_LABEL[g.phase] || g.phase}</span></td>
-                            <td data-label="Dátum">{formatLocal(g.starts_at)}</td>
-                            <td data-label="Tím 1">{g.team1 || <span style={{color:'#aaa'}}>TBD</span>}</td>
-                            <td data-label="Tím 2">{g.team2 || <span style={{color:'#aaa'}}>TBD</span>}</td>
-                            <td data-label="Miesto" className={styles.hideOnMobile} style={{fontSize:'0.82rem',maxWidth:'160px',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{g.venue}</td>
-                            <td data-label="Stav"><span className={effectiveStatus(g) === 'finished' ? styles.badgeAdmin : effectiveStatus(g) === 'live' ? styles.badgeLive : styles.badge}>{effectiveStatus(g)}</span></td>
-                            <td data-label="" style={{display:'flex', alignItems:'center', gap:6, justifyContent:'flex-end'}}>
-                                {g.flashscore_url && (
-                                    <a href={g.flashscore_url} target="_blank" rel="noopener noreferrer" title="FlashScore">
-                                        <img src="/flashscore.png" alt="FS" style={{width:18,height:18,borderRadius:4,opacity:0.85,verticalAlign:'middle'}} />
-                                    </a>
-                                )}
-                                <button className={styles.btnSmall} onClick={() => setEditing(g)}>Upraviť</button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+            <AdminGamesTable
+                rows={filtered.map(g => {
+                    const st = effectiveStatus(g);
+                    const teamCell = (code) => code
+                        ? <span style={{display:'inline-flex', alignItems:'center', gap:6}}>
+                            <img src={FLAG_IIHF(code)} alt="" style={{width:22, height:14, borderRadius:2}} onError={e => e.target.style.display='none'} />{code}
+                          </span>
+                        : <span style={{color:'#aaa'}}>TBD</span>;
+                    const result = st === 'finished' && g.score1 != null
+                        ? (g.final1 != null && g.score1 === g.score2 ? `${g.final1}:${g.final2} pp` : `${g.score1}:${g.score2}`)
+                        : null;
+                    return {
+                        key: g.id,
+                        number: g.game_number,
+                        phaseLabel: PHASE_LABEL[g.phase] || g.phase,
+                        dateLocal: formatLocal(g.starts_at),
+                        homeCell: teamCell(g.team1),
+                        awayCell: teamCell(g.team2),
+                        result,
+                        venue: g.venue,
+                        status: st,
+                        flashscore_url: g.flashscore_url,
+                        raw: g,
+                    };
+                })}
+                onEdit={setEditing}
+            />
 
             {editing && <GameModal game={editing} onClose={() => setEditing(null)} onSaved={handleSaved} />}
         </div>

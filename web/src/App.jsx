@@ -1,7 +1,9 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { CompetitionProvider, useCompetition } from './context/CompetitionContext';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Impersonate from './pages/Impersonate';
 import Profile from './pages/Profile';
 import AdminLayout from './pages/admin/AdminLayout';
 import Users from './pages/admin/Users';
@@ -16,6 +18,11 @@ import AdminMailLog from './pages/admin/AdminMailLog';
 import AdminAnnouncements from './pages/admin/AdminAnnouncements';
 import UserLayout from './pages/user/UserLayout';
 import Games from './pages/user/Games';
+import FifaGames from './pages/user/FifaGames';
+import FifaDashboard from './pages/user/FifaDashboard';
+import FifaAdminResults from './pages/admin/FifaAdminResults';
+import FifaAdminGames from './pages/admin/FifaAdminGames';
+import FifaAdminGroupStandings from './pages/admin/FifaAdminGroupStandings';
 import GroupStandings from './pages/user/GroupStandings';
 import Standings from './pages/user/Standings';
 import Pravidla from './pages/user/Pravidla';
@@ -35,6 +42,31 @@ function PrivateAdminRoute({ children }) {
     return children;
 }
 
+function DashboardRouter() {
+    const { activeCompetition } = useCompetition();
+    return activeCompetition?.slug === 'fifa2026' ? <FifaDashboard /> : <Dashboard />;
+}
+
+function GamesRouter() {
+    const { activeCompetition } = useCompetition();
+    return activeCompetition?.slug === 'fifa2026' ? <FifaGames /> : <Games />;
+}
+
+function AdminResultsRouter() {
+    const { activeCompetition } = useCompetition();
+    return activeCompetition?.slug === 'fifa2026' ? <FifaAdminResults /> : <AdminResults />;
+}
+
+function AdminGamesRouter() {
+    const { activeCompetition } = useCompetition();
+    return activeCompetition?.slug === 'fifa2026' ? <FifaAdminGames /> : <AdminGames />;
+}
+
+function AdminGroupStandingsRouter() {
+    const { activeCompetition } = useCompetition();
+    return activeCompetition?.slug === 'fifa2026' ? <FifaAdminGroupStandings /> : <AdminGroupStandings />;
+}
+
 function HomeRedirect() {
     const { user } = useAuth();
     if (!user) return <Navigate to="/login" replace />;
@@ -48,11 +80,12 @@ export default function App() {
             <BrowserRouter>
                 <Routes>
                     <Route path="/login"    element={<Login />} />
+                    <Route path="/impersonate" element={<Impersonate />} />
                     <Route path="/register" element={<Register />} />
 
-                    <Route element={<PrivateUserRoute><UserLayout /></PrivateUserRoute>}>
-                        <Route path="/dashboard" element={<Dashboard />} />
-                        <Route path="/games"     element={<Games />} />
+                    <Route element={<PrivateUserRoute><CompetitionProvider><UserLayout /></CompetitionProvider></PrivateUserRoute>}>
+                        <Route path="/dashboard" element={<DashboardRouter />} />
+                        <Route path="/games"     element={<GamesRouter />} />
                         <Route path="/tabulky"   element={<GroupStandings />} />
                         <Route path="/groups"    element={<Navigate to="/profile" replace />} />
                         <Route path="/standings" element={<Standings />} />
@@ -61,14 +94,14 @@ export default function App() {
                     </Route>
 
                     <Route path="/admin" element={
-                        <PrivateAdminRoute><AdminLayout /></PrivateAdminRoute>
+                        <PrivateAdminRoute><CompetitionProvider><AdminLayout /></CompetitionProvider></PrivateAdminRoute>
                     }>
                         <Route index          element={<Navigate to="users" replace />} />
                         <Route path="users"   element={<Users />} />
                         <Route path="invites" element={<Invites />} />
-                        <Route path="games"     element={<AdminGames />} />
-                        <Route path="results"        element={<AdminResults />} />
-                        <Route path="group-standings" element={<AdminGroupStandings />} />
+                        <Route path="games"     element={<AdminGamesRouter />} />
+                        <Route path="results"        element={<AdminResultsRouter />} />
+                        <Route path="group-standings" element={<AdminGroupStandingsRouter />} />
                         <Route path="standings"      element={<AdminStandings />} />
                         <Route path="tools"     element={<AdminTools />} />
                         <Route path="login-logs" element={<AdminLoginLogs />} />

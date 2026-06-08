@@ -28,7 +28,31 @@
     font-size: 1.1rem;
 }
 
-.brand img { width: 36px; }
+.brand img { width: 36px; border-radius: 50%; }
+
+.compSwitch {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+}
+.compLabel {
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: rgba(255,255,255,0.55);
+}
+.compSelect {
+    padding: 6px 8px;
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    font-size: 0.82rem;
+    cursor: pointer;
+}
+.compSelect option { color: #1a3a6b; }
 
 nav { display: flex; flex-direction: column; padding: 12px 0; flex: 1; }
 

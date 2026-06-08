@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch } from '../../api/client';
+import { useCompetition } from '../../context/CompetitionContext';
+import FifaGroupStandings from './FifaGroupStandings';
 import styles from './GroupStandings.module.css';
 
 const FLAG_URL = code => `/flags/team_flag_${code?.toLowerCase()}.png`;
@@ -65,6 +67,8 @@ function GroupTable({ phase, teams, onTeamClick }) {
 
 export default function GroupStandings({ onTeamClick }) {
     const navigate = useNavigate();
+    const { activeCompetition } = useCompetition();
+    if (activeCompetition?.slug === 'fifa2026') return <FifaGroupStandings onTeamClick={onTeamClick} />;
     const [data,    setData]    = useState(null);
     const [loading, setLoading] = useState(true);
     const [error,   setError]   = useState('');

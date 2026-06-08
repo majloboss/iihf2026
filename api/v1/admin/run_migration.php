@@ -3,7 +3,7 @@
 require_auth(true);
 $pdo = db();
 
-$migrations = ['003_group_standings.sql', '004_invites_sent_to.sql', '009_notification_settings.sql', '010_games_final_score.sql', '011_notification_log.sql', 'run_012.sql', 'run_013.sql', 'run_014.sql', 'run_015_flashscore_urls.sql', 'run_016_games_pdf.sql', 'run_017_mail_log_body.sql', 'run_018_login_logs_env.sql', 'run_019_group_standings_ot.sql', 'run_020_announcements.sql', 'run_021_announcement_active.sql'];
+$migrations = ['003_group_standings.sql', '004_invites_sent_to.sql', '009_notification_settings.sql', '010_games_final_score.sql', '011_notification_log.sql', 'run_012.sql', 'run_013.sql', 'run_014.sql', 'run_015_flashscore_urls.sql', 'run_016_games_pdf.sql', 'run_017_mail_log_body.sql', 'run_018_login_logs_env.sql', 'run_019_group_standings_ot.sql', 'run_020_announcements.sql', 'run_021_announcement_active.sql', 'run_022_livescore.sql', 'run_023_livescore_next_poll.sql', '024_competitions.sql', '025_fifa_data.sql', '026_fifa_standings_seed.sql', '027_rename_iihf.sql', '028_fifa_scoring_config.sql', '029_fifa_flashscore.sql'];
 $ran = [];
 foreach ($migrations as $file) {
     $sql = file_get_contents(__DIR__ . '/../../migrations/' . $file);

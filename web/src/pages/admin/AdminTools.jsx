@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
 import { apiFetch } from '../../api/client';
+import { fifaTestSetup } from '../../api/fifaAdmin';
+import { getUsers, impersonate } from '../../api/admin';
+import { useCompetition } from '../../context/CompetitionContext';
 
 const BASE = import.meta.env.VITE_API_URL ?? '/api';
 import styles from './Admin.module.css';
@@ -13,12 +16,20 @@ const GEN_ACTIONS = [
     { key: 'final', label: 'Finále + Bronz' },
 ];
 
+const TABS = [
+    { key: 'login',  label: 'Prihlasovanie' },
+    { key: 'fifa',   label: 'FIFA 2026' },
+    { key: 'iihf',   label: 'IIHF 2026' },
+    { key: 'notif',  label: 'Notifikácie' },
+    { key: 'common', label: 'Common' },
+];
+
 export default function AdminTools() {
+    const { activeCompetition } = useCompetition();
+    const [tab, setTab]               = useState(activeCompetition?.slug === 'fifa2026' ? 'fifa' : 'iihf');
     const [running,    setRunning]    = useState(null);
     const [results,    setResults]    = useState({});
     const [errors,     setErrors]     = useState({});
-    const [migrating,  setMigrating]  = useState(false);
-    const [migrateRes, setMigrateRes] = useState('');
     const [confirm,  setConfirm]  = useState(null); // 'init' | 'reset' | null
     const [syncRes,  setSyncRes]  = useState(null);
     const [syncErr,  setSyncErr]  = useState('');
@@ -35,12 +46,25 @@ export default function AdminTools() {
     const [subMsg,        setSubMsg]        = useState('');
     const [sendLoading,   setSendLoading]   = useState(false);
     const [sendMsg,       setSendMsg]       = useState('');
+    const [fifaAction,    setFifaAction]    = useState(null);
+    const [fifaConfirm,   setFifaConfirm]   = useState(null);
+    const [fifaMsg,       setFifaMsg]       = useState('');
+    const [userList,      setUserList]      = useState([]);
+    const [selUserId,     setSelUserId]     = useState('');
+    const [impBusy,       setImpBusy]       = useState(false);
+    const [impMsg,        setImpMsg]        = useState('');
 
     useEffect(() => {
         fetch(BASE + '/v1/push-config')
             .then(r => setVapidStatus(r.ok ? 'ok' : 'missing'))
             .catch(() => setVapidStatus('missing'));
     }, []);
+
+    // Pri prepnutí turnaja v sidebari prepni focus na jeho záložku
+    useEffect(() => {
+        if (activeCompetition?.slug === 'fifa2026') setTab('fifa');
+        else if (activeCompetition?.slug) setTab('iihf');
+    }, [activeCompetition?.slug]);
 
     const run = async (action) => {
         setConfirm(null);
@@ -60,16 +84,7 @@ export default function AdminTools() {
         }
     };
 
-    const busy = running !== null || syncing || migrating;
-
-    const runMigrations = async () => {
-        setMigrating(true); setMigrateRes('');
-        try {
-            const r = await apiFetch('v1/admin/run-migration', { method: 'POST' });
-            setMigrateRes('✓ Hotovo: ' + r.migrations.join(', '));
-        } catch (e) { setMigrateRes('✗ ' + e.message); }
-        finally { setMigrating(false); }
-    };
+    const busy = running !== null || syncing;
 
     const sendTestMail = async () => {
         setTestMailing(true); setTestMailRes('');
@@ -156,6 +171,34 @@ export default function AdminTools() {
         finally { setSendLoading(false); }
     };
 
+    useEffect(() => {
+        if (tab === 'login' && userList.length === 0) {
+            getUsers().then(setUserList).catch(() => {});
+        }
+    }, [tab]);
+
+    const doImpersonate = async () => {
+        if (!selUserId) return;
+        setImpBusy(true); setImpMsg('');
+        try {
+            const r = await impersonate(parseInt(selUserId));
+            window.open('/impersonate#' + r.token, '_blank');
+            setImpMsg('✓ Otvorené nové okno ako ' + r.username);
+        } catch (e) { setImpMsg('✗ ' + e.message); }
+        finally { setImpBusy(false); }
+    };
+
+    const runFifa = async (action) => {
+        setFifaConfirm(null); setFifaAction(action); setFifaMsg('');
+        try {
+            const r = await fifaTestSetup(action);
+            if (action === 'load_master')      setFifaMsg(`✓ Rozpis načítaný z master: ${r.games_loaded} zápasov`);
+            else if (action === 'reset')       setFifaMsg(`✓ Súťaž spustená: ${r.games_reset} zápasov obnovených, tipy a tabuľky vymazané`);
+            else if (action === 'gen_group')   setFifaMsg(`✓ Základná časť: ${r.games} zápasov, ${r.users} hráčov, ${r.tips} tipov`);
+        } catch (e) { setFifaMsg('✗ ' + e.message); }
+        finally { setFifaAction(null); }
+    };
+
     const syncScores = async () => {
         setSyncing(true); setSyncRes(null); setSyncErr('');
         try {
@@ -169,22 +212,51 @@ export default function AdminTools() {
         <div className={styles.toolsWrap}>
             <h2>Nástroje</h2>
 
-            {/* ── DB Migrácie ─────────────────────────────────────────── */}
-            <div className={styles.card} style={{ padding: 20, marginTop: 16, borderLeft: '4px solid #fd7e14' }}>
-                <h3 style={{ margin: '0 0 4px', fontSize: '1rem', color: '#fd7e14' }}>🗄 DB Migrácie</h3>
-                <p style={{ margin: '0 0 12px', fontSize: '0.82rem', color: '#666' }}>
-                    Spustí všetky pending migrácie (run_012, run_013...). Bezpečné — prikazy su IF NOT EXISTS.
-                </p>
-                <button className={styles.btn} style={{ background: '#fd7e14' }} onClick={runMigrations} disabled={busy}>
-                    {migrating ? 'Spustam...' : '▶ Spustit migracie'}
-                </button>
-                {migrateRes && (
-                    <p style={{ marginTop: 8, fontSize: '0.85rem', color: migrateRes.startsWith('✓') ? '#28a745' : '#dc3545' }}>
-                        {migrateRes}
-                    </p>
-                )}
+            {/* ── Záložky ─────────────────────────────────────────────── */}
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', margin: '16px 0 4px', borderBottom: '2px solid #e9ecef' }}>
+                {TABS.map(t => (
+                    <button key={t.key} onClick={() => setTab(t.key)}
+                        style={{
+                            padding: '8px 18px', border: 'none', background: 'none', cursor: 'pointer',
+                            fontSize: '0.9rem', fontWeight: 600, marginBottom: -2,
+                            borderBottom: '2px solid ' + (tab === t.key ? '#1a3a6b' : 'transparent'),
+                            color: tab === t.key ? '#1a3a6b' : '#999',
+                        }}>
+                        {t.label}
+                    </button>
+                ))}
             </div>
 
+            {/* ════════ PRIHLASOVANIE (impersonácia) ════════ */}
+            {tab === 'login' && (
+                <div className={styles.card} style={{ padding: 20, marginTop: 16, borderLeft: '4px solid #6f42c1' }}>
+                    <h3 style={{ margin: '0 0 4px', fontSize: '1rem', color: '#6f42c1' }}>🔓 Prihlásiť sa ako iný používateľ</h3>
+                    <p style={{ margin: '0 0 12px', fontSize: '0.82rem', color: '#666' }}>
+                        Vyber používateľa a klikni Login — aplikácia sa otvorí v novom okne prihlásená ako on.
+                        Tvoje admin prihlásenie v tomto okne ostáva nedotknuté.
+                    </p>
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                        <select value={selUserId} onChange={e => setSelUserId(e.target.value)}
+                            style={{ padding: '8px 10px', border: '1px solid #ccc', borderRadius: 6, fontSize: '0.88rem', flex: 1, minWidth: 220 }}>
+                            <option value="">— vyber používateľa —</option>
+                            {userList.filter(u => u.is_active)
+                                .slice().sort((a, b) => a.username.localeCompare(b.username, 'sk'))
+                                .map(u => (
+                                <option key={u.id} value={u.id}>
+                                    {u.username}{(u.first_name || u.last_name) ? ` (${[u.first_name, u.last_name].filter(Boolean).join(' ')})` : ''}{u.role === 'admin' ? ' · admin' : ''}
+                                </option>
+                            ))}
+                        </select>
+                        <button className={styles.btn} style={{ background: '#6f42c1' }} onClick={doImpersonate} disabled={impBusy || !selUserId}>
+                            {impBusy ? '…' : '🔓 Login'}
+                        </button>
+                    </div>
+                    {impMsg && <p style={{ marginTop: 8, fontSize: '0.85rem', color: impMsg.startsWith('✓') ? '#28a745' : '#dc3545' }}>{impMsg}</p>}
+                </div>
+            )}
+
+            {/* ════════ COMMON ════════ */}
+            {tab === 'common' && <>
             {/* ── Sync výsledkov z API-Sports ─────────────────────────── */}
             <div className={styles.card} style={{ padding: 20, marginTop: 16, borderLeft: '4px solid #1a3a6b' }}>
                 <h3 style={{ margin: '0 0 4px', fontSize: '1rem', color: '#1a3a6b' }}>🌐 Sync výsledkov (API-Sports)</h3>
@@ -204,6 +276,10 @@ export default function AdminTools() {
                 )}
             </div>
 
+            </>}
+
+            {/* ════════ NOTIFIKÁCIE ════════ */}
+            {tab === 'notif' && <>
             {/* ── Test emailu ────────────────────────────────────────── */}
             <div className={styles.card} style={{ padding: 20, marginTop: 16, borderLeft: '4px solid #6f42c1' }}>
                 <h3 style={{ margin: '0 0 4px', fontSize: '1rem', color: '#6f42c1' }}>📧 Test emailu (SMTP)</h3>
@@ -287,6 +363,60 @@ export default function AdminTools() {
                 </div>
             )}
 
+            </>}
+
+            {/* ════════ FIFA 2026 ════════ */}
+            {tab === 'fifa' && <>
+                {/* Generovanie základnej časti */}
+                <div className={styles.card} style={{ padding: 20, marginTop: 16 }}>
+                    <h3 style={{ margin: '0 0 4px', fontSize: '1rem' }}>⚽ Vygenerovať základnú časť</h3>
+                    <p style={{ margin: '0 0 12px', fontSize: '0.82rem', color: '#666' }}>
+                        Posunie dátumy tak, aby skupinová fáza skončila <strong>včera</strong> a play-off začalo <strong>dnes</strong>.
+                        Odohrá všetky skupinové zápasy (podľa ratingu) a vygeneruje tipy hráčov.
+                    </p>
+                    {fifaConfirm === 'gen_group'
+                        ? <ConfirmInline text="Vygenerovať skupinovú fázu a tipy? Prepíše existujúce skóre a tipy skupín."
+                            onYes={() => runFifa('gen_group')} onNo={() => setFifaConfirm(null)} />
+                        : <button className={styles.btn} onClick={() => setFifaConfirm('gen_group')} disabled={!!fifaAction}>
+                            {fifaAction === 'gen_group' ? 'Generujem…' : '⚽ Vygenerovať základnú časť'}
+                          </button>}
+                </div>
+
+                {/* Načítať master */}
+                <div className={styles.card} style={{ padding: 20, marginTop: 12, borderLeft: '4px solid #0891b2' }}>
+                    <h3 style={{ margin: '0 0 4px', fontSize: '1rem', color: '#0891b2' }}>📥 Načítať rozpis z master</h3>
+                    <p style={{ margin: '0 0 12px', fontSize: '0.82rem', color: '#666' }}>
+                        Obnoví rozpis zápasov z <code>games_pdf</code> (tímy, časy, štadióny, FlashScore).
+                        Skóre sa vynuluje, <strong>tipy ostávajú</strong>.
+                    </p>
+                    {fifaConfirm === 'load_master'
+                        ? <ConfirmInline text="Obnoviť rozpis z master? Existujúce skóre sa vynuluje."
+                            onYes={() => runFifa('load_master')} onNo={() => setFifaConfirm(null)} />
+                        : <button className={styles.btn} style={{ background: '#0891b2' }} onClick={() => setFifaConfirm('load_master')} disabled={!!fifaAction}>
+                            {fifaAction === 'load_master' ? 'Načítavam…' : '📥 Načítať master'}
+                          </button>}
+                </div>
+
+                {/* Spustenie súťaže */}
+                <div className={styles.card} style={{ padding: 20, marginTop: 12, borderLeft: '4px solid #28a745' }}>
+                    <h3 style={{ margin: '0 0 4px', fontSize: '1rem', color: '#28a745' }}>▶ Spustenie súťaže</h3>
+                    <p style={{ margin: '0 0 12px', fontSize: '0.82rem', color: '#666' }}>
+                        Obnoví rozpis z master a <strong>vymaže všetky tipy a tabuľky</strong>.
+                        Useri, skupiny a pozvánky zostávajú. <strong>Nezvratné!</strong>
+                    </p>
+                    {fifaConfirm === 'reset'
+                        ? <ConfirmInline text="Naozaj spustiť súťaž a vymazať tipy + tabuľky?"
+                            onYes={() => runFifa('reset')} onNo={() => setFifaConfirm(null)} />
+                        : <button className={styles.btn} style={{ background: '#28a745' }} onClick={() => setFifaConfirm('reset')} disabled={!!fifaAction}>
+                            {fifaAction === 'reset' ? 'Prebieha…' : '▶ Spustiť súťaž'}
+                          </button>}
+                </div>
+
+                {fifaMsg && <p style={{ marginTop: 12, fontSize: '0.88rem', color: fifaMsg.startsWith('✓') ? '#28a745' : '#dc3545' }}>{fifaMsg}</p>}
+            </>}
+
+            {/* ════════ IIHF 2026 ════════ */}
+            {tab === 'iihf' && <>
             {/* ── Generovanie testovacích dát ─────────────────────────── */}
             <div className={styles.card} style={{ padding: 20, marginTop: 16 }}>
                 <h3 style={{ margin: '0 0 4px', fontSize: '1rem' }}>Generovanie testovacích dát</h3>
@@ -353,6 +483,10 @@ export default function AdminTools() {
                 <ResultArea keys={['reset']} results={results} errors={errors} />
             </div>
 
+            </>}
+
+            {/* ════════ COMMON (Inicializácia) ════════ */}
+            {tab === 'common' && <>
             {/* ── Inicializácia systému ───────────────────────────────── */}
             <div className={styles.card} style={{ padding: 20, marginTop: 12, borderLeft: '4px solid #dc3545' }}>
                 <h3 style={{ margin: '0 0 4px', fontSize: '1rem', color: '#dc3545' }}>⚠ Inicializácia systému</h3>
@@ -376,6 +510,7 @@ export default function AdminTools() {
                 }
                 <ResultArea keys={['init']} results={results} errors={errors} />
             </div>
+            </>}
         </div>
     );
 }

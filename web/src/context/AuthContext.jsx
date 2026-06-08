@@ -1,4 +1,5 @@
 import { createContext, useContext, useState } from 'react';
+import { getToken, isImpersonating } from '../api/token';
 
 const AuthContext = createContext(null);
 
@@ -12,8 +13,9 @@ function parseToken(token) {
 }
 
 export function AuthProvider({ children }) {
-    const [token, setToken] = useState(() => localStorage.getItem('token'));
+    const [token, setToken] = useState(() => getToken());
     const user = token ? parseToken(token) : null;
+    const impersonating = isImpersonating();
 
     const signIn = (newToken) => {
         localStorage.setItem('token', newToken);
@@ -21,12 +23,17 @@ export function AuthProvider({ children }) {
     };
 
     const signOut = () => {
-        localStorage.removeItem('token');
+        if (sessionStorage.getItem('imp_token')) {
+            // Impersonačný tab — ukonči impersonáciu
+            sessionStorage.removeItem('imp_token');
+        } else {
+            localStorage.removeItem('token');
+        }
         setToken(null);
     };
 
     return (
-        <AuthContext.Provider value={{ user, token, signIn, signOut }}>
+        <AuthContext.Provider value={{ user, token, impersonating, signIn, signOut }}>
             {children}
         </AuthContext.Provider>
     );

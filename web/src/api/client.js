@@ -1,7 +1,9 @@
+import { getToken, clearToken } from './token';
+
 const BASE = import.meta.env.VITE_API_URL ?? '/api';
 
 export async function apiUpload(path, formData) {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     const res = await fetch(`${BASE}/${path}`, {
         method: 'POST',
         headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -13,7 +15,7 @@ export async function apiUpload(path, formData) {
 }
 
 export async function apiFetch(path, options = {}) {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     const res = await fetch(`${BASE}/${path}`, {
         ...options,
         headers: {
@@ -22,6 +24,11 @@ export async function apiFetch(path, options = {}) {
             ...(options.headers ?? {})
         }
     });
+    if (res.status === 401) {
+        clearToken();
+        window.location.href = '/login';
+        return;
+    }
     const json = await res.json();
     if (!json.ok) throw new Error(json.error ?? 'Chyba servera');
     return json.data;

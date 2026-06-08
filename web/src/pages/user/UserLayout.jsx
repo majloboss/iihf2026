@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useCompetition } from '../../context/CompetitionContext';
 import { apiFetch } from '../../api/client';
 import styles from './UserLayout.module.css';
 
@@ -8,6 +9,7 @@ export default function UserLayout() {
     const { signOut } = useAuth();
     const navigate    = useNavigate();
     const [profile, setProfile] = useState(null);
+    const { activeCompetition, competitionEmoji } = useCompetition();
 
     useEffect(() => {
         apiFetch('v1/profile').then(setProfile).catch(() => {});
@@ -19,8 +21,20 @@ export default function UserLayout() {
         <div className={styles.layout}>
             <aside className={styles.sidebar}>
                 <div className={styles.brand}>
-                    <img src="/logo.png" alt="IIHF 2026" />
-                    <span>IIHF 2026</span>
+                    <div className={styles.brandLogos}>
+                        <img src="/logo.png" alt="BetClub" className={styles.brandLogoBC} />
+                        {activeCompetition && (
+                            <img
+                                src={`/logos/tournament_logo_${activeCompetition.slug}.png`}
+                                alt={activeCompetition.name}
+                                className={styles.brandLogoTournament}
+                                onError={e => e.target.style.display = 'none'}
+                            />
+                        )}
+                    </div>
+                    {activeCompetition && (
+                        <div className={styles.brandName}>{activeCompetition.name}</div>
+                    )}
                 </div>
                 <nav>
                     <NavLink to="/dashboard" className={({ isActive }) => isActive ? styles.active : ''}>

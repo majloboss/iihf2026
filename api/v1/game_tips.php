@@ -28,7 +28,7 @@ $stmt = $pdo->prepare("
         t.tip2,
         t.points
     FROM admin.group_members gm_me
-    JOIN admin.friend_groups fg      ON fg.id = gm_me.group_id
+    JOIN admin.friend_groups fg      ON fg.id = gm_me.group_id AND fg.competition_id = 1
     JOIN admin.group_members gm_them ON gm_them.group_id = fg.id
                                      AND gm_them.status = 'accepted'
     JOIN admin.users u               ON u.id = gm_them.user_id

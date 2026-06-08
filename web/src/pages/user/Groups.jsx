@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { getGroups, createGroup, disbandGroup, joinGroup, leaveGroup, getMembers, memberAction, inviteMember, acceptGroupInvite } from '../../api/groups';
+import { useCompetition } from '../../context/CompetitionContext';
+import { getGroups, getAllMyGroups, createGroup, disbandGroup, joinGroup, leaveGroup, getMembers, memberAction, inviteMember, acceptGroupInvite, bulkInvite, updateGroupDescription } from '../../api/groups';
 import { getUser, getUsers } from '../../api/users';
 import styles from './Groups.module.css';
 
@@ -12,13 +13,19 @@ function Avatar({ src, name, size = 32 }) {
 
 export default function Groups() {
     const { user } = useAuth();
+    const { activeCompetition } = useCompetition();
+    const compId = activeCompetition?.id ?? null;
+
     const [groups, setGroups]       = useState([]);
     const [loading, setLoading]     = useState(true);
-    const [myOnly, setMyOnly]       = useState(false);
+    const [myOnly, setMyOnly]       = useState(true);
     const [creating, setCreating]   = useState(false);
     const [newName, setNewName]     = useState('');
+    const [newDesc, setNewDesc]     = useState('');
     const [createErr, setCreateErr] = useState('');
     const [busy, setBusy]           = useState('');
+    const [editDescId, setEditDescId] = useState(null);
+    const [editDescVal, setEditDescVal] = useState('');
     const [expanded, setExpanded]   = useState(null);
     const [members, setMembers]     = useState({});
     const [userDetail, setUserDetail] = useState(null);
@@ -30,8 +37,16 @@ export default function Groups() {
     const [inviteBusy, setInviteBusy]       = useState('');
     const [inviteErr, setInviteErr]         = useState('');
 
-    const load = () => getGroups().then(setGroups).finally(() => setLoading(false));
-    useEffect(() => { load(); }, []);
+    // Bulk invite state
+    const [bulkOpenFor, setBulkOpenFor]     = useState(null);   // group_id pre ktorú je otvorený panel
+    const [allMyGroups, setAllMyGroups]     = useState(null);   // všetky skupiny usera naprieč súťažami
+    const [bulkSource, setBulkSource]       = useState('');     // vybraná zdrojová skupina
+    const [bulkBusy, setBulkBusy]           = useState(false);
+    const [bulkResult, setBulkResult]       = useState(null);   // { invited, skipped }
+    const [bulkErr, setBulkErr]             = useState('');
+
+    const load = () => getGroups(compId).then(setGroups).finally(() => setLoading(false));
+    useEffect(() => { load(); }, [compId]);
 
     useEffect(() => {
         setInviteQuery('');
@@ -81,12 +96,41 @@ export default function Groups() {
 
     const doCreate = async () => {
         if (!newName.trim()) return;
+        if (!compId) { setCreateErr('Najprv vyber súťaž v Profile'); return; }
         setBusy('create'); setCreateErr('');
         try {
-            await createGroup(newName.trim());
-            setNewName(''); setCreating(false); load();
+            await createGroup(newName.trim(), compId, newDesc.trim() || null);
+            setNewName(''); setNewDesc(''); setCreating(false); load();
         } catch (e) { setCreateErr(e.message); }
         finally { setBusy(''); }
+    };
+
+    const saveDesc = async (groupId) => {
+        setBusy(`desc-${groupId}`);
+        try {
+            await updateGroupDescription(groupId, editDescVal.trim() || null);
+            setEditDescId(null); load();
+        } catch (e) { alert(e.message); }
+        finally { setBusy(''); }
+    };
+
+    const openBulkInvite = async (groupId) => {
+        if (bulkOpenFor === groupId) { setBulkOpenFor(null); return; }
+        setBulkOpenFor(groupId); setBulkSource(''); setBulkResult(null); setBulkErr('');
+        setAllMyGroups(null);
+        const data = await getAllMyGroups().catch(() => []);
+        setAllMyGroups(data);
+    };
+
+    const doBulkInvite = async (groupId) => {
+        if (!bulkSource) { setBulkErr('Vyber zdrojovú skupinu'); return; }
+        setBulkBusy(true); setBulkErr(''); setBulkResult(null);
+        try {
+            const res = await bulkInvite(groupId, parseInt(bulkSource));
+            setBulkResult(res);
+            load(); loadMembers(groupId);
+        } catch (e) { setBulkErr(e.message); }
+        finally { setBulkBusy(false); }
     };
 
     const doJoin = async (id) => {
@@ -167,6 +211,14 @@ export default function Groups() {
                     <input autoFocus placeholder="Názov skupiny" value={newName}
                         onChange={e => setNewName(e.target.value)}
                         onKeyDown={e => e.key === 'Enter' && doCreate()} />
+                    <textarea
+                        placeholder="Popis / podmienka vstupu (voliteľné)"
+                        value={newDesc}
+                        onChange={e => setNewDesc(e.target.value)}
+                        maxLength={500}
+                        rows={2}
+                        style={{ width:'100%', boxSizing:'border-box', padding:'8px 10px', border:'1px solid #ddd', borderRadius:6, fontSize:'0.88rem', resize:'vertical', marginTop:8 }}
+                    />
                     <button className={styles.btn} onClick={doCreate} disabled={busy === 'create'}>
                         {busy === 'create' ? 'Vytváram…' : 'Vytvoriť'}
                     </button>
@@ -199,6 +251,11 @@ export default function Groups() {
                                             {g.member_count} {Number(g.member_count) === 1 ? 'člen' : 'členov'}
                                             {' · '}zakladateľ: {g.creator_username}
                                         </span>
+                                        {g.description && (
+                                            <span className={styles.meta} style={{ color:'#555', fontStyle:'italic', whiteSpace:'pre-wrap' }}>
+                                                {g.description}
+                                            </span>
+                                        )}
                                     </div>
                                     {isFounder && pendingCnt > 0 && (
                                         <span className={styles.badgePending}>{pendingCnt} čaká</span>
@@ -225,13 +282,34 @@ export default function Groups() {
 
                             {isOpen && (
                                 <div className={styles.membersList}>
+                                    {isFounder && (
+                                        <div className={styles.inviteSection}>
+                                            {editDescId === g.id ? (
+                                                <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
+                                                    <textarea value={editDescVal} onChange={e => setEditDescVal(e.target.value)}
+                                                        maxLength={500} rows={2} placeholder="Popis / podmienka vstupu"
+                                                        style={{ width:'100%', boxSizing:'border-box', padding:'8px 10px', border:'1px solid #ddd', borderRadius:6, fontSize:'0.88rem', resize:'vertical' }} />
+                                                    <div style={{ display:'flex', gap:8 }}>
+                                                        <button className={styles.btnInvite} disabled={busy === `desc-${g.id}`} onClick={() => saveDesc(g.id)}>
+                                                            {busy === `desc-${g.id}` ? '…' : 'Uložiť popis'}
+                                                        </button>
+                                                        <button className={styles.btnLeave} onClick={() => setEditDescId(null)}>Zrušiť</button>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <button className={styles.btnBulk} onClick={() => { setEditDescId(g.id); setEditDescVal(g.description || ''); }}>
+                                                    ✎ {g.description ? 'Upraviť popis / podmienku' : 'Pridať popis / podmienku vstupu'}
+                                                </button>
+                                            )}
+                                        </div>
+                                    )}
                                     {canInvite && (
                                         <div className={styles.inviteSection}>
                                             <div className={styles.inviteRow}>
                                                 <div className={styles.inviteInputWrap}>
                                                     <input
                                                         className={styles.inviteInput}
-                                                        placeholder="pozvi nového člena"
+                                                        placeholder="meno alebo email"
                                                         value={inviteQuery}
                                                         onChange={async e => {
                                                             const q = e.target.value;
@@ -274,8 +352,58 @@ export default function Groups() {
                                                 >
                                                     {inviteBusy === `invite-${g.id}` ? '…' : 'Pozvať'}
                                                 </button>
+                                                {isFounder && (
+                                                    <button
+                                                        className={styles.btnBulk}
+                                                        onClick={() => openBulkInvite(g.id)}
+                                                    >
+                                                        {bulkOpenFor === g.id ? '▲ Zavrieť' : 'Pozvať zo skupiny'}
+                                                    </button>
+                                                )}
                                             </div>
                                             {inviteErr && <p className={styles.inviteErr}>{inviteErr}</p>}
+
+                                            {/* Bulk invite panel — len zakladateľ */}
+                                            {isFounder && bulkOpenFor === g.id && (
+                                                <div className={styles.bulkPanel}>
+                                                    {!allMyGroups
+                                                        ? <p className={styles.emptySmall}>Načítavam skupiny…</p>
+                                                        : <>
+                                                            <div className={styles.bulkRow}>
+                                                                <select
+                                                                    className={styles.bulkSelect}
+                                                                    value={bulkSource}
+                                                                    onChange={e => { setBulkSource(e.target.value); setBulkResult(null); setBulkErr(''); }}
+                                                                >
+                                                                    <option value="">— vyber zdrojovú skupinu —</option>
+                                                                    {allMyGroups
+                                                                        .filter(sg => sg.id !== g.id && sg.my_status === 'accepted')
+                                                                        .map(sg => (
+                                                                            <option key={sg.id} value={sg.id}>
+                                                                                {sg.name} {sg.competition_name ? `(${sg.competition_name})` : ''}
+                                                                            </option>
+                                                                        ))
+                                                                    }
+                                                                </select>
+                                                                <button
+                                                                    className={styles.btnBulkSend}
+                                                                    disabled={!bulkSource || bulkBusy}
+                                                                    onClick={() => doBulkInvite(g.id)}
+                                                                >
+                                                                    {bulkBusy ? 'Pozývam…' : 'Pozvať členov'}
+                                                                </button>
+                                                            </div>
+                                                            {bulkErr && <p className={styles.inviteErr}>{bulkErr}</p>}
+                                                            {bulkResult && (
+                                                                <p className={styles.bulkOk}>
+                                                                    ✓ {bulkResult.invited} pozvaniek odoslaných
+                                                                    {bulkResult.skipped > 0 && `, ${bulkResult.skipped} preskočených (už v skupine)`}
+                                                                </p>
+                                                            )}
+                                                        </>
+                                                    }
+                                                </div>
+                                            )}
                                         </div>
                                     )}
                                     {!grpMembers ? (
@@ -302,7 +430,9 @@ export default function Groups() {
                                                 <button className={styles.btnAccept} onClick={() => doAcceptInvite(g.id)} disabled={busy === `accept-${g.id}`}>Akceptovať</button>
                                             )}
                                             {m.status === 'invited' && Number(m.user_id) !== Number(user.user_id) && (
-                                                <span className={styles.badgeInvited}>pozvaný</span>
+                                                isFounder
+                                                    ? <button className={styles.btnCancelInvite} onClick={() => doMemberAction(g.id, m.user_id, 'cancel_invite')} disabled={busy === `m-${m.user_id}`}>Zrušiť pozvánku</button>
+                                                    : <span className={styles.badgeInvited}>pozvaný</span>
                                             )}
                                         </div>
                                     ))}

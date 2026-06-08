@@ -30,9 +30,8 @@ export default function Login() {
     return (
         <div className={styles.wrapper}>
             <div className={styles.card}>
-                <img src="/logo.png" alt="IIHF 2026" className={styles.logo} />
-                <h1>IIHF 2026</h1>
-                <p className={styles.subtitle}>Tipovačka MS v hokeji</p>
+                <img src="/logo.png" alt="Klub priateľov tipovania" className={styles.logo} />
+                <p className={styles.appTitle}>Klub priateľov tipovania</p>
                 <form onSubmit={handleSubmit}>
                     <input
                         className={styles.input}

@@ -92,15 +92,24 @@
 }
 .gameTeam {
     display: flex;
+    flex-direction: row;
     align-items: center;
-    gap: 5px;
+    gap: 7px;
     flex: 1;
     font-size: 0.9rem;
     font-weight: 700;
     color: #1a3a6b;
+    min-width: 0;
+    overflow: hidden;
 }
-.gameTeamRight { flex-direction: row-reverse; justify-content: flex-start; }
-.gameFlag { width: 22px; height: 14px; object-fit: cover; border-radius: 2px; flex-shrink: 0; }
+.gameTeamRight { flex-direction: row-reverse; }
+.gameFlag {
+    width: 32px;
+    height: 21px;
+    object-fit: cover;
+    border-radius: 2px;
+    flex-shrink: 0;
+}
 .tbd { color: #aaa; font-weight: 400; font-size: 0.82rem; }
 
 .gameScore {
@@ -126,6 +135,8 @@
 }
 .tipCheck { color: #28a745; font-weight: 700; }
 .tipMissing { color: #e67e22; }
+.tipMissingLink { color: #e67e22; text-decoration: none; font-weight: 600; }
+.tipMissingLink:hover { text-decoration: underline; }
 
 .gamePts { font-weight: 700; border-radius: 4px; padding: 1px 5px; font-size: 0.72rem; }
 .ptsGood { background: #d4edda; color: #155724; }
