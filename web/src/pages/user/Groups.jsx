@@ -18,7 +18,7 @@ export default function Groups() {
 
     const [groups, setGroups]       = useState([]);
     const [loading, setLoading]     = useState(true);
-    const [myOnly, setMyOnly]       = useState(true);
+    const [myOnly, setMyOnly]       = useState(false);
     const [creating, setCreating]   = useState(false);
     const [newName, setNewName]     = useState('');
     const [newDesc, setNewDesc]     = useState('');
