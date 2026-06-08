@@ -4,7 +4,7 @@
 // Body: { group_id: X, source_group_id: Y }
 $auth = require_auth();
 $pdo  = db();
-require_once __DIR__ . '/../helpers/notify_group_event.php';
+require_once __DIR__ . '/../../helpers/notify_group_event.php';
 
 if ($method !== 'POST') json_error('Method not allowed', 405);
 
