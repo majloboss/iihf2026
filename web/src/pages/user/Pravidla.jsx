@@ -12,9 +12,10 @@ function TabBodovanie() {
         <>
             <div className={styles.card}>
                 <h3 className={styles.cardTitle}>Ako tipovať</h3>
-                <p>Pred každým zápasom zadáš tip na <strong>presný výsledok riadnej hracej doby (60 minút)</strong>. Predĺženie ani samostatné nájazdy sa do výsledku nepočítajú.</p>
+                <p>Pred každým zápasom zadáš tip na <strong>presný výsledok riadnej hracej doby</strong> — v hokeji <strong>60 minút</strong>, vo futbale <strong>90 minút</strong>. Predĺženie, nájazdy ani penalty sa do výsledku tipu nepočítajú.</p>
                 <p>Tipovanie sa uzavrie <strong>5 minút pred začiatkom zápasu</strong>. Po uzavretí tip nie je možné zmeniť.</p>
                 <p>Rovnaký tip platí vo všetkých skupinách priateľov, v ktorých si členom.</p>
+                <p className={styles.note}>Tipy platia pre <strong>aktívnu súťaž</strong>, ktorú máš zvolenú v Profile → Súťaže. Každá súťaž má vlastné tipy, tabuľky aj poradie.</p>
             </div>
 
             <div className={styles.card}>
@@ -50,7 +51,7 @@ function TabBodovanie() {
                         </tr>
                     </tbody>
                 </table>
-                <p className={styles.note}>Play-off = štvrťfinále, semifinále, finále, zápas o bronz.</p>
+                <p className={styles.note}>Bodovanie je rovnaké pre všetky súťaže. Play-off = vyraďovacia časť (osemfinále / Round of 32, štvrťfinále, semifinále, zápas o bronz, finále).</p>
             </div>
 
             <div className={styles.card}>
@@ -78,7 +79,7 @@ function TabBodovanie() {
 
             <div className={styles.card}>
                 <h3 className={styles.cardTitle}>Príklady (základná časť)</h3>
-                <p className={styles.exampleDesc}>Skutočný výsledok: <strong>FIN 3:2 GER</strong></p>
+                <p className={styles.exampleDesc}>Skutočný výsledok: <strong>Domáci 3:2 Hostia</strong></p>
                 <table className={styles.table}>
                     <thead>
                         <tr>
@@ -88,18 +89,18 @@ function TabBodovanie() {
                         </tr>
                     </thead>
                     <tbody>
-                        <tr><td>FIN 3:2 GER</td><td className={styles.center}><span className={styles.pts3}>5</span></td><td>víťaz ✓, góly FIN ✓, góly GER ✓</td></tr>
-                        <tr><td>FIN 3:1 GER</td><td className={styles.center}><span className={styles.pts2}>4</span></td><td>víťaz ✓, góly FIN ✓, góly GER ✗</td></tr>
-                        <tr><td>FIN 2:1 GER</td><td className={styles.center}><span className={styles.pts1}>3</span></td><td>víťaz ✓, góly FIN ✗, góly GER ✗</td></tr>
-                        <tr><td>FIN 1:2 GER</td><td className={styles.center}><span className={styles.pts1}>1</span></td><td>víťaz ✗, góly GER ✓</td></tr>
-                        <tr><td>FIN 0:1 GER</td><td className={styles.center}><span className={styles.pts0}>0</span></td><td>—</td></tr>
+                        <tr><td>3:2</td><td className={styles.center}><span className={styles.pts3}>5</span></td><td>víťaz ✓, góly domácich ✓, góly hostí ✓</td></tr>
+                        <tr><td>3:1</td><td className={styles.center}><span className={styles.pts2}>4</span></td><td>víťaz ✓, góly domácich ✓, góly hostí ✗</td></tr>
+                        <tr><td>2:1</td><td className={styles.center}><span className={styles.pts1}>3</span></td><td>víťaz ✓, góly ✗</td></tr>
+                        <tr><td>1:2</td><td className={styles.center}><span className={styles.pts1}>1</span></td><td>víťaz ✗, góly hostí ✓</td></tr>
+                        <tr><td>0:1</td><td className={styles.center}><span className={styles.pts0}>0</span></td><td>—</td></tr>
                     </tbody>
                 </table>
             </div>
 
             <div className={styles.card}>
                 <h3 className={styles.cardTitle}>Príklady (play-off)</h3>
-                <p className={styles.exampleDesc}>Skutočný výsledok: <strong>CAN 2:1 SVK</strong></p>
+                <p className={styles.exampleDesc}>Skutočný výsledok po riadnej hracej dobe: <strong>Domáci 2:1 Hostia</strong></p>
                 <table className={styles.table}>
                     <thead>
                         <tr>
@@ -109,13 +110,14 @@ function TabBodovanie() {
                         </tr>
                     </thead>
                     <tbody>
-                        <tr><td>CAN 2:1 SVK</td><td className={styles.center}><span className={styles.pts3}>7</span></td><td>víťaz ✓, góly CAN ✓, góly SVK ✓</td></tr>
-                        <tr><td>CAN 2:0 SVK</td><td className={styles.center}><span className={styles.pts2}>6</span></td><td>víťaz ✓, góly CAN ✓</td></tr>
-                        <tr><td>CAN 3:0 SVK</td><td className={styles.center}><span className={styles.pts1}>5</span></td><td>víťaz ✓</td></tr>
-                        <tr><td>CAN 0:1 SVK</td><td className={styles.center}><span className={styles.pts1}>1</span></td><td>góly SVK ✓</td></tr>
-                        <tr><td>SVK 2:0 CAN</td><td className={styles.center}><span className={styles.pts0}>0</span></td><td>—</td></tr>
+                        <tr><td>2:1</td><td className={styles.center}><span className={styles.pts3}>7</span></td><td>víťaz ✓, góly domácich ✓, góly hostí ✓</td></tr>
+                        <tr><td>2:0</td><td className={styles.center}><span className={styles.pts2}>6</span></td><td>víťaz ✓, góly domácich ✓</td></tr>
+                        <tr><td>3:0</td><td className={styles.center}><span className={styles.pts1}>5</span></td><td>víťaz ✓</td></tr>
+                        <tr><td>0:1</td><td className={styles.center}><span className={styles.pts1}>1</span></td><td>góly hostí ✓</td></tr>
+                        <tr><td>0:2</td><td className={styles.center}><span className={styles.pts0}>0</span></td><td>—</td></tr>
                     </tbody>
                 </table>
+                <p className={styles.note}>Pri play-off zápase, ktorý sa rozhodne v predĺžení/penaltách, sa tip vyhodnocuje podľa skóre po riadnej hracej dobe. Konečný výsledok (po predĺžení) je len informačný.</p>
             </div>
         </>
     );
@@ -132,7 +134,7 @@ function TabSkupiny() {
                         <span className={styles.stepNum}>1</span>
                         <div>
                             <strong>Vytvor pozvánku</strong>
-                            <p>V sekcii <em>Pozvánky</em> klikni na <em>Nová pozvánka</em>. Môžeš zadať e-mail adresáta — pozvánka mu bude doručená automaticky. Bez e-mailu ti systém vygeneruje link, ktorý mu pošleš sám.</p>
+                            <p>V Profile → <em>Pozvánky</em> klikni na <em>Nová pozvánka</em>. Môžeš zadať e-mail adresáta — pozvánka mu bude doručená automaticky. Bez e-mailu ti systém vygeneruje link, ktorý mu pošleš sám.</p>
                         </div>
                     </div>
                     <div className={styles.step}>
@@ -146,7 +148,7 @@ function TabSkupiny() {
                         <span className={styles.stepNum}>3</span>
                         <div>
                             <strong>Sleduj stav</strong>
-                            <p>V zozname pozvánok vidíš, či link bol už použitý a kto sa cez neho zaregistroval.</p>
+                            <p>V zozname pozvánok vidíš, či link bol už použitý a kto sa cez neho zaregistroval. Nepoužitú pozvánku môžeš kedykoľvek zrušiť.</p>
                         </div>
                     </div>
                 </div>
@@ -155,33 +157,34 @@ function TabSkupiny() {
 
             <div className={styles.card}>
                 <h3 className={styles.cardTitle}>Skupiny priateľov</h3>
+                <p>Skupiny sú <strong>samostatné pre každú súťaž</strong>. Skupiny vidíš a vytváraš pre súťaž, ktorú máš práve zvolenú (Profil → Súťaže).</p>
                 <div className={styles.steps}>
                     <div className={styles.step}>
                         <span className={styles.stepNum}>1</span>
                         <div>
                             <strong>Vytvor skupinu</strong>
-                            <p>V sekcii Skupiny klikni na <em>Vytvoriť skupinu</em> a zadaj jej názov. Staneš sa zakladateľom a automaticky prvým členom.</p>
+                            <p>V Profile → Skupiny klikni na <em>Nová skupina</em>, zadaj názov a voliteľne <strong>popis / podmienku vstupu</strong>. Staneš sa zakladateľom a automaticky prvým členom.</p>
                         </div>
                     </div>
                     <div className={styles.step}>
                         <span className={styles.stepNum}>2</span>
                         <div>
                             <strong>Pozvi priateľov</strong>
-                            <p>V sekcii <em>Pozvánky</em> vytvor pozývací link a pošli ho priateľovi — e-mailom alebo inak. Môžeš priamo vybrať skupinu, do ktorej chceš nového hráča automaticky zaradiť po registrácii.</p>
+                            <p>V <em>Pozvánkach</em> vytvor link a pošli ho priateľovi — môžeš priamo vybrať skupinu, do ktorej sa po registrácii automaticky zaradí. Alebo cez tlačidlo <em>Pozvať zo skupiny</em> hromadne pozveš všetkých členov inej svojej skupiny (aj z iného turnaja).</p>
                         </div>
                     </div>
                     <div className={styles.step}>
                         <span className={styles.stepNum}>3</span>
                         <div>
                             <strong>Schváľ žiadosti</strong>
-                            <p>Ak sa niekto prihlási do skupiny sám (bez pozvánky so skupinou), uvidíš jeho žiadosť v sekcii Skupiny a môžeš ju schváliť alebo odmietnuť.</p>
+                            <p>Ak sa niekto prihlási do skupiny sám, uvidíš jeho žiadosť a môžeš ju schváliť alebo odmietnuť (napr. až po splnení podmienky vstupu).</p>
                         </div>
                     </div>
                     <div className={styles.step}>
                         <span className={styles.stepNum}>4</span>
                         <div>
                             <strong>Sleduj poradie</strong>
-                            <p>V sekcii Tabuľky vidíš poradie všetkých svojich skupín. Môžeš byť členom viacerých skupín naraz — tvoje tipy platia v každej z nich.</p>
+                            <p>V sekcii Poradie vidíš tabuľky všetkých svojich skupín pre aktívnu súťaž. Môžeš byť členom viacerých skupín naraz — tvoje tipy platia v každej z nich.</p>
                         </div>
                     </div>
                 </div>
@@ -189,8 +192,33 @@ function TabSkupiny() {
             </div>
 
             <div className={styles.card}>
+                <h3 className={styles.cardTitle}>Tipovanie za odmenu</h3>
+                <p>Zakladateľ skupiny môže do <strong>popisu / podmienky vstupu</strong> uviesť vlastné pravidlá — napríklad vklad do spoločného banku a rozdelenie výhry medzi najlepších tipérov. <strong>Aplikácia peniaze nespravuje</strong> — všetko si organizuje zakladateľ skupiny mimo aplikácie.</p>
+                <p className={styles.exampleDesc}>Príklad popisu skupiny:</p>
+                <div className={styles.exampleBox}>
+{`Skupina pre skutočných tipérov.
+
+POSTUP:
+  1. Vlož 10€ na účet: SK0123456789 a do poznámky uveď svoj USERNAME
+  2. Požiadaj o vstup do skupiny
+  3. Po pripísaní platby na účet bude tvoja požiadavka schválená
+
+Výhra sa delí v pomere:
+  1. miesto — 70%
+  2. miesto — 20%
+  3. miesto — 10%
+
+Možnosť vstupu sa uzavrie dňa DD.MM.2026.
+
+Výhra bude pripísaná na účet, z ktorého prišla platba,
+do týždňa po skončení turnaja.`}
+                </div>
+                <p className={styles.note}>Zakladateľ schvaľuje žiadosti o vstup ručne — môže tak počkať na splnenie podmienky (napr. pripísanie platby). Popis je viditeľný každému, kto si skupinu pozrie.</p>
+            </div>
+
+            <div className={styles.card}>
                 <h3 className={styles.cardTitle}>Poradie v skupinách</h3>
-                <p>Hráči súťažia v skupinách priateľov. Poradie určuje celkový počet bodov zo všetkých tipovaných zápasov.</p>
+                <p>Hráči súťažia v skupinách priateľov. Poradie určuje celkový počet bodov zo všetkých tipovaných zápasov danej súťaže.</p>
                 <p>Pri rovnosti bodov rozhoduje počet tipov s plným počtom bodov (5 resp. 7), potom s nižším počtom bodov atď.</p>
             </div>
         </>
@@ -201,57 +229,64 @@ function TabOvladanie() {
     return (
         <>
             <div className={styles.card}>
-                <h3 className={styles.cardTitle}>Prehľad</h3>
-                <p>Úvodná obrazovka zobrazuje najdôležitejšie informácie na jednom mieste:</p>
+                <h3 className={styles.cardTitle}>Súťaže (prepínanie turnajov)</h3>
+                <p>Aplikácia podporuje viacero turnajov naraz (napr. MS v hokeji, MS vo futbale). Všetky stránky zobrazujú dáta pre <strong>aktívnu súťaž</strong>.</p>
                 <div className={styles.guideList}>
-                    <div className={styles.guideItem}><span className={styles.guideLabel}>Správa organizátora</span> — aktuálny oznam od organizátora tipovačky (ak existuje).</div>
-                    <div className={styles.guideItem}><span className={styles.guideLabel}>Nenatipované zápasy</span> — zápasy na dnes a zajtra, ktoré ešte nemáš natipované. Kliknutím otvoríš formulár na zadanie tipu. Sekcia sa zobrazí len ak takéto zápasy existujú.</div>
-                    <div className={styles.guideItem}><span className={styles.guideLabel}>Najbližšie zápasy</span> — nadchádzajúce a live zápasy. Kliknutím na zápas s otvoreným tipovaním zadáš tip; kliknutím na live alebo odohraný zápas vidíš tipy členov tvojich skupín.</div>
-                    <div className={styles.guideItem}><span className={styles.guideLabel}>Posledné výsledky</span> — posledné odohraté zápasy so skóre a tvojím tipom.</div>
-                    <div className={styles.guideItem}><span className={styles.guideLabel}>Poradie v skupinách</span> — skrátené tabuľky tvojich skupín (top 3 + ty, ak nie si v top 3).</div>
-                    <div className={styles.guideItem}><span className={styles.guideLabel}>História správ</span> — archív starších správ organizátora.</div>
+                    <div className={styles.guideItem}><span className={styles.guideLabel}>Výber súťaže</span> — Profil → záložka <em>Súťaže</em>. Klikni na <em>Prepnúť</em> pri turnaji, ktorý chceš tipovať.</div>
+                    <div className={styles.guideItem}><span className={styles.guideLabel}>Aktívna súťaž</span> — vidíš ju ako logo a názov v hornej časti menu (sidebar). Voľba sa uloží.</div>
+                    <div className={styles.guideItem}><span className={styles.guideLabel}>Oddelené dáta</span> — zápasy, tipy, skupiny, tabuľky aj poradie sú pre každú súťaž samostatné. Prepnutím súťaže sa všetko prepne naraz.</div>
                 </div>
+                <p className={styles.note}>Menu a ovládanie sú rovnaké pre všetky súťaže — mení sa len obsah podľa zvoleného turnaja.</p>
+            </div>
+
+            <div className={styles.card}>
+                <h3 className={styles.cardTitle}>Prehľad</h3>
+                <p>Úvodná obrazovka zobrazuje najdôležitejšie informácie aktívnej súťaže na jednom mieste:</p>
+                <div className={styles.guideList}>
+                    <div className={styles.guideItem}><span className={styles.guideLabel}>Správa organizátora</span> — aktuálny oznam (ak existuje).</div>
+                    <div className={styles.guideItem}><span className={styles.guideLabel}>Nenatipované zápasy</span> — zápasy na dnes a zajtra bez tvojho tipu. Kliknutím otvoríš formulár na tip.</div>
+                    <div className={styles.guideItem}><span className={styles.guideLabel}>Najbližšie zápasy</span> — nadchádzajúce a live zápasy. Klik na zápas s otvoreným tipovaním = zadáš tip; klik na live alebo odohraný zápas = vidíš tipy členov tvojich skupín.</div>
+                    <div className={styles.guideItem}><span className={styles.guideLabel}>Posledné výsledky</span> — odohraté zápasy so skóre a tvojím tipom.</div>
+                    <div className={styles.guideItem}><span className={styles.guideLabel}>Poradie v skupinách</span> — skrátené tabuľky tvojich skupín (top 3 + ty).</div>
+                </div>
+                <p className={styles.note}>Obrazovka sa sama obnovuje — live skóre a body sa aktualizujú automaticky.</p>
             </div>
 
             <div className={styles.card}>
                 <h3 className={styles.cardTitle}>Zápasy</h3>
-                <p>Obrazovka zobrazuje všetkých 64 zápasov turnaja s možnosťou filtrovania a tipovania.</p>
+                <p>Zobrazuje všetky zápasy turnaja s možnosťou filtrovania a tipovania.</p>
                 <div className={styles.guideList}>
-                    <div className={styles.guideItem}><span className={styles.guideLabel}>Filter nenatipovaných (✓)</span> — prvé tlačidlo v lište filtrov. Svetlo červené = zobrazené všetky zápasy. Tmavo červené = zobrazené len zápasy bez tvojho tipu. Kombinuje sa s ostatnými filtrami.</div>
-                    <div className={styles.guideItem}><span className={styles.guideLabel}>Filtre fázy (ALL / A / B / QF / SF / BR / F)</span> — zobrazí zápasy zvolenej fázy turnaja. ALL zobrazí všetky.</div>
-                    <div className={styles.guideItem}><span className={styles.guideLabel}>TAB</span> — prepne na skupinové tabuľky tímov A a B. Kliknutím na tím v tabuľke sa vrátia všetky jeho zápasy.</div>
-                    <div className={styles.guideItem}><span className={styles.guideLabel}>Kalendár</span> — filter podľa dátumu. Kliknutím na deň zobrazíš len zápasy toho dňa. Opätovným kliknutím filter zrušíš.</div>
-                    <div className={styles.guideItem}><span className={styles.guideLabel}>Vlajky tímov</span> — filter podľa tímu. Kliknutím na vlajku zobrazíš len zápasy daného tímu.</div>
-                    <div className={styles.guideItem}><span className={styles.guideLabel}>Tipovanie</span> — pri zápasoch s otvoreným tipovaním zadáš skóre priamo na karte zápasu a potvrdíš tlačidlom.</div>
+                    <div className={styles.guideItem}><span className={styles.guideLabel}>Filter nenatipovaných (1x2)</span> — prvé tlačidlo. Tmavé = zobrazené len zápasy bez tvojho tipu.</div>
+                    <div className={styles.guideItem}><span className={styles.guideLabel}>Filtre fázy</span> — ALL (všetko), GRP / skupiny, vyraďovacie kolá (napr. R32, R16, QF, SF, bronz, finále). Pri voľbe GRP sa zobrazí riadok skupín (A, B, C…).</div>
+                    <div className={styles.guideItem}><span className={styles.guideLabel}>TAB</span> — prepne na skupinové tabuľky tímov. Klikom na tím sa vrátiš na jeho zápasy.</div>
+                    <div className={styles.guideItem}><span className={styles.guideLabel}>Kalendár</span> — filter podľa dátumu. Po otvorení sa automaticky nastaví aktuálne kolo.</div>
+                    <div className={styles.guideItem}><span className={styles.guideLabel}>Vlajky tímov</span> — filter podľa tímu.</div>
+                    <div className={styles.guideItem}><span className={styles.guideLabel}>Tipovanie</span> — pri otvorených zápasoch zadáš skóre priamo na karte a potvrdíš.</div>
+                    <div className={styles.guideItem}><span className={styles.guideLabel}>Tipy skupín</span> — pri live a odohraných zápasoch rozbalíš tipy členov tvojich skupín (počas live sa zobrazujú priebežné body).</div>
                 </div>
             </div>
 
             <div className={styles.card}>
-                <h3 className={styles.cardTitle}>Tabuľky skupín (TAB)</h3>
-                <p>V obrazovke Zápasy klikni na <strong>TAB</strong> — zobrazí sa skupinová tabuľka tímov zo skupiny A a B (zhodná s oficiálnou IIHF tabuľkou).</p>
-                <p>Kliknutím na ľubovoľný tím v tabuľke sa automaticky prepneš späť na zoznam zápasov s nastaveným filtrom na daný tím — uvidíš všetky jeho zápasy naraz.</p>
+                <h3 className={styles.cardTitle}>Tabuľky</h3>
+                <p>Skupinové tabuľky tímov (poradie tímov v skupinách). Pri turnajoch s viacerými skupinami obsahuje aj <strong>tabuľku najlepších tretích miest</strong> (ktoré tretie tímy postupujú do vyraďovacej časti).</p>
+                <p>Tú istú tabuľku otvoríš aj z obrazovky Zápasy tlačidlom <strong>TAB</strong>. Klikom na tím sa prepneš na zoznam jeho zápasov.</p>
             </div>
 
             <div className={styles.card}>
-                <h3 className={styles.cardTitle}>Skupiny</h3>
-                <p>Obrazovka Skupiny slúži na správu skupín priateľov a pozvánok.</p>
-                <div className={styles.guideList}>
-                    <div className={styles.guideItem}><span className={styles.guideLabel}>Zoznam skupín</span> — kliknutím na skupinu rozbalíš zoznam jej členov s avatarmi. Ďalším kliknutím na člena vidíš jeho profil.</div>
-                    <div className={styles.guideItem}><span className={styles.guideLabel}>Filter Len moje / Všetky</span> — prepína medzi skupinami, kde si členom, a všetkými existujúcimi skupinami.</div>
-                    <div className={styles.guideItem}><span className={styles.guideLabel}>Vytvoriť skupinu</span> — vytvoríš novú skupinu a staneš sa jej zakladateľom.</div>
-                    <div className={styles.guideItem}><span className={styles.guideLabel}>Pozvánky</span> — záložka v Profile → Pozvánky. Tu vidíš odoslané pozvánky a môžeš vytvoriť novú.</div>
-                </div>
+                <h3 className={styles.cardTitle}>Poradie</h3>
+                <p>Tabuľky tvojich skupín priateľov pre aktívnu súťaž — celkové body a rozpad počtu tipov podľa získaných bodov (7-6-5-4-3-2-1-0).</p>
             </div>
 
             <div className={styles.card}>
                 <h3 className={styles.cardTitle}>Profil</h3>
-                <p>V Profile môžeš upraviť svoje osobné údaje a nastavenia.</p>
+                <p>V Profile spravuješ údaje, súťaže, skupiny, pozvánky a notifikácie.</p>
                 <div className={styles.guideList}>
-                    <div className={styles.guideItem}><span className={styles.guideLabel}>Avatar</span> — klikni na fotografiu a nahraj obrázok zo zariadenia.</div>
-                    <div className={styles.guideItem}><span className={styles.guideLabel}>Osobné údaje</span> — meno, priezvisko, e-mail, telefón. E-mail je potrebný pre e-mailové notifikácie.</div>
-                    <div className={styles.guideItem}><span className={styles.guideLabel}>Zmena hesla</span> — zadáš aktuálne heslo a dvakrát nové. Zmena je okamžitá.</div>
-                    <div className={styles.guideItem}><span className={styles.guideLabel}>Notifikácie</span> — záložka Notif. Nastavíš, o čom chceš byť upozornený — pred zápasom, pri netipovanom zápase, po zadaní výsledku. Notifikácie chodia e-mailom aj cez push notifikácie priamo do prehliadača (aj keď aplikácia nie je otvorená). Push aktivuješ tlačidlom v tejto záložke — funguje v Chrome, Edge, Firefox aj na mobile.</div>
-                    <div className={styles.guideItem}><span className={styles.guideLabel}>Odhlásenie</span> — záložka Odhlásenie v Profile.</div>
+                    <div className={styles.guideItem}><span className={styles.guideLabel}>Súťaže</span> — výber aktívneho turnaja.</div>
+                    <div className={styles.guideItem}><span className={styles.guideLabel}>Skupiny</span> — vytváranie skupín, popis/podmienka vstupu, pozývanie členov, schvaľovanie žiadostí.</div>
+                    <div className={styles.guideItem}><span className={styles.guideLabel}>Pozvánky</span> — odoslané pozvánky a tvorba nových.</div>
+                    <div className={styles.guideItem}><span className={styles.guideLabel}>Avatar a údaje</span> — fotka, meno, e-mail (potrebný pre e-mailové notifikácie), telefón, zmena hesla.</div>
+                    <div className={styles.guideItem}><span className={styles.guideLabel}>Notifikácie</span> — upozornenia pred zápasom, pri netipovanom zápase a po zadaní výsledku. E-mailom aj push (Chrome, Edge, Firefox aj mobil) — push aktivuješ tlačidlom.</div>
+                    <div className={styles.guideItem}><span className={styles.guideLabel}>Odhlásenie</span> — záložka Odhlásenie.</div>
                 </div>
             </div>
         </>
