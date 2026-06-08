@@ -296,16 +296,16 @@ Poradie migrácie:
 
 | # | Nápad | Priorita |
 |---|---|---|
-| 1 | **Email pri registrácii** — uvítací mail po úspešnej registrácii | pred 11.6. |
-| 2 | **Zabudnuté heslo** — reset cez email, teraz rieši admin manuálne | pred 11.6. |
-| 3 | **Notifikácia pri novej pozvánke** — push/email keď ťa niekto pozve do skupiny | pred 11.6. |
-| 4 | **Upozornenie pred uzavretím tipu** — push X hodín pred zápasom (teraz len game_start) | počas turnaja |
-| 5 | **Dashboard — nezatipovaný zápas** — výrazné upozornenie ak máš nezatipovaný zápas do 24h | počas turnaja |
-| 6 | **História tipov usera** — vlastné tipy po skončení zápasov s rozpisom bodov | počas turnaja |
-| 7 | **Hromadné zadanie výsledkov** — admin zadáva viacero zápasov naraz | admin pohodlie |
-| 8 | **Export výsledkov** — CSV export poradia skupiny na konci turnaja | po turnaji |
-| 9 | **Komentáre/chat v skupine** — tipéri môžu reagovať na výsledky | dlhodobé |
-| 10 | **Štatistiky usera** — celková úspešnosť, najlepší/najhorší zápas, streak | dlhodobé |
-| 11 | **Sieň slávy** — história výsledkov za jednotlivé súťaže (víťazi, poradie, štatistiky) | dlhodobé |
+| 1 | **Email pri registrácii** — uvítací mail po úspešnej registrácii. Predmet: "Vitaj v BetClub!". Text: privítanie, odkaz na pravidlá, odporúčanie pridať sa do skupiny alebo vytvoriť vlastnú. | 🟢 READY TO CODE |
+| 2 | **Zabudnuté heslo** — odkaz na prihlasovacej obrazovke. User zadá username + email — obe musia sedieť. Ak email nie je v profile, správa "Kontaktuj administrátora na betclub@fellow.sk". Ak sedí, pošle sa jednorazový reset link (expirácia 1h). Pravidlá/Profil: červená poznámka — bez emailu v profile nie je možné resetovať heslo bez admina. | 🟢 READY TO CODE |
+| 3 | **Skupinové udalosti (notifikácie)** — rozšíriť Notifikácie o jednu položku "Skupinové udalosti". Pokryje: (a) pozvánka do skupiny "[username] Ťa pozval do skupiny [názov]", (b) schválenie žiadosti "Tvoja žiadosť o vstup do skupiny [názov] bola schválená". Klik otvorí Skupiny v Profile. Pravidlá: doplniť do sekcie notifikácií. | 🟢 READY TO CODE |
+| 4 | **Upozornenie pred uzavretím tipu** — push 30 min pred zápasom. Ak nemá tip: "Nezatipovaný zápas! [tím1 vs tím2] začína o 30 minút". Ak má tip: "[tím1 vs tím2] začína o 30 minút, ešte môžeš zmeniť tip". Len pre userov s povolenými notifikáciami. | 🟢 READY TO CODE |
+| 5 | **Dashboard — nezatipovaný zápas** — sekcia nezatipovaných zápasov na dnes a zajtra. | ✅ už implementované |
+| 6 | **História tipov + graf vývoja** — (a) V tabuľke skupiny klik na hráča rozbalí jeho tipy pod riadkom (accordion, viacero naraz). Zápas, jeho tip, skutočný výsledok, body. (b) Line chart vývoja bodov v čase (os X = zápasy/dni, os Y = kumulatívne body) — každý hráč skupiny jedna čiara. Vypočítané priamo z tips+games (bez extra tabuľky), funguje aj spätne pre IIHF. Knižnica: Recharts. | 🟢 READY TO CODE |
+| 7 | **Hromadné zadanie výsledkov** — nie je potrebné, futbalové zápasy nejdu naraz, admin zadáva po jednom cez livescore. | ❌ nepotrebné |
+| 8 | **Export výsledkov** — CSV export poradia skupiny. | ❌ nepotrebné |
+| 9 | **Správy/chat** — správa adminovi + jednoduchý chat pre tipérov v skupine. Nie sociálna sieť. Riešiť ako úplne posledné. | 🔲 dlhodobé |
+| 10 | **Štatistiky usera** — úspešnosť, najlepší/najhorší zápas, streak. | 🔲 dlhodobé |
+| 11 | **Sieň slávy** — po skončení každého turnaja sa uloží finálne globálne poradie. Top 10 dostane body (1.=10, 2.=9, ... 10.=1, od 11.=0). Tri tabuľky: (a) Globálna (všetky turnaje), (b) Futbalová (FIFA, LM, ME, Olympiáda...), (c) Hokejová (MS, Olympiáda...). Body sa kumulujú naprieč turnajmi v rámci športu — tipér súťaží len v tom športe ktorý tipuje. | 🔲 dlhodobé |
 
 > Login token expirácia: **7 dní** (`time() + 86400 * 7`). Test expirácie + auto-redirect na /login overený (✅).
