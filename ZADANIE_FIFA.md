@@ -272,9 +272,9 @@ Poradie migrácie:
 ## Čo zostáva (TODO)
 
 1. ✅ **Notifikácie pre FIFA** — `send_notifications_fifa.php` (game_start/untipped/result_entered), zdielané nastavenia, dedup `fifa_` prefix
-2. 🔲 **Deploy na produkciu (main → betclub.fellow.sk)** — merge develop→main (na pokyn), spustiť migrácie 024–035 na **DB-BET**, nahrať `db.php` (prod) + `vapid.php` na prod server
+2. 🟠 **Deploy na produkciu (main → betclub.fellow.sk)** — merge develop→main (na pokyn), spustiť migrácie 024–036 na **DB-BET**, nahrať `db.php` (prod) + `vapid.php` na prod server
 3. 🔲 **Android aplikácia** (Kotlin) — neskôr, nie priorita
-4. 🔲 **Token-versioning** — pridať `token_version` per user (inkrement pri zmene hesla / „odhlásiť všade") → zneplatní všetky staré JWT. Dnes je revoke len cez deaktiváciu usera; zmena hesla staré tokeny nezruší. Pri dlhej platnosti tokenu (30–100 dní) je to bezpečnejšie. *(zatiaľ nerobíme)*
+4. ✅ **Token-versioning** — `token_version` per user; inkrement pri zmene hesla aj admin-revoke; tokeny bez `tv` odmietnuté; zmena hesla vracia nový token (aktuálna session zostáva); admin „Odhlásiť zo všetkých zariadení"; migrácia 036
 5. 🟡 *Nice-to-have:* automatické párovanie knockout bracketu z víťazov skupín (teraz manuálne)
 
 > Login token expirácia: **7 dní** (`time() + 86400 * 7`). Test expirácie + auto-redirect na /login overený (✅).
