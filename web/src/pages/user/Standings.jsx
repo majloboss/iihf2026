@@ -61,11 +61,23 @@ function PlayerTips({ userId, compId }) {
                                         <span style={{fontSize:'0.75rem'}}>{t.team2}</span>
                                     </div>
                                 </td>
-                                <td style={{padding:'3px 4px', textAlign:'center', fontSize:'0.75rem'}}>
-                                    {t.score1 !== null ? `${t.score1}:${t.score2}` : '—'}
+                                <td style={{padding:'3px 4px', textAlign:'center', fontSize:'0.75rem', whiteSpace:'nowrap'}}>
+                                    {t.score1 !== null
+                                        ? <span style={{display:'inline-flex', gap:2}}>
+                                            <span style={{minWidth:14, textAlign:'right'}}>{t.score1}</span>
+                                            <span>:</span>
+                                            <span style={{minWidth:14, textAlign:'left'}}>{t.score2}</span>
+                                          </span>
+                                        : '—'}
                                 </td>
-                                <td style={{padding:'3px 4px', textAlign:'center', fontSize:'0.75rem'}}>
-                                    {t.tip1 !== null ? `${t.tip1}:${t.tip2}` : <span style={{color:'#aaa'}}>—</span>}
+                                <td style={{padding:'3px 4px', textAlign:'center', fontSize:'0.75rem', whiteSpace:'nowrap'}}>
+                                    {t.tip1 !== null
+                                        ? <span style={{display:'inline-flex', gap:2}}>
+                                            <span style={{minWidth:14, textAlign:'right'}}>{t.tip1}</span>
+                                            <span>:</span>
+                                            <span style={{minWidth:14, textAlign:'left'}}>{t.tip2}</span>
+                                          </span>
+                                        : <span style={{color:'#aaa'}}>—</span>}
                                 </td>
                                 <td style={{padding:'3px 4px', textAlign:'center', fontWeight:700, fontSize:'0.8rem',
                                     color: t.points === null ? '#aaa' : t.points >= 5 ? '#27ae60' : t.points >= 3 ? '#e67e22' : t.points > 0 ? '#2980b9' : '#c0392b'}}>
