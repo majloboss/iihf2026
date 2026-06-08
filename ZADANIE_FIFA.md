@@ -260,7 +260,7 @@ Poradie migrácie:
 | 024–036 | ✅ | ✅ |
 | 037 FIFA flashscore URL | ✅ | ✅ |
 | 038 group description 1000 | ✅ | ✅ |
-| 039 invites cancelled_at | ✅ | ⚠️ spustiť |
+| 039 invites cancelled_at | ✅ | ✅ |
 
 ---
 
@@ -286,7 +286,7 @@ Poradie migrácie:
 11. ✅ **Impersonácia opravená** — chýbajúci `tv` claim spôsoboval okamžitý logout (v4.11)
 12. ✅ **Pozvánky soft delete** — cancelled_at, stav Zrušená, duplicita ignoruje zrušené, admin aj user môže zrušiť (migrácia 039)
 13. ✅ **Skupiny default filter** — Všetky namiesto Moje
-14. ⚠️ **Migrácia 039** — spustiť na **DB-BET** (prod)
+14. ✅ **Migrácia 039** — spustená na DB-DEV-BET aj DB-BET
 15. 🔲 **Android aplikácia** (Kotlin) — neskôr, nie priorita
 16. 🟡 *Nice-to-have:* automatické párovanie knockout bracketu z víťazov skupín (teraz manuálne)
 
