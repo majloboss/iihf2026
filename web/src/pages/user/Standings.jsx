@@ -26,7 +26,9 @@ function PlayerTips({ userId, compId }) {
     if (error)   return <tr><td colSpan={5} style={{padding:'8px 16px',color:'#c0392b'}}>{error}</td></tr>;
     if (!data?.tips?.length) return <tr><td colSpan={5} style={{padding:'8px 16px',color:'#aaa'}}>Žiadne ukončené zápasy.</td></tr>;
 
-    const flag = (code) => `/flags/team_flag_${code?.toLowerCase()}.png`;
+    const flag = (code) => compId === 2
+        ? `/flags/fifa_flag_${code?.toLowerCase()}.png`
+        : `/flags/team_flag_${code?.toLowerCase()}.png`;
     const fmtDate = (iso) => {
         const d = new Date(iso);
         return d.toLocaleDateString('sk-SK', {day:'2-digit', month:'2-digit'}) + ' ' +
