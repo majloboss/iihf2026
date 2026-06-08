@@ -379,7 +379,14 @@ export default function FifaGames() {
                                     </div>
                                     <TeamBlock code={g.away_code} />
                                 </div>
-                                <div className={styles.venue}>{g.venue}</div>
+                                <div className={styles.venue}>
+                                    {g.venue}
+                                    {g.flashscore_url && (
+                                        <a href={g.flashscore_url} target="_blank" rel="noopener noreferrer" className={styles.fsLink} title="Sledovať na FlashScore">
+                                            <img src="/flashscore.png" alt="FlashScore" className={styles.fsIcon} />
+                                        </a>
+                                    )}
+                                </div>
                                 {!finished && g.ls_home != null && (
                                     <div className={styles.liveBar}>
                                         <span className={styles.lsBadge}>LIVE</span>
