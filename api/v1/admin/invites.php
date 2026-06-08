@@ -120,19 +120,19 @@ if ($method === 'POST') {
 
         $group_line = $group_name
             ? "Po registrácii budeš automaticky pridaný do skupiny \"" . $group_name . "\", kde budeš môcť súťažiť s ostatnými členmi.\n\n"
-            : "Odporúčame ti pripojiť sa k existujúcej skupine alebo si vytvoriť vlastnú a pozvať ďalších priateľov.\n\n";
+            : "Odporúčame Ti pripojiť sa k existujúcej skupine alebo si vytvoriť vlastnú a pozvať ďalších priateľov.\n\n";
 
         $body_mail = "Ahoj,\n\n"
-            . "pozývame ťa do BetClub – tipovačky výsledkov futbalových a hokejových zápasov pre teba a tvojich kamošov.\n\n"
+            . "pozývame Ťa do BetClub - tipovačky výsledkov športových zápasov pre Teba a Tvojich kamošov.\n\n"
             . "Zaregistruj sa kliknutím na tento odkaz:\n" . $link . "\n\n"
             . "Po registrácii si zvolíš vlastné meno a heslo. Potom môžeš:\n"
             . "- tipovať presné výsledky zápasov\n"
             . "- súťažiť s kamarátmi v skupinách\n"
             . "- sledovať priebežné poradie\n\n"
             . $group_line
-            . "Pred začatím odporúčame prečítať si pravidlá tipovačky:\n" . $rules_url . "\n\n"
+            . "Pred začatím si prečítaj pravidlá tipovačky:\n" . $rules_url . "\n\n"
             . "Link je jednorazový – platí pre jednu registráciu.\n\n"
-            . "Tešíme sa na teba!\n"
+            . "Tešíme sa na Teba!\n"
             . "BetClub – Tipujte s kamošmi";
         try {
             send_mail_logged($pdo, $sent_to, $subject, $body_mail);
