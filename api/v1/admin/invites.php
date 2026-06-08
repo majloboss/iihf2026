@@ -147,6 +147,19 @@ if ($method === 'POST') {
              'group_id' => $group_id, 'email_sent' => $email_sent, 'email_err' => $email_err], 201);
 }
 
+if ($method === 'DELETE') {
+    $body = json_decode(file_get_contents('php://input'), true) ?? [];
+    $id   = (int)($body['id'] ?? 0);
+    if (!$id) json_error('Chýba id', 400);
+
+    $stmt = $pdo->prepare("SELECT id FROM admin.invites WHERE id = ? AND used_at IS NULL AND cancelled_at IS NULL");
+    $stmt->execute([$id]);
+    if (!$stmt->fetch()) json_error('Pozvánka neexistuje alebo už bola použitá', 404);
+
+    $pdo->prepare("UPDATE admin.invites SET cancelled_at = NOW() WHERE id = ?")->execute([$id]);
+    json_ok(['cancelled' => true]);
+}
+
 if ($method === 'PUT') {
     $body = json_decode(file_get_contents('php://input'), true);
     if (!isset($body['id'])) json_error('Missing id', 400);

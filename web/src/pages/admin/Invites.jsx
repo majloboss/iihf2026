@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getInvites, createInvite, updateInviteSentTo } from '../../api/admin';
+import { apiFetch } from '../../api/client';
 import UserModal from './UserModal';
 import styles from './Admin.module.css';
 
@@ -65,6 +66,7 @@ export default function Invites() {
     const [error,      setError]      = useState('');
     const [info,       setInfo]       = useState('');
     const [editUser,   setEditUser]   = useState(null);
+    const [revoking,   setRevoking]   = useState(null);
 
     const load = () => getInvites()
         .then(data => {
@@ -95,6 +97,16 @@ export default function Invites() {
 
     const handleSentToSaved = (id, val) => {
         setInvites(prev => prev.map(i => i.id === id ? { ...i, sent_to: val || null } : i));
+    };
+
+    const revoke = async (id) => {
+        if (!confirm('Zrušiť pozvánku? Link bude zneplatnený.')) return;
+        setRevoking(id);
+        try {
+            await apiFetch('v1/admin/invites', { method: 'DELETE', body: JSON.stringify({ id }) });
+            load();
+        } catch (e) { setError(e.message); }
+        finally { setRevoking(null); }
     };
 
     return (
@@ -184,7 +196,19 @@ export default function Invites() {
                                         ? <span className={styles.badgeProd} title="Pozvánka odoslaná emailom">✓</span>
                                         : <span style={{color:'#aaa'}}>—</span>}
                                 </td>
-                                <td data-label=""><CopyBtn text={i.link} /></td>
+                                <td data-label="" style={{whiteSpace:'nowrap'}}>
+                                    <CopyBtn text={i.link} />
+                                    {!i.used_at && !i.cancelled_at && (
+                                        <button
+                                            onClick={() => revoke(i.id)}
+                                            disabled={revoking === i.id}
+                                            className={styles.btnSmall}
+                                            style={{color:'#c0392b', borderColor:'#f5c6cb', marginLeft:4}}
+                                        >
+                                            {revoking === i.id ? '…' : '✕'}
+                                        </button>
+                                    )}
+                                </td>
                             </tr>
                         ))}
                     </tbody>
