@@ -39,10 +39,20 @@ try {
     $username = 'iihf2026_' . $inviteId;
     $placeholderHash = password_hash(bin2hex(random_bytes(16)), PASSWORD_BCRYPT);
 
+    // Zisti aktuálnu aktívnu súťaž (najnovšia aktívna)
+    $actComp = $pdo->query("SELECT id FROM admin.competitions WHERE is_active = TRUE ORDER BY id DESC LIMIT 1")->fetchColumn();
+    $actCompId = $actComp ? (int)$actComp : 2; // fallback FIFA
+
+    // Email z pozvánky (ak bol zadaný) — predvyplní profil
+    $invEmail = $pdo->prepare("SELECT sent_to FROM admin.invites WHERE id = ?");
+    $invEmail->execute([$inviteId]);
+    $sentTo = $invEmail->fetchColumn() ?: null;
+    $sentTo = ($sentTo && filter_var($sentTo, FILTER_VALIDATE_EMAIL)) ? $sentTo : null;
+
     $ins = $pdo->prepare(
-        'INSERT INTO admin.users (username, password, is_active) VALUES (?, ?, FALSE) RETURNING id'
+        'INSERT INTO admin.users (username, password, is_active, active_competition_id, email) VALUES (?, ?, FALSE, ?, ?) RETURNING id'
     );
-    $ins->execute([$username, $placeholderHash]);
+    $ins->execute([$username, $placeholderHash, $actCompId, $sentTo]);
     $userId = $ins->fetchColumn();
 
     $upd = $pdo->prepare(

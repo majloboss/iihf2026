@@ -16,7 +16,7 @@ https://dashboard.sportdb.dev/api-keys: 2sJeeo35xgIMNx0mNZumlDFc2YKBpiUyKmBE0VV0
 ## STAV IMPLEMENTÁCIE — PREHĽAD
 
 ✅ *BetClub platforma + FIFA modul nasadený na produkciu (betclub.fellow.sk).*
-Web funkčný: multi-turnaj, FIFA zápasy/tipy/tabuľky/poradie/tretie miesta, admin (výsledky, živé skóre, bracket, finalizácia), generovanie testovacích dát, impersonácia, token-versioning, flashscore ikony, BetClub favicon.
+Web funkčný: multi-turnaj, FIFA zápasy/tipy/tabuľky/poradie/tretie miesta, admin (výsledky, živé skóre, bracket, finalizácia), generovanie testovacích dát, impersonácia, token-versioning, flashscore ikony, BetClub favicon + PWA ikony, pozvánky (soft delete, BetClub text), impersonácia opravená (tv claim).
 Zostáva: Android.
 
 ---
@@ -260,6 +260,7 @@ Poradie migrácie:
 | 024–036 | ✅ | ✅ |
 | 037 FIFA flashscore URL | ✅ | ✅ |
 | 038 group description 1000 | ✅ | ✅ |
+| 039 invites cancelled_at | ✅ | ✅ |
 
 ---
 
@@ -279,9 +280,32 @@ Poradie migrácie:
 5. ✅ **FIFA flashscore URL** — skupinová fáza (game_id 1–72), migrácia 037; R32+ doplniť po zostavení parov
 6. ✅ **Admin Skupiny** — klik na názov zobrazí popis skupiny (▼/▲)
 7. ✅ **Popis skupiny 1000 znakov** — migrácia 038, frontend maxLength
-8. ✅ **Text pozvánky** — aktualizovaný na BetClub (všeobecný, vykanie)
+8. ✅ **Text pozvánky** — aktualizovaný na BetClub (všeobecný, vykanie), admin aj user, text kopírovania
 9. ✅ **Všetci useri** — active_competition_id nastavené na FIFA (id=2)
-10. 🔲 **Android aplikácia** (Kotlin) — neskôr, nie priorita
-11. 🟡 *Nice-to-have:* automatické párovanie knockout bracketu z víťazov skupín (teraz manuálne)
+10. ✅ **PWA manifest** — BetClub názov, ikony 192/512 (prod + dev variant)
+11. ✅ **Impersonácia opravená** — chýbajúci `tv` claim spôsoboval okamžitý logout (v4.11)
+12. ✅ **Pozvánky soft delete** — cancelled_at, stav Zrušená, duplicita ignoruje zrušené, admin aj user môže zrušiť (migrácia 039)
+13. ✅ **Skupiny default filter** — Všetky namiesto Moje
+14. ✅ **Migrácia 039** — spustená na DB-DEV-BET aj DB-BET
+15. 🔲 **Android aplikácia** (Kotlin) — neskôr, nie priorita
+16. 🟡 *Nice-to-have:* automatické párovanie knockout bracketu z víťazov skupín (teraz manuálne)
+
+---
+
+## Nápady na vylepšenia (backlog)
+
+| # | Nápad | Priorita |
+|---|---|---|
+| 1 | **Email pri registrácii** — uvítací mail po úspešnej registrácii. Email z pozvánky sa uloží do profilu. | ✅ otestované |
+| 2 | **Zabudnuté heslo** — odkaz na prihlasovacej obrazovke, reset link cez email (1h), migrácia 040. Pravidlá: červená poznámka o emaili. | ✅ otestované |
+| 3 | **Skupinové udalosti (notifikácie)** — push + email pri pozvánke do skupiny a schválení vstupu. | ✅ otestované |
+| 4 | **Upozornenie pred uzavretím tipu** — push 30 min pred zápasom, rozlíši tip/bez tipu. IIHF aj FIFA cron. | 🟠 implementované, otestuje sa počas turnaja |
+| 5 | **Dashboard — nezatipovaný zápas** — sekcia nezatipovaných zápasov na dnes a zajtra. | ✅ už implementované |
+| 6 | **História tipov + graf vývoja** — accordion tipov hráča v Poradí + line chart vývoja bodov (Recharts). Vlajky, dátum, zarovnané skóre. | ✅ otestované |
+| 7 | **Hromadné zadanie výsledkov** — nie je potrebné, futbalové zápasy nejdu naraz, admin zadáva po jednom cez livescore. | ❌ nepotrebné |
+| 8 | **Export výsledkov** — CSV export poradia skupiny. | ❌ nepotrebné |
+| 9 | **Správy/chat** — správa adminovi + jednoduchý chat pre tipérov v skupine. Nie sociálna sieť. Riešiť ako úplne posledné. | 🔲 dlhodobé |
+| 10 | **Štatistiky usera** — úspešnosť, najlepší/najhorší zápas, streak. | 🔲 dlhodobé |
+| 11 | **Sieň slávy** — po skončení každého turnaja sa uloží finálne globálne poradie. Top 10 dostane body (1.=10, 2.=9, ... 10.=1, od 11.=0). Tri tabuľky: (a) Globálna (všetky turnaje), (b) Futbalová (FIFA, LM, ME, Olympiáda...), (c) Hokejová (MS, Olympiáda...). Body sa kumulujú naprieč turnajmi v rámci športu — tipér súťaží len v tom športe ktorý tipuje. Klik na hráča rozroluje turnaje kde získal body (accordion). | 🟢 READY TO CODE |
 
 > Login token expirácia: **7 dní** (`time() + 86400 * 7`). Test expirácie + auto-redirect na /login overený (✅).

@@ -11,6 +11,8 @@ $TYPES = [
     'result_entered'     => ['label' => 'Výsledok zápasu',            'timed' => false],
     'group_stage_closed' => ['label' => 'Uzavretie základnej časti',  'timed' => false],
     'new_games_added'    => ['label' => 'Nové play-off zápasy',       'timed' => false],
+    'group_events'       => ['label' => 'Skupinové udalosti (pozvánka, schválenie vstupu)', 'timed' => false],
+    'pre_game_reminder'  => ['label' => 'Upozornenie pred zápasom (rozlíši či máš tip alebo nie)', 'timed' => true],
 ];
 
 if ($method === 'GET') {

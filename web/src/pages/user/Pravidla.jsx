@@ -283,8 +283,8 @@ function TabOvladanie() {
                     <div className={styles.guideItem}><span className={styles.guideLabel}>Súťaže</span> — výber aktívneho turnaja.</div>
                     <div className={styles.guideItem}><span className={styles.guideLabel}>Skupiny</span> — vytváranie skupín, popis/podmienka vstupu, pozývanie členov, schvaľovanie žiadostí.</div>
                     <div className={styles.guideItem}><span className={styles.guideLabel}>Pozvánky</span> — odoslané pozvánky a tvorba nových.</div>
-                    <div className={styles.guideItem}><span className={styles.guideLabel}>Avatar a údaje</span> — fotka, meno, e-mail (potrebný pre e-mailové notifikácie), telefón, zmena hesla.</div>
-                    <div className={styles.guideItem}><span className={styles.guideLabel}>Notifikácie</span> — upozornenia pred zápasom, pri netipovanom zápase a po zadaní výsledku. E-mailom aj push (Chrome, Edge, Firefox aj mobil) — push aktivuješ tlačidlom.</div>
+                    <div className={styles.guideItem}><span className={styles.guideLabel}>Avatar a údaje</span> — fotka, meno, e-mail (potrebný pre e-mailové notifikácie), telefón, zmena hesla. <span style={{color:'#c0392b', fontWeight:600}}>Bez vyplneného e-mailu nie je možné resetovať zabudnuté heslo bez pomoci administrátora.</span></div>
+                    <div className={styles.guideItem}><span className={styles.guideLabel}>Notifikácie</span> — upozornenia pred zápasom, pri netipovanom zápase, po zadaní výsledku a skupinové udalosti (pozvánka do skupiny, schválenie vstupu). E-mailom aj push (Chrome, Edge, Firefox aj mobil) — push aktivuješ tlačidlom v záložke Notifikácie.</div>
                     <div className={styles.guideItem}><span className={styles.guideLabel}>Odhlásenie</span> — záložka Odhlásenie.</div>
                 </div>
             </div>

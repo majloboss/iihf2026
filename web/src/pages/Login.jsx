@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { login } from '../api/auth';
 import { useAuth } from '../context/AuthContext';
 import styles from './Login.module.css';
@@ -55,6 +55,7 @@ export default function Login() {
                         {loading ? 'Prihlasovanie…' : 'Prihlásiť sa'}
                     </button>
                 </form>
+                <Link to="/forgot-password" className={styles.forgotLink}>Zabudnuté heslo?</Link>
             </div>
         </div>
     );

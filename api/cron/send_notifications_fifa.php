@@ -30,10 +30,12 @@ $users = $pdo->query("
            ns_start.push_enabled AS gs_push, ns_start.minutes_before AS gs_min,
            ns_ut.enabled AS ut_enabled, ns_ut.email_enabled AS ut_email,
            ns_ut.push_enabled AS ut_push, ns_ut.minutes_before AS ut_min,
+           ns_pgr.enabled AS pgr_enabled, ns_pgr.push_enabled AS pgr_push, ns_pgr.minutes_before AS pgr_min,
            (SELECT COUNT(*) FROM admin.user_push_subscriptions WHERE user_id = u.id) AS push_count
     FROM admin.users u
     LEFT JOIN admin.notification_settings ns_start ON ns_start.user_id = u.id AND ns_start.notif_type = 'game_start'
     LEFT JOIN admin.notification_settings ns_ut    ON ns_ut.user_id = u.id AND ns_ut.notif_type = 'untipped_game'
+    LEFT JOIN admin.notification_settings ns_pgr   ON ns_pgr.user_id = u.id AND ns_pgr.notif_type = 'pre_game_reminder'
     WHERE u.is_active = TRUE
       AND ((u.email IS NOT NULL AND u.email <> '')
            OR EXISTS (SELECT 1 FROM admin.user_push_subscriptions WHERE user_id = u.id))
@@ -53,6 +55,10 @@ foreach ($users as $u) {
         $min = (int)($u['ut_min'] ?? 30);
         if ($has_email && $u['ut_email']) fifa_send_game_mail($pdo, $uid, $u['email'], $u['username'], $min, 'untipped_game', true);
         if ($has_push  && $u['ut_push'])  fifa_send_game_push($pdo, $uid, $min, 'untipped_game', true, $vapid);
+    }
+    if ($u['pgr_enabled']) {
+        $min = (int)($u['pgr_min'] ?? 30);
+        if ($has_push && $u['pgr_push']) fifa_send_pre_game_reminder_push($pdo, $uid, $min, $vapid);
     }
 }
 
@@ -166,6 +172,23 @@ function fifa_send_game_push(PDO $pdo, int $uid, int $min, string $type, bool $c
         $time  = (new DateTime($g['start_time'], new DateTimeZone('UTC')))->setTimezone(new DateTimeZone('Europe/Bratislava'))->format('H:i');
         $title = $type === 'game_start' ? "{$g['team1']} – {$g['team2']} o $time" : "Nezadaný tip: {$g['team1']} – {$g['team2']}";
         $body  = $type === 'game_start' ? "Začína za $min minút" : "Tipovanie sa uzatvára o $time";
+        $payload = json_encode(['title' => $title, 'body' => $body, 'url' => '/games']);
+        $r = send_push_to_user($pdo, $uid, $payload, $vapid);
+        if ($r['sent'] > 0) fifa_log_notif($pdo, $uid, $logType, (int)$g['game_id']);
+    }
+}
+
+function fifa_send_pre_game_reminder_push(PDO $pdo, int $uid, int $min, array $vapid): void {
+    $logType = 'fifa_pre_game_reminder_push';
+    foreach (fifa_upcoming_games($pdo, $uid, $min, $logType) as $g) {
+        $has_tip = !fifa_is_untipped($pdo, $uid, (int)$g['game_id']);
+        $time    = (new DateTime($g['start_time'], new DateTimeZone('UTC')))->setTimezone(new DateTimeZone('Europe/Bratislava'))->format('H:i');
+        $title   = $has_tip
+            ? "{$g['team1']} – {$g['team2']} o $time"
+            : "Nezatipovaný zápas! {$g['team1']} – {$g['team2']}";
+        $body    = $has_tip
+            ? "Začína za $min minút, ešte môžeš zmeniť tip"
+            : "Tipovanie sa uzatvára o $time — {$min} minút!";
         $payload = json_encode(['title' => $title, 'body' => $body, 'url' => '/games']);
         $r = send_push_to_user($pdo, $uid, $payload, $vapid);
         if ($r['sent'] > 0) fifa_log_notif($pdo, $uid, $logType, (int)$g['game_id']);

@@ -1,6 +1,7 @@
 <?php
 // POST /v1/auth/complete — dokoncenie registracie (nastavenie username + hesla)
 if ($method !== 'POST') json_error('Method not allowed', 405);
+require_once __DIR__ . '/../../helpers/mailer.php';
 
 $payload = require_auth();
 if (empty($payload['complete'])) json_error('Forbidden', 403);
@@ -40,10 +41,35 @@ if ($invRow) {
     }
 }
 
+// Uvítací email (ak má user vyplnený email)
+$emailRow = $pdo->prepare("SELECT email FROM admin.users WHERE id = ?");
+$emailRow->execute([$payload['user_id']]);
+$userEmail = $emailRow->fetchColumn();
+if ($userEmail && filter_var($userEmail, FILTER_VALIDATE_EMAIL)) {
+    try {
+        $rulesUrl = APP_URL . '/pravidla';
+        $welcomeBody = "Ahoj " . $username . ",\n\n"
+            . "vitaj v BetClub – tipovačke športových zápasov pre Teba a Tvojich kamošov!\n\n"
+            . "Tvoj účet je aktívny, môžeš sa prihlásiť na " . APP_URL . "\n\n"
+            . "Čo urobiť ako prvé:\n"
+            . "1. Prečítaj si pravidlá — ako funguje tipovanie, bodovanie a skupiny:\n   " . $rulesUrl . "\n"
+            . "2. Pridaj sa do skupiny — v záložke Skupiny nájdeš existujúce skupiny a môžeš požiadať o vstup\n"
+            . "3. Vytvor vlastnú skupinu — pozvi kamarátov a súťažte medzi sebou\n\n"
+            . "Veľa šťastia a pekných tipov!\n"
+            . "BetClub – Tipujte s kamošmi";
+        send_mail_logged($pdo, $userEmail, 'Vitaj v BetClub!', $welcomeBody);
+    } catch (Throwable $e) { /* non-fatal */ }
+}
+
+$tvRow = $pdo->prepare("SELECT token_version FROM admin.users WHERE id = ?");
+$tvRow->execute([$payload['user_id']]);
+$tv = (int)$tvRow->fetchColumn();
+
 $token = jwt_create([
     'user_id'          => $payload['user_id'],
     'role'             => 'user',
     'username_changed' => true,
+    'tv'               => $tv,
     'exp'              => time() + 86400 * 7
 ]);
 
