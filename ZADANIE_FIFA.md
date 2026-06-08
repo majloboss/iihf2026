@@ -290,4 +290,22 @@ Poradie migrácie:
 15. 🔲 **Android aplikácia** (Kotlin) — neskôr, nie priorita
 16. 🟡 *Nice-to-have:* automatické párovanie knockout bracketu z víťazov skupín (teraz manuálne)
 
+---
+
+## Nápady na vylepšenia (backlog)
+
+| # | Nápad | Priorita |
+|---|---|---|
+| 1 | **Email pri registrácii** — uvítací mail po úspešnej registrácii | pred 11.6. |
+| 2 | **Zabudnuté heslo** — reset cez email, teraz rieši admin manuálne | pred 11.6. |
+| 3 | **Notifikácia pri novej pozvánke** — push/email keď ťa niekto pozve do skupiny | pred 11.6. |
+| 4 | **Upozornenie pred uzavretím tipu** — push X hodín pred zápasom (teraz len game_start) | počas turnaja |
+| 5 | **Dashboard — nezatipovaný zápas** — výrazné upozornenie ak máš nezatipovaný zápas do 24h | počas turnaja |
+| 6 | **História tipov usera** — vlastné tipy po skončení zápasov s rozpisom bodov | počas turnaja |
+| 7 | **Hromadné zadanie výsledkov** — admin zadáva viacero zápasov naraz | admin pohodlie |
+| 8 | **Export výsledkov** — CSV export poradia skupiny na konci turnaja | po turnaji |
+| 9 | **Komentáre/chat v skupine** — tipéri môžu reagovať na výsledky | dlhodobé |
+| 10 | **Štatistiky usera** — celková úspešnosť, najlepší/najhorší zápas, streak | dlhodobé |
+| 11 | **Sieň slávy** — história výsledkov za jednotlivé súťaže (víťazi, poradie, štatistiky) | dlhodobé |
+
 > Login token expirácia: **7 dní** (`time() + 86400 * 7`). Test expirácie + auto-redirect na /login overený (✅).
