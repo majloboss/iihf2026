@@ -1,0 +1,80 @@
+-- Migration 037: FIFA flashscore URLs (skupinová fáza, game_id 1-72)
+-- Skopírované z DB-DEV-BET.fifa2026.games_pdf
+-- Spusti na: DB-BET
+
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/juzna-afrika-W2ijYvlr/mexiko-O6iHcNkd/?mid=h4EoUB7T' WHERE game_id = 1  AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/cesko-6LHwBDGU/juzna-korea-K6Gs7P6G/?mid=CGdvIm6K' WHERE game_id = 2  AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/bosna-a-hercegovina-fqe7WYTr/kanada-x4toKORL/?mid=OxkQ8qT6' WHERE game_id = 3  AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/paraguaj-YaNlqp6j/usa-fuitL4CF/?mid=bo9vy2zK' WHERE game_id = 4  AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/katar-zqzHL77i/svajciarsko-rHJ2vy1B/?mid=C8oCpXiA' WHERE game_id = 5  AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/brazilia-I9l9aqLq/maroko-IDKYO3R8/?mid=b5JayTEd' WHERE game_id = 6  AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/haiti-nk4v10Z1/skotsko-fZRU25WH/?mid=QBBoaW63' WHERE game_id = 7  AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/australia-xSrf6qMM/turecko-QeijuHo5/?mid=nLNXPs35' WHERE game_id = 8  AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/curacao-bLLGpOkQ/nemecko-ptQide1O/?mid=dtiRRcc6' WHERE game_id = 9  AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/holandsko-WYintcWb/japonsko-ULXPdOUj/?mid=4SV9xFBO' WHERE game_id = 10 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/ekvador-8tbm8Tri/pobrezie-slonoviny-G2FRjBgn/?mid=h8pzQySI' WHERE game_id = 11 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/svedsko-OQyqbHWB/tunisko-QqZVYk95/?mid=UaJKzaHN' WHERE game_id = 12 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/kapverdy-MocyWdm7/spanielsko-bLyo6mco/?mid=Iiqjm5Pq' WHERE game_id = 13 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/belgicko-GbB957na/egypt-bejDn7NN/?mid=dG7zgzd5' WHERE game_id = 14 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/saudska-arabia-biSY8ox4/uruguaj-xMk44orG/?mid=Olnboqfd' WHERE game_id = 15 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/iran-xrRx85iA/novy-zeland-rLctHkpU/?mid=4tBriEQH' WHERE game_id = 16 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/francuzsko-QkGeVG1n/senegal-hOIsJLJr/?mid=ALxYcMw2' WHERE game_id = 17 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/irak-K8aAGt6r/norsko-8rP6JO0H/?mid=n9TEVLhA' WHERE game_id = 18 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/alzirsko-nc87N1BR/argentina-f9OppQjp/?mid=UP9bEsOr' WHERE game_id = 19 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/jordansko-vNcmJoU2/rakusko-naHiWdnt/?mid=OO27CLhe' WHERE game_id = 20 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/d-r-kongo-phn9mm8H/portugalsko-WvJrjFVN/?mid=4zTHJLbM' WHERE game_id = 21 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/anglicko-j9N9ZNFA/chorvatsko-K8aznggo/?mid=b5qGuKMs' WHERE game_id = 22 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/ghana-nNBjHale/panama-OWKqbCfi/?mid=jD1Nwbif' WHERE game_id = 23 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/kolumbia-G02s4PCS/uzbekistan-EZYKKRMc/?mid=jaMlPbx1' WHERE game_id = 24 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/cesko-6LHwBDGU/juzna-afrika-W2ijYvlr/?mid=8nrACRTs' WHERE game_id = 25 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/bosna-a-hercegovina-fqe7WYTr/svajciarsko-rHJ2vy1B/?mid=djmY6NcJ' WHERE game_id = 26 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/kanada-x4toKORL/katar-zqzHL77i/?mid=67vLrBMM' WHERE game_id = 27 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/juzna-korea-K6Gs7P6G/mexiko-O6iHcNkd/?mid=On5HOkVj' WHERE game_id = 28 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/australia-xSrf6qMM/usa-fuitL4CF/?mid=S0aAVubs' WHERE game_id = 29 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/maroko-IDKYO3R8/skotsko-fZRU25WH/?mid=nRafcAyG' WHERE game_id = 30 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/brazilia-I9l9aqLq/haiti-nk4v10Z1/?mid=IRyRv2Ll' WHERE game_id = 31 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/paraguaj-YaNlqp6j/turecko-QeijuHo5/?mid=KnyuOLXH' WHERE game_id = 32 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/holandsko-WYintcWb/svedsko-OQyqbHWB/?mid=0rAjVxuo' WHERE game_id = 33 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/nemecko-ptQide1O/pobrezie-slonoviny-G2FRjBgn/?mid=SMzorJsm' WHERE game_id = 34 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/curacao-bLLGpOkQ/ekvador-8tbm8Tri/?mid=p2XLmuKP' WHERE game_id = 35 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/japonsko-ULXPdOUj/tunisko-QqZVYk95/?mid=SzGJdIdt' WHERE game_id = 36 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/saudska-arabia-biSY8ox4/spanielsko-bLyo6mco/?mid=CASh7QGF' WHERE game_id = 37 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/belgicko-GbB957na/iran-xrRx85iA/?mid=fBZ09etn' WHERE game_id = 38 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/kapverdy-MocyWdm7/uruguaj-xMk44orG/?mid=4pPp9nn3' WHERE game_id = 39 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/egypt-bejDn7NN/novy-zeland-rLctHkpU/?mid=QeaikheU' WHERE game_id = 40 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/argentina-f9OppQjp/rakusko-naHiWdnt/?mid=Cpq2Y2FE' WHERE game_id = 41 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/francuzsko-QkGeVG1n/irak-K8aAGt6r/?mid=KMRMTaNM' WHERE game_id = 42 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/norsko-8rP6JO0H/senegal-hOIsJLJr/?mid=xSUJLPV8' WHERE game_id = 43 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/alzirsko-nc87N1BR/jordansko-vNcmJoU2/?mid=dx1FAaN7' WHERE game_id = 44 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/portugalsko-WvJrjFVN/uzbekistan-EZYKKRMc/?mid=nRFcNx7D' WHERE game_id = 45 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/anglicko-j9N9ZNFA/ghana-nNBjHale/?mid=KhgvzGjJ' WHERE game_id = 46 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/chorvatsko-K8aznggo/panama-OWKqbCfi/?mid=CSkWyxM6' WHERE game_id = 47 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/d-r-kongo-phn9mm8H/kolumbia-G02s4PCS/?mid=K0YnEaMq' WHERE game_id = 48 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/kanada-x4toKORL/svajciarsko-rHJ2vy1B/?mid=2wQjwkpp' WHERE game_id = 49 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/bosna-a-hercegovina-fqe7WYTr/katar-zqzHL77i/?mid=jRyHEZGP' WHERE game_id = 50 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/brazilia-I9l9aqLq/skotsko-fZRU25WH/?mid=EgVZxtj1' WHERE game_id = 51 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/haiti-nk4v10Z1/maroko-IDKYO3R8/?mid=n7TsyKKD' WHERE game_id = 52 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/cesko-6LHwBDGU/mexiko-O6iHcNkd/?mid=GCoIA5bf' WHERE game_id = 53 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/juzna-afrika-W2ijYvlr/juzna-korea-K6Gs7P6G/?mid=4rr4ngNc' WHERE game_id = 54 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/curacao-bLLGpOkQ/pobrezie-slonoviny-G2FRjBgn/?mid=d2S1vysC' WHERE game_id = 55 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/ekvador-8tbm8Tri/nemecko-ptQide1O/?mid=zmvgtcCa' WHERE game_id = 56 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/japonsko-ULXPdOUj/svedsko-OQyqbHWB/?mid=Sl2xgtXi' WHERE game_id = 57 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/holandsko-WYintcWb/tunisko-QqZVYk95/?mid=0lERfdRh' WHERE game_id = 58 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/turecko-QeijuHo5/usa-fuitL4CF/?mid=SCvmMa2U' WHERE game_id = 59 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/australia-xSrf6qMM/paraguaj-YaNlqp6j/?mid=lGmJTJSg' WHERE game_id = 60 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/francuzsko-QkGeVG1n/norsko-8rP6JO0H/?mid=bsJSJ30L' WHERE game_id = 61 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/irak-K8aAGt6r/senegal-hOIsJLJr/?mid=j5IhOwop' WHERE game_id = 62 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/kapverdy-MocyWdm7/saudska-arabia-biSY8ox4/?mid=487Xar9k' WHERE game_id = 63 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/spanielsko-bLyo6mco/uruguaj-xMk44orG/?mid=8xM154oS' WHERE game_id = 64 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/egypt-bejDn7NN/iran-xrRx85iA/?mid=OjRH5DuB' WHERE game_id = 65 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/belgicko-GbB957na/novy-zeland-rLctHkpU/?mid=jwT97ZAb' WHERE game_id = 66 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/anglicko-j9N9ZNFA/panama-OWKqbCfi/?mid=YZajsXcn' WHERE game_id = 67 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/chorvatsko-K8aznggo/ghana-nNBjHale/?mid=6mbbuBSb' WHERE game_id = 68 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/kolumbia-G02s4PCS/portugalsko-WvJrjFVN/?mid=vL2qotaK' WHERE game_id = 69 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/d-r-kongo-phn9mm8H/uzbekistan-EZYKKRMc/?mid=hEWfCwid' WHERE game_id = 70 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/alzirsko-nc87N1BR/rakusko-naHiWdnt/?mid=4rOtRK7l' WHERE game_id = 71 AND flashscore_url IS NULL;
+UPDATE fifa2026.games SET flashscore_url = 'https://www.flashscore.sk/zapas/futbal/argentina-f9OppQjp/jordansko-vNcmJoU2/?mid=KAnAWtpR' WHERE game_id = 72 AND flashscore_url IS NULL;
+
+INSERT INTO admin.schema_versions (version, description)
+VALUES (37, 'FIFA flashscore URLs skupinová fáza (game_id 1-72)')
+ON CONFLICT (version) DO NOTHING;
