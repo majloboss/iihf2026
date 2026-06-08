@@ -5,7 +5,6 @@
 // POST /v1/group-members  { group_id, action: 'approve'|'reject', user_id } - zakladateľ
 $auth = require_auth();
 $pdo  = db();
-require_once __DIR__ . '/../../helpers/notify_group_event.php';
 
 $group_id = (int)(($_GET['group_id'] ?? 0) ?: (json_decode(file_get_contents('php://input'), true)['group_id'] ?? 0));
 if (!$group_id) json_error('Chýba group_id', 400);
@@ -62,6 +61,7 @@ if ($method === 'POST') {
         $inviterRow = $pdo->prepare("SELECT username FROM admin.users WHERE id = ?");
         $inviterRow->execute([$auth['user_id']]);
         $inviter = $inviterRow->fetchColumn() ?: 'Niekto';
+        require_once __DIR__ . '/../../helpers/notify_group_event.php';
         notify_group_event($pdo, $inv_id, 'Pozvánka do skupiny', $inviter . ' Ťa pozval do skupiny "' . $group_name . '"');
         json_ok(['done' => true]);
     }
@@ -87,6 +87,7 @@ if ($method === 'POST') {
     if ($action === 'approve') {
         $pdo->prepare("UPDATE admin.group_members SET status='accepted', joined_at=NOW() WHERE group_id=? AND user_id=?")->execute([$group_id, $user_id]);
         // Notifikácia schválenému
+        require_once __DIR__ . '/../../helpers/notify_group_event.php';
         notify_group_event($pdo, $user_id, 'Vstup do skupiny schválený', 'Tvoja žiadosť o vstup do skupiny "' . $group_name . '" bola schválená');
     } else {
         $pdo->prepare('DELETE FROM admin.group_members WHERE group_id=? AND user_id=?')->execute([$group_id, $user_id]);

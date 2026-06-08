@@ -4,7 +4,6 @@
 // Body: { group_id: X, source_group_id: Y }
 $auth = require_auth();
 $pdo  = db();
-require_once __DIR__ . '/../../helpers/notify_group_event.php';
 
 if ($method !== 'POST') json_error('Method not allowed', 405);
 
@@ -56,6 +55,7 @@ foreach ($sourceMembers as $uid) {
     $ins->execute([$group_id, $uid]);
     if ($ins->rowCount() > 0) {
         $invited++;
+        require_once __DIR__ . '/../../helpers/notify_group_event.php';
         notify_group_event($pdo, (int)$uid, 'Pozvánka do skupiny', $inviter_username . ' Ťa pozval do skupiny "' . $target_group_name . '"');
     } else $skipped++;
 }
