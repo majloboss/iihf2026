@@ -2,7 +2,7 @@
 // POST /v1/auth/password-reset-request  body: { username, email }
 // Odošle reset link ak username + email sedí k tomu istému účtu.
 if ($method !== 'POST') json_error('Method not allowed', 405);
-require_once __DIR__ . '/../helpers/mailer.php';
+require_once __DIR__ . '/../../helpers/mailer.php';
 
 $body     = json_decode(file_get_contents('php://input'), true) ?? [];
 $username = trim($body['username'] ?? '');

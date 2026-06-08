@@ -1,7 +1,7 @@
 <?php
 // POST /v1/auth/complete — dokoncenie registracie (nastavenie username + hesla)
 if ($method !== 'POST') json_error('Method not allowed', 405);
-require_once __DIR__ . '/../helpers/mailer.php';
+require_once __DIR__ . '/../../helpers/mailer.php';
 
 $payload = require_auth();
 if (empty($payload['complete'])) json_error('Forbidden', 403);
