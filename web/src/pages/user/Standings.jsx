@@ -22,64 +22,63 @@ function PlayerTips({ userId, compId }) {
             .catch(e => { setError(e.message); setLoading(false); });
     }, [userId, compId]);
 
-    if (loading) return <tr><td colSpan={5} style={{padding:'8px 16px',color:'#aaa'}}>Načítavam…</td></tr>;
-    if (error)   return <tr><td colSpan={5} style={{padding:'8px 16px',color:'#c0392b'}}>{error}</td></tr>;
-    if (!data?.tips?.length) return <tr><td colSpan={5} style={{padding:'8px 16px',color:'#aaa'}}>Žiadne ukončené zápasy.</td></tr>;
+    if (loading) return <tr><td colSpan={4} style={{padding:'8px 16px',color:'#aaa'}}>Načítavam…</td></tr>;
+    if (error)   return <tr><td colSpan={4} style={{padding:'8px 16px',color:'#c0392b'}}>{error}</td></tr>;
+    if (!data?.tips?.length) return <tr><td colSpan={4} style={{padding:'8px 16px',color:'#aaa'}}>Žiadne ukončené zápasy.</td></tr>;
 
     const flag = (code) => compId === 2
         ? `/flags/fifa_flag_${code?.toLowerCase()}.png`
         : `/flags/team_flag_${code?.toLowerCase()}.png`;
     const fmtDate = (iso) => {
         const d = new Date(iso);
-        return d.toLocaleDateString('sk-SK', {day:'2-digit', month:'2-digit'}) + ' ' +
-               d.toLocaleTimeString('sk-SK', {hour:'2-digit', minute:'2-digit'});
+        const day = String(d.getDate()).padStart(2,'0');
+        const mon = String(d.getMonth()+1).padStart(2,'0');
+        const h   = String(d.getHours()).padStart(2,'0');
+        const m   = String(d.getMinutes()).padStart(2,'0');
+        return `${day}.${mon} ${h}:${m}`;
     };
 
     return (
         <tr>
-            <td colSpan={5} style={{padding:'0 0 4px 0', background:'#f8f9fa'}}>
-                <table style={{width:'100%', borderCollapse:'collapse', fontSize:'0.78rem'}}>
+            <td colSpan={4} style={{padding:'0 0 4px 0', background:'#f8f9fa'}}>
+              <div style={{overflowX:'auto'}}>
+                <table style={{width:'100%', minWidth:'320px', borderCollapse:'collapse', fontSize:'0.78rem', tableLayout:'fixed'}}>
+                    <colgroup>
+                        <col style={{width:'58px'}} />
+                        <col style={{width:'auto'}} />
+                        <col style={{width:'30px'}} />
+                        <col style={{width:'30px'}} />
+                        <col style={{width:'18px'}} />
+                    </colgroup>
                     <thead>
                         <tr style={{background:'#e9ecef', color:'#555'}}>
-                            <th style={{padding:'4px 6px', textAlign:'left', whiteSpace:'nowrap'}}>Dátum</th>
-                            <th style={{padding:'4px 6px', textAlign:'left'}}>Zápas</th>
-                            <th style={{padding:'4px 4px', textAlign:'center'}}>Výsl.</th>
-                            <th style={{padding:'4px 4px', textAlign:'center'}}>Tip</th>
-                            <th style={{padding:'4px 4px', textAlign:'center'}}>B</th>
+                            <th style={{padding:'4px 4px', textAlign:'left'}}>Dátum</th>
+                            <th style={{padding:'4px 4px', textAlign:'left'}}>Zápas</th>
+                            <th style={{padding:'4px 2px', textAlign:'center'}}>Výsl.</th>
+                            <th style={{padding:'4px 2px', textAlign:'center'}}>Tip</th>
+                            <th style={{padding:'4px 2px', textAlign:'center'}}>B</th>
                         </tr>
                     </thead>
                     <tbody>
                         {data.tips.map(t => (
                             <tr key={t.game_id} style={{borderBottom:'1px solid #dee2e6'}}>
-                                <td style={{padding:'3px 6px', color:'#888', whiteSpace:'nowrap', fontSize:'0.73rem'}}>{fmtDate(t.starts_at)}</td>
-                                <td style={{padding:'3px 6px'}}>
-                                    <div style={{display:'grid', gridTemplateColumns:'16px 30px 8px 16px 30px', alignItems:'center', gap:'0 3px'}}>
-                                        <img src={flag(t.team1)} alt={t.team1} style={{width:16, height:11, objectFit:'cover'}} onError={e => e.target.style.display='none'} />
-                                        <span style={{fontSize:'0.75rem', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap'}}>{t.team1}</span>
-                                        <span style={{fontSize:'0.75rem', textAlign:'center', color:'#555'}}>:</span>
-                                        <img src={flag(t.team2)} alt={t.team2} style={{width:16, height:11, objectFit:'cover'}} onError={e => e.target.style.display='none'} />
-                                        <span style={{fontSize:'0.75rem', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap'}}>{t.team2}</span>
+                                <td style={{padding:'3px 4px', color:'#888', fontSize:'0.7rem', whiteSpace:'nowrap', overflow:'hidden'}}>{fmtDate(t.starts_at)}</td>
+                                <td style={{padding:'3px 4px'}}>
+                                    <div style={{display:'flex', alignItems:'center', gap:2, whiteSpace:'nowrap'}}>
+                                        <img src={flag(t.team1)} alt={t.team1} style={{width:16, height:11, objectFit:'cover', flexShrink:0}} onError={e => e.target.style.display='none'} />
+                                        <span style={{fontSize:'0.73rem'}}>{t.team1}</span>
+                                        <span style={{fontSize:'0.73rem', color:'#555', margin:'0 1px'}}>:</span>
+                                        <img src={flag(t.team2)} alt={t.team2} style={{width:16, height:11, objectFit:'cover', flexShrink:0}} onError={e => e.target.style.display='none'} />
+                                        <span style={{fontSize:'0.73rem'}}>{t.team2}</span>
                                     </div>
                                 </td>
-                                <td style={{padding:'3px 4px', textAlign:'center', fontSize:'0.75rem', whiteSpace:'nowrap'}}>
-                                    {t.score1 !== null
-                                        ? <span style={{display:'inline-flex', gap:2}}>
-                                            <span style={{minWidth:14, textAlign:'right'}}>{t.score1}</span>
-                                            <span>:</span>
-                                            <span style={{minWidth:14, textAlign:'left'}}>{t.score2}</span>
-                                          </span>
-                                        : '—'}
+                                <td style={{padding:'3px 2px', textAlign:'center', fontSize:'0.73rem', whiteSpace:'nowrap'}}>
+                                    {t.score1 !== null ? `${t.score1}:${t.score2}` : '—'}
                                 </td>
-                                <td style={{padding:'3px 4px', textAlign:'center', fontSize:'0.75rem', whiteSpace:'nowrap'}}>
-                                    {t.tip1 !== null
-                                        ? <span style={{display:'inline-flex', gap:2}}>
-                                            <span style={{minWidth:14, textAlign:'right'}}>{t.tip1}</span>
-                                            <span>:</span>
-                                            <span style={{minWidth:14, textAlign:'left'}}>{t.tip2}</span>
-                                          </span>
-                                        : <span style={{color:'#aaa'}}>—</span>}
+                                <td style={{padding:'3px 2px', textAlign:'center', fontSize:'0.73rem', whiteSpace:'nowrap'}}>
+                                    {t.tip1 !== null ? `${t.tip1}:${t.tip2}` : <span style={{color:'#aaa'}}>—</span>}
                                 </td>
-                                <td style={{padding:'3px 4px', textAlign:'center', fontWeight:700, fontSize:'0.8rem',
+                                <td style={{padding:'3px 2px', textAlign:'center', fontWeight:700, fontSize:'0.8rem',
                                     color: t.points === null ? '#aaa' : t.points >= 5 ? '#27ae60' : t.points >= 3 ? '#e67e22' : t.points > 0 ? '#2980b9' : '#c0392b'}}>
                                     {t.points !== null ? t.points : '—'}
                                 </td>
@@ -87,6 +86,7 @@ function PlayerTips({ userId, compId }) {
                         ))}
                     </tbody>
                 </table>
+              </div>
             </td>
         </tr>
     );
