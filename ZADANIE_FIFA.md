@@ -277,4 +277,4 @@ Poradie migrácie:
 4. 🔲 **Token-versioning** — pridať `token_version` per user (inkrement pri zmene hesla / „odhlásiť všade") → zneplatní všetky staré JWT. Dnes je revoke len cez deaktiváciu usera; zmena hesla staré tokeny nezruší. Pri dlhej platnosti tokenu (30–100 dní) je to bezpečnejšie. *(zatiaľ nerobíme)*
 5. 🟡 *Nice-to-have:* automatické párovanie knockout bracketu z víťazov skupín (teraz manuálne)
 
-> **DOČASNÉ:** login token expirácia je teraz nastavená na **5 min** (test) — vrátiť na finálnu hodnotu (`time() + 86400 * 30` alebo `* 100`) v `api/v1/auth/login.php`.
+> Login token expirácia: **7 dní** (`time() + 86400 * 7`). Test expirácie + auto-redirect na /login overený (✅).

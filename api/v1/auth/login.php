@@ -25,7 +25,7 @@ $token = jwt_create([
     'user_id'          => $user['id'],
     'role'             => $user['role'],
     'username_changed' => (bool)$user['username_changed'],
-    'exp'              => time() + 300  // 5 minút (DOČASNE pre test expirácie!)
+    'exp'              => time() + 86400 * 7  // 7 dni
 ]);
 
 // Log login
