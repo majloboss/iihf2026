@@ -26,12 +26,20 @@ function PlayerTips({ userId, compId }) {
     if (error)   return <tr><td colSpan={5} style={{padding:'8px 16px',color:'#c0392b'}}>{error}</td></tr>;
     if (!data?.tips?.length) return <tr><td colSpan={5} style={{padding:'8px 16px',color:'#aaa'}}>Žiadne ukončené zápasy.</td></tr>;
 
+    const flag = (code) => `/flags/team_flag_${code?.toLowerCase()}.png`;
+    const fmtDate = (iso) => {
+        const d = new Date(iso);
+        return d.toLocaleDateString('sk-SK', {day:'2-digit', month:'2-digit'}) + ' ' +
+               d.toLocaleTimeString('sk-SK', {hour:'2-digit', minute:'2-digit'});
+    };
+
     return (
         <tr>
             <td colSpan={5} style={{padding:'0 0 4px 0', background:'#f8f9fa'}}>
                 <table style={{width:'100%', borderCollapse:'collapse', fontSize:'0.78rem'}}>
                     <thead>
                         <tr style={{background:'#e9ecef', color:'#555'}}>
+                            <th style={{padding:'4px 8px', textAlign:'left'}}>Dátum</th>
                             <th style={{padding:'4px 8px', textAlign:'left'}}>Zápas</th>
                             <th style={{padding:'4px 8px', textAlign:'center'}}>Výsledok</th>
                             <th style={{padding:'4px 8px', textAlign:'center'}}>Tip</th>
@@ -41,7 +49,16 @@ function PlayerTips({ userId, compId }) {
                     <tbody>
                         {data.tips.map(t => (
                             <tr key={t.game_id} style={{borderBottom:'1px solid #dee2e6'}}>
-                                <td style={{padding:'3px 8px'}}>{t.team1} – {t.team2}</td>
+                                <td style={{padding:'3px 8px', color:'#888', whiteSpace:'nowrap'}}>{fmtDate(t.starts_at)}</td>
+                                <td style={{padding:'3px 8px'}}>
+                                    <div style={{display:'flex', alignItems:'center', gap:4}}>
+                                        <img src={flag(t.team1)} alt={t.team1} style={{width:18, height:12, objectFit:'cover'}} onError={e => e.target.style.display='none'} />
+                                        {t.team1}
+                                        <span style={{color:'#aaa', margin:'0 2px'}}>–</span>
+                                        <img src={flag(t.team2)} alt={t.team2} style={{width:18, height:12, objectFit:'cover'}} onError={e => e.target.style.display='none'} />
+                                        {t.team2}
+                                    </div>
+                                </td>
                                 <td style={{padding:'3px 8px', textAlign:'center'}}>
                                     {t.score1 !== null ? `${t.score1}:${t.score2}` : '—'}
                                 </td>
