@@ -158,6 +158,21 @@ function ResultCard({ game: initGame, teams, onChanged }) {
 
     const needsET = isPlayoff && isDraw90;  // play-off remíza → povinné predĺženie s víťazom
 
+    const onH90Change = (val) => {
+        setH90(val);
+        if (isPlayoff && val !== '' && a90 !== '' && parseInt(val) === parseInt(a90)) {
+            if (hFin === '') setHFin(val);
+            if (aFin === '') setAFin(a90);
+        }
+    };
+    const onA90Change = (val) => {
+        setA90(val);
+        if (isPlayoff && h90 !== '' && val !== '' && parseInt(h90) === parseInt(val)) {
+            if (hFin === '') setHFin(h90);
+            if (aFin === '') setAFin(val);
+        }
+    };
+
     const save = async () => {
         if (h90 === '' || a90 === '') { setErr('Zadaj skóre po 90 min'); return; }
         if (needsET) {
@@ -269,9 +284,9 @@ function ResultCard({ game: initGame, teams, onChanged }) {
                     <div className={styles.editRow}>
                         <span style={{fontSize:'0.78rem', color:'#888', minWidth:60}}>Po 90 min:</span>
                         <div className={styles.scoreBox}>
-                            <input type="number" min="0" max="30" value={h90} onChange={e => setH90(e.target.value)} className={styles.scoreIn} />
+                            <input type="number" min="0" max="30" value={h90} onChange={e => onH90Change(e.target.value)} className={styles.scoreIn} />
                             <span className={styles.colon}>:</span>
-                            <input type="number" min="0" max="30" value={a90} onChange={e => setA90(e.target.value)} className={styles.scoreIn} />
+                            <input type="number" min="0" max="30" value={a90} onChange={e => onA90Change(e.target.value)} className={styles.scoreIn} />
                         </div>
                         <button className={styles.btnSave} onClick={save} disabled={saving}>
                             {saving ? '…' : saved ? '✓ Uložené' : 'Uložiť výsledok'}
