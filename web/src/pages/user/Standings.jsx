@@ -22,9 +22,9 @@ function PlayerTips({ userId, compId }) {
             .catch(e => { setError(e.message); setLoading(false); });
     }, [userId, compId]);
 
-    if (loading) return <tr><td colSpan={5} style={{padding:'8px 16px',color:'#aaa'}}>Načítavam…</td></tr>;
-    if (error)   return <tr><td colSpan={5} style={{padding:'8px 16px',color:'#c0392b'}}>{error}</td></tr>;
-    if (!data?.tips?.length) return <tr><td colSpan={5} style={{padding:'8px 16px',color:'#aaa'}}>Žiadne ukončené zápasy.</td></tr>;
+    if (loading) return <tr><td colSpan={4} style={{padding:'8px 16px',color:'#aaa'}}>Načítavam…</td></tr>;
+    if (error)   return <tr><td colSpan={4} style={{padding:'8px 16px',color:'#c0392b'}}>{error}</td></tr>;
+    if (!data?.tips?.length) return <tr><td colSpan={4} style={{padding:'8px 16px',color:'#aaa'}}>Žiadne ukončené zápasy.</td></tr>;
 
     const flag = (code) => compId === 2
         ? `/flags/fifa_flag_${code?.toLowerCase()}.png`
@@ -37,14 +37,15 @@ function PlayerTips({ userId, compId }) {
 
     return (
         <tr>
-            <td colSpan={5} style={{padding:'0 0 4px 0', background:'#f8f9fa'}}>
-                <table style={{width:'100%', borderCollapse:'collapse', fontSize:'0.78rem', tableLayout:'fixed'}}>
+            <td colSpan={4} style={{padding:'0 0 4px 0', background:'#f8f9fa'}}>
+              <div style={{overflowX:'auto'}}>
+                <table style={{width:'100%', minWidth:'320px', borderCollapse:'collapse', fontSize:'0.78rem', tableLayout:'fixed'}}>
                     <colgroup>
                         <col style={{width:'72px'}} />
                         <col />
-                        <col style={{width:'34px'}} />
-                        <col style={{width:'34px'}} />
-                        <col style={{width:'22px'}} />
+                        <col style={{width:'36px'}} />
+                        <col style={{width:'36px'}} />
+                        <col style={{width:'24px'}} />
                     </colgroup>
                     <thead>
                         <tr style={{background:'#e9ecef', color:'#555'}}>
@@ -82,6 +83,7 @@ function PlayerTips({ userId, compId }) {
                         ))}
                     </tbody>
                 </table>
+              </div>
             </td>
         </tr>
     );
