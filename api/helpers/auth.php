@@ -47,8 +47,8 @@ function require_auth($admin = false) {
                        || $row['is_active'] === '1' || $row['is_active'] === 1);
     if (!$active) json_error('Účet je neaktívny alebo neexistuje', 401);
 
-    // Token versioning: zmena hesla alebo admin-revoke inkrementuje token_version → staré tokeny odmietnuté
-    if (isset($payload['tv']) && (int)$payload['tv'] !== (int)$row['token_version']) {
+    // Token versioning: token bez 'tv' alebo s nesprávnou verziou je odmietnutý → nútený relogin
+    if (!isset($payload['tv']) || (int)$payload['tv'] !== (int)$row['token_version']) {
         json_error('Relácia vypršala, prihláste sa znova', 401);
     }
 
