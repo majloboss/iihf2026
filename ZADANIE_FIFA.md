@@ -261,6 +261,7 @@ Poradie migrácie:
 | 037 FIFA flashscore URL | ✅ | ✅ |
 | 038 group description 1000 | ✅ | ✅ |
 | 039 invites cancelled_at | ✅ | ✅ |
+| 040 password_reset_tokens | ✅ | ✅ |
 
 ---
 
