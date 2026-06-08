@@ -14,9 +14,9 @@ self.addEventListener('push', event => {
     if (!event.data) return;
     let data;
     try { data = event.data.json(); }
-    catch { data = { title: 'IIHF 2026', body: event.data.text() }; }
+    catch { data = { title: 'BetClub', body: event.data.text() }; }
     event.waitUntil(
-        self.registration.showNotification(data.title || 'IIHF 2026', {
+        self.registration.showNotification(data.title || 'BetClub', {
             body: data.body || '',
             icon: '/icon-192.png',
             badge: '/icon-192.png',
