@@ -31,8 +31,11 @@ function PlayerTips({ userId, compId }) {
         : `/flags/team_flag_${code?.toLowerCase()}.png`;
     const fmtDate = (iso) => {
         const d = new Date(iso);
-        return d.toLocaleDateString('sk-SK', {day:'2-digit', month:'2-digit'}) + ' ' +
-               d.toLocaleTimeString('sk-SK', {hour:'2-digit', minute:'2-digit'});
+        const day = String(d.getDate()).padStart(2,'0');
+        const mon = String(d.getMonth()+1).padStart(2,'0');
+        const h   = String(d.getHours()).padStart(2,'0');
+        const m   = String(d.getMinutes()).padStart(2,'0');
+        return `${day}.${mon} ${h}:${m}`;
     };
 
     return (
@@ -41,11 +44,11 @@ function PlayerTips({ userId, compId }) {
               <div style={{overflowX:'auto'}}>
                 <table style={{width:'100%', minWidth:'320px', borderCollapse:'collapse', fontSize:'0.78rem', tableLayout:'fixed'}}>
                     <colgroup>
-                        <col style={{width:'72px'}} />
-                        <col />
-                        <col style={{width:'36px'}} />
-                        <col style={{width:'36px'}} />
-                        <col style={{width:'24px'}} />
+                        <col style={{width:'58px'}} />
+                        <col style={{width:'auto'}} />
+                        <col style={{width:'30px'}} />
+                        <col style={{width:'30px'}} />
+                        <col style={{width:'18px'}} />
                     </colgroup>
                     <thead>
                         <tr style={{background:'#e9ecef', color:'#555'}}>
@@ -61,12 +64,12 @@ function PlayerTips({ userId, compId }) {
                             <tr key={t.game_id} style={{borderBottom:'1px solid #dee2e6'}}>
                                 <td style={{padding:'3px 4px', color:'#888', fontSize:'0.7rem', whiteSpace:'nowrap', overflow:'hidden'}}>{fmtDate(t.starts_at)}</td>
                                 <td style={{padding:'3px 4px'}}>
-                                    <div style={{display:'grid', gridTemplateColumns:'16px 1fr 8px 16px 1fr', alignItems:'center', gap:'0 2px'}}>
-                                        <img src={flag(t.team1)} alt={t.team1} style={{width:16, height:11, objectFit:'cover'}} onError={e => e.target.style.display='none'} />
-                                        <span style={{fontSize:'0.73rem', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap'}}>{t.team1}</span>
-                                        <span style={{fontSize:'0.73rem', textAlign:'center', color:'#555'}}>:</span>
-                                        <img src={flag(t.team2)} alt={t.team2} style={{width:16, height:11, objectFit:'cover'}} onError={e => e.target.style.display='none'} />
-                                        <span style={{fontSize:'0.73rem', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap'}}>{t.team2}</span>
+                                    <div style={{display:'flex', alignItems:'center', gap:2, whiteSpace:'nowrap'}}>
+                                        <img src={flag(t.team1)} alt={t.team1} style={{width:16, height:11, objectFit:'cover', flexShrink:0}} onError={e => e.target.style.display='none'} />
+                                        <span style={{fontSize:'0.73rem'}}>{t.team1}</span>
+                                        <span style={{fontSize:'0.73rem', color:'#555', margin:'0 1px'}}>:</span>
+                                        <img src={flag(t.team2)} alt={t.team2} style={{width:16, height:11, objectFit:'cover', flexShrink:0}} onError={e => e.target.style.display='none'} />
+                                        <span style={{fontSize:'0.73rem'}}>{t.team2}</span>
                                     </div>
                                 </td>
                                 <td style={{padding:'3px 2px', textAlign:'center', fontSize:'0.73rem', whiteSpace:'nowrap'}}>
