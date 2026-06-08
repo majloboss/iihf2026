@@ -39,7 +39,8 @@
     padding: 12px 16px;
     box-shadow: 0 1px 4px rgba(0,0,0,.06);
 }
-.cardUsed { border-left: 3px solid #28a745; }
+.cardUsed      { border-left: 3px solid #28a745; }
+.cardCancelled { border-left: 3px solid #aaa; opacity: 0.7; }
 
 .cardHead {
     display: flex;
@@ -50,8 +51,9 @@
 .recipient { font-weight: 600; font-size: 0.95rem; color: #1a3a6b; }
 .noEmail   { color: #aaa; font-weight: 400; font-style: italic; }
 
-.badgeUsed    { background: #d4edda; color: #155724; padding: 2px 8px; border-radius: 10px; font-size: 0.78rem; font-weight: 600; }
-.badgePending { background: #fff3cd; color: #856404; padding: 2px 8px; border-radius: 10px; font-size: 0.78rem; font-weight: 600; }
+.badgeUsed      { background: #d4edda; color: #155724; padding: 2px 8px; border-radius: 10px; font-size: 0.78rem; font-weight: 600; }
+.badgePending   { background: #fff3cd; color: #856404; padding: 2px 8px; border-radius: 10px; font-size: 0.78rem; font-weight: 600; }
+.badgeCancelled { background: #e9ecef; color: #666; padding: 2px 8px; border-radius: 10px; font-size: 0.78rem; font-weight: 600; }
 
 .cardMeta {
     display: flex;
