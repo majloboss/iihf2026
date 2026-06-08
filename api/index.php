@@ -23,6 +23,7 @@ try {
         $path === 'v1/admin/user-update'   => require __DIR__ . '/v1/admin/user_update.php',
         $path === 'v1/admin/user-edit'     => require __DIR__ . '/v1/admin/user_edit.php',
         $path === 'v1/admin/user-password' => require __DIR__ . '/v1/admin/user_password.php',
+        $path === 'v1/admin/user-revoke'   => require __DIR__ . '/v1/admin/user_revoke.php',
         $path === 'v1/admin/user-delete'   => require __DIR__ . '/v1/admin/user_delete.php',
         $path === 'v1/admin/invites'       => require __DIR__ . '/v1/admin/invites.php',
         $path === 'v1/admin/invite-use'    => require __DIR__ . '/v1/auth/invite_use.php',

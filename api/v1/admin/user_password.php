@@ -10,7 +10,7 @@ $new_pass = $body['new_password'] ?? '';
 if (!$id)               json_error('Chýba id', 400);
 if (strlen($new_pass) < 6) json_error('Heslo musí mať aspoň 6 znakov', 400);
 
-db()->prepare('UPDATE admin.users SET password = ? WHERE id = ?')
+db()->prepare('UPDATE admin.users SET password = ?, token_version = token_version + 1 WHERE id = ?')
     ->execute([password_hash($new_pass, PASSWORD_DEFAULT), $id]);
 
 json_ok(['changed' => true]);

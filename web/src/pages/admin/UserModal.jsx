@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { editUser, setUserPassword } from '../../api/admin';
+import { editUser, setUserPassword, revokeUserTokens } from '../../api/admin';
 import styles from './UserModal.module.css';
 
 export default function UserModal({ user, onClose, onSaved }) {
@@ -22,6 +22,16 @@ export default function UserModal({ user, onClose, onSaved }) {
             await editUser(user.id, form);
             setSuccess('Profil uložený.');
             onSaved({ ...user, ...form });
+        } catch (e) { setError(e.message); }
+        finally { setSaving(false); }
+    };
+
+    const revokeTokens = async () => {
+        if (!confirm(`Odhlásiť ${user.username} zo všetkých zariadení?`)) return;
+        setSaving(true); setError(''); setSuccess('');
+        try {
+            await revokeUserTokens(user.id);
+            setSuccess('Tokeny zrušené — user bude nútený prihlásiť sa znova.');
         } catch (e) { setError(e.message); }
         finally { setSaving(false); }
     };
@@ -81,6 +91,14 @@ export default function UserModal({ user, onClose, onSaved }) {
                         />
                         <button className={styles.btn} onClick={savePassword} disabled={saving}>Nastaviť</button>
                     </div>
+                    <button
+                        className={styles.btnDanger}
+                        onClick={revokeTokens}
+                        disabled={saving}
+                        style={{ marginTop: 8 }}
+                    >
+                        Odhlásiť zo všetkých zariadení
+                    </button>
                 </div>
 
                 {error   && <p className={styles.error}>{error}</p>}

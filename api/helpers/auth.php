@@ -40,12 +40,17 @@ function require_auth($admin = false) {
 
     // Efektívny "revoke": deaktivovaný/zmazaný user okamžite stráca prístup.
     // Rola sa berie z DB (spoľahlivejšie ako z tokenu — admin mohol byť degradovaný).
-    $stmt = db()->prepare("SELECT is_active, role FROM admin.users WHERE id = ?");
+    $stmt = db()->prepare("SELECT is_active, role, token_version FROM admin.users WHERE id = ?");
     $stmt->execute([$payload['user_id'] ?? 0]);
     $row = $stmt->fetch();
     $active = $row && ($row['is_active'] === true || $row['is_active'] === 't'
                        || $row['is_active'] === '1' || $row['is_active'] === 1);
     if (!$active) json_error('Účet je neaktívny alebo neexistuje', 401);
+
+    // Token versioning: zmena hesla alebo admin-revoke inkrementuje token_version → staré tokeny odmietnuté
+    if (isset($payload['tv']) && (int)$payload['tv'] !== (int)$row['token_version']) {
+        json_error('Relácia vypršala, prihláste sa znova', 401);
+    }
 
     $payload['role'] = $row['role']; // aktuálna rola z DB
     if ($admin && $row['role'] !== 'admin') json_error('Forbidden', 403);

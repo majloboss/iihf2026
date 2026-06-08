@@ -13,6 +13,9 @@ export const editUser      = (id, data) => apiFetch('v1/admin/user-edit', {
 export const setUserPassword = (id, new_password) => apiFetch('v1/admin/user-password', {
     method: 'POST', body: JSON.stringify({ id, new_password })
 });
+export const revokeUserTokens = (id) => apiFetch('v1/admin/user-revoke', {
+    method: 'POST', body: JSON.stringify({ id })
+});
 export const deleteUser    = (id) => apiFetch('v1/admin/user-delete', {
     method: 'POST', body: JSON.stringify({ id })
 });

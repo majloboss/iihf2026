@@ -9,7 +9,7 @@ import UserInvites from './user/UserInvites';
 import styles from './Profile.module.css';
 
 export default function Profile() {
-    const { signOut } = useAuth();
+    const { signOut, signIn } = useAuth();
     const navigate    = useNavigate();
     const fileRef     = useRef(null);
     const { competitions, activeCompetition, switchCompetition } = useCompetition();
@@ -63,7 +63,8 @@ export default function Profile() {
         }
         setBusy('pass'); setErr(e => ({ ...e, pass: '' })); setMsg(m => ({ ...m, pass: '' }));
         try {
-            await changePassword({ old_password: pass.old_password, new_password: pass.new_password });
+            const res = await changePassword({ old_password: pass.old_password, new_password: pass.new_password });
+            if (res?.token) signIn(res.token); // uložíme nový token s aktualizovanou token_version
             setPass({ old_password: '', new_password: '', confirm: '' });
             setMsg(m => ({ ...m, pass: 'Heslo zmenené.' }));
         } catch (e) { setErr(er => ({ ...er, pass: e.message })); }

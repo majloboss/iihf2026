@@ -118,6 +118,18 @@
 .btn:hover:not(:disabled) { background: #24519e; }
 .btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
+.btnDanger {
+    padding: 7px 14px;
+    background: transparent;
+    color: #c0392b;
+    border: 1px solid #c0392b;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.82rem;
+}
+.btnDanger:hover:not(:disabled) { background: #c0392b; color: #fff; }
+.btnDanger:disabled { opacity: 0.5; cursor: not-allowed; }
+
 .error   { color: #c0392b; font-size: 0.88rem; margin-top: 8px; }
 .success { color: #27ae60; font-size: 0.88rem; margin-top: 8px; }
 
