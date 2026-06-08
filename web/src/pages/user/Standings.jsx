@@ -157,8 +157,8 @@ function GroupTable({ group, currentUserId, compId }) {
                     </tr>
                 </thead>
                 <tbody>
-                    {group.members.map((m, i) => (
-                        <>
+                    {group.members.flatMap((m, i) => {
+                        const rows = [
                             <tr key={m.user_id}
                                 className={m.user_id === currentUserId ? styles.me : ''}
                                 onClick={() => toggle(m.user_id)}
@@ -186,11 +186,12 @@ function GroupTable({ group, currentUserId, compId }) {
                                     </div>
                                 </td>
                             </tr>
-                            {expanded.has(m.user_id) && (
-                                <PlayerTips key={`tips-${m.user_id}`} userId={m.user_id} compId={compId} />
-                            )}
-                        </>
-                    ))}
+                        ];
+                        if (expanded.has(m.user_id)) {
+                            rows.push(<PlayerTips key={`tips-${m.user_id}`} userId={m.user_id} compId={compId} />);
+                        }
+                        return rows;
+                    })}
                 </tbody>
             </table>
         </div>
