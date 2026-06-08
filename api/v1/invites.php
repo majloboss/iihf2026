@@ -8,7 +8,7 @@ require_once __DIR__ . '/../helpers/mailer.php';
 if ($method === 'GET') {
     try {
         $rows = $pdo->prepare(
-            "SELECT i.id, i.invite_token, i.sent_to, i.created_at, i.used_at,
+            "SELECT i.id, i.invite_token, i.sent_to, i.created_at, i.used_at, i.cancelled_at,
                     i.email_sent, i.group_id,
                     fg.name AS group_name,
                     u.username AS used_by_username
@@ -78,12 +78,12 @@ if ($method === 'POST') {
             json_error('Hráč s týmto emailom je už zaregistrovaný (@' . $reg['username'] . ')', 409);
         }
 
-        // 2. Existuje pozvánka (čakajúca alebo použitá)?
+        // 2. Existuje pozvánka (čakajúca alebo použitá)? Zrušené ignorujeme.
         $dup = $pdo->prepare(
             "SELECT i.id, i.created_by, i.used_at, u.username
              FROM admin.invites i
              JOIN admin.users u ON u.id = i.created_by
-             WHERE i.sent_to = ?
+             WHERE i.sent_to = ? AND i.cancelled_at IS NULL
              ORDER BY i.created_at DESC LIMIT 1"
         );
         $dup->execute([$sent_to]);
@@ -174,13 +174,13 @@ if ($method === 'DELETE') {
     $id   = (int)($body['id'] ?? 0);
     if (!$id) json_error('Chýba id', 400);
 
-    // Len vlastné, nepoužité pozvánky
-    $stmt = $pdo->prepare("SELECT id FROM admin.invites WHERE id = ? AND created_by = ? AND used_at IS NULL");
+    // Len vlastné, nepoužité, nezrušené pozvánky
+    $stmt = $pdo->prepare("SELECT id FROM admin.invites WHERE id = ? AND created_by = ? AND used_at IS NULL AND cancelled_at IS NULL");
     $stmt->execute([$id, $auth['user_id']]);
     if (!$stmt->fetch()) json_error('Pozvánka neexistuje alebo už bola použitá', 404);
 
-    $pdo->prepare("DELETE FROM admin.invites WHERE id = ?")->execute([$id]);
-    json_ok(['deleted' => true]);
+    $pdo->prepare("UPDATE admin.invites SET cancelled_at = NOW() WHERE id = ?")->execute([$id]);
+    json_ok(['cancelled' => true]);
 }
 
 json_error('Method not allowed', 405);

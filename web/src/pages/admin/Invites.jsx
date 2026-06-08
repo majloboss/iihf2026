@@ -167,7 +167,9 @@ export default function Invites() {
                                 </td>
                                 <td data-label="Použitý">{i.used_at
                                     ? new Date(i.used_at).toLocaleString('sk-SK')
-                                    : <span className={styles.unused}>Nepoužitý</span>}
+                                    : i.cancelled_at
+                                        ? <span style={{color:'#aaa'}}>✕ Zrušená</span>
+                                        : <span className={styles.unused}>Nepoužitý</span>}
                                 </td>
                                 <td data-label="Hráč">
                                     {i.used_by_username

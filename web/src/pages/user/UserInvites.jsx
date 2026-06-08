@@ -6,25 +6,24 @@ function buildInviteText(inv, myUsername) {
     const rulesUrl = window.location.origin + '/pravidla';
     const groupLine = inv.group_name
         ? `Po registrácii budeš automaticky pridaný do skupiny "${inv.group_name}", kde budeš môcť súťažiť s ${myUsername} a ostatnými členmi.\n\n`
-        : 'Odporúčame ti pripojiť sa k existujúcej skupine alebo si vytvoriť vlastnú a pozvať ďalších priateľov.\n\n';
-    return `Pozývam ťa do IIHF 2026 Tipovačky – súťaže v tipovaní výsledkov Majstrovstiev sveta v ľadovom hokeji 2026 (15. – 31. mája 2026).
+        : 'Odporúčame Ti pripojiť sa k existujúcej skupine alebo si vytvoriť vlastnú a pozvať ďalších priateľov.\n\n';
+    return `Pozývam Ťa do BetClub - tipovačky výsledkov športových zápasov pre Teba a Tvojich kamošov.
 
 Zaregistruj sa kliknutím na tento odkaz:
 ${inv.link}
 
-Po registrácii si zvolíš prezývku a heslo. Potom môžeš:
-- tipovať presné výsledky všetkých 64 zápasov MS
+Po registrácii si zvolíš vlastné meno a heslo. Potom môžeš:
+- tipovať presné výsledky zápasov
 - súťažiť s kamarátmi v skupinách
 - sledovať priebežné poradie
-- posielať pozvánky kamarátom a rozširovať skupinu
 
-${groupLine}Pred začatím odporúčame prečítať si pravidlá tipovačky:
+${groupLine}Pred začatím si prečítaj pravidlá tipovačky:
 ${rulesUrl}
 
 Link je jednorazový – platí pre jednu registráciu.
 
-Tešíme sa na teba!
-IIHF 2026 Tipovačka`;
+Tešíme sa na Teba!
+BetClub – Tipujte s kamošmi`;
 }
 
 function CopyBtn({ text }) {
@@ -141,14 +140,18 @@ export default function UserInvites() {
                 <p className={styles.empty}>Zatiaľ si neodoslal žiadnu pozvánku.</p>
             ) : (
                 <div className={styles.list}>
-                    {invites.map(inv => (
-                        <div key={inv.id} className={`${styles.card} ${inv.used_at ? styles.cardUsed : ''}`}>
+                    {invites.map(inv => {
+                        const isUsed      = !!inv.used_at;
+                        const isCancelled = !!inv.cancelled_at;
+                        const isPending   = !isUsed && !isCancelled;
+                        return (
+                        <div key={inv.id} className={`${styles.card} ${isUsed ? styles.cardUsed : ''} ${isCancelled ? styles.cardCancelled : ''}`}>
                             <div className={styles.cardHead}>
                                 <span className={styles.recipient}>
                                     {inv.sent_to || <span className={styles.noEmail}>bez emailu</span>}
                                 </span>
-                                <span className={inv.used_at ? styles.badgeUsed : styles.badgePending}>
-                                    {inv.used_at ? '✓ Použitá' : 'Čaká'}
+                                <span className={isUsed ? styles.badgeUsed : isCancelled ? styles.badgeCancelled : styles.badgePending}>
+                                    {isUsed ? '✓ Použitá' : isCancelled ? '✕ Zrušená' : 'Čaká'}
                                 </span>
                             </div>
                             <div className={styles.cardMeta}>
@@ -165,7 +168,7 @@ export default function UserInvites() {
                                     <span className={styles.mailSent} title="Email odoslaný">✉</span>
                                 )}
                             </div>
-                            {!inv.used_at && (
+                            {isPending && (
                                 <div style={{display:'flex', gap:8, marginTop:8}}>
                                     <CopyBtn text={buildInviteText(inv, myUsername)} />
                                     <button
@@ -178,7 +181,8 @@ export default function UserInvites() {
                                 </div>
                             )}
                         </div>
-                    ))}
+                        );
+                    })}
                 </div>
             )}
         </div>

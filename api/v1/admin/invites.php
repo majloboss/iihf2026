@@ -18,7 +18,7 @@ if ($method === 'GET') {
                    ORDER BY i.created_at DESC";
     try {
         $rows = $pdo->query(
-            "SELECT i.id, i.invite_token, i.sent_to, i.created_at, i.used_at,
+            "SELECT i.id, i.invite_token, i.sent_to, i.created_at, i.used_at, i.cancelled_at,
                     i.email_sent, i.group_id,
                     fg.name AS group_name,
                     i.user_id AS used_by_id,
