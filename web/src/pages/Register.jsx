@@ -43,8 +43,8 @@ export default function Register() {
     return (
         <div className={styles.wrapper}>
             <div className={styles.card}>
-                <img src="/logo.png" alt="IIHF 2026" className={styles.logo} />
-                <h1>IIHF 2026</h1>
+                <img src="/logo.png" alt="Klub priateľov tipovania" className={styles.logo} />
+                <h1>Klub priateľov tipovania</h1>
 
                 {step === 'loading' && <p>Overujem pozývací link…</p>}
 
