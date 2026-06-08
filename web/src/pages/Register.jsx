@@ -43,6 +43,7 @@ export default function Register() {
     return (
         <div className={styles.wrapper}>
             <div className={styles.card}>
+                <img src="/logo.png" alt="Klub priateľov tipovania" className={styles.logo} />
                 <p className={styles.appTitle}>Klub priateľov tipovania</p>
 
                 {step === 'loading' && <p>Overujem pozývací link…</p>}
