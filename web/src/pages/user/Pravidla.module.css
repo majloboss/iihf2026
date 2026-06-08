@@ -143,6 +143,27 @@
     margin: 4px 0 10px;
 }
 
+.exampleText {
+    border-left: 3px solid #4a90d9;
+    padding: 10px 14px;
+    margin: 4px 0 10px;
+    font-size: 0.9rem;
+    line-height: 1.65;
+}
+
+.exampleText p {
+    margin: 4px 0;
+}
+
+.exampleText ol {
+    margin: 4px 0 8px 18px;
+    padding: 0;
+}
+
+.exampleText li {
+    margin: 2px 0;
+}
+
 /* ── Tabs ── */
 .tabs {
     display: flex;

@@ -195,23 +195,22 @@ function TabSkupiny() {
                 <h3 className={styles.cardTitle}>Tipovanie za odmenu</h3>
                 <p>Zakladateľ skupiny môže do <strong>popisu / podmienky vstupu</strong> uviesť vlastné pravidlá — napríklad vklad do spoločného banku a rozdelenie výhry medzi najlepších tipérov. <strong>Aplikácia peniaze nespravuje</strong> — všetko si organizuje zakladateľ skupiny mimo aplikácie.</p>
                 <p className={styles.exampleDesc}>Príklad popisu skupiny:</p>
-                <div className={styles.exampleBox}>
-{`Skupina pre skutočných tipérov.
-
-POSTUP:
-  1. Vlož 10€ na účet: SK0123456789 a do poznámky uveď svoj USERNAME
-  2. Požiadaj o vstup do skupiny
-  3. Po pripísaní platby na účet bude tvoja požiadavka schválená
-
-Výhra sa delí v pomere:
-  1. miesto — 70%
-  2. miesto — 20%
-  3. miesto — 10%
-
-Možnosť vstupu sa uzavrie dňa DD.MM.2026.
-
-Výhra bude pripísaná na účet, z ktorého prišla platba,
-do týždňa po skončení turnaja.`}
+                <div className={styles.exampleText}>
+                    <p><em>Skupina pre skutočných tipérov.</em></p>
+                    <p><strong>POSTUP:</strong></p>
+                    <ol>
+                        <li>Vlož 10€ na účet: SK0123456789 a do poznámky uveď svoj USERNAME</li>
+                        <li>Požiadaj o vstup do skupiny</li>
+                        <li>Po pripísaní platby na účet bude tvoja požiadavka schválená</li>
+                    </ol>
+                    <p><strong>Výhra sa delí v pomere:</strong></p>
+                    <ol>
+                        <li>miesto — 70%</li>
+                        <li>miesto — 20%</li>
+                        <li>miesto — 10%</li>
+                    </ol>
+                    <p>Možnosť vstupu sa uzavrie dňa DD.MM.2026.</p>
+                    <p>Výhra bude pripísaná na účet, z ktorého prišla platba, do týždňa po skončení turnaja.</p>
                 </div>
                 <p className={styles.note}>Zakladateľ schvaľuje žiadosti o vstup ručne — môže tak počkať na splnenie podmienky (napr. pripísanie platby). Popis je viditeľný každému, kto si skupinu pozrie.</p>
             </div>
