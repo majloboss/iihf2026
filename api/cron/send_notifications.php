@@ -22,12 +22,17 @@ $users = $pdo->query("
            ns_ut.email_enabled     AS ut_email,
            ns_ut.push_enabled      AS ut_push,
            ns_ut.minutes_before    AS ut_min,
+           ns_pgr.enabled          AS pgr_enabled,
+           ns_pgr.push_enabled     AS pgr_push,
+           ns_pgr.minutes_before   AS pgr_min,
            (SELECT COUNT(*) FROM admin.user_push_subscriptions WHERE user_id = u.id) AS push_count
     FROM admin.users u
     LEFT JOIN admin.notification_settings ns_start
         ON ns_start.user_id = u.id AND ns_start.notif_type = 'game_start'
     LEFT JOIN admin.notification_settings ns_ut
         ON ns_ut.user_id = u.id AND ns_ut.notif_type = 'untipped_game'
+    LEFT JOIN admin.notification_settings ns_pgr
+        ON ns_pgr.user_id = u.id AND ns_pgr.notif_type = 'pre_game_reminder'
     WHERE u.is_active = TRUE
       AND (
           (u.email IS NOT NULL AND u.email <> '')
@@ -59,6 +64,14 @@ foreach ($users as $u) {
         }
         if ($has_push && $u['ut_push']) {
             send_game_push($pdo, $uid, $u['username'], $min, 'untipped_game', true, $vapid);
+        }
+    }
+
+    // pre_game_reminder — 30 min pred zápasom, rozlíši či má tip alebo nie
+    if ($u['pgr_enabled']) {
+        $min = (int)($u['pgr_min'] ?? 30);
+        if ($has_push && $u['pgr_push']) {
+            send_pre_game_reminder_push($pdo, $uid, $min, $vapid);
         }
     }
 }
@@ -210,6 +223,39 @@ function send_game_push(PDO $pdo, int $uid, string $username, int $min, string $
         if ($result['sent'] > 0) {
             log_notif($pdo, $uid, $push_type, $g['id']);
         }
+    }
+}
+
+function send_pre_game_reminder_push(PDO $pdo, int $uid, int $min, array $vapid): void {
+    $type = 'pre_game_reminder_push';
+    $stmt = $pdo->prepare("
+        SELECT g.id, g.game_number, g.team1, g.team2, g.starts_at
+        FROM iihf2026.games g
+        WHERE g.status = 'scheduled'
+          AND g.team1 IS NOT NULL AND g.team2 IS NOT NULL
+          AND g.starts_at BETWEEN NOW() + (:min - 3) * INTERVAL '1 minute'
+                               AND NOW() + (:min + 3) * INTERVAL '1 minute'
+          AND NOT EXISTS (
+              SELECT 1 FROM admin.notification_log nl
+              WHERE nl.user_id = :uid AND nl.notif_type = :type AND nl.game_id = g.id
+          )
+    ");
+    $stmt->execute([':min' => $min, ':uid' => $uid, ':type' => $type]);
+
+    foreach ($stmt->fetchAll() as $g) {
+        $tipped = $pdo->prepare("SELECT 1 FROM iihf2026.tips WHERE user_id=? AND game_id=?");
+        $tipped->execute([$uid, $g['id']]);
+        $has_tip = (bool)$tipped->fetch();
+        $time    = (new DateTime($g['starts_at']))->setTimezone(new DateTimeZone('Europe/Bratislava'))->format('H:i');
+        $title   = $has_tip
+            ? "{$g['team1']} – {$g['team2']} o $time"
+            : "Nezatipovaný zápas! {$g['team1']} – {$g['team2']}";
+        $body    = $has_tip
+            ? "Začína za $min minút, ešte môžeš zmeniť tip"
+            : "Tipovanie sa uzatvára o $time — {$min} minút!";
+        $payload = json_encode(['title' => $title, 'body' => $body, 'url' => '/zapasy']);
+        $result  = send_push_to_user($pdo, $uid, $payload, $vapid);
+        if ($result['sent'] > 0) log_notif($pdo, $uid, $type, $g['id']);
     }
 }
 
