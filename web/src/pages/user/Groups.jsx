@@ -215,7 +215,7 @@ export default function Groups() {
                         placeholder="Popis / podmienka vstupu (voliteľné)"
                         value={newDesc}
                         onChange={e => setNewDesc(e.target.value)}
-                        maxLength={500}
+                        maxLength={1000}
                         rows={2}
                         style={{ width:'100%', boxSizing:'border-box', padding:'8px 10px', border:'1px solid #ddd', borderRadius:6, fontSize:'0.88rem', resize:'vertical', marginTop:8 }}
                     />
@@ -287,7 +287,7 @@ export default function Groups() {
                                             {editDescId === g.id ? (
                                                 <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
                                                     <textarea value={editDescVal} onChange={e => setEditDescVal(e.target.value)}
-                                                        maxLength={500} rows={2} placeholder="Popis / podmienka vstupu"
+                                                        maxLength={1000} rows={2} placeholder="Popis / podmienka vstupu"
                                                         style={{ width:'100%', boxSizing:'border-box', padding:'8px 10px', border:'1px solid #ddd', borderRadius:6, fontSize:'0.88rem', resize:'vertical' }} />
                                                     <div style={{ display:'flex', gap:8 }}>
                                                         <button className={styles.btnInvite} disabled={busy === `desc-${g.id}`} onClick={() => saveDesc(g.id)}>
