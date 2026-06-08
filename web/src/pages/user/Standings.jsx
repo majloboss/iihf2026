@@ -38,48 +38,43 @@ function PlayerTips({ userId, compId }) {
     return (
         <tr>
             <td colSpan={5} style={{padding:'0 0 4px 0', background:'#f8f9fa'}}>
-                <table style={{width:'100%', borderCollapse:'collapse', fontSize:'0.78rem'}}>
+                <table style={{width:'100%', borderCollapse:'collapse', fontSize:'0.78rem', tableLayout:'fixed'}}>
+                    <colgroup>
+                        <col style={{width:'72px'}} />
+                        <col />
+                        <col style={{width:'34px'}} />
+                        <col style={{width:'34px'}} />
+                        <col style={{width:'22px'}} />
+                    </colgroup>
                     <thead>
                         <tr style={{background:'#e9ecef', color:'#555'}}>
-                            <th style={{padding:'4px 6px', textAlign:'left', whiteSpace:'nowrap'}}>Dátum</th>
-                            <th style={{padding:'4px 6px', textAlign:'left'}}>Zápas</th>
-                            <th style={{padding:'4px 4px', textAlign:'center'}}>Výsl.</th>
-                            <th style={{padding:'4px 4px', textAlign:'center'}}>Tip</th>
-                            <th style={{padding:'4px 4px', textAlign:'center'}}>B</th>
+                            <th style={{padding:'4px 4px', textAlign:'left'}}>Dátum</th>
+                            <th style={{padding:'4px 4px', textAlign:'left'}}>Zápas</th>
+                            <th style={{padding:'4px 2px', textAlign:'center'}}>Výsl.</th>
+                            <th style={{padding:'4px 2px', textAlign:'center'}}>Tip</th>
+                            <th style={{padding:'4px 2px', textAlign:'center'}}>B</th>
                         </tr>
                     </thead>
                     <tbody>
                         {data.tips.map(t => (
                             <tr key={t.game_id} style={{borderBottom:'1px solid #dee2e6'}}>
-                                <td style={{padding:'3px 6px', color:'#888', whiteSpace:'nowrap', fontSize:'0.73rem'}}>{fmtDate(t.starts_at)}</td>
-                                <td style={{padding:'3px 6px'}}>
-                                    <div style={{display:'grid', gridTemplateColumns:'16px 30px 8px 16px 30px', alignItems:'center', gap:'0 3px'}}>
+                                <td style={{padding:'3px 4px', color:'#888', fontSize:'0.7rem', whiteSpace:'nowrap', overflow:'hidden'}}>{fmtDate(t.starts_at)}</td>
+                                <td style={{padding:'3px 4px'}}>
+                                    <div style={{display:'grid', gridTemplateColumns:'16px 1fr 8px 16px 1fr', alignItems:'center', gap:'0 2px'}}>
                                         <img src={flag(t.team1)} alt={t.team1} style={{width:16, height:11, objectFit:'cover'}} onError={e => e.target.style.display='none'} />
-                                        <span style={{fontSize:'0.75rem', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap'}}>{t.team1}</span>
-                                        <span style={{fontSize:'0.75rem', textAlign:'center', color:'#555'}}>:</span>
+                                        <span style={{fontSize:'0.73rem', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap'}}>{t.team1}</span>
+                                        <span style={{fontSize:'0.73rem', textAlign:'center', color:'#555'}}>:</span>
                                         <img src={flag(t.team2)} alt={t.team2} style={{width:16, height:11, objectFit:'cover'}} onError={e => e.target.style.display='none'} />
-                                        <span style={{fontSize:'0.75rem', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap'}}>{t.team2}</span>
+                                        <span style={{fontSize:'0.73rem', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap'}}>{t.team2}</span>
                                     </div>
                                 </td>
-                                <td style={{padding:'3px 4px', textAlign:'center', fontSize:'0.75rem', whiteSpace:'nowrap'}}>
-                                    {t.score1 !== null
-                                        ? <span style={{display:'inline-flex', gap:2}}>
-                                            <span style={{minWidth:14, textAlign:'right'}}>{t.score1}</span>
-                                            <span>:</span>
-                                            <span style={{minWidth:14, textAlign:'left'}}>{t.score2}</span>
-                                          </span>
-                                        : '—'}
+                                <td style={{padding:'3px 2px', textAlign:'center', fontSize:'0.73rem', whiteSpace:'nowrap'}}>
+                                    {t.score1 !== null ? `${t.score1}:${t.score2}` : '—'}
                                 </td>
-                                <td style={{padding:'3px 4px', textAlign:'center', fontSize:'0.75rem', whiteSpace:'nowrap'}}>
-                                    {t.tip1 !== null
-                                        ? <span style={{display:'inline-flex', gap:2}}>
-                                            <span style={{minWidth:14, textAlign:'right'}}>{t.tip1}</span>
-                                            <span>:</span>
-                                            <span style={{minWidth:14, textAlign:'left'}}>{t.tip2}</span>
-                                          </span>
-                                        : <span style={{color:'#aaa'}}>—</span>}
+                                <td style={{padding:'3px 2px', textAlign:'center', fontSize:'0.73rem', whiteSpace:'nowrap'}}>
+                                    {t.tip1 !== null ? `${t.tip1}:${t.tip2}` : <span style={{color:'#aaa'}}>—</span>}
                                 </td>
-                                <td style={{padding:'3px 4px', textAlign:'center', fontWeight:700, fontSize:'0.8rem',
+                                <td style={{padding:'3px 2px', textAlign:'center', fontWeight:700, fontSize:'0.8rem',
                                     color: t.points === null ? '#aaa' : t.points >= 5 ? '#27ae60' : t.points >= 3 ? '#e67e22' : t.points > 0 ? '#2980b9' : '#c0392b'}}>
                                     {t.points !== null ? t.points : '—'}
                                 </td>
