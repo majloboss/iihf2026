@@ -115,7 +115,7 @@ if ($method === 'POST') {
             $group_name = $gname->fetchColumn() ?: null;
         }
 
-        $subject   = 'Pozvánka do IIHF 2026 Tipovačky';
+        $subject   = 'Pozvánka do BetClub Tipovačky';
         $rules_url = APP_URL . '/pravidla';
 
         $group_line = $group_name
@@ -123,17 +123,17 @@ if ($method === 'POST') {
             : "Odporúčame ti pripojiť sa k existujúcej skupine alebo si vytvoriť vlastnú a pozvať ďalších priateľov.\n\n";
 
         $body_mail = "Ahoj,\n\n"
-            . "pozývame ťa do IIHF 2026 Tipovačky – súťaže v tipovaní výsledkov Majstrovstiev sveta v ľadovom hokeji 2026 (15. – 31. mája 2026).\n\n"
+            . "pozývame ťa do BetClub – tipovačky výsledkov futbalových a hokejových zápasov pre teba a tvojich kamošov.\n\n"
             . "Zaregistruj sa kliknutím na tento odkaz:\n" . $link . "\n\n"
             . "Po registrácii si zvolíš vlastné meno a heslo. Potom môžeš:\n"
-            . "- tipovať presné výsledky všetkých 64 zápasov MS\n"
+            . "- tipovať presné výsledky zápasov\n"
             . "- súťažiť s kamarátmi v skupinách\n"
             . "- sledovať priebežné poradie\n\n"
             . $group_line
             . "Pred začatím odporúčame prečítať si pravidlá tipovačky:\n" . $rules_url . "\n\n"
             . "Link je jednorazový – platí pre jednu registráciu.\n\n"
             . "Tešíme sa na teba!\n"
-            . "IIHF 2026 Tipovačka";
+            . "BetClub – Tipujte s kamošmi";
         try {
             send_mail_logged($pdo, $sent_to, $subject, $body_mail);
             $pdo->prepare("UPDATE admin.invites SET email_sent=TRUE WHERE id=?")->execute([$id]);
