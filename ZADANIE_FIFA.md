@@ -327,5 +327,14 @@ Obrazovka **Skupiny** má 3 záložky (ako Profil):
 - **is_closed** (default vypnuté) — uzavretá skupina: žiadne pozvánky (ani zakladateľ), žiadne žiadosti o vstup. V zozname badge „🔒 Uzavretá", tlačidlo Vstúpiť skryté.
 - Zakladateľ prepína oba príznaky checkboxmi v rozbalenej skupine (vedľa úpravy popisu).
 - BE kontroly: `group-members invite`, `group-join`, `group-invite-bulk` rešpektujú oba príznaky.
+- **Pozvánky dropdown** ✅ — v Profile → Pozvánky sa zobrazia len skupiny **aktuálneho turnaja**, **nie uzavreté** a kde člen smie pozývať (alebo je zakladateľ). Endpoint `v1/invites?competition_id=X`.
+
+### Vlajky — tooltip s názvom krajiny 🟠 (develop)
+
+Zdieľaný komponent `web/src/components/Flag.jsx` + endpoint `GET /v1/team-names?competition_id=X` ({code:name} z DB, anglické názvy). Cache per turnaj.
+- **Web:** hover nad vlajkou → natívna bublina (`title`) s názvom krajiny.
+- **Mobil:** long-press (~0,45s) → bublina nad vlajkou s názvom (zmizne po pustení).
+- Použité vo všetkých **user** obrazovkách s vlajkami: Zápasy (IIHF+FIFA), Prehľad (IIHF+FIFA), Tabuľky (IIHF+FIFA), Tretie miesta, Skupiny→rozklik tipov.
+- FIFA Zápasy vlajkový filter: krátky tap = filter tímu (zachované), long-press = tooltip. Admin obrazovky bez zmeny.
 
 > Login token expirácia: **7 dní** (`time() + 86400 * 7`). Test expirácie + auto-redirect na /login overený (✅).
