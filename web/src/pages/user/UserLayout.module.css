@@ -158,11 +158,11 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        padding: 10px 4px 12px;
+        padding: 6px 4px 8px;
         color: rgba(255,255,255,0.65);
         text-decoration: none;
         font-size: 0.65rem;
-        gap: 4px;
+        gap: 2px;
         transition: color 0.15s, background 0.15s;
     }
 
@@ -175,7 +175,7 @@
     .profileNav {
         position: relative;
         justify-content: flex-end !important;
-        padding-top: 34px !important;
+        padding-top: 26px !important;
         gap: 2px !important;
         overflow: visible;
     }
