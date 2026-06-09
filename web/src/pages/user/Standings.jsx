@@ -48,7 +48,7 @@ function PlayerTips({ userId, compId }) {
                 {/* hlavička */}
                 <div style={{...cell, background:'#e9ecef', color:'#666', padding:'3px 8px', fontWeight:600}}>
                     <span style={{flex:'0 0 78px'}}>Dátum</span>
-                    <span style={{flex:'1 1 0', minWidth:0}}>Zápas</span>
+                    <span className="tipMatchCol" style={{flex:'1 1 0', minWidth:0}}>Zápas</span>
                     <span style={{flex:'0 0 44px', textAlign:'center', display:'block'}}>Výsl</span>
                     <span style={{flex:'0 0 44px', textAlign:'center', display:'block'}}>Tip</span>
                     <span style={{flex:'0 0 28px', textAlign:'center', display:'block'}}>B</span>
@@ -56,7 +56,7 @@ function PlayerTips({ userId, compId }) {
                 {data.tips.map(t => (
                     <div key={t.game_id} style={{...cell, padding:'2px 8px', borderBottom:'1px solid #dee2e6'}}>
                         <span style={{flex:'0 0 78px', color:'#888'}}>{fmtDate(t.starts_at).full}</span>
-                        <span style={{flex:'1 1 0', minWidth:0, display:'flex', alignItems:'center', overflow:'hidden', whiteSpace:'nowrap'}}>
+                        <span className="tipMatchCol" style={{flex:'1 1 0', minWidth:0, display:'flex', alignItems:'center', overflow:'hidden', whiteSpace:'nowrap'}}>
                             <img src={flag(t.team1)} alt="" style={{width:13, height:9, objectFit:'cover', marginRight:2, flexShrink:0}} onError={e => e.target.style.display='none'} />
                             {t.team1}
                             <span style={{color:'#999', margin:'0 3px'}}>:</span>
