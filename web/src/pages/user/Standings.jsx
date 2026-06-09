@@ -35,13 +35,13 @@ function PlayerTips({ userId, compId }) {
         const mon = String(d.getMonth()+1).padStart(2,'0');
         const h   = String(d.getHours()).padStart(2,'0');
         const m   = String(d.getMinutes()).padStart(2,'0');
-        return `${day}.${mon} ${h}:${m}`;
+        return { full: `${day}.${mon} ${h}:${m}`, time: `${h}:${m}` };
     };
 
     return (
         <tr>
             <td colSpan={9} style={{padding:'0 0 4px 0', background:'#f8f9fa'}}>
-                <table style={{width:'100%', borderCollapse:'collapse', fontSize:'0.75rem'}}>
+                <table style={{width:'100%', borderCollapse:'collapse', fontSize:'0.72rem'}}>
                     <thead>
                         <tr style={{background:'#e9ecef', color:'#666'}}>
                             <th style={{padding:'3px 4px', textAlign:'left', whiteSpace:'nowrap'}}>Dátum</th>
@@ -58,7 +58,9 @@ function PlayerTips({ userId, compId }) {
                     <tbody>
                         {data.tips.map(t => (
                             <tr key={t.game_id} style={{borderBottom:'1px solid #dee2e6'}}>
-                                <td style={{padding:'2px 4px', color:'#888', whiteSpace:'nowrap'}}>{fmtDate(t.starts_at)}</td>
+                                <td style={{padding:'2px 4px', color:'#888', whiteSpace:'nowrap'}}>
+                                    {(() => { const dt = fmtDate(t.starts_at); return (<><span className="hideOnMobile">{dt.full}</span><span className="showOnMobile">{dt.time}</span></>); })()}
+                                </td>
                                 <td style={{padding:'2px 2px', whiteSpace:'nowrap'}}>
                                     <img src={flag(t.team1)} alt="" style={{width:14, height:10, objectFit:'cover', verticalAlign:'middle'}} onError={e => e.target.style.display='none'} />
                                 </td>
