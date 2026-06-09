@@ -139,6 +139,9 @@ function GroupTable({ group, currentUserId, compId }) {
     const [expanded, setExpanded] = useState(new Set());
     const [showChart, setShowChart] = useState(false);
 
+    // V Global view má každá "skupina" (= turnaj) vlastné competition_id
+    const effCompId = group.competition_id ?? compId;
+
     const toggle = (uid) => {
         setExpanded(prev => {
             const next = new Set(prev);
@@ -160,7 +163,7 @@ function GroupTable({ group, currentUserId, compId }) {
                     </button>
                 )}
             </div>
-            {showChart && <GroupChart members={group.members} compId={compId} />}
+            {showChart && <GroupChart members={group.members} compId={effCompId} />}
             <table className={styles.table}>
                 <thead>
                     <tr>
@@ -206,7 +209,7 @@ function GroupTable({ group, currentUserId, compId }) {
                             </tr>
                         ];
                         if (expanded.has(m.user_id)) {
-                            rows.push(<PlayerTips key={`tips-${m.user_id}`} userId={m.user_id} compId={compId} />);
+                            rows.push(<PlayerTips key={`tips-${m.user_id}`} userId={m.user_id} compId={effCompId} />);
                         }
                         return rows;
                     })}
@@ -216,11 +219,8 @@ function GroupTable({ group, currentUserId, compId }) {
     );
 }
 
-export default function Standings() {
-    const { user } = useAuth();
-    const { activeCompetition } = useCompetition();
-    const compId = activeCompetition?.id ?? null;
-
+// Záložka Skupiny — súčasná funkcionalita (skupiny pre zvolený turnaj)
+function GroupsView({ currentUserId, compId }) {
     const [groups,  setGroups]  = useState([]);
     const [loading, setLoading] = useState(true);
     const [error,   setError]   = useState('');
@@ -236,11 +236,50 @@ export default function Standings() {
     if (loading) return <p>Načítavam…</p>;
     if (error)   return <p style={{color:'red'}}>Chyba: {error}</p>;
 
+    return groups.length === 0
+        ? <p className={styles.empty}>Nie si v žiadnej skupine.</p>
+        : groups.map(g => <GroupTable key={g.id} group={g} currentUserId={currentUserId} compId={compId} />);
+}
+
+// Záložka Global — všetci tipéri po turnajoch (zoradené podľa dátumu turnaja)
+function GlobalView({ currentUserId }) {
+    const [comps,   setComps]   = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error,   setError]   = useState('');
+
+    useEffect(() => {
+        setLoading(true);
+        apiFetch('v1/global-standings')
+            .then(data => { setComps(data); setLoading(false); })
+            .catch(e   => { setError(e.message); setLoading(false); });
+    }, []);
+
+    if (loading) return <p>Načítavam…</p>;
+    if (error)   return <p style={{color:'red'}}>Chyba: {error}</p>;
+
+    return comps.length === 0
+        ? <p className={styles.empty}>Žiadne turnaje.</p>
+        : comps.map(c => <GroupTable key={c.id} group={c} currentUserId={currentUserId} compId={c.competition_id} />);
+}
+
+export default function Standings() {
+    const { user } = useAuth();
+    const { activeCompetition } = useCompetition();
+    const compId = activeCompetition?.id ?? null;
+
+    const [tab, setTab] = useState('skupiny');
+
     return (
         <div className={styles.wrap}>
-            {groups.length === 0
-                ? <p className={styles.empty}>Nie si v žiadnej skupine.</p>
-                : groups.map(g => <GroupTable key={g.id} group={g} currentUserId={user?.user_id} compId={compId} />)}
+            <div className={styles.tabs}>
+                <button className={tab === 'skupiny' ? styles.tabActive : styles.tab} onClick={() => setTab('skupiny')}>Skupiny</button>
+                <button className={tab === 'global'  ? styles.tabActive : styles.tab} onClick={() => setTab('global')}>Global</button>
+                <button className={tab === 'sien'    ? styles.tabActive : styles.tab} onClick={() => setTab('sien')}>Sieň slávy</button>
+            </div>
+
+            {tab === 'skupiny' && <GroupsView currentUserId={user?.user_id} compId={compId} />}
+            {tab === 'global'  && <GlobalView currentUserId={user?.user_id} />}
+            {tab === 'sien'    && <p className={styles.hofPlaceholder}>Sieň slávy — čoskoro. Po skončení turnaja sa tu zobrazí finálne poradie a získané body.</p>}
         </div>
     );
 }
