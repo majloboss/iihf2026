@@ -41,7 +41,7 @@ export default function UserLayout() {
                         🏠 Prehľad
                     </NavLink>
                     <NavLink to="/games"     className={({ isActive }) => isActive ? styles.active : ''}>
-                        🏒⚽ Zápasy
+                        <img src="/ikona_zapasy.png" alt="" style={{width:18,height:18,objectFit:'contain',verticalAlign:'middle',marginRight:6}} />Zápasy
                     </NavLink>
                     <NavLink to="/tabulky"   className={({ isActive }) => isActive ? styles.active : ''}>
                         📊 Tabuľky
@@ -74,7 +74,7 @@ export default function UserLayout() {
                     <span className={styles.bottomNavIcon}>🏠</span>Prehľad
                 </NavLink>
                 <NavLink to="/games"     className={({ isActive }) => isActive ? styles.active : ''}>
-                    <span className={styles.bottomNavIcon}>🏒⚽</span>Zápasy
+                    <img src="/ikona_zapasy.png" alt="" style={{width:24,height:24,objectFit:'contain'}} /><span style={{fontSize:'0.65rem',marginTop:2}}>Zápasy</span>
                 </NavLink>
                 <NavLink to="/profile" className={({ isActive }) => [styles.profileNav, isActive ? styles.active : ''].join(' ')}>
                     <div className={styles.profileNavAvatar}>
