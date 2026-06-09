@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { getFifaGames, saveFifaTip, getFifaGameTips } from '../../api/fifaGames';
 import FifaGroupStandings from './FifaGroupStandings';
+import { Flag } from '../../components/Flag';
 import styles from './Games.module.css';
 
 const PLAYOFF_CODES = ['R32','R16','QF','SF','BM','F'];
@@ -93,7 +94,7 @@ function TeamBlock({ code, isLeft }) {
     return (
         <div className={`${styles.team} ${isLeft ? styles.teamLeft : styles.teamRight}`}>
             {code
-                ? <><img className={styles.flag} src={FLAG_URL(code)} alt={code} onError={e => e.target.style.display='none'} /><span className={styles.teamCode}>{code}</span></>
+                ? <><Flag code={code} compId={2} className={styles.flag} /><span className={styles.teamCode}>{code}</span></>
                 : <span className={styles.teamCode} style={{color:'#bbb'}}>TBD</span>
             }
         </div>
@@ -326,8 +327,7 @@ export default function FifaGames() {
                             className={`${styles.flagBtn} ${selectedTeam === team ? styles.flagBtnActive : ''}`}
                             onClick={() => setSelectedTeam(selectedTeam === team ? null : team)}
                         >
-                            <img className={styles.flagImg} src={FLAG_URL(team)} alt={team}
-                                onError={e => e.target.style.display='none'} />
+                            <Flag code={team} compId={2} className={styles.flagImg} />
                             <span className={styles.flagCode}>{team}</span>
                         </button>
                     ))}

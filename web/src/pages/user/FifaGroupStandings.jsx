@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { apiFetch } from '../../api/client';
 import FifaThirdPlaced from './FifaThirdPlaced';
+import { Flag } from '../../components/Flag';
 import styles from './GroupStandings.module.css';
 
 const GROUP_CODES = ['A','B','C','D','E','F','G','H','I','J','K','L'];
@@ -40,8 +41,7 @@ function GroupTable({ phase, teams, onTeamClick }) {
                                 </td>
                                 <td className={styles.left}>
                                     <div className={styles.teamCell}>
-                                        <img src={FLAG_URL(t.team)} className={styles.flag} alt=""
-                                            onError={e => e.target.style.display = 'none'} />
+                                        <Flag code={t.team} compId={2} className={styles.flag} />
                                         {t.team}
                                     </div>
                                 </td>
