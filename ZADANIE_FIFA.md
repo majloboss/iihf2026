@@ -329,12 +329,11 @@ Obrazovka **Skupiny** má 3 záložky (ako Profil):
 - BE kontroly: `group-members invite`, `group-join`, `group-invite-bulk` rešpektujú oba príznaky.
 - **Pozvánky dropdown** ✅ — v Profile → Pozvánky sa zobrazia len skupiny **aktuálneho turnaja**, **nie uzavreté** a kde člen smie pozývať (alebo je zakladateľ). Endpoint `v1/invites?competition_id=X`.
 
-### Vlajky — tooltip s názvom krajiny 🟠 (develop)
+### Vlajky — názov krajiny ✅ (produkcia)
 
 Zdieľaný komponent `web/src/components/Flag.jsx` + endpoint `GET /v1/team-names?competition_id=X` ({code:name} z DB, anglické názvy). Cache per turnaj.
-- **Web:** hover nad vlajkou → natívna bublina (`title`) s názvom krajiny.
-- **Mobil:** long-press (~0,45s) → bublina nad vlajkou s názvom (zmizne po pustení).
-- Použité vo všetkých **user** obrazovkách s vlajkami: Zápasy (IIHF+FIFA), Prehľad (IIHF+FIFA), Tabuľky (IIHF+FIFA), Tretie miesta, Skupiny→rozklik tipov.
-- FIFA Zápasy vlajkový filter: krátky tap = filter tímu (zachované), long-press = tooltip. Admin obrazovky bez zmeny.
+- **Zápasy (IIHF+FIFA):** pod skratkou štátu je menším písmom **celý názov štátu** (web aj mobil) — `.teamName`. Hlavné miesto s plnými názvami.
+- **Ostatné obrazovky** (Prehľad, Tabuľky, Tretie miesta, Skupiny→rozklik tipov): vlajka má `title` → názov pri hover na webe. Long-press na mobile zrušený (otváral natívne menu obrázka).
+- FIFA Zápasy vlajkový filter: krátky tap = filter tímu (zachované). Admin obrazovky bez zmeny.
 
 > Login token expirácia: **7 dní** (`time() + 86400 * 7`). Test expirácie + auto-redirect na /login overený (✅).
