@@ -154,6 +154,32 @@
     color: #e67e22;
     white-space: nowrap;
 }
+.badgeClosed {
+    font-size: 0.75rem;
+    color: #8a6d3b;
+    background: #fcf3e3;
+    border: 1px solid #f0dcb8;
+    padding: 2px 8px;
+    border-radius: 20px;
+    white-space: nowrap;
+}
+.flagsRow {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed #e0e0e0;
+}
+.flagLabel {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.82rem;
+    color: #444;
+    cursor: pointer;
+}
+.flagLabel input { width: 16px; height: 16px; cursor: pointer; }
 .badgeWait {
     font-size: 0.75rem;
     color: #aaa;

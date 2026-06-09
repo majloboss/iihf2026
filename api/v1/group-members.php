@@ -9,11 +9,12 @@ $pdo  = db();
 $group_id = (int)(($_GET['group_id'] ?? 0) ?: (json_decode(file_get_contents('php://input'), true)['group_id'] ?? 0));
 if (!$group_id) json_error('Chýba group_id', 400);
 
-$stmt = $pdo->prepare('SELECT id, name, created_by FROM admin.friend_groups WHERE id = ?');
+$stmt = $pdo->prepare('SELECT id, name, created_by, allow_member_invite, is_closed FROM admin.friend_groups WHERE id = ?');
 $stmt->execute([$group_id]);
 $group = $stmt->fetch();
 if (!$group) json_error('Skupina neexistuje', 404);
 $group_name = $group['name'];
+$is_founder = ((int)$group['created_by'] === (int)$auth['user_id']);
 
 if ($method === 'GET') {
     $stmt = $pdo->prepare("
@@ -32,6 +33,11 @@ if ($method === 'POST') {
     $action = $body['action'] ?? '';
 
     if ($action === 'invite') {
+        if ($group['is_closed']) json_error('Skupina je uzavretá — nedajú sa posielať pozvánky', 403);
+        // Bežný člen smie pozývať len ak to skupina povoľuje; zakladateľ vždy
+        if (!$is_founder && !$group['allow_member_invite']) {
+            json_error('V tejto skupine môže pozývať len zakladateľ', 403);
+        }
         $chk = $pdo->prepare("SELECT 1 FROM admin.group_members WHERE group_id = ? AND user_id = ? AND status = 'accepted'");
         $chk->execute([$group_id, $auth['user_id']]);
         if (!$chk->fetch()) json_error('Nie si členom skupiny', 403);

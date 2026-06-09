@@ -8,9 +8,11 @@ $group_id = (int)($body['group_id'] ?? 0);
 if (!$group_id) json_error('Chýba group_id', 400);
 
 $pdo  = db();
-$stmt = $pdo->prepare('SELECT id FROM admin.friend_groups WHERE id = ?');
+$stmt = $pdo->prepare('SELECT id, is_closed FROM admin.friend_groups WHERE id = ?');
 $stmt->execute([$group_id]);
-if (!$stmt->fetch()) json_error('Skupina neexistuje', 404);
+$grp = $stmt->fetch();
+if (!$grp) json_error('Skupina neexistuje', 404);
+if ($grp['is_closed']) json_error('Skupina je uzavretá — nedá sa do nej požiadať o vstup', 403);
 
 try {
     $pdo->prepare(

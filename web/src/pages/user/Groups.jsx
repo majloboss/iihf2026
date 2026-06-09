@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useCompetition } from '../../context/CompetitionContext';
-import { getGroups, getAllMyGroups, createGroup, disbandGroup, joinGroup, leaveGroup, getMembers, memberAction, inviteMember, acceptGroupInvite, bulkInvite, updateGroupDescription } from '../../api/groups';
+import { getGroups, getAllMyGroups, createGroup, disbandGroup, joinGroup, leaveGroup, getMembers, memberAction, inviteMember, acceptGroupInvite, bulkInvite, updateGroupDescription, updateGroupFlags } from '../../api/groups';
 import { getUser, getUsers } from '../../api/users';
 import styles from './Groups.module.css';
 
@@ -110,6 +110,15 @@ export default function Groups() {
         try {
             await updateGroupDescription(groupId, editDescVal.trim() || null);
             setEditDescId(null); load();
+        } catch (e) { alert(e.message); }
+        finally { setBusy(''); }
+    };
+
+    const toggleFlag = async (groupId, flag, value) => {
+        setBusy(`flag-${groupId}`);
+        try {
+            await updateGroupFlags(groupId, { [flag]: value });
+            load();
         } catch (e) { alert(e.message); }
         finally { setBusy(''); }
     };
@@ -237,7 +246,10 @@ export default function Groups() {
                     const isOpen     = expanded === g.id;
                     const grpMembers = members[g.id];
                     const pendingCnt = grpMembers?.filter(m => m.status === 'pending').length ?? 0;
-                    const canInvite  = myStatus === 'accepted' || isFounder;
+                    const isClosed   = !!g.is_closed;
+                    const allowMemberInvite = g.allow_member_invite !== false;
+                    // Pozývať môže: zakladateľ vždy (ak nie je uzavretá); člen len ak skupina povoľuje
+                    const canInvite  = !isClosed && (isFounder || (myStatus === 'accepted' && allowMemberInvite));
                     const suggestions = isOpen ? getSuggestions(g.id, inviteQuery) : [];
 
                     return (
@@ -262,7 +274,10 @@ export default function Groups() {
                                     )}
                                 </div>
                                 <div className={styles.cardActions} onClick={e => e.stopPropagation()}>
-                                    {myStatus === null && (
+                                    {isClosed && (
+                                        <span className={styles.badgeClosed}>🔒 Uzavretá</span>
+                                    )}
+                                    {myStatus === null && !isClosed && (
                                         <button className={styles.btnJoin} onClick={() => doJoin(g.id)} disabled={!!busy}>Vstúpiť</button>
                                     )}
                                     {myStatus === 'pending' && (
@@ -301,6 +316,22 @@ export default function Groups() {
                                                     ✎ {g.description ? 'Upraviť popis / podmienku' : 'Pridať popis / podmienku vstupu'}
                                                 </button>
                                             )}
+                                            <div className={styles.flagsRow}>
+                                                <label className={styles.flagLabel}>
+                                                    <input type="checkbox"
+                                                        checked={allowMemberInvite}
+                                                        disabled={busy === `flag-${g.id}`}
+                                                        onChange={e => toggleFlag(g.id, 'allow_member_invite', e.target.checked)} />
+                                                    Členovia môžu pozývať
+                                                </label>
+                                                <label className={styles.flagLabel}>
+                                                    <input type="checkbox"
+                                                        checked={isClosed}
+                                                        disabled={busy === `flag-${g.id}`}
+                                                        onChange={e => toggleFlag(g.id, 'is_closed', e.target.checked)} />
+                                                    Uzavretá skupina (bez pozvánok a žiadostí)
+                                                </label>
+                                            </div>
                                         </div>
                                     )}
                                     {canInvite && (
@@ -377,7 +408,7 @@ export default function Groups() {
                                                                 >
                                                                     <option value="">— vyber zdrojovú skupinu —</option>
                                                                     {allMyGroups
-                                                                        .filter(sg => sg.id !== g.id && sg.my_status === 'accepted')
+                                                                        .filter(sg => sg.id !== g.id && sg.my_status === 'accepted' && sg.allow_member_invite !== false)
                                                                         .map(sg => (
                                                                             <option key={sg.id} value={sg.id}>
                                                                                 {sg.name} {sg.competition_name ? `(${sg.competition_name})` : ''}

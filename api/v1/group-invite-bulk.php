@@ -15,11 +15,12 @@ if (!$group_id || !$source_group_id) json_error('Chýba group_id alebo source_gr
 if ($group_id === $source_group_id)  json_error('Zdrojová a cieľová skupina musia byť rôzne', 400);
 
 // Overenie: user musí byť zakladateľ cieľovej skupiny
-$chk = $pdo->prepare('SELECT id, name, created_by FROM admin.friend_groups WHERE id = ?');
+$chk = $pdo->prepare('SELECT id, name, created_by, is_closed FROM admin.friend_groups WHERE id = ?');
 $chk->execute([$group_id]);
 $grp = $chk->fetch();
 if (!$grp) json_error('Cieľová skupina neexistuje', 404);
 if ((int)$grp['created_by'] !== (int)$auth['user_id']) json_error('Len zakladateľ môže posielať hromadné pozvánky', 403);
+if ($grp['is_closed']) json_error('Cieľová skupina je uzavretá — nedajú sa posielať pozvánky', 403);
 $target_group_name = $grp['name'];
 
 $inviterRow = $pdo->prepare("SELECT username FROM admin.users WHERE id = ?");

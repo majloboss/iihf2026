@@ -16,6 +16,7 @@ if ($method === 'GET') {
 
     $stmt = $pdo->prepare("
         SELECT fg.id, fg.name, fg.description, fg.created_by, fg.created_at, fg.competition_id,
+               fg.allow_member_invite, fg.is_closed,
                u.username AS creator_username,
                c.name AS competition_name, c.slug AS competition_slug,
                COUNT(gm.user_id) FILTER (WHERE gm.status = 'accepted') AS member_count,
@@ -77,12 +78,26 @@ if ($method === 'PATCH') {
     $stmt->execute([$group_id]);
     $group = $stmt->fetch();
     if (!$group) json_error('Skupina neexistuje', 404);
-    if ((int)$group['created_by'] !== (int)$auth['user_id']) json_error('Len zakladateľ môže upraviť popis', 403);
+    if ((int)$group['created_by'] !== (int)$auth['user_id']) json_error('Len zakladateľ môže upraviť skupinu', 403);
 
-    $description = isset($body['description']) ? trim($body['description']) : null;
-    if ($description === '') $description = null;
-    $pdo->prepare('UPDATE admin.friend_groups SET description = ? WHERE id = ?')->execute([$description, $group_id]);
-    json_ok(['updated' => true, 'description' => $description]);
+    // Popis (ak je v tele)
+    if (array_key_exists('description', $body)) {
+        $description = trim($body['description'] ?? '');
+        if ($description === '') $description = null;
+        $pdo->prepare('UPDATE admin.friend_groups SET description = ? WHERE id = ?')->execute([$description, $group_id]);
+    }
+    // Príznak: člen môže pozvať
+    if (array_key_exists('allow_member_invite', $body)) {
+        $pdo->prepare('UPDATE admin.friend_groups SET allow_member_invite = ? WHERE id = ?')
+            ->execute([$body['allow_member_invite'] ? 'true' : 'false', $group_id]);
+    }
+    // Príznak: skupina uzavretá
+    if (array_key_exists('is_closed', $body)) {
+        $pdo->prepare('UPDATE admin.friend_groups SET is_closed = ? WHERE id = ?')
+            ->execute([$body['is_closed'] ? 'true' : 'false', $group_id]);
+    }
+
+    json_ok(['updated' => true]);
 }
 
 if ($method === 'DELETE') {
