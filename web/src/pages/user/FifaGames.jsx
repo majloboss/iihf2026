@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { getFifaGames, saveFifaTip, getFifaGameTips } from '../../api/fifaGames';
 import FifaGroupStandings from './FifaGroupStandings';
-import { Flag } from '../../components/Flag';
+import { useTeamNames } from '../../components/Flag';
 import styles from './Games.module.css';
 
 const PLAYOFF_CODES = ['R32','R16','QF','SF','BM','F'];
@@ -91,10 +91,18 @@ const dayKey    = (iso)  => {
 };
 
 function TeamBlock({ code, isLeft }) {
+    const names = useTeamNames(2);
+    const fullName = code ? (names[code.toUpperCase()] || '') : '';
     return (
         <div className={`${styles.team} ${isLeft ? styles.teamLeft : styles.teamRight}`}>
             {code
-                ? <><Flag code={code} compId={2} className={styles.flag} /><span className={styles.teamCode}>{code}</span></>
+                ? <>
+                    <img className={styles.flag} src={FLAG_URL(code)} alt={code} onError={e => e.target.style.display='none'} />
+                    <span className={styles.teamCodeWrap}>
+                        <span className={styles.teamCode}>{code}</span>
+                        {fullName && <span className={styles.teamName}>{fullName}</span>}
+                    </span>
+                  </>
                 : <span className={styles.teamCode} style={{color:'#bbb'}}>TBD</span>
             }
         </div>
@@ -327,7 +335,8 @@ export default function FifaGames() {
                             className={`${styles.flagBtn} ${selectedTeam === team ? styles.flagBtnActive : ''}`}
                             onClick={() => setSelectedTeam(selectedTeam === team ? null : team)}
                         >
-                            <Flag code={team} compId={2} className={styles.flagImg} />
+                            <img className={styles.flagImg} src={FLAG_URL(team)} alt={team}
+                                onError={e => e.target.style.display='none'} />
                             <span className={styles.flagCode}>{team}</span>
                         </button>
                     ))}
