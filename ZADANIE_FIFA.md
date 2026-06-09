@@ -262,7 +262,7 @@ Poradie migrácie:
 | 038 group description 1000 | ✅ | ✅ |
 | 039 invites cancelled_at | ✅ | ✅ |
 | 040 password_reset_tokens | ✅ | ✅ |
-| 041 group invite flags (allow_member_invite + is_closed) | 🔲 | 🔲 |
+| 041 group invite flags (allow_member_invite + is_closed) | ✅ | ✅ |
 
 ---
 
@@ -321,7 +321,7 @@ Obrazovka **Skupiny** má 3 záložky (ako Profil):
 - **Sieň slávy** — ✅ implementované. Endpoint `GET /v1/hall-of-fame`. **Dynamický** výpočet (žiadna tabuľka): turnaj je „skončený" ak majú všetky jeho zápasy zadaný výsledok → finálne poradie tipérov → body top 10 (1.=10b … 10.=1b, pevná pozícia + tiebreak 7/6/5...). Pri zmene výsledku sa prepočíta automaticky. Šport z `competitions.sport`. 3 pod-záložky: Globálna / Futbal / Hokej. Klik na hráča = accordion s turnajmi a získanými bodmi. *(Naplní sa až po skončení 1. turnaja — IIHF máj / FIFA jún 2026.)*
 - **Graf tooltip** — ✅ zoradené poradie podľa bodov v danom bode grafu (najvyšší navrchu, s číslom pozície).
 
-### Skupiny — príznaky pozvánok 🟠 (develop, migrácia 041)
+### Skupiny — príznaky pozvánok ✅ (produkcia, migrácia 041)
 
 - **allow_member_invite** (default zapnuté) — keď zakladateľ vypne, bežní členovia nevidia pole „Pozvať" a skupina sa neobjaví ako **zdroj** v bulk invite (nikoho z nej nemožno hromadne prevziať inam). Zakladateľ pozýva vždy.
 - **is_closed** (default vypnuté) — uzavretá skupina: žiadne pozvánky (ani zakladateľ), žiadne žiadosti o vstup. V zozname badge „🔒 Uzavretá", tlačidlo Vstúpiť skryté.
