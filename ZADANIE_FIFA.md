@@ -307,6 +307,13 @@ Poradie migrácie:
 | 8 | **Export výsledkov** — CSV export poradia skupiny. | ❌ nepotrebné |
 | 9 | **Správy/chat** — správa adminovi + jednoduchý chat pre tipérov v skupine. Nie sociálna sieť. Riešiť ako úplne posledné. | 🔲 dlhodobé |
 | 10 | **Štatistiky usera** — úspešnosť, najlepší/najhorší zápas, streak. | 🔲 dlhodobé |
-| 11 | **Sieň slávy** — po skončení každého turnaja sa uloží finálne globálne poradie. Top 10 dostane body (1.=10, 2.=9, ... 10.=1, od 11.=0). Tri tabuľky: (a) Globálna (všetky turnaje), (b) Futbalová (FIFA, LM, ME, Olympiáda...), (c) Hokejová (MS, Olympiáda...). Body sa kumulujú naprieč turnajmi v rámci športu — tipér súťaží len v tom športe ktorý tipuje. Klik na hráča rozroluje turnaje kde získal body (accordion). | 🟢 READY TO CODE |
+| 11 | **Sieň slávy** — po skončení každého turnaja sa uloží finálne globálne poradie. Top 10 dostane body (1.=10, 2.=9, ... 10.=1, od 11.=0). Tri tabuľky: (a) Globálna (všetky turnaje), (b) Futbalová (FIFA, LM, ME, Olympiáda...), (c) Hokejová (MS, Olympiáda...). Body sa kumulujú naprieč turnajmi v rámci športu — tipér súťaží len v tom športe ktorý tipuje. Klik na hráča rozroluje turnaje kde získal body (accordion). | 🟠 rozpracované |
+
+### Obrazovka Skupiny — záložky (🟠 develop)
+
+Obrazovka **Skupiny** má teraz 3 záložky (ako Profil):
+- **Skupiny** — ✅ pôvodná funkcionalita: skupiny pre zvolený turnaj, poradie hráčov, body, rozklik tipov + graf
+- **Global** — 🟠 všetci tipéri po turnajoch (každý turnaj = jedna „skupina"), zoradené podľa dátumu turnaja (najnovší prvý → FIFA, potom IIHF). Endpoint `GET /v1/global-standings`. Rozklik tipov + graf fungujú per-turnaj.
+- **Sieň slávy** — 🟠 zatiaľ placeholder (prázdna), čaká na implementáciu bodovania top 10 + 3 tabuľky (globálna/futbalová/hokejová)
 
 > Login token expirácia: **7 dní** (`time() + 86400 * 7`). Test expirácie + auto-redirect na /login overený (✅).
