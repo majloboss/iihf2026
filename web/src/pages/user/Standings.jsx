@@ -43,49 +43,46 @@ function PlayerTips({ userId, compId }) {
             <td colSpan={9} style={{padding:'0 0 4px 0', background:'#f8f9fa'}}>
                 <table style={{width:'100%', borderCollapse:'collapse', fontSize:'0.72rem', tableLayout:'fixed'}}>
                     <colgroup>
-                        <col style={{width:'13%'}} />{/* čas */}
-                        <col style={{width:'4%'}} /> {/* vlajka1 */}
-                        <col style={{width:'13%'}} />{/* tím1 */}
-                        <col style={{width:'4%'}} /> {/* : */}
-                        <col style={{width:'4%'}} /> {/* vlajka2 */}
-                        <col style={{width:'13%'}} />{/* tím2 */}
-                        <col style={{width:'17%'}} />{/* výsledok */}
-                        <col style={{width:'17%'}} />{/* tip */}
-                        <col style={{width:'5%'}} /> {/* B */}
+                        <col style={{width:'15%'}} />
+                        <col style={{width:'4%'}} />
+                        <col style={{width:'12%'}} />
+                        <col style={{width:'3%'}} />
+                        <col style={{width:'4%'}} />
+                        <col style={{width:'12%'}} />
+                        <col style={{width:'16%'}} />
+                        <col style={{width:'16%'}} />
+                        <col style={{width:'5%'}} />
                     </colgroup>
                     <thead>
                         <tr style={{background:'#e9ecef', color:'#666'}}>
-                            <th style={{padding:'3px 2px', textAlign:'left'}}><span className="hideOnMobile">Dátum</span><span className="showOnMobile">Čas</span></th>
+                            <th style={{padding:'3px 2px 3px 4px', textAlign:'left'}}>Dátum</th>
                             <th style={{padding:'3px 1px'}}></th>
-                            <th style={{padding:'3px 1px', textAlign:'left'}}>Tím 1</th>
+                            <th style={{padding:'3px 0', textAlign:'left'}}>Tím 1</th>
                             <th style={{padding:'3px 1px', textAlign:'center'}}>:</th>
                             <th style={{padding:'3px 1px'}}></th>
-                            <th style={{padding:'3px 1px', textAlign:'left'}}>Tím 2</th>
-                            <th style={{padding:'3px 2px', textAlign:'center'}}><span className="hideOnMobile">Výsledok</span><span className="showOnMobile">Výsl.</span></th>
-                            <th style={{padding:'3px 2px', textAlign:'center'}}>Tip</th>
+                            <th style={{padding:'3px 0', textAlign:'left'}}>Tím 2</th>
+                            <th style={{padding:'3px 1px', textAlign:'center'}}>Výsl.</th>
+                            <th style={{padding:'3px 1px', textAlign:'center'}}>Tip</th>
                             <th style={{padding:'3px 2px', textAlign:'center'}}>B</th>
                         </tr>
                     </thead>
                     <tbody>
                         {data.tips.map(t => (
                             <tr key={t.game_id} style={{borderBottom:'1px solid #dee2e6'}}>
-                                <td style={{padding:'2px 2px', color:'#888', overflow:'hidden'}}>
-                                    <span className="hideOnMobile" style={{whiteSpace:'nowrap'}}>{fmtDate(t.starts_at).full}</span>
-                                    <span className="showOnMobile" style={{whiteSpace:'nowrap'}}>{fmtDate(t.starts_at).time}</span>
-                                </td>
+                                <td style={{padding:'2px 2px 2px 4px', color:'#888', whiteSpace:'nowrap', overflow:'hidden'}}>{fmtDate(t.starts_at).full}</td>
                                 <td style={{padding:'2px 1px'}}>
                                     <img src={flag(t.team1)} alt="" style={{width:13, height:9, objectFit:'cover', verticalAlign:'middle'}} onError={e => e.target.style.display='none'} />
                                 </td>
-                                <td style={{padding:'2px 1px', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap'}}>{t.team1}</td>
+                                <td style={{padding:'2px 0', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap'}}>{t.team1}</td>
                                 <td style={{padding:'2px 1px', textAlign:'center', color:'#999'}}>:</td>
                                 <td style={{padding:'2px 1px'}}>
                                     <img src={flag(t.team2)} alt="" style={{width:13, height:9, objectFit:'cover', verticalAlign:'middle'}} onError={e => e.target.style.display='none'} />
                                 </td>
-                                <td style={{padding:'2px 1px', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap'}}>{t.team2}</td>
-                                <td style={{padding:'2px 2px', textAlign:'center', whiteSpace:'nowrap'}}>
+                                <td style={{padding:'2px 0', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap'}}>{t.team2}</td>
+                                <td style={{padding:'2px 1px', textAlign:'center', whiteSpace:'nowrap'}}>
                                     {t.score1 !== null ? `${t.score1}:${t.score2}` : '—'}
                                 </td>
-                                <td style={{padding:'2px 2px', textAlign:'center', whiteSpace:'nowrap'}}>
+                                <td style={{padding:'2px 1px', textAlign:'center', whiteSpace:'nowrap'}}>
                                     {t.tip1 !== null ? `${t.tip1}:${t.tip2}` : <span style={{color:'#aaa'}}>—</span>}
                                 </td>
                                 <td style={{padding:'2px 2px', textAlign:'center', fontWeight:700,
