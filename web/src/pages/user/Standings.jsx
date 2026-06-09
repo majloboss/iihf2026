@@ -62,16 +62,16 @@ function PlayerTips({ userId, compId }) {
                                 <td style={{padding:'2px 2px', whiteSpace:'nowrap'}}>
                                     <img src={flag(t.team1)} alt="" style={{width:14, height:10, objectFit:'cover', verticalAlign:'middle'}} onError={e => e.target.style.display='none'} />
                                 </td>
-                                <td style={{padding:'2px 4px 2px 0', whiteSpace:'nowrap'}}>{t.team1}</td>
-                                <td style={{padding:'2px 2px', textAlign:'center', color:'#999'}}>:</td>
-                                <td style={{padding:'2px 2px', whiteSpace:'nowrap'}}>
+                                <td style={{padding:'2px 1px 2px 0', whiteSpace:'nowrap'}}>{t.team1}</td>
+                                <td style={{padding:'2px 1px', textAlign:'center', color:'#999'}}>:</td>
+                                <td style={{padding:'2px 1px', whiteSpace:'nowrap'}}>
                                     <img src={flag(t.team2)} alt="" style={{width:14, height:10, objectFit:'cover', verticalAlign:'middle'}} onError={e => e.target.style.display='none'} />
                                 </td>
-                                <td style={{padding:'2px 4px 2px 0', whiteSpace:'nowrap'}}>{t.team2}</td>
-                                <td style={{padding:'2px 4px', textAlign:'center', whiteSpace:'nowrap'}}>
+                                <td style={{padding:'2px 2px 2px 0', whiteSpace:'nowrap'}}>{t.team2}</td>
+                                <td style={{padding:'2px 2px', textAlign:'center', whiteSpace:'nowrap'}}>
                                     {t.score1 !== null ? `${t.score1}:${t.score2}` : '—'}
                                 </td>
-                                <td style={{padding:'2px 4px', textAlign:'center', whiteSpace:'nowrap'}}>
+                                <td style={{padding:'2px 2px', textAlign:'center', whiteSpace:'nowrap'}}>
                                     {t.tip1 !== null ? `${t.tip1}:${t.tip2}` : <span style={{color:'#aaa'}}>—</span>}
                                 </td>
                                 <td style={{padding:'2px 4px', textAlign:'center', fontWeight:700,
