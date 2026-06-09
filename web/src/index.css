@@ -13,5 +13,13 @@ body {
     min-height: 100vh;
 }
 
+.hideOnMobile { display: inline; }
+.showOnMobile { display: none; }
+@media (max-width: 600px) {
+    .hideOnMobile { display: none; }
+    .showOnMobile { display: inline; }
+    .tipMatchCol { flex: 0 0 110px !important; }
+}
+
 h1, h2, h3 { margin: 0; }
 p { margin: 0; }
