@@ -4,6 +4,7 @@ import { getFifaGames, saveFifaTip, getFifaGameTips } from '../../api/fifaGames'
 import { apiFetch } from '../../api/client';
 import { useAuth } from '../../context/AuthContext';
 import { useCompetition } from '../../context/CompetitionContext';
+import { Flag } from '../../components/Flag';
 import styles from './Dashboard.module.css';
 
 const FLAG_URL = code => `/flags/fifa_flag_${code?.toLowerCase()}.png`;
@@ -60,11 +61,11 @@ function TipModal({ game, onClose, onSaved }) {
                     <span className={styles.modalPhase}>{PHASE_LABEL[game.game_type_code] ?? game.game_type_code}</span>
                     <div className={styles.modalTeams}>
                         <span className={styles.modalTeam}>
-                            <img src={FLAG_URL(game.home_code)} className={styles.modalFlag} alt="" onError={e => e.target.style.display='none'} />{game.home_code}
+                            <Flag code={game.home_code} compId={2} className={styles.modalFlag} />{game.home_code}
                         </span>
                         <span className={styles.modalScore}>vs</span>
                         <span className={`${styles.modalTeam} ${styles.modalTeamRight}`}>
-                            {game.away_code}<img src={FLAG_URL(game.away_code)} className={styles.modalFlag} alt="" onError={e => e.target.style.display='none'} />
+                            {game.away_code}<Flag code={game.away_code} compId={2} className={styles.modalFlag} />
                         </span>
                     </div>
                 </div>
@@ -76,13 +77,13 @@ function TipModal({ game, onClose, onSaved }) {
                             <div className={styles.tipModalForm}>
                                 <div className={styles.tipModalInputs}>
                                     <div className={styles.tipTeamLabel}>
-                                        <img src={FLAG_URL(game.home_code)} className={styles.modalFlag} alt="" onError={e => e.target.style.display='none'} />{game.home_code}
+                                        <Flag code={game.home_code} compId={2} className={styles.modalFlag} />{game.home_code}
                                     </div>
                                     <input type="number" min="0" max="20" value={v1} onChange={e => setV1(e.target.value)} className={styles.tipInput} inputMode="numeric" />
                                     <span className={styles.tipSep}>:</span>
                                     <input type="number" min="0" max="20" value={v2} onChange={e => setV2(e.target.value)} className={styles.tipInput} inputMode="numeric" />
                                     <div className={`${styles.tipTeamLabel} ${styles.tipTeamRight}`}>
-                                        {game.away_code}<img src={FLAG_URL(game.away_code)} className={styles.modalFlag} alt="" onError={e => e.target.style.display='none'} />
+                                        {game.away_code}<Flag code={game.away_code} compId={2} className={styles.modalFlag} />
                                     </div>
                                 </div>
                                 {err && <p className={styles.tipModalErr}>{err}</p>}
@@ -115,14 +116,14 @@ function GameTipsModal({ game, onClose }) {
                     <span className={styles.modalPhase}>{PHASE_LABEL[game.game_type_code] ?? game.game_type_code}</span>
                     <div className={styles.modalTeams}>
                         <span className={styles.modalTeam}>
-                            <img src={FLAG_URL(game.home_code)} className={styles.modalFlag} alt="" onError={e => e.target.style.display='none'} />{game.home_code}
+                            <Flag code={game.home_code} compId={2} className={styles.modalFlag} />{game.home_code}
                         </span>
                         <span className={styles.modalScore}>
                             {isLive ? `${game.ls_home}:${game.ls_away}`
                                 : finished && game.home_score_regular != null ? `${game.home_score_regular}:${game.away_score_regular}` : 'vs'}
                         </span>
                         <span className={`${styles.modalTeam} ${styles.modalTeamRight}`}>
-                            {game.away_code}<img src={FLAG_URL(game.away_code)} className={styles.modalFlag} alt="" onError={e => e.target.style.display='none'} />
+                            {game.away_code}<Flag code={game.away_code} compId={2} className={styles.modalFlag} />
                         </span>
                     </div>
                 </div>
@@ -176,7 +177,7 @@ function GameCard({ game, onTipClick, onShowTips }) {
             <div className={styles.gameRow}>
                 <div className={styles.gameTeam}>
                     {game.home_code
-                        ? <><img src={FLAG_URL(game.home_code)} className={styles.gameFlag} alt="" onError={e => e.target.style.display='none'} /><span>{game.home_code}</span></>
+                        ? <><Flag code={game.home_code} compId={2} className={styles.gameFlag} /><span>{game.home_code}</span></>
                         : <span className={styles.tbd}>TBD</span>}
                 </div>
                 <div className={styles.gameScore}>
@@ -191,7 +192,7 @@ function GameCard({ game, onTipClick, onShowTips }) {
                 </div>
                 <div className={`${styles.gameTeam} ${styles.gameTeamRight}`}>
                     {game.away_code
-                        ? <><span>{game.away_code}</span><img src={FLAG_URL(game.away_code)} className={styles.gameFlag} alt="" onError={e => e.target.style.display='none'} /></>
+                        ? <><span>{game.away_code}</span><Flag code={game.away_code} compId={2} className={styles.gameFlag} /></>
                         : <span className={styles.tbd}>TBD</span>}
                 </div>
             </div>

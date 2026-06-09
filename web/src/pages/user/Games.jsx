@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { getGames } from '../../api/games';
 import { saveTip, getGameTips } from '../../api/tips';
 import GroupStandings from './GroupStandings';
+import { useTeamNames } from '../../components/Flag';
 import styles from './Games.module.css';
 
 const PHASE_LABEL = { A: 'Skupina A', B: 'Skupina B', QF: 'Štvrťfinále', SF: 'Semifinále', BRONZE: 'O bronz', GOLD: 'Finále' };
@@ -31,10 +32,18 @@ const dayKey = (iso) => {
 };
 
 function TeamBlock({ code, score, isLeft }) {
+    const names = useTeamNames(1);
+    const fullName = code ? (names[code.toUpperCase()] || '') : '';
     return (
         <div className={`${styles.team} ${isLeft ? styles.teamLeft : styles.teamRight}`}>
             {code
-                ? <><img className={styles.flag} src={FLAG_URL(code)} alt={code} onError={e => e.target.style.display='none'} /><span className={styles.teamCode}>{code}</span></>
+                ? <>
+                    <img className={styles.flag} src={FLAG_URL(code)} alt={code} onError={e => e.target.style.display='none'} />
+                    <span className={styles.teamCodeWrap}>
+                        <span className={styles.teamCode}>{code}</span>
+                        {fullName && <span className={styles.teamName}>{fullName}</span>}
+                    </span>
+                  </>
                 : <span className={styles.teamCode}>TBD</span>
             }
             {score != null && <span className={styles.score}>{score}</span>}

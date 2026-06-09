@@ -3,6 +3,7 @@ import { apiFetch } from '../../api/client';
 import { useAuth } from '../../context/AuthContext';
 import { useCompetition } from '../../context/CompetitionContext';
 import { LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { Flag } from '../../components/Flag';
 import styles from './Standings.module.css';
 
 const BUCKETS = ['pts7','pts6','pts5','pts4','pts3','pts2','pts1','pts0'];
@@ -57,10 +58,10 @@ function PlayerTips({ userId, compId }) {
                     <div key={t.game_id} style={{...cell, padding:'2px 8px', borderBottom:'1px solid #dee2e6'}}>
                         <span style={{flex:'0 0 78px', color:'#888'}}>{fmtDate(t.starts_at).full}</span>
                         <span className="tipMatchCol" style={{flex:'1 1 0', minWidth:0, display:'flex', alignItems:'center', overflow:'hidden', whiteSpace:'nowrap'}}>
-                            <img src={flag(t.team1)} alt="" style={{width:13, height:9, objectFit:'cover', marginRight:2, flexShrink:0}} onError={e => e.target.style.display='none'} />
+                            <Flag code={t.team1} compId={compId} width={13} height={9} style={{marginRight:2, flexShrink:0}} />
                             {t.team1}
                             <span style={{color:'#999', margin:'0 3px'}}>:</span>
-                            <img src={flag(t.team2)} alt="" style={{width:13, height:9, objectFit:'cover', marginRight:2, flexShrink:0}} onError={e => e.target.style.display='none'} />
+                            <Flag code={t.team2} compId={compId} width={13} height={9} style={{marginRight:2, flexShrink:0}} />
                             {t.team2}
                         </span>
                         <span style={{flex:'0 0 44px', textAlign:'center', display:'block'}}>

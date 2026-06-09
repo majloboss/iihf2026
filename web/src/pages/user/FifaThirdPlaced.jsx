@@ -1,5 +1,6 @@
 import styles from './GroupStandings.module.css';
 import aStyles from '../admin/AdminGroupStandings.module.css';
+import { Flag } from '../../components/Flag';
 
 const GROUP_CODES = ['A','B','C','D','E','F','G','H','I','J','K','L'];
 const FLAG_URL = code => `/flags/fifa_flag_${code?.toLowerCase()}.png`;
@@ -69,7 +70,7 @@ export default function FifaThirdPlaced({ data, thirds: thirdsProp, onTeamClick,
                                     <td className={styles.left}><span className={styles.rank}>{i + 1}.</span></td>
                                     <td className={styles.left}>
                                         <div className={styles.teamCell}>
-                                            <img src={FLAG_URL(t.team)} className={styles.flag} alt="" onError={e => e.target.style.display='none'} />
+                                            <Flag code={t.team} compId={2} className={styles.flag} />
                                             {t.team}
                                             <span style={{ color: '#aaa', fontSize: '0.82em', marginLeft: 4 }}>({t.group})</span>
                                         </div>

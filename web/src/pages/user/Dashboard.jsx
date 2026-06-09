@@ -4,6 +4,7 @@ import { apiFetch } from '../../api/client';
 import { getGames } from '../../api/games';
 import { saveTip } from '../../api/tips';
 import { useAuth } from '../../context/AuthContext';
+import { Flag } from '../../components/Flag';
 import styles from './Dashboard.module.css';
 
 const FLAG_URL = code => `/flags/team_flag_${code?.toLowerCase()}.png`;
@@ -50,7 +51,7 @@ function ModalHeader({ game }) {
             <div className={styles.modalTeams}>
                 <span className={styles.modalTeam}>
                     {game.team1
-                        ? <><img src={FLAG_URL(game.team1)} className={styles.modalFlag} alt="" onError={e => e.target.style.display='none'} />{game.team1}</>
+                        ? <><Flag code={game.team1} compId={1} className={styles.modalFlag} />{game.team1}</>
                         : 'TBD'}
                 </span>
                 <span className={styles.modalScore}>
@@ -60,7 +61,7 @@ function ModalHeader({ game }) {
                 </span>
                 <span className={`${styles.modalTeam} ${styles.modalTeamRight}`}>
                     {game.team2
-                        ? <>{game.team2}<img src={FLAG_URL(game.team2)} className={styles.modalFlag} alt="" onError={e => e.target.style.display='none'} /></>
+                        ? <>{game.team2}<Flag code={game.team2} compId={1} className={styles.modalFlag} /></>
                         : 'TBD'}
                 </span>
             </div>
@@ -101,7 +102,7 @@ function TipModal({ game, onClose, onSaved }) {
                         <div className={styles.tipModalForm}>
                             <div className={styles.tipModalInputs}>
                                 <div className={styles.tipTeamLabel}>
-                                    {game.team1 && <><img src={FLAG_URL(game.team1)} className={styles.modalFlag} alt="" onError={e => e.target.style.display='none'} />{game.team1}</>}
+                                    {game.team1 && <><Flag code={game.team1} compId={1} className={styles.modalFlag} />{game.team1}</>}
                                 </div>
                                 <input
                                     type="number" min="0" max="20"
@@ -117,7 +118,7 @@ function TipModal({ game, onClose, onSaved }) {
                                     inputMode="numeric"
                                 />
                                 <div className={`${styles.tipTeamLabel} ${styles.tipTeamRight}`}>
-                                    {game.team2 && <>{game.team2}<img src={FLAG_URL(game.team2)} className={styles.modalFlag} alt="" onError={e => e.target.style.display='none'} /></>}
+                                    {game.team2 && <>{game.team2}<Flag code={game.team2} compId={1} className={styles.modalFlag} /></>}
                                 </div>
                             </div>
                             {err && <p className={styles.tipModalErr}>{err}</p>}
@@ -214,7 +215,7 @@ function GameCard({ game, onTipClick, onGroupTipsClick }) {
             <div className={styles.gameRow}>
                 <div className={styles.gameTeam}>
                     {game.team1
-                        ? <><img src={FLAG_URL(game.team1)} className={styles.gameFlag} alt="" onError={e => e.target.style.display='none'} /><span>{game.team1}</span></>
+                        ? <><Flag code={game.team1} compId={1} className={styles.gameFlag} /><span>{game.team1}</span></>
                         : <span className={styles.tbd}>TBD</span>}
                 </div>
                 <div className={styles.gameScore}>
@@ -224,7 +225,7 @@ function GameCard({ game, onTipClick, onGroupTipsClick }) {
                 </div>
                 <div className={`${styles.gameTeam} ${styles.gameTeamRight}`}>
                     {game.team2
-                        ? <><span>{game.team2}</span><img src={FLAG_URL(game.team2)} className={styles.gameFlag} alt="" onError={e => e.target.style.display='none'} /></>
+                        ? <><span>{game.team2}</span><Flag code={game.team2} compId={1} className={styles.gameFlag} /></>
                         : <span className={styles.tbd}>TBD</span>}
                 </div>
             </div>
