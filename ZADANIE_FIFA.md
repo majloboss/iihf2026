@@ -288,8 +288,11 @@ Poradie migrácie:
 12. ✅ **Pozvánky soft delete** — cancelled_at, stav Zrušená, duplicita ignoruje zrušené, admin aj user môže zrušiť (migrácia 039)
 13. ✅ **Skupiny default filter** — Všetky namiesto Moje
 14. ✅ **Migrácia 039** — spustená na DB-DEV-BET aj DB-BET
-15. 🔲 **Android aplikácia** (Kotlin) — neskôr, nie priorita
-16. 🟡 *Nice-to-have:* automatické párovanie knockout bracketu z víťazov skupín (teraz manuálne)
+15. ✅ **Menu ikony** — vlastné obrázkové ikony navigácie z `sources/menu/` (Prehľad/Zápasy/Tabuľky/Skupiny/Profil/Pravidlá), transparentné rohy, sidebar 34px + bottom nav 30px; profil v mobile zobrazí avatar ak ho má
+16. ✅ **Mobil Zápasy filtre** — menšie tlačidlá filtrov (≤480px) aby sa TAB zmestil na obrazovku
+17. ✅ **Rozklik tipov v Skupinách** — flex layout (nie vnorená tabuľka), body vždy viditeľné aj na mobile; vlajka1/tím1/:/vlajka2/tím2 zarovnané stĺpce; mobil zápas pevných 110px
+18. 🔲 **Android aplikácia** (Kotlin) — neskôr, nie priorita
+19. 🟡 *Nice-to-have:* automatické párovanie knockout bracketu z víťazov skupín (teraz manuálne)
 
 ---
 
@@ -307,13 +310,14 @@ Poradie migrácie:
 | 8 | **Export výsledkov** — CSV export poradia skupiny. | ❌ nepotrebné |
 | 9 | **Správy/chat** — správa adminovi + jednoduchý chat pre tipérov v skupine. Nie sociálna sieť. Riešiť ako úplne posledné. | 🔲 dlhodobé |
 | 10 | **Štatistiky usera** — úspešnosť, najlepší/najhorší zápas, streak. | 🔲 dlhodobé |
-| 11 | **Sieň slávy** — po skončení každého turnaja sa uloží finálne globálne poradie. Top 10 dostane body (1.=10, 2.=9, ... 10.=1, od 11.=0). Tri tabuľky: (a) Globálna (všetky turnaje), (b) Futbalová (FIFA, LM, ME, Olympiáda...), (c) Hokejová (MS, Olympiáda...). Body sa kumulujú naprieč turnajmi v rámci športu — tipér súťaží len v tom športe ktorý tipuje. Klik na hráča rozroluje turnaje kde získal body (accordion). | 🟠 implementované (develop) |
+| 11 | **Sieň slávy** — po skončení každého turnaja sa uloží finálne globálne poradie. Top 10 dostane body (1.=10, 2.=9, ... 10.=1, od 11.=0). Tri tabuľky: (a) Globálna (všetky turnaje), (b) Futbalová (FIFA, LM, ME, Olympiáda...), (c) Hokejová (MS, Olympiáda...). Body sa kumulujú naprieč turnajmi v rámci športu — tipér súťaží len v tom športe ktorý tipuje. Klik na hráča rozroluje turnaje kde získal body (accordion). | ✅ produkcia (naplní sa po skončení 1. turnaja) |
 
-### Obrazovka Skupiny — záložky (🟠 develop)
+### Obrazovka Skupiny — záložky ✅ (main/prod)
 
-Obrazovka **Skupiny** má teraz 3 záložky (ako Profil):
-- **\<názov turnaja\>** — ✅ pôvodná funkcionalita (prvá záložka nesie názov aktuálneho turnaja): skupiny pre zvolený turnaj, poradie hráčov, body, rozklik tipov + graf
-- **Global** — 🟠 všetci tipéri po turnajoch (každý turnaj = jedna „skupina"), zoradené podľa dátumu turnaja (najnovší prvý → FIFA, potom IIHF). Endpoint `GET /v1/global-standings`. Rozklik tipov + graf fungujú per-turnaj.
-- **Sieň slávy** — 🟠 implementované. Endpoint `GET /v1/hall-of-fame`. **Dynamický** výpočet (žiadna tabuľka): turnaj je „skončený" ak majú všetky jeho zápasy zadaný výsledok → finálne poradie tipérov → body top 10 (1.=10b … 10.=1b, pevná pozícia + tiebreak 7/6/5...). Pri zmene výsledku sa prepočíta automaticky. Šport z `competitions.sport`. 3 pod-záložky: Globálna / Futbal / Hokej. Klik na hráča = accordion s turnajmi a získanými bodmi.
+Obrazovka **Skupiny** má 3 záložky (ako Profil):
+- **\<názov turnaja\>** — ✅ pôvodná funkcionalita (prvá záložka nesie názov aktuálneho turnaja): skupiny pre zvolený turnaj, poradie hráčov, body, rozklik tipov + graf. Názov roztiahnutý po tlačidlo Graf.
+- **Global** — ✅ všetci tipéri po turnajoch (každý turnaj = jedna „skupina"), zoradené podľa dátumu turnaja (najnovší prvý → FIFA, potom IIHF). Endpoint `GET /v1/global-standings`. Rozklik tipov + graf fungujú per-turnaj.
+- **Sieň slávy** — ✅ implementované. Endpoint `GET /v1/hall-of-fame`. **Dynamický** výpočet (žiadna tabuľka): turnaj je „skončený" ak majú všetky jeho zápasy zadaný výsledok → finálne poradie tipérov → body top 10 (1.=10b … 10.=1b, pevná pozícia + tiebreak 7/6/5...). Pri zmene výsledku sa prepočíta automaticky. Šport z `competitions.sport`. 3 pod-záložky: Globálna / Futbal / Hokej. Klik na hráča = accordion s turnajmi a získanými bodmi. *(Naplní sa až po skončení 1. turnaja — IIHF máj / FIFA jún 2026.)*
+- **Graf tooltip** — ✅ zoradené poradie podľa bodov v danom bode grafu (najvyšší navrchu, s číslom pozície).
 
 > Login token expirácia: **7 dní** (`time() + 86400 * 7`). Test expirácie + auto-redirect na /login overený (✅).
