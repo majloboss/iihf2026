@@ -33,6 +33,80 @@
 .empty { color: #888; text-align: center; padding: 30px 0; }
 .hofPlaceholder { color: #888; text-align: center; padding: 40px 16px; font-size: 0.95rem; }
 
+/* ── Hall of Fame ── */
+.hofSubTabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 16px;
+}
+.hofSubTab, .hofSubTabActive {
+    flex: 1;
+    padding: 8px 4px;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    background: #fff;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #777;
+    transition: all 0.15s;
+}
+.hofSubTabActive { background: #1a3a6b; color: #fff; border-color: #1a3a6b; }
+
+.hofRow {
+    display: flex;
+    align-items: center;
+    padding: 10px 12px;
+    background: #fff;
+    border: 1px solid #e8ecf0;
+    border-radius: 10px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+.hofRank {
+    font-weight: 700;
+    width: 32px;
+    color: #888;
+    flex-shrink: 0;
+}
+.hofRank1 { color: #d4a017; }
+.hofRank2 { color: #8c8c8c; }
+.hofRank3 { color: #b87333; }
+.hofAvatar {
+    width: 34px; height: 34px; border-radius: 50%;
+    object-fit: cover; margin-right: 10px; flex-shrink: 0;
+}
+.hofAvatarPh {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: #dde3ec; color: #1a3a6b; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    margin-right: 10px; flex-shrink: 0;
+}
+.hofName { flex: 1; font-weight: 600; color: #222; }
+.hofPoints { font-weight: 700; color: #1a3a6b; font-size: 1.05rem; margin-right: 8px; }
+.hofCaret { color: #aaa; font-size: 0.75rem; }
+
+.hofDetail {
+    background: #f8f9fa;
+    border: 1px solid #e8ecf0;
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+    margin: -8px 0 8px;
+    padding: 8px 12px;
+}
+.hofDetailItem {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 0;
+    font-size: 0.82rem;
+    border-bottom: 1px solid #ececec;
+}
+.hofDetailItem:last-child { border-bottom: none; }
+.hofDetailPlace { color: #888; }
+.hofDetailPts { font-weight: 700; color: #27ae60; }
+
 .groupCard {
     background: #fff;
     border: 1px solid #e8ecf0;

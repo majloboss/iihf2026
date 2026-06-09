@@ -262,6 +262,83 @@ function GlobalView({ currentUserId }) {
         : comps.map(c => <GroupTable key={c.id} group={c} currentUserId={currentUserId} compId={c.competition_id} />);
 }
 
+// Záložka Sieň slávy — kumulované body z top 10 umiestnení po turnajoch
+function HallOfFame({ currentUserId }) {
+    const [data,    setData]    = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error,   setError]   = useState('');
+    const [sub,     setSub]     = useState('global');
+    const [expanded, setExpanded] = useState(new Set());
+
+    useEffect(() => {
+        apiFetch('v1/hall-of-fame')
+            .then(d => { setData(d); setLoading(false); })
+            .catch(e => { setError(e.message); setLoading(false); });
+    }, []);
+
+    const toggle = (uid) => setExpanded(prev => {
+        const next = new Set(prev);
+        next.has(uid) ? next.delete(uid) : next.add(uid);
+        return next;
+    });
+
+    if (loading) return <p>Načítavam…</p>;
+    if (error)   return <p style={{color:'red'}}>Chyba: {error}</p>;
+
+    const rows = data?.[sub] || [];
+
+    return (
+        <div>
+            <div className={styles.hofSubTabs}>
+                <button className={sub === 'global'   ? styles.hofSubTabActive : styles.hofSubTab} onClick={() => setSub('global')}>Globálna</button>
+                <button className={sub === 'football' ? styles.hofSubTabActive : styles.hofSubTab} onClick={() => setSub('football')}>Futbal</button>
+                <button className={sub === 'hockey'   ? styles.hofSubTabActive : styles.hofSubTab} onClick={() => setSub('hockey')}>Hokej</button>
+            </div>
+
+            {!data?.finished?.length && (
+                <p className={styles.hofPlaceholder}>
+                    Zatiaľ neskončil žiadny turnaj. Sieň slávy sa naplní po zadaní výsledku posledného zápasu turnaja.
+                </p>
+            )}
+
+            {data?.finished?.length > 0 && rows.length === 0 && (
+                <p className={styles.empty}>V tejto kategórii zatiaľ nikto nezískal body.</p>
+            )}
+
+            {rows.map((r, i) => (
+                <div key={r.user_id}>
+                    <div className={styles.hofRow}
+                        onClick={() => toggle(r.user_id)}
+                        style={r.user_id === currentUserId ? {borderColor:'#1a3a6b', borderWidth:2} : undefined}>
+                        <span className={`${styles.hofRank} ${i === 0 ? styles.hofRank1 : i === 1 ? styles.hofRank2 : i === 2 ? styles.hofRank3 : ''}`}>
+                            {i + 1}.
+                        </span>
+                        {r.avatar
+                            ? <img src={r.avatar} className={styles.hofAvatar} alt="" />
+                            : <span className={styles.hofAvatarPh}>{r.username[0].toUpperCase()}</span>}
+                        <span className={styles.hofName}>{r.username}</span>
+                        <span className={styles.hofPoints}>{r.points} b</span>
+                        <span className={styles.hofCaret}>{expanded.has(r.user_id) ? '▲' : '▼'}</span>
+                    </div>
+                    {expanded.has(r.user_id) && (
+                        <div className={styles.hofDetail}>
+                            {r.tournaments.map((t, j) => (
+                                <div key={j} className={styles.hofDetailItem}>
+                                    <span>{t.name}</span>
+                                    <span>
+                                        <span className={styles.hofDetailPlace}>{t.place}. miesto · </span>
+                                        <span className={styles.hofDetailPts}>+{t.hof_points} b</span>
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            ))}
+        </div>
+    );
+}
+
 export default function Standings() {
     const { user } = useAuth();
     const { activeCompetition } = useCompetition();
@@ -269,17 +346,19 @@ export default function Standings() {
 
     const [tab, setTab] = useState('skupiny');
 
+    const groupsTabLabel = activeCompetition?.name || 'Skupiny';
+
     return (
         <div className={styles.wrap}>
             <div className={styles.tabs}>
-                <button className={tab === 'skupiny' ? styles.tabActive : styles.tab} onClick={() => setTab('skupiny')}>Skupiny</button>
+                <button className={tab === 'skupiny' ? styles.tabActive : styles.tab} onClick={() => setTab('skupiny')}>{groupsTabLabel}</button>
                 <button className={tab === 'global'  ? styles.tabActive : styles.tab} onClick={() => setTab('global')}>Global</button>
                 <button className={tab === 'sien'    ? styles.tabActive : styles.tab} onClick={() => setTab('sien')}>Sieň slávy</button>
             </div>
 
             {tab === 'skupiny' && <GroupsView currentUserId={user?.user_id} compId={compId} />}
             {tab === 'global'  && <GlobalView currentUserId={user?.user_id} />}
-            {tab === 'sien'    && <p className={styles.hofPlaceholder}>Sieň slávy — čoskoro. Po skončení turnaja sa tu zobrazí finálne poradie a získané body.</p>}
+            {tab === 'sien'    && <HallOfFame currentUserId={user?.user_id} />}
         </div>
     );
 }
