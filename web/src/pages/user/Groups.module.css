@@ -165,8 +165,8 @@
 }
 .flagsRow {
     display: flex;
-    flex-direction: column;
-    gap: 6px;
+    flex-wrap: wrap;
+    gap: 8px 20px;
     margin-top: 10px;
     padding-top: 10px;
     border-top: 1px dashed #e0e0e0;
