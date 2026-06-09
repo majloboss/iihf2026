@@ -116,13 +116,34 @@ function GroupChart({ members, compId }) {
     if (loading) return <div style={{padding:'8px',color:'#aaa',fontSize:'0.8rem'}}>Načítavam graf…</div>;
     if (!chartData?.length) return null;
 
+    // Vlastný tooltip: zoradí hráčov podľa bodov v danom bode (poradie), najvyšší navrchu
+    const RankTooltip = ({ active, payload }) => {
+        if (!active || !payload?.length) return null;
+        const sorted = payload
+            .filter(p => p.value !== null && p.value !== undefined)
+            .sort((a, b) => b.value - a.value);
+        return (
+            <div style={{background:'#fff', border:'1px solid #dee2e6', borderRadius:6,
+                padding:'6px 8px', fontSize:'0.72rem', boxShadow:'0 2px 6px rgba(0,0,0,0.12)'}}>
+                {sorted.map((p, i) => (
+                    <div key={p.dataKey} style={{display:'flex', alignItems:'center', gap:4, padding:'1px 0'}}>
+                        <span style={{color:'#888', width:18}}>{i + 1}.</span>
+                        <span style={{width:8, height:8, borderRadius:'50%', background:p.stroke, display:'inline-block', flexShrink:0}} />
+                        <span style={{flex:1, color:'#222'}}>{p.dataKey}</span>
+                        <span style={{fontWeight:700, color:'#1a3a6b', marginLeft:6}}>{p.value} b</span>
+                    </div>
+                ))}
+            </div>
+        );
+    };
+
     return (
         <div style={{padding:'12px 0 4px'}}>
             <ResponsiveContainer width="100%" height={200}>
                 <LineChart data={chartData} margin={{top:4, right:8, left:0, bottom:4}}>
                     <XAxis dataKey="name" tick={false} />
                     <YAxis tick={{fontSize:10}} width={28} />
-                    <Tooltip formatter={(v, name) => [v + ' b', name]} labelFormatter={l => l} />
+                    <Tooltip content={<RankTooltip />} />
                     <Legend wrapperStyle={{fontSize:'0.75rem'}} />
                     {members.map((m, i) => (
                         <Line key={m.user_id} type="monotone" dataKey={m.username}
@@ -152,13 +173,14 @@ function GroupTable({ group, currentUserId, compId }) {
 
     return (
         <div className={styles.groupCard}>
-            <div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
-                <div className={styles.groupName}>{group.name}</div>
+            <div style={{display:'flex', alignItems:'stretch'}}>
+                <div className={styles.groupName} style={{flex:1, display:'flex', alignItems:'center'}}>{group.name}</div>
                 {group.members.length > 1 && (
                     <button onClick={() => setShowChart(v => !v)}
-                        style={{fontSize:'0.75rem', border:'1px solid #dee2e6', borderRadius:6,
-                            padding:'2px 8px', cursor:'pointer', background: showChart ? '#1a3a6b' : '#fff',
-                            color: showChart ? '#fff' : '#555'}}>
+                        style={{fontSize:'0.75rem', border:'none', borderLeft:'1px solid rgba(255,255,255,0.2)',
+                            padding:'0 12px', cursor:'pointer',
+                            background: showChart ? '#12294a' : '#1a3a6b',
+                            color: '#fff', flexShrink:0}}>
                         {showChart ? '▲ Graf' : '▼ Graf'}
                     </button>
                 )}
