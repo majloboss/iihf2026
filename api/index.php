@@ -65,6 +65,8 @@ try {
         $path === 'v1/games'               => require __DIR__ . '/v1/games.php',
         $path === 'v1/tips'                => require __DIR__ . '/v1/tips.php',
         $path === 'v1/standings'           => require __DIR__ . '/v1/standings.php',
+        $path === 'v1/global-standings'    => require __DIR__ . '/v1/global-standings.php',
+        $path === 'v1/hall-of-fame'        => require __DIR__ . '/v1/hall-of-fame.php',
         $path === 'v1/player-tips'         => require __DIR__ . '/v1/player_tips.php',
         $path === 'v1/group-standings'     => require __DIR__ . '/v1/group_standings.php',
         $path === 'v1/admin/standings'           => require __DIR__ . '/v1/admin/standings.php',

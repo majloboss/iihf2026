@@ -116,13 +116,34 @@ function GroupChart({ members, compId }) {
     if (loading) return <div style={{padding:'8px',color:'#aaa',fontSize:'0.8rem'}}>Načítavam graf…</div>;
     if (!chartData?.length) return null;
 
+    // Vlastný tooltip: zoradí hráčov podľa bodov v danom bode (poradie), najvyšší navrchu
+    const RankTooltip = ({ active, payload }) => {
+        if (!active || !payload?.length) return null;
+        const sorted = payload
+            .filter(p => p.value !== null && p.value !== undefined)
+            .sort((a, b) => b.value - a.value);
+        return (
+            <div style={{background:'#fff', border:'1px solid #dee2e6', borderRadius:6,
+                padding:'6px 8px', fontSize:'0.72rem', boxShadow:'0 2px 6px rgba(0,0,0,0.12)'}}>
+                {sorted.map((p, i) => (
+                    <div key={p.dataKey} style={{display:'flex', alignItems:'center', gap:4, padding:'1px 0'}}>
+                        <span style={{color:'#888', width:18}}>{i + 1}.</span>
+                        <span style={{width:8, height:8, borderRadius:'50%', background:p.stroke, display:'inline-block', flexShrink:0}} />
+                        <span style={{flex:1, color:'#222'}}>{p.dataKey}</span>
+                        <span style={{fontWeight:700, color:'#1a3a6b', marginLeft:6}}>{p.value} b</span>
+                    </div>
+                ))}
+            </div>
+        );
+    };
+
     return (
         <div style={{padding:'12px 0 4px'}}>
             <ResponsiveContainer width="100%" height={200}>
                 <LineChart data={chartData} margin={{top:4, right:8, left:0, bottom:4}}>
                     <XAxis dataKey="name" tick={false} />
                     <YAxis tick={{fontSize:10}} width={28} />
-                    <Tooltip formatter={(v, name) => [v + ' b', name]} labelFormatter={l => l} />
+                    <Tooltip content={<RankTooltip />} />
                     <Legend wrapperStyle={{fontSize:'0.75rem'}} />
                     {members.map((m, i) => (
                         <Line key={m.user_id} type="monotone" dataKey={m.username}
@@ -139,6 +160,9 @@ function GroupTable({ group, currentUserId, compId }) {
     const [expanded, setExpanded] = useState(new Set());
     const [showChart, setShowChart] = useState(false);
 
+    // V Global view má každá "skupina" (= turnaj) vlastné competition_id
+    const effCompId = group.competition_id ?? compId;
+
     const toggle = (uid) => {
         setExpanded(prev => {
             const next = new Set(prev);
@@ -149,18 +173,19 @@ function GroupTable({ group, currentUserId, compId }) {
 
     return (
         <div className={styles.groupCard}>
-            <div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
-                <div className={styles.groupName}>{group.name}</div>
+            <div style={{display:'flex', alignItems:'stretch'}}>
+                <div className={styles.groupName} style={{flex:1, display:'flex', alignItems:'center'}}>{group.name}</div>
                 {group.members.length > 1 && (
                     <button onClick={() => setShowChart(v => !v)}
-                        style={{fontSize:'0.75rem', border:'1px solid #dee2e6', borderRadius:6,
-                            padding:'2px 8px', cursor:'pointer', background: showChart ? '#1a3a6b' : '#fff',
-                            color: showChart ? '#fff' : '#555'}}>
+                        style={{fontSize:'0.75rem', border:'none', borderLeft:'1px solid rgba(255,255,255,0.2)',
+                            padding:'0 12px', cursor:'pointer',
+                            background: showChart ? '#12294a' : '#1a3a6b',
+                            color: '#fff', flexShrink:0}}>
                         {showChart ? '▲ Graf' : '▼ Graf'}
                     </button>
                 )}
             </div>
-            {showChart && <GroupChart members={group.members} compId={compId} />}
+            {showChart && <GroupChart members={group.members} compId={effCompId} />}
             <table className={styles.table}>
                 <thead>
                     <tr>
@@ -206,7 +231,7 @@ function GroupTable({ group, currentUserId, compId }) {
                             </tr>
                         ];
                         if (expanded.has(m.user_id)) {
-                            rows.push(<PlayerTips key={`tips-${m.user_id}`} userId={m.user_id} compId={compId} />);
+                            rows.push(<PlayerTips key={`tips-${m.user_id}`} userId={m.user_id} compId={effCompId} />);
                         }
                         return rows;
                     })}
@@ -216,11 +241,8 @@ function GroupTable({ group, currentUserId, compId }) {
     );
 }
 
-export default function Standings() {
-    const { user } = useAuth();
-    const { activeCompetition } = useCompetition();
-    const compId = activeCompetition?.id ?? null;
-
+// Záložka Skupiny — súčasná funkcionalita (skupiny pre zvolený turnaj)
+function GroupsView({ currentUserId, compId }) {
     const [groups,  setGroups]  = useState([]);
     const [loading, setLoading] = useState(true);
     const [error,   setError]   = useState('');
@@ -236,11 +258,129 @@ export default function Standings() {
     if (loading) return <p>Načítavam…</p>;
     if (error)   return <p style={{color:'red'}}>Chyba: {error}</p>;
 
+    return groups.length === 0
+        ? <p className={styles.empty}>Nie si v žiadnej skupine.</p>
+        : groups.map(g => <GroupTable key={g.id} group={g} currentUserId={currentUserId} compId={compId} />);
+}
+
+// Záložka Global — všetci tipéri po turnajoch (zoradené podľa dátumu turnaja)
+function GlobalView({ currentUserId }) {
+    const [comps,   setComps]   = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error,   setError]   = useState('');
+
+    useEffect(() => {
+        setLoading(true);
+        apiFetch('v1/global-standings')
+            .then(data => { setComps(data); setLoading(false); })
+            .catch(e   => { setError(e.message); setLoading(false); });
+    }, []);
+
+    if (loading) return <p>Načítavam…</p>;
+    if (error)   return <p style={{color:'red'}}>Chyba: {error}</p>;
+
+    return comps.length === 0
+        ? <p className={styles.empty}>Žiadne turnaje.</p>
+        : comps.map(c => <GroupTable key={c.id} group={c} currentUserId={currentUserId} compId={c.competition_id} />);
+}
+
+// Záložka Sieň slávy — kumulované body z top 10 umiestnení po turnajoch
+function HallOfFame({ currentUserId }) {
+    const [data,    setData]    = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error,   setError]   = useState('');
+    const [sub,     setSub]     = useState('global');
+    const [expanded, setExpanded] = useState(new Set());
+
+    useEffect(() => {
+        apiFetch('v1/hall-of-fame')
+            .then(d => { setData(d); setLoading(false); })
+            .catch(e => { setError(e.message); setLoading(false); });
+    }, []);
+
+    const toggle = (uid) => setExpanded(prev => {
+        const next = new Set(prev);
+        next.has(uid) ? next.delete(uid) : next.add(uid);
+        return next;
+    });
+
+    if (loading) return <p>Načítavam…</p>;
+    if (error)   return <p style={{color:'red'}}>Chyba: {error}</p>;
+
+    const rows = data?.[sub] || [];
+
+    return (
+        <div>
+            <div className={styles.hofSubTabs}>
+                <button className={sub === 'global'   ? styles.hofSubTabActive : styles.hofSubTab} onClick={() => setSub('global')}>Globálna</button>
+                <button className={sub === 'football' ? styles.hofSubTabActive : styles.hofSubTab} onClick={() => setSub('football')}>Futbal</button>
+                <button className={sub === 'hockey'   ? styles.hofSubTabActive : styles.hofSubTab} onClick={() => setSub('hockey')}>Hokej</button>
+            </div>
+
+            {!data?.finished?.length && (
+                <p className={styles.hofPlaceholder}>
+                    Zatiaľ neskončil žiadny turnaj. Sieň slávy sa naplní po zadaní výsledku posledného zápasu turnaja.
+                </p>
+            )}
+
+            {data?.finished?.length > 0 && rows.length === 0 && (
+                <p className={styles.empty}>V tejto kategórii zatiaľ nikto nezískal body.</p>
+            )}
+
+            {rows.map((r, i) => (
+                <div key={r.user_id}>
+                    <div className={styles.hofRow}
+                        onClick={() => toggle(r.user_id)}
+                        style={r.user_id === currentUserId ? {borderColor:'#1a3a6b', borderWidth:2} : undefined}>
+                        <span className={`${styles.hofRank} ${i === 0 ? styles.hofRank1 : i === 1 ? styles.hofRank2 : i === 2 ? styles.hofRank3 : ''}`}>
+                            {i + 1}.
+                        </span>
+                        {r.avatar
+                            ? <img src={r.avatar} className={styles.hofAvatar} alt="" />
+                            : <span className={styles.hofAvatarPh}>{r.username[0].toUpperCase()}</span>}
+                        <span className={styles.hofName}>{r.username}</span>
+                        <span className={styles.hofPoints}>{r.points} b</span>
+                        <span className={styles.hofCaret}>{expanded.has(r.user_id) ? '▲' : '▼'}</span>
+                    </div>
+                    {expanded.has(r.user_id) && (
+                        <div className={styles.hofDetail}>
+                            {r.tournaments.map((t, j) => (
+                                <div key={j} className={styles.hofDetailItem}>
+                                    <span>{t.name}</span>
+                                    <span>
+                                        <span className={styles.hofDetailPlace}>{t.place}. miesto · </span>
+                                        <span className={styles.hofDetailPts}>+{t.hof_points} b</span>
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            ))}
+        </div>
+    );
+}
+
+export default function Standings() {
+    const { user } = useAuth();
+    const { activeCompetition } = useCompetition();
+    const compId = activeCompetition?.id ?? null;
+
+    const [tab, setTab] = useState('skupiny');
+
+    const groupsTabLabel = activeCompetition?.name || 'Skupiny';
+
     return (
         <div className={styles.wrap}>
-            {groups.length === 0
-                ? <p className={styles.empty}>Nie si v žiadnej skupine.</p>
-                : groups.map(g => <GroupTable key={g.id} group={g} currentUserId={user?.user_id} compId={compId} />)}
+            <div className={styles.tabs}>
+                <button className={tab === 'skupiny' ? styles.tabActive : styles.tab} onClick={() => setTab('skupiny')}>{groupsTabLabel}</button>
+                <button className={tab === 'global'  ? styles.tabActive : styles.tab} onClick={() => setTab('global')}>Global</button>
+                <button className={tab === 'sien'    ? styles.tabActive : styles.tab} onClick={() => setTab('sien')}>Sieň slávy</button>
+            </div>
+
+            {tab === 'skupiny' && <GroupsView currentUserId={user?.user_id} compId={compId} />}
+            {tab === 'global'  && <GlobalView currentUserId={user?.user_id} />}
+            {tab === 'sien'    && <HallOfFame currentUserId={user?.user_id} />}
         </div>
     );
 }

@@ -307,6 +307,13 @@ Poradie migrácie:
 | 8 | **Export výsledkov** — CSV export poradia skupiny. | ❌ nepotrebné |
 | 9 | **Správy/chat** — správa adminovi + jednoduchý chat pre tipérov v skupine. Nie sociálna sieť. Riešiť ako úplne posledné. | 🔲 dlhodobé |
 | 10 | **Štatistiky usera** — úspešnosť, najlepší/najhorší zápas, streak. | 🔲 dlhodobé |
-| 11 | **Sieň slávy** — po skončení každého turnaja sa uloží finálne globálne poradie. Top 10 dostane body (1.=10, 2.=9, ... 10.=1, od 11.=0). Tri tabuľky: (a) Globálna (všetky turnaje), (b) Futbalová (FIFA, LM, ME, Olympiáda...), (c) Hokejová (MS, Olympiáda...). Body sa kumulujú naprieč turnajmi v rámci športu — tipér súťaží len v tom športe ktorý tipuje. Klik na hráča rozroluje turnaje kde získal body (accordion). | 🟢 READY TO CODE |
+| 11 | **Sieň slávy** — po skončení každého turnaja sa uloží finálne globálne poradie. Top 10 dostane body (1.=10, 2.=9, ... 10.=1, od 11.=0). Tri tabuľky: (a) Globálna (všetky turnaje), (b) Futbalová (FIFA, LM, ME, Olympiáda...), (c) Hokejová (MS, Olympiáda...). Body sa kumulujú naprieč turnajmi v rámci športu — tipér súťaží len v tom športe ktorý tipuje. Klik na hráča rozroluje turnaje kde získal body (accordion). | 🟠 implementované (develop) |
+
+### Obrazovka Skupiny — záložky (🟠 develop)
+
+Obrazovka **Skupiny** má teraz 3 záložky (ako Profil):
+- **\<názov turnaja\>** — ✅ pôvodná funkcionalita (prvá záložka nesie názov aktuálneho turnaja): skupiny pre zvolený turnaj, poradie hráčov, body, rozklik tipov + graf
+- **Global** — 🟠 všetci tipéri po turnajoch (každý turnaj = jedna „skupina"), zoradené podľa dátumu turnaja (najnovší prvý → FIFA, potom IIHF). Endpoint `GET /v1/global-standings`. Rozklik tipov + graf fungujú per-turnaj.
+- **Sieň slávy** — 🟠 implementované. Endpoint `GET /v1/hall-of-fame`. **Dynamický** výpočet (žiadna tabuľka): turnaj je „skončený" ak majú všetky jeho zápasy zadaný výsledok → finálne poradie tipérov → body top 10 (1.=10b … 10.=1b, pevná pozícia + tiebreak 7/6/5...). Pri zmene výsledku sa prepočíta automaticky. Šport z `competitions.sport`. 3 pod-záložky: Globálna / Futbal / Hokej. Klik na hráča = accordion s turnajmi a získanými bodmi.
 
 > Login token expirácia: **7 dní** (`time() + 86400 * 7`). Test expirácie + auto-redirect na /login overený (✅).
