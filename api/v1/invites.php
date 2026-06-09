@@ -46,15 +46,26 @@ if ($method === 'GET') {
     }
     unset($r);
 
-    // Skupiny kde je user členom (pre dropdown)
+    // Skupiny kde je user členom (pre dropdown):
+    //  - len pre aktuálny turnaj (ak je zadaný competition_id)
+    //  - nie uzavreté skupiny (do tých sa nedá pozývať)
+    //  - člen smie pozývať len ak skupina povoľuje, alebo je zakladateľ
+    $cid = isset($_GET['competition_id']) ? (int)$_GET['competition_id'] : null;
+    $compFilter = $cid ? "AND fg.competition_id = :cid" : "";
+    $gParams = [':uid' => $auth['user_id']];
+    if ($cid) $gParams[':cid'] = $cid;
+
     $gStmt = $pdo->prepare(
         "SELECT fg.id, fg.name, c.name AS competition_name
          FROM admin.friend_groups fg
-         JOIN admin.group_members gm ON gm.group_id = fg.id AND gm.user_id = ? AND gm.status = 'accepted'
+         JOIN admin.group_members gm ON gm.group_id = fg.id AND gm.user_id = :uid AND gm.status = 'accepted'
          LEFT JOIN admin.competitions c ON c.id = fg.competition_id
+         WHERE fg.is_closed = FALSE
+           AND (fg.allow_member_invite = TRUE OR fg.created_by = :uid)
+           $compFilter
          ORDER BY fg.name"
     );
-    $gStmt->execute([$auth['user_id']]);
+    $gStmt->execute($gParams);
 
     $meStmt = $pdo->prepare('SELECT username FROM admin.users WHERE id = ?');
     $meStmt->execute([$auth['user_id']]);
@@ -98,13 +109,22 @@ if ($method === 'POST') {
         }
     }
 
-    // Overit ze user je členom skupiny
+    // Overit ze user je členom skupiny + skupina prijíma pozvánky
     if ($group_id) {
         $chk = $pdo->prepare(
-            "SELECT 1 FROM admin.group_members WHERE group_id=? AND user_id=? AND status='accepted'"
+            "SELECT fg.is_closed, fg.allow_member_invite, fg.created_by
+             FROM admin.friend_groups fg
+             JOIN admin.group_members gm ON gm.group_id = fg.id AND gm.user_id = ? AND gm.status = 'accepted'
+             WHERE fg.id = ?"
         );
-        $chk->execute([$group_id, $auth['user_id']]);
-        if (!$chk->fetch()) $group_id = null;
+        $chk->execute([$auth['user_id'], $group_id]);
+        $g = $chk->fetch();
+        // nie člen | uzavretá | člen bez práva pozývať (a nie zakladateľ) → bez skupiny
+        if (!$g
+            || $g['is_closed']
+            || (!$g['allow_member_invite'] && (int)$g['created_by'] !== (int)$auth['user_id'])) {
+            $group_id = null;
+        }
     }
 
     try {

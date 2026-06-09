@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { apiFetch } from '../../api/client';
+import { useCompetition } from '../../context/CompetitionContext';
 import styles from './UserInvites.module.css';
 
 function buildInviteText(inv, myUsername) {
@@ -41,6 +42,9 @@ function CopyBtn({ text }) {
 }
 
 export default function UserInvites() {
+    const { activeCompetition } = useCompetition();
+    const compId = activeCompetition?.id ?? null;
+
     const [invites,    setInvites]    = useState([]);
     const [groups,     setGroups]     = useState([]);
     const [myUsername, setMyUsername] = useState('');
@@ -54,7 +58,7 @@ export default function UserInvites() {
 
     const load = () => {
         setLoading(true);
-        apiFetch('v1/invites')
+        apiFetch(`v1/invites${compId ? `?competition_id=${compId}` : ''}`)
             .then(data => {
                 setInvites(data.invites || []);
                 setGroups(data.groups || []);
@@ -64,7 +68,7 @@ export default function UserInvites() {
             .finally(() => setLoading(false));
     };
 
-    useEffect(() => { load(); }, []);
+    useEffect(() => { load(); }, [compId]);
 
     const revoke = async (id) => {
         if (!confirm('Zrušiť pozvánku? Link bude zneplatnený.')) return;
