@@ -227,6 +227,23 @@
 
 .tipScore2 { font-weight: 700; color: #222; }
 .tipNoTip { color: #bbb; font-style: italic; }
+
+@media (max-width: 480px) {
+    .pBtn {
+        font-size: 0.78rem;
+        min-width: 32px;
+        padding: 4px 0;
+    }
+    .btnTabulky, .btnTabulkyActive {
+        font-size: 0.78rem;
+        padding: 4px 8px;
+    }
+    .untippedBtn, .untippedBtnOn {
+        font-size: 0.82rem;
+        padding: 4px 8px;
+    }
+    .filters { gap: 3px; }
+}
 .tipPts { color: #28a745; font-size: 0.75rem; padding-left: 4px; }
 .tipsLoading { text-align: center; color: #aaa; font-size: 0.8rem; padding: 8px 0; }
 .tipsErr { color: #dc3545; font-size: 0.78rem; text-align: center; margin-top: 6px; }
