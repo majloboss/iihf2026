@@ -17,6 +17,7 @@ import AdminGroupStandings from './pages/admin/AdminGroupStandings';
 import AdminTools from './pages/admin/AdminTools';
 import AdminLoginLogs from './pages/admin/AdminLoginLogs';
 import AdminMailLog from './pages/admin/AdminMailLog';
+import AdminMessages from './pages/admin/AdminMessages';
 import AdminAnnouncements from './pages/admin/AdminAnnouncements';
 import UserLayout from './pages/user/UserLayout';
 import Games from './pages/user/Games';
@@ -112,6 +113,7 @@ export default function App() {
                         <Route path="tools"     element={<AdminTools />} />
                         <Route path="login-logs" element={<AdminLoginLogs />} />
                         <Route path="mail-log"        element={<AdminMailLog />} />
+                        <Route path="messages"        element={<AdminMessages />} />
                         <Route path="announcements"   element={<AdminAnnouncements />} />
                     </Route>
 

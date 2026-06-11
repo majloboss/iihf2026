@@ -1,0 +1,108 @@
+.wrap {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 120px);
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e8ecf0;
+    margin-bottom: 12px;
+}
+.headerIcon { width: 40px; height: 40px; object-fit: contain; }
+.headerTitle { font-size: 1.1rem; font-weight: 700; color: #1a3a6b; }
+.headerSub { font-size: 0.78rem; color: #999; }
+
+.thread {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 4px 2px;
+}
+
+.muted, .empty { color: #999; text-align: center; padding: 24px 0; }
+
+.row { display: flex; }
+.rowMine  { justify-content: flex-end; }
+.rowAdmin { justify-content: flex-start; }
+
+.bubble {
+    max-width: 78%;
+    padding: 8px 12px;
+    border-radius: 14px;
+    font-size: 0.9rem;
+    line-height: 1.35;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+    word-break: break-word;
+    white-space: pre-wrap;
+}
+.bubbleMine {
+    background: #1a3a6b;
+    color: #fff;
+    border-bottom-right-radius: 4px;
+}
+.bubbleAdmin {
+    background: #fff;
+    color: #222;
+    border: 1px solid #e8ecf0;
+    border-bottom-left-radius: 4px;
+}
+.bubbleDeleted { opacity: 0.6; font-style: italic; }
+
+.sender { font-size: 0.68rem; font-weight: 700; color: #1a3a6b; margin-bottom: 2px; }
+.body { }
+.meta {
+    font-size: 0.66rem;
+    margin-top: 3px;
+    opacity: 0.7;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    justify-content: flex-end;
+}
+.read { font-weight: 600; }
+.delBtn {
+    background: none; border: none; cursor: pointer;
+    color: inherit; opacity: 0.6; font-size: 0.7rem; padding: 0;
+}
+.delBtn:hover { opacity: 1; }
+
+.composer {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+    padding-top: 10px;
+    border-top: 1px solid #e8ecf0;
+    margin-top: 8px;
+}
+.input {
+    flex: 1;
+    resize: none;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    max-height: 120px;
+    min-height: 40px;
+}
+.sendBtn {
+    background: #1a3a6b;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 0 18px;
+    height: 40px;
+    font-weight: 600;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+.sendBtn:disabled { opacity: 0.5; cursor: default; }
