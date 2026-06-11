@@ -9,6 +9,7 @@ export default function Login() {
     const navigate   = useNavigate();
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [showPass, setShowPass] = useState(false);
     const [error, setError]       = useState('');
     const [loading, setLoading]   = useState(false);
 
@@ -42,14 +43,25 @@ export default function Login() {
                         required
                         autoFocus
                     />
-                    <input
-                        className={styles.input}
-                        type="password"
-                        placeholder="Heslo"
-                        value={password}
-                        onChange={e => setPassword(e.target.value)}
-                        required
-                    />
+                    <div className={styles.passWrap}>
+                        <input
+                            className={styles.input}
+                            type={showPass ? 'text' : 'password'}
+                            placeholder="Heslo"
+                            value={password}
+                            onChange={e => setPassword(e.target.value)}
+                            required
+                        />
+                        <button
+                            type="button"
+                            className={styles.eyeBtn}
+                            onClick={() => setShowPass(v => !v)}
+                            tabIndex={-1}
+                            aria-label={showPass ? 'Skryť heslo' : 'Zobraziť heslo'}
+                        >
+                            {showPass ? '🙈' : '👁️'}
+                        </button>
+                    </div>
                     {error && <p className={styles.error}>{error}</p>}
                     <button className={styles.btn} type="submit" disabled={loading}>
                         {loading ? 'Prihlasovanie…' : 'Prihlásiť sa'}
