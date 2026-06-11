@@ -174,3 +174,18 @@ nav a.active { background: rgba(255,255,255,0.18); color: #fff; font-weight: 600
         padding: 68px 12px calc(40px + env(safe-area-inset-bottom, 0px));
     }
 }
+
+.navBadge {
+    display: inline-block;
+    min-width: 16px;
+    padding: 0 5px;
+    margin-left: 4px;
+    background: #e53935;
+    color: #fff;
+    font-size: 0.62rem;
+    font-weight: 700;
+    line-height: 16px;
+    text-align: center;
+    border-radius: 8px;
+    vertical-align: middle;
+}

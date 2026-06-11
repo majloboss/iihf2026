@@ -1,19 +1,30 @@
 import { useState, useEffect } from 'react';
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useCompetition } from '../../context/CompetitionContext';
 import { apiFetch } from '../../api/client';
+import { getUnreadCount } from '../../api/messages';
 import styles from './UserLayout.module.css';
 
 export default function UserLayout() {
     const { signOut } = useAuth();
     const navigate    = useNavigate();
+    const location    = useLocation();
     const [profile, setProfile] = useState(null);
+    const [unread, setUnread]   = useState(0);
     const { activeCompetition, competitionEmoji } = useCompetition();
 
     useEffect(() => {
         apiFetch('v1/profile').then(setProfile).catch(() => {});
     }, []);
+
+    // Počet neprečítaných správ pre badge (obnova pri zmene obrazovky + každých 30s)
+    useEffect(() => {
+        const fetchUnread = () => getUnreadCount().then(d => setUnread(d.unread || 0)).catch(() => {});
+        fetchUnread();
+        const t = setInterval(fetchUnread, 30000);
+        return () => clearInterval(t);
+    }, [location.pathname]);
 
     const handleLogout = () => { signOut(); navigate('/login'); };
 
@@ -52,6 +63,12 @@ export default function UserLayout() {
                     <NavLink to="/profile"   className={({ isActive }) => isActive ? styles.active : ''}>
                         <img src="/menu_profil.png" alt="" style={{width:34,height:34,objectFit:'contain',verticalAlign:'middle',marginRight:6}} />Profil
                     </NavLink>
+                    <NavLink to="/spravy"    className={({ isActive }) => isActive ? styles.active : ''}>
+                        <span className={styles.iconWrap}>
+                            <img src="/menu_spravy.png" alt="" style={{width:34,height:34,objectFit:'contain',verticalAlign:'middle',marginRight:6}} />
+                            {unread > 0 && <span className={styles.badge}>{unread > 9 ? '9+' : unread}</span>}
+                        </span>Správy
+                    </NavLink>
                     <NavLink to="/pravidla"  className={({ isActive }) => isActive ? styles.active : ''}>
                         <img src="/menu_pravidla.png" alt="" style={{width:34,height:34,objectFit:'contain',verticalAlign:'middle',marginRight:6}} />Pravidlá
                     </NavLink>
@@ -72,11 +89,11 @@ export default function UserLayout() {
             <nav className={styles.bottomNav}>
                 <NavLink to="/dashboard" className={({ isActive }) => isActive ? styles.active : ''}>
                     <img src="/menu_prehlad.png" alt="" style={{width:30,height:30,objectFit:'contain'}} />
-                    <span style={{fontSize:'0.65rem',marginTop:2}}>Prehľad</span>
+                    <span className={styles.bottomNavLabel}>Prehľad</span>
                 </NavLink>
                 <NavLink to="/games"     className={({ isActive }) => isActive ? styles.active : ''}>
                     <img src="/menu_zapasy.png" alt="" style={{width:30,height:30,objectFit:'contain'}} />
-                    <span style={{fontSize:'0.65rem',marginTop:2}}>Zápasy</span>
+                    <span className={styles.bottomNavLabel}>Zápasy</span>
                 </NavLink>
                 <NavLink to="/profile" className={({ isActive }) => [styles.profileNav, isActive ? styles.active : ''].join(' ')}>
                     <div className={styles.profileNavAvatar}>
@@ -85,15 +102,22 @@ export default function UserLayout() {
                             : <img src="/menu_profil.png" alt="" style={{width:30,height:30,objectFit:'contain'}} />
                         }
                     </div>
-                    <span style={{fontSize:'0.65rem',marginTop:2}}>Profil</span>
+                    <span className={styles.bottomNavLabel}>Profil</span>
                 </NavLink>
                 <NavLink to="/standings" className={({ isActive }) => isActive ? styles.active : ''}>
                     <img src="/menu_skupiny.png" alt="" style={{width:30,height:30,objectFit:'contain'}} />
-                    <span style={{fontSize:'0.65rem',marginTop:2}}>Skupiny</span>
+                    <span className={styles.bottomNavLabel}>Skupiny</span>
+                </NavLink>
+                <NavLink to="/spravy"    className={({ isActive }) => isActive ? styles.active : ''}>
+                    <span className={styles.iconWrap}>
+                        <img src="/menu_spravy.png" alt="" style={{width:30,height:30,objectFit:'contain'}} />
+                        {unread > 0 && <span className={styles.badge}>{unread > 9 ? '9+' : unread}</span>}
+                    </span>
+                    <span className={styles.bottomNavLabel}>Správy</span>
                 </NavLink>
                 <NavLink to="/pravidla"  className={({ isActive }) => isActive ? styles.active : ''}>
                     <img src="/menu_pravidla.png" alt="" style={{width:30,height:30,objectFit:'contain'}} />
-                    <span style={{fontSize:'0.65rem',marginTop:2}}>Pravidlá</span>
+                    <span className={styles.bottomNavLabel}>Pravidlá</span>
                 </NavLink>
             </nav>
         </div>

@@ -4,6 +4,26 @@
     background: #f4f6f9;
 }
 
+/* Badge neprečítaných správ */
+.iconWrap { position: relative; display: inline-flex; align-items: center; vertical-align: middle; }
+.badge {
+    position: absolute;
+    top: -4px;
+    right: 0;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    box-sizing: border-box;
+    background: #e53935;
+    color: #fff;
+    font-size: 0.6rem;
+    font-weight: 700;
+    line-height: 16px;
+    text-align: center;
+    border-radius: 8px;
+    box-shadow: 0 0 0 2px #1a3a6b;
+}
+
 .sidebar {
     width: 220px;
     background: #1a3a6b;
@@ -158,10 +178,10 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        padding: 6px 4px 8px;
+        padding: 6px 2px 8px;
         color: rgba(255,255,255,0.65);
         text-decoration: none;
-        font-size: 0.65rem;
+        font-size: 0.6rem;
         gap: 2px;
         transition: color 0.15s, background 0.15s;
     }
@@ -169,7 +189,23 @@
     .bottomNav a:hover  { background: rgba(255,255,255,0.08); }
     .bottomNav a.active { color: #fff; background: rgba(255,255,255,0.15); }
 
+    /* 6 položiek: 2 vľavo + Profil (stred) + 3 vpravo.
+       Ľavé 2 dostanú flex 1.5 (spolu 3), pravé 3 flex 1 (spolu 3) → Profil presne v strede. */
+    .bottomNav a:nth-child(1),
+    .bottomNav a:nth-child(2) { flex: 1.5; }
+    .bottomNav a:nth-child(3) { flex: 1.5; }   /* Profil */
+    .bottomNav a:nth-child(4),
+    .bottomNav a:nth-child(5),
+    .bottomNav a:nth-child(6) { flex: 1; }
+
     .bottomNavIcon { font-size: 1.4rem; line-height: 1; }
+
+    .bottomNavLabel {
+        font-size: 0.6rem;
+        margin-top: 2px;
+        line-height: 1;
+        white-space: nowrap;
+    }
 
     /* Profil — avatar vyčnieva nad lištu */
     .profileNav {
