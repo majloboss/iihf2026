@@ -28,6 +28,7 @@ import FifaAdminGroupStandings from './pages/admin/FifaAdminGroupStandings';
 import GroupStandings from './pages/user/GroupStandings';
 import Standings from './pages/user/Standings';
 import Pravidla from './pages/user/Pravidla';
+import Messages from './pages/user/Messages';
 import Dashboard from './pages/user/Dashboard';
 
 function PrivateUserRoute({ children }) {
@@ -94,6 +95,7 @@ export default function App() {
                         <Route path="/groups"    element={<Navigate to="/profile" replace />} />
                         <Route path="/standings" element={<Standings />} />
                         <Route path="/profile"   element={<Profile />} />
+                        <Route path="/spravy"    element={<Messages />} />
                         <Route path="/pravidla"  element={<Pravidla />} />
                     </Route>
 

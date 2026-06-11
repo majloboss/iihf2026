@@ -52,6 +52,9 @@ export default function UserLayout() {
                     <NavLink to="/profile"   className={({ isActive }) => isActive ? styles.active : ''}>
                         <img src="/menu_profil.png" alt="" style={{width:34,height:34,objectFit:'contain',verticalAlign:'middle',marginRight:6}} />Profil
                     </NavLink>
+                    <NavLink to="/spravy"    className={({ isActive }) => isActive ? styles.active : ''}>
+                        <img src="/menu_spravy.png" alt="" style={{width:34,height:34,objectFit:'contain',verticalAlign:'middle',marginRight:6}} />Správy
+                    </NavLink>
                     <NavLink to="/pravidla"  className={({ isActive }) => isActive ? styles.active : ''}>
                         <img src="/menu_pravidla.png" alt="" style={{width:34,height:34,objectFit:'contain',verticalAlign:'middle',marginRight:6}} />Pravidlá
                     </NavLink>
@@ -90,6 +93,10 @@ export default function UserLayout() {
                 <NavLink to="/standings" className={({ isActive }) => isActive ? styles.active : ''}>
                     <img src="/menu_skupiny.png" alt="" style={{width:30,height:30,objectFit:'contain'}} />
                     <span style={{fontSize:'0.65rem',marginTop:2}}>Skupiny</span>
+                </NavLink>
+                <NavLink to="/spravy"    className={({ isActive }) => isActive ? styles.active : ''}>
+                    <img src="/menu_spravy.png" alt="" style={{width:30,height:30,objectFit:'contain'}} />
+                    <span style={{fontSize:'0.65rem',marginTop:2}}>Správy</span>
                 </NavLink>
                 <NavLink to="/pravidla"  className={({ isActive }) => isActive ? styles.active : ''}>
                     <img src="/menu_pravidla.png" alt="" style={{width:30,height:30,objectFit:'contain'}} />
