@@ -54,12 +54,12 @@ export default function Login() {
                         />
                         <button
                             type="button"
-                            className={styles.eyeBtn}
+                            className={`${styles.eyeBtn} ${showPass ? styles.eyeOff : ''}`}
                             onClick={() => setShowPass(v => !v)}
                             tabIndex={-1}
                             aria-label={showPass ? 'Skryť heslo' : 'Zobraziť heslo'}
                         >
-                            {showPass ? '🙈' : '👁️'}
+                            👁
                         </button>
                     </div>
                     {error && <p className={styles.error}>{error}</p>}
