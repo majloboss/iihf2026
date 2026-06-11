@@ -25,6 +25,7 @@ export default function AdminMessages() {
     const [newOpen, setNewOpen]   = useState(false);   // výber hráča pre novú konverzáciu
     const [allUsers, setAllUsers] = useState(null);
     const [userQuery, setUserQuery] = useState('');
+    const [pickedUser, setPickedUser] = useState(null);  // meno hráča pri novej konverzácii
     const endRef  = useRef(null);
     const fileRef = useRef(null);
     const inputRef = useRef(null);
@@ -50,7 +51,9 @@ export default function AdminMessages() {
         return () => clearInterval(t);
     }, [loadThreads]);
 
-    useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [msgs]);
+    useEffect(() => {
+        if (msgs.length) endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, [msgs]);
 
     const open = (uid) => setParams({ user_id: String(uid) });
     const back = () => setParams({});
@@ -63,7 +66,7 @@ export default function AdminMessages() {
             setAllUsers(data);
         }
     };
-    const startConversation = (uid) => { setNewOpen(false); open(uid); };
+    const startConversation = (u) => { setNewOpen(false); setPickedUser(u); open(u.id); };
 
     const pickImage = (file) => {
         if (!file || !file.type.startsWith('image/')) return;
@@ -101,6 +104,9 @@ export default function AdminMessages() {
     };
 
     const activeThread = threads.find(t => t.user_id === activeUser);
+    const activeName = activeThread?.username
+        || (pickedUser && pickedUser.id === activeUser ? pickedUser.username : null)
+        || `User #${activeUser}`;
 
     if (loading) return <div className={styles.wrap}><p>Načítavam…</p></div>;
 
@@ -110,7 +116,7 @@ export default function AdminMessages() {
             <div className={styles.wrap}>
                 <div className={styles.detailHead}>
                     <button className={styles.backBtn} onClick={back}>‹ Späť</button>
-                    <span className={styles.detailName}>{activeThread?.username || `User #${activeUser}`}</span>
+                    <span className={styles.detailName}>{activeName}</span>
                 </div>
                 <div className={styles.thread}>
                     {msgs.length === 0 ? <p className={styles.muted}>Žiadne správy.</p> : msgs.map(m => {
@@ -218,7 +224,7 @@ export default function AdminMessages() {
                             ) : filteredUsers.length === 0 ? (
                                 <p className={styles.muted}>Nikto nenájdený.</p>
                             ) : filteredUsers.map(u => (
-                                <button key={u.id} className={styles.modalUser} onClick={() => startConversation(u.id)}>
+                                <button key={u.id} className={styles.modalUser} onClick={() => startConversation(u)}>
                                     {u.avatar
                                         ? <img src={u.avatar} className={styles.avatar} alt="" />
                                         : <span className={styles.avatarPh}>{u.username[0].toUpperCase()}</span>}
