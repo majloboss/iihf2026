@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { getAdminThreads, getAdminThread, adminReply, adminDeleteMessage, uploadMessageImage } from '../../api/messages';
+import { getUsers } from '../../api/users';
 import styles from './AdminMessages.module.css';
 
 const fmtTime = (iso) => {
@@ -21,6 +22,10 @@ export default function AdminMessages() {
     const [sending, setSending]   = useState(false);
     const [pendingImg, setPendingImg] = useState(null);
     const [lightbox, setLightbox] = useState(null);
+    const [newOpen, setNewOpen]   = useState(false);   // výber hráča pre novú konverzáciu
+    const [allUsers, setAllUsers] = useState(null);
+    const [userQuery, setUserQuery] = useState('');
+    const [pickedUser, setPickedUser] = useState(null);  // meno hráča pri novej konverzácii
     const endRef  = useRef(null);
     const fileRef = useRef(null);
     const inputRef = useRef(null);
@@ -46,10 +51,22 @@ export default function AdminMessages() {
         return () => clearInterval(t);
     }, [loadThreads]);
 
-    useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [msgs]);
+    useEffect(() => {
+        if (msgs.length) endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, [msgs]);
 
     const open = (uid) => setParams({ user_id: String(uid) });
     const back = () => setParams({});
+
+    const openNew = async () => {
+        setNewOpen(true);
+        setUserQuery('');
+        if (!allUsers) {
+            const data = await getUsers().catch(() => []);
+            setAllUsers(data);
+        }
+    };
+    const startConversation = (u) => { setNewOpen(false); setPickedUser(u); open(u.id); };
 
     const pickImage = (file) => {
         if (!file || !file.type.startsWith('image/')) return;
@@ -87,6 +104,9 @@ export default function AdminMessages() {
     };
 
     const activeThread = threads.find(t => t.user_id === activeUser);
+    const activeName = activeThread?.username
+        || (pickedUser && pickedUser.id === activeUser ? pickedUser.username : null)
+        || `User #${activeUser}`;
 
     if (loading) return <div className={styles.wrap}><p>Načítavam…</p></div>;
 
@@ -96,7 +116,7 @@ export default function AdminMessages() {
             <div className={styles.wrap}>
                 <div className={styles.detailHead}>
                     <button className={styles.backBtn} onClick={back}>‹ Späť</button>
-                    <span className={styles.detailName}>{activeThread?.username || `User #${activeUser}`}</span>
+                    <span className={styles.detailName}>{activeName}</span>
                 </div>
                 <div className={styles.thread}>
                     {msgs.length === 0 ? <p className={styles.muted}>Žiadne správy.</p> : msgs.map(m => {
@@ -152,12 +172,23 @@ export default function AdminMessages() {
         );
     }
 
+    // Filtrovaní hráči pre výber novej konverzácie
+    const filteredUsers = (allUsers || []).filter(u => {
+        const q = userQuery.toLowerCase();
+        return !q || u.username.toLowerCase().includes(q)
+            || (u.first_name || '').toLowerCase().includes(q)
+            || (u.last_name || '').toLowerCase().includes(q);
+    });
+
     // Zoznam vlákien
     return (
         <div className={styles.wrap}>
-            <h2 className={styles.title}>Správy od hráčov</h2>
+            <div className={styles.listHead}>
+                <h2 className={styles.title}>Správy od hráčov</h2>
+                <button className={styles.newBtn} onClick={openNew}>✎ Nová správa</button>
+            </div>
             {threads.length === 0 ? (
-                <p className={styles.muted}>Žiadne správy.</p>
+                <p className={styles.muted}>Žiadne správy. Začni konverzáciu tlačidlom „Nová správa“.</p>
             ) : (
                 <div className={styles.list}>
                     {threads.map(t => (
@@ -175,6 +206,38 @@ export default function AdminMessages() {
                             </div>
                         </button>
                     ))}
+                </div>
+            )}
+
+            {newOpen && (
+                <div className={styles.overlay} onClick={() => setNewOpen(false)}>
+                    <div className={styles.modal} onClick={e => e.stopPropagation()}>
+                        <div className={styles.modalHead}>
+                            <span>Vyber hráča</span>
+                            <button className={styles.modalClose} onClick={() => setNewOpen(false)}>✕</button>
+                        </div>
+                        <input className={styles.modalSearch} autoFocus placeholder="Hľadať hráča…"
+                            value={userQuery} onChange={e => setUserQuery(e.target.value)} />
+                        <div className={styles.modalList}>
+                            {!allUsers ? (
+                                <p className={styles.muted}>Načítavam…</p>
+                            ) : filteredUsers.length === 0 ? (
+                                <p className={styles.muted}>Nikto nenájdený.</p>
+                            ) : filteredUsers.map(u => (
+                                <button key={u.id} className={styles.modalUser} onClick={() => startConversation(u)}>
+                                    {u.avatar
+                                        ? <img src={u.avatar} className={styles.avatar} alt="" />
+                                        : <span className={styles.avatarPh}>{u.username[0].toUpperCase()}</span>}
+                                    <div className={styles.threadInfo}>
+                                        <div className={styles.threadName}>{u.username}</div>
+                                        {(u.first_name || u.last_name) && (
+                                            <div className={styles.threadLast}>{`${u.first_name || ''} ${u.last_name || ''}`.trim()}</div>
+                                        )}
+                                    </div>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
                 </div>
             )}
         </div>
