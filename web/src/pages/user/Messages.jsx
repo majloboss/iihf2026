@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { getMessages, sendMessage, deleteMessage } from '../../api/messages';
+import { getMessages, sendMessage, deleteMessage, uploadMessageImage } from '../../api/messages';
 import styles from './Messages.module.css';
 
 const fmtTime = (iso) => {
@@ -16,7 +16,10 @@ export default function Messages() {
     const [loading, setLoading]   = useState(true);
     const [text, setText]         = useState('');
     const [sending, setSending]   = useState(false);
+    const [pendingImg, setPendingImg] = useState(null);  // { file, preview }
+    const [lightbox, setLightbox] = useState(null);
     const endRef  = useRef(null);
+    const fileRef = useRef(null);
     const initial = useRef(true);
 
     const load = useCallback(() => {
@@ -27,27 +30,39 @@ export default function Messages() {
     }, []);
 
     useEffect(() => { load(); }, [load]);
-
-    // Polling kým je obrazovka otvorená
     useEffect(() => {
         const t = setInterval(load, 7000);
         return () => clearInterval(t);
     }, [load]);
-
-    // Scroll na koniec po načítaní/novej správe
     useEffect(() => {
         endRef.current?.scrollIntoView({ behavior: initial.current ? 'auto' : 'smooth' });
         initial.current = false;
     }, [messages]);
 
+    const pickImage = (file) => {
+        if (!file || !file.type.startsWith('image/')) return;
+        setPendingImg({ file, preview: URL.createObjectURL(file) });
+    };
+
+    const onPaste = (e) => {
+        const item = [...(e.clipboardData?.items || [])].find(i => i.type.startsWith('image/'));
+        if (item) { e.preventDefault(); pickImage(item.getAsFile()); }
+    };
+
     const send = async () => {
         const body = text.trim();
-        if (!body || sending) return;
+        if ((!body && !pendingImg) || sending) return;
         setSending(true);
         try {
-            const msg = await sendMessage(body);
+            let image_url = null;
+            if (pendingImg) {
+                const up = await uploadMessageImage(pendingImg.file);
+                image_url = up.image_url;
+            }
+            const msg = await sendMessage(body, image_url);
             setMessages(m => [...m, msg]);
             setText('');
+            setPendingImg(null);
         } catch (e) { alert(e.message); }
         finally { setSending(false); }
     };
@@ -56,7 +71,7 @@ export default function Messages() {
         if (!confirm('Zmazať správu?')) return;
         try {
             await deleteMessage(id);
-            setMessages(m => m.map(x => x.id === id ? { ...x, deleted_at: new Date().toISOString() } : x));
+            setMessages(m => m.map(x => x.id === id ? { ...x, deleted_at: new Date().toISOString(), body: null, image_url: null } : x));
         } catch (e) { alert(e.message); }
     };
 
@@ -82,7 +97,17 @@ export default function Messages() {
                         <div key={m.id} className={`${styles.row} ${mine ? styles.rowMine : styles.rowAdmin}`}>
                             <div className={`${styles.bubble} ${mine ? styles.bubbleMine : styles.bubbleAdmin} ${del ? styles.bubbleDeleted : ''}`}>
                                 {!mine && <div className={styles.sender}>Admin</div>}
-                                <div className={styles.body}>{del ? 'Správa zmazaná' : m.body}</div>
+                                {del ? (
+                                    <div className={styles.body}>Správa zmazaná</div>
+                                ) : (
+                                    <>
+                                        {m.image_url && (
+                                            <img src={m.image_url} alt="" className={styles.msgImg}
+                                                onClick={() => setLightbox(m.image_url)} />
+                                        )}
+                                        {m.body && <div className={styles.body}>{m.body}</div>}
+                                    </>
+                                )}
                                 <div className={styles.meta}>
                                     {fmtTime(m.created_at)}
                                     {mine && !del && m.read_at && <span className={styles.read}> ✓ prečítané</span>}
@@ -97,20 +122,37 @@ export default function Messages() {
                 <div ref={endRef} />
             </div>
 
+            {pendingImg && (
+                <div className={styles.preview}>
+                    <img src={pendingImg.preview} alt="" className={styles.previewImg} />
+                    <button className={styles.previewRemove} onClick={() => setPendingImg(null)}>✕ Odobrať</button>
+                </div>
+            )}
+
             <div className={styles.composer}>
+                <button className={styles.attachBtn} onClick={() => fileRef.current?.click()} title="Pridať obrázok">📎</button>
+                <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }}
+                    onChange={e => { pickImage(e.target.files?.[0]); e.target.value = ''; }} />
                 <textarea
                     className={styles.input}
-                    placeholder="Napíšte správu…"
+                    placeholder="Napíšte správu… (obrázok aj cez Ctrl+V)"
                     value={text}
                     onChange={e => setText(e.target.value)}
+                    onPaste={onPaste}
                     onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }}
                     rows={1}
                     maxLength={2000}
                 />
-                <button className={styles.sendBtn} onClick={send} disabled={sending || !text.trim()}>
+                <button className={styles.sendBtn} onClick={send} disabled={sending || (!text.trim() && !pendingImg)}>
                     {sending ? '…' : 'Odoslať'}
                 </button>
             </div>
+
+            {lightbox && (
+                <div className={styles.lightbox} onClick={() => setLightbox(null)}>
+                    <img src={lightbox} alt="" className={styles.lightboxImg} />
+                </div>
+            )}
         </div>
     );
 }

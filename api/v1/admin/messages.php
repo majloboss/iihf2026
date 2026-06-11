@@ -23,7 +23,7 @@ if ($method === 'GET') {
                        WHERE user_id = ? AND sender = 'user' AND read_at IS NULL")
             ->execute([$target]);
 
-        $stmt = $pdo->prepare("SELECT id, sender, body, read_at, created_at, deleted_at
+        $stmt = $pdo->prepare("SELECT id, sender, body, image_url, read_at, created_at, deleted_at
                                FROM admin.messages
                                WHERE user_id = ?
                                ORDER BY created_at");
@@ -54,13 +54,14 @@ if ($method === 'POST') {
     $body   = json_decode(file_get_contents('php://input'), true) ?? [];
     $target = (int)($body['user_id'] ?? 0);
     $text   = trim($body['body'] ?? '');
+    $image  = trim($body['image_url'] ?? '');
     if (!$target) json_error('Chýba user_id', 400);
-    if ($text === '') json_error('Prázdna správa', 400);
+    if ($text === '' && $image === '') json_error('Prázdna správa', 400);
     if (mb_strlen($text) > 2000) json_error('Správa je príliš dlhá (max 2000 znakov)', 400);
 
-    $stmt = $pdo->prepare("INSERT INTO admin.messages (user_id, sender, body)
-                           VALUES (?, 'admin', ?) RETURNING id, sender, body, read_at, created_at, deleted_at");
-    $stmt->execute([$target, $text]);
+    $stmt = $pdo->prepare("INSERT INTO admin.messages (user_id, sender, body, image_url)
+                           VALUES (?, 'admin', ?, ?) RETURNING id, sender, body, image_url, read_at, created_at, deleted_at");
+    $stmt->execute([$target, $text !== '' ? $text : null, $image !== '' ? $image : null]);
     $msg = $stmt->fetch();
 
     // Notifikácia userovi (push + email)

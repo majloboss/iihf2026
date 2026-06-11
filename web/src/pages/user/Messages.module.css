@@ -75,6 +75,50 @@
 }
 .delBtn:hover { opacity: 1; }
 
+.msgImg {
+    max-width: 220px;
+    max-height: 260px;
+    border-radius: 10px;
+    margin-bottom: 4px;
+    cursor: pointer;
+    display: block;
+    object-fit: cover;
+}
+
+.preview {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px;
+    background: #f0f4fb;
+    border-radius: 10px;
+    margin-top: 8px;
+}
+.previewImg { max-height: 60px; border-radius: 6px; }
+.previewRemove {
+    background: none; border: none; color: #c0392b;
+    cursor: pointer; font-size: 0.8rem; font-weight: 600;
+}
+
+.attachBtn {
+    background: none;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    width: 40px; height: 40px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+.attachBtn:hover { background: #f0f4fb; }
+
+.lightbox {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.85);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000; padding: 20px; cursor: zoom-out;
+}
+.lightboxImg { max-width: 100%; max-height: 100%; border-radius: 8px; }
+
 .composer {
     display: flex;
     gap: 8px;

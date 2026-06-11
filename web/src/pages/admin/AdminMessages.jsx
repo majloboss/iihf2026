@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { getAdminThreads, getAdminThread, adminReply, adminDeleteMessage } from '../../api/messages';
+import { getAdminThreads, getAdminThread, adminReply, adminDeleteMessage, uploadMessageImage } from '../../api/messages';
 import styles from './AdminMessages.module.css';
 
 const fmtTime = (iso) => {
@@ -19,7 +19,10 @@ export default function AdminMessages() {
     const [loading, setLoading]   = useState(true);
     const [text, setText]         = useState('');
     const [sending, setSending]   = useState(false);
-    const endRef = useRef(null);
+    const [pendingImg, setPendingImg] = useState(null);
+    const [lightbox, setLightbox] = useState(null);
+    const endRef  = useRef(null);
+    const fileRef = useRef(null);
 
     const loadThreads = useCallback(() =>
         getAdminThreads().then(d => setThreads(d.threads || [])).catch(() => {}), []);
@@ -47,14 +50,26 @@ export default function AdminMessages() {
     const open = (uid) => setParams({ user_id: String(uid) });
     const back = () => setParams({});
 
+    const pickImage = (file) => {
+        if (!file || !file.type.startsWith('image/')) return;
+        setPendingImg({ file, preview: URL.createObjectURL(file) });
+    };
+    const onPaste = (e) => {
+        const item = [...(e.clipboardData?.items || [])].find(i => i.type.startsWith('image/'));
+        if (item) { e.preventDefault(); pickImage(item.getAsFile()); }
+    };
+
     const send = async () => {
         const body = text.trim();
-        if (!body || sending || !activeUser) return;
+        if ((!body && !pendingImg) || sending || !activeUser) return;
         setSending(true);
         try {
-            const msg = await adminReply(activeUser, body);
+            let image_url = null;
+            if (pendingImg) { const up = await uploadMessageImage(pendingImg.file); image_url = up.image_url; }
+            const msg = await adminReply(activeUser, body, image_url);
             setMsgs(m => [...m, msg]);
             setText('');
+            setPendingImg(null);
             loadThreads();
         } catch (e) { alert(e.message); }
         finally { setSending(false); }
@@ -64,7 +79,7 @@ export default function AdminMessages() {
         if (!confirm('Zmazať správu?')) return;
         try {
             await adminDeleteMessage(id);
-            setMsgs(m => m.map(x => x.id === id ? { ...x, deleted_at: new Date().toISOString() } : x));
+            setMsgs(m => m.map(x => x.id === id ? { ...x, deleted_at: new Date().toISOString(), body: null, image_url: null } : x));
         } catch (e) { alert(e.message); }
     };
 
@@ -87,7 +102,14 @@ export default function AdminMessages() {
                         return (
                             <div key={m.id} className={`${styles.row} ${mine ? styles.rowMine : styles.rowUser}`}>
                                 <div className={`${styles.bubble} ${mine ? styles.bubbleMine : styles.bubbleUser} ${del ? styles.bubbleDeleted : ''}`}>
-                                    <div className={styles.body}>{del ? 'Správa zmazaná' : m.body}</div>
+                                    {del ? (
+                                        <div className={styles.body}>Správa zmazaná</div>
+                                    ) : (
+                                        <>
+                                            {m.image_url && <img src={m.image_url} alt="" className={styles.msgImg} onClick={() => setLightbox(m.image_url)} />}
+                                            {m.body && <div className={styles.body}>{m.body}</div>}
+                                        </>
+                                    )}
                                     <div className={styles.meta}>
                                         {fmtTime(m.created_at)}
                                         {mine && !del && m.read_at && <span> ✓ prečítané</span>}
@@ -99,15 +121,30 @@ export default function AdminMessages() {
                     })}
                     <div ref={endRef} />
                 </div>
+                {pendingImg && (
+                    <div className={styles.preview}>
+                        <img src={pendingImg.preview} alt="" className={styles.previewImg} />
+                        <button className={styles.previewRemove} onClick={() => setPendingImg(null)}>✕ Odobrať</button>
+                    </div>
+                )}
                 <div className={styles.composer}>
-                    <textarea className={styles.input} placeholder="Odpoveď…" value={text}
+                    <button className={styles.attachBtn} onClick={() => fileRef.current?.click()} title="Pridať obrázok">📎</button>
+                    <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }}
+                        onChange={e => { pickImage(e.target.files?.[0]); e.target.value = ''; }} />
+                    <textarea className={styles.input} placeholder="Odpoveď… (obrázok aj cez Ctrl+V)" value={text}
                         onChange={e => setText(e.target.value)}
+                        onPaste={onPaste}
                         onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }}
                         rows={1} maxLength={2000} />
-                    <button className={styles.sendBtn} onClick={send} disabled={sending || !text.trim()}>
+                    <button className={styles.sendBtn} onClick={send} disabled={sending || (!text.trim() && !pendingImg)}>
                         {sending ? '…' : 'Odoslať'}
                     </button>
                 </div>
+                {lightbox && (
+                    <div className={styles.lightbox} onClick={() => setLightbox(null)}>
+                        <img src={lightbox} alt="" className={styles.lightboxImg} />
+                    </div>
+                )}
             </div>
         );
     }

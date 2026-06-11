@@ -69,6 +69,7 @@ try {
         $path === 'v1/hall-of-fame'        => require __DIR__ . '/v1/hall-of-fame.php',
         $path === 'v1/team-names'          => require __DIR__ . '/v1/team-names.php',
         $path === 'v1/messages'            => require __DIR__ . '/v1/messages.php',
+        $path === 'v1/message-image'       => require __DIR__ . '/v1/message-image.php',
         $path === 'v1/admin/messages'      => require __DIR__ . '/v1/admin/messages.php',
         $path === 'v1/player-tips'         => require __DIR__ . '/v1/player_tips.php',
         $path === 'v1/group-standings'     => require __DIR__ . '/v1/group_standings.php',

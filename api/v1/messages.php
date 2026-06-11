@@ -21,7 +21,7 @@ if ($method === 'GET') {
                    WHERE user_id = ? AND sender = 'admin' AND read_at IS NULL")
         ->execute([$uid]);
 
-    $stmt = $pdo->prepare("SELECT id, sender, body, read_at, created_at, deleted_at
+    $stmt = $pdo->prepare("SELECT id, sender, body, image_url, read_at, created_at, deleted_at
                            FROM admin.messages
                            WHERE user_id = ?
                            ORDER BY created_at");
@@ -30,14 +30,15 @@ if ($method === 'GET') {
 }
 
 if ($method === 'POST') {
-    $body = json_decode(file_get_contents('php://input'), true) ?? [];
-    $text = trim($body['body'] ?? '');
-    if ($text === '') json_error('Prázdna správa', 400);
+    $body  = json_decode(file_get_contents('php://input'), true) ?? [];
+    $text  = trim($body['body'] ?? '');
+    $image = trim($body['image_url'] ?? '');
+    if ($text === '' && $image === '') json_error('Prázdna správa', 400);
     if (mb_strlen($text) > 2000) json_error('Správa je príliš dlhá (max 2000 znakov)', 400);
 
-    $stmt = $pdo->prepare("INSERT INTO admin.messages (user_id, sender, body)
-                           VALUES (?, 'user', ?) RETURNING id, sender, body, read_at, created_at, deleted_at");
-    $stmt->execute([$uid, $text]);
+    $stmt = $pdo->prepare("INSERT INTO admin.messages (user_id, sender, body, image_url)
+                           VALUES (?, 'user', ?, ?) RETURNING id, sender, body, image_url, read_at, created_at, deleted_at");
+    $stmt->execute([$uid, $text !== '' ? $text : null, $image !== '' ? $image : null]);
     $msg = $stmt->fetch();
 
     // Notifikácia adminom (push + email)
@@ -45,7 +46,7 @@ if ($method === 'POST') {
         require_once __DIR__ . '/../helpers/notify_admins_message.php';
         $me = $pdo->prepare("SELECT username FROM admin.users WHERE id = ?");
         $me->execute([$uid]);
-        notify_admins_new_message($pdo, $uid, $me->fetchColumn() ?: 'Hráč', $text);
+        notify_admins_new_message($pdo, $uid, $me->fetchColumn() ?: 'Hráč', $text !== '' ? $text : '📷 Obrázok');
     } catch (Throwable $e) { /* non-fatal */ }
 
     json_ok($msg, 201);
