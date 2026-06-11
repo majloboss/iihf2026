@@ -58,12 +58,14 @@
     border-color: #1a3a6b;
 }
 
-.passWrap { position: relative; }
-.passWrap .input { padding-right: 44px; }
+/* wrapper má margin-bottom (presunutý z inputu), aby mal presne výšku poľa */
+.passWrap { position: relative; margin-bottom: 12px; }
+.passWrap .input { padding-right: 44px; margin-bottom: 0; }
 .eyeBtn {
     position: absolute;
-    top: 7px;
+    top: 50%;
     right: 10px;
+    transform: translateY(-50%);
     background: none;
     border: none;
     cursor: pointer;
@@ -75,8 +77,7 @@
 }
 .eyeBtn:hover { opacity: 1; }
 
-/* Skryté heslo: oko prečiarknuté šikmou čiarou (ako slepec) */
-.eyeOff { position: relative; }
+/* Zobrazené heslo: oko prečiarknuté šikmou čiarou */
 .eyeOff::after {
     content: '';
     position: absolute;
@@ -87,6 +88,7 @@
     background: #222;
     transform: translate(-50%, -50%) rotate(-45deg);
     border-radius: 2px;
+    pointer-events: none;
 }
 
 .btn {
