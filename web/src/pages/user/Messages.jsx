@@ -14,12 +14,13 @@ const fmtTime = (iso) => {
 export default function Messages() {
     const [messages, setMessages] = useState([]);
     const [loading, setLoading]   = useState(true);
-    const [text, setText]         = useState('');
+    const [hasText, setHasText]   = useState(false);
     const [sending, setSending]   = useState(false);
     const [pendingImg, setPendingImg] = useState(null);  // { file, preview }
     const [lightbox, setLightbox] = useState(null);
     const endRef  = useRef(null);
     const fileRef = useRef(null);
+    const inputRef = useRef(null);
     const initial = useRef(true);
 
     const load = useCallback(() => {
@@ -44,13 +45,22 @@ export default function Messages() {
         setPendingImg({ file, preview: URL.createObjectURL(file) });
     };
 
+    // Vloženie obrázka (z klávesnice "Prilepiť", Ctrl+V, alebo drag) — funguje na webe aj mobile
     const onPaste = (e) => {
-        const item = [...(e.clipboardData?.items || [])].find(i => i.type.startsWith('image/'));
-        if (item) { e.preventDefault(); pickImage(item.getAsFile()); }
+        const items = e.clipboardData?.items || [];
+        const imgItem = [...items].find(i => i.type.startsWith('image/'));
+        if (imgItem) {
+            e.preventDefault();
+            pickImage(imgItem.getAsFile());
+        }
     };
 
+    const onInput = () => setHasText(!!inputRef.current?.innerText.trim());
+
+    const clearInput = () => { if (inputRef.current) inputRef.current.innerText = ''; setHasText(false); };
+
     const send = async () => {
-        const body = text.trim();
+        const body = (inputRef.current?.innerText || '').trim();
         if ((!body && !pendingImg) || sending) return;
         setSending(true);
         try {
@@ -61,7 +71,7 @@ export default function Messages() {
             }
             const msg = await sendMessage(body, image_url);
             setMessages(m => [...m, msg]);
-            setText('');
+            clearInput();
             setPendingImg(null);
         } catch (e) { alert(e.message); }
         finally { setSending(false); }
@@ -130,20 +140,20 @@ export default function Messages() {
             )}
 
             <div className={styles.composer}>
-                <button className={styles.attachBtn} onClick={() => fileRef.current?.click()} title="Pridať obrázok">📎</button>
+                <button className={styles.attachBtn} onClick={() => fileRef.current?.click()} title="Pridať obrázok / foto">📎</button>
                 <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }}
                     onChange={e => { pickImage(e.target.files?.[0]); e.target.value = ''; }} />
-                <textarea
+                <div
+                    ref={inputRef}
                     className={styles.input}
-                    placeholder="Napíšte správu… (obrázok aj cez Ctrl+V)"
-                    value={text}
-                    onChange={e => setText(e.target.value)}
+                    contentEditable
+                    role="textbox"
+                    data-placeholder="Napíšte správu…"
+                    onInput={onInput}
                     onPaste={onPaste}
                     onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }}
-                    rows={1}
-                    maxLength={2000}
                 />
-                <button className={styles.sendBtn} onClick={send} disabled={sending || (!text.trim() && !pendingImg)}>
+                <button className={styles.sendBtn} onClick={send} disabled={sending || (!hasText && !pendingImg)}>
                     {sending ? '…' : 'Odoslať'}
                 </button>
             </div>

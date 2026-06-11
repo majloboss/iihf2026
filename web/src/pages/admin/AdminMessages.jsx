@@ -17,12 +17,13 @@ export default function AdminMessages() {
     const [threads, setThreads]   = useState([]);
     const [msgs, setMsgs]         = useState([]);
     const [loading, setLoading]   = useState(true);
-    const [text, setText]         = useState('');
+    const [hasText, setHasText]   = useState(false);
     const [sending, setSending]   = useState(false);
     const [pendingImg, setPendingImg] = useState(null);
     const [lightbox, setLightbox] = useState(null);
     const endRef  = useRef(null);
     const fileRef = useRef(null);
+    const inputRef = useRef(null);
 
     const loadThreads = useCallback(() =>
         getAdminThreads().then(d => setThreads(d.threads || [])).catch(() => {}), []);
@@ -58,9 +59,11 @@ export default function AdminMessages() {
         const item = [...(e.clipboardData?.items || [])].find(i => i.type.startsWith('image/'));
         if (item) { e.preventDefault(); pickImage(item.getAsFile()); }
     };
+    const onInput = () => setHasText(!!inputRef.current?.innerText.trim());
+    const clearInput = () => { if (inputRef.current) inputRef.current.innerText = ''; setHasText(false); };
 
     const send = async () => {
-        const body = text.trim();
+        const body = (inputRef.current?.innerText || '').trim();
         if ((!body && !pendingImg) || sending || !activeUser) return;
         setSending(true);
         try {
@@ -68,7 +71,7 @@ export default function AdminMessages() {
             if (pendingImg) { const up = await uploadMessageImage(pendingImg.file); image_url = up.image_url; }
             const msg = await adminReply(activeUser, body, image_url);
             setMsgs(m => [...m, msg]);
-            setText('');
+            clearInput();
             setPendingImg(null);
             loadThreads();
         } catch (e) { alert(e.message); }
@@ -128,15 +131,15 @@ export default function AdminMessages() {
                     </div>
                 )}
                 <div className={styles.composer}>
-                    <button className={styles.attachBtn} onClick={() => fileRef.current?.click()} title="Pridať obrázok">📎</button>
+                    <button className={styles.attachBtn} onClick={() => fileRef.current?.click()} title="Pridať obrázok / foto">📎</button>
                     <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }}
                         onChange={e => { pickImage(e.target.files?.[0]); e.target.value = ''; }} />
-                    <textarea className={styles.input} placeholder="Odpoveď… (obrázok aj cez Ctrl+V)" value={text}
-                        onChange={e => setText(e.target.value)}
+                    <div ref={inputRef} className={styles.input} contentEditable role="textbox"
+                        data-placeholder="Odpoveď…"
+                        onInput={onInput}
                         onPaste={onPaste}
-                        onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }}
-                        rows={1} maxLength={2000} />
-                    <button className={styles.sendBtn} onClick={send} disabled={sending || (!text.trim() && !pendingImg)}>
+                        onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }} />
+                    <button className={styles.sendBtn} onClick={send} disabled={sending || (!hasText && !pendingImg)}>
                         {sending ? '…' : 'Odoslať'}
                     </button>
                 </div>

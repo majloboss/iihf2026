@@ -129,14 +129,24 @@
 }
 .input {
     flex: 1;
-    resize: none;
     padding: 10px 12px;
     border: 1px solid #ddd;
     border-radius: 10px;
     font-size: 0.9rem;
     font-family: inherit;
+    line-height: 1.3;
     max-height: 120px;
     min-height: 40px;
+    overflow-y: auto;
+    outline: none;
+    box-sizing: border-box;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+.input:empty:before {
+    content: attr(data-placeholder);
+    color: #aaa;
+    pointer-events: none;
 }
 .sendBtn {
     background: #1a3a6b;
