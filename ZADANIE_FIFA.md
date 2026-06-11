@@ -263,6 +263,7 @@ Poradie migrácie:
 | 039 invites cancelled_at | ✅ | ✅ |
 | 040 password_reset_tokens | ✅ | ✅ |
 | 041 group invite flags (allow_member_invite + is_closed) | ✅ | ✅ |
+| 042 admin.messages (chat user↔admin) | 🔲 | 🔲 |
 
 ---
 
@@ -309,7 +310,7 @@ Poradie migrácie:
 | 6 | **História tipov + graf vývoja** — accordion tipov hráča v Poradí + line chart vývoja bodov (Recharts). Vlajky, dátum, zarovnané skóre. | ✅ otestované |
 | 7 | **Hromadné zadanie výsledkov** — nie je potrebné, futbalové zápasy nejdu naraz, admin zadáva po jednom cez livescore. | ❌ nepotrebné |
 | 8 | **Export výsledkov** — CSV export poradia skupiny. | ❌ nepotrebné |
-| 9 | **Správy/chat** — správa adminovi + jednoduchý chat pre tipérov v skupine. Nie sociálna sieť. Riešiť ako úplne posledné. | 🔲 dlhodobé |
+| 9 | **Správy/chat** — správa adminovi + jednoduchý chat pre tipérov v skupine. Nie sociálna sieť. Riešiť ako úplne posledné. | 🟠 chat s adminom hotový (develop); user↔user neimplementované (zámerne) |
 | 10 | **Štatistiky usera** — úspešnosť, najlepší/najhorší zápas, streak. | 🔲 dlhodobé |
 | 11 | **Sieň slávy** — po skončení každého turnaja sa uloží finálne globálne poradie. Top 10 dostane body (1.=10, 2.=9, ... 10.=1, od 11.=0). Tri tabuľky: (a) Globálna (všetky turnaje), (b) Futbalová (FIFA, LM, ME, Olympiáda...), (c) Hokejová (MS, Olympiáda...). Body sa kumulujú naprieč turnajmi v rámci športu — tipér súťaží len v tom športe ktorý tipuje. Klik na hráča rozroluje turnaje kde získal body (accordion). | ✅ produkcia (naplní sa po skončení 1. turnaja) |
 
@@ -328,6 +329,15 @@ Obrazovka **Skupiny** má 3 záložky (ako Profil):
 - Zakladateľ prepína oba príznaky checkboxmi v rozbalenej skupine (vedľa úpravy popisu).
 - BE kontroly: `group-members invite`, `group-join`, `group-invite-bulk` rešpektujú oba príznaky.
 - **Pozvánky dropdown** ✅ — v Profile → Pozvánky sa zobrazia len skupiny **aktuálneho turnaja**, **nie uzavreté** a kde člen smie pozývať (alebo je zakladateľ). Endpoint `v1/invites?competition_id=X`.
+
+### Chat s adminom 🟠 (develop, migrácia 042)
+
+Súkromné vlákno každý tipér ↔ admin tím (žiadne user↔user — zámerne). Tabuľka `admin.messages` (user_id, sender 'user'|'admin', body, read_at, deleted_at).
+- **User** `/spravy` — bublinové vlákno, písanie, soft-delete vlastnej správy, „✓ prečítané", polling 7s.
+- **Admin** `/admin/messages` — zoznam vlákien (neprečítané navrchu s počtom) + detail vlákna s odpoveďou, soft-delete.
+- **Badge** ✅ červená bodka s počtom neprečítaných: na ikone Správy (user sidebar+bottom nav) aj v admin menu. Obnova 30s + pri zmene obrazovky.
+- **Notifikácie:** user píše → push+email všetkým adminom; admin odpovie → push+email userovi. Identita admina jednotná („Admin").
+- Endpointy: `GET/POST/DELETE /v1/messages` (+`?unread=1`), `GET/POST/DELETE /v1/admin/messages` (+`?user_id=X`, `?unread=1`).
 
 ### Vlajky — názov krajiny ✅ (produkcia)
 
