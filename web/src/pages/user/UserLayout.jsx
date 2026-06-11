@@ -75,11 +75,11 @@ export default function UserLayout() {
             <nav className={styles.bottomNav}>
                 <NavLink to="/dashboard" className={({ isActive }) => isActive ? styles.active : ''}>
                     <img src="/menu_prehlad.png" alt="" style={{width:30,height:30,objectFit:'contain'}} />
-                    <span style={{fontSize:'0.65rem',marginTop:2}}>Prehľad</span>
+                    <span className={styles.bottomNavLabel}>Prehľad</span>
                 </NavLink>
                 <NavLink to="/games"     className={({ isActive }) => isActive ? styles.active : ''}>
                     <img src="/menu_zapasy.png" alt="" style={{width:30,height:30,objectFit:'contain'}} />
-                    <span style={{fontSize:'0.65rem',marginTop:2}}>Zápasy</span>
+                    <span className={styles.bottomNavLabel}>Zápasy</span>
                 </NavLink>
                 <NavLink to="/profile" className={({ isActive }) => [styles.profileNav, isActive ? styles.active : ''].join(' ')}>
                     <div className={styles.profileNavAvatar}>
@@ -88,19 +88,19 @@ export default function UserLayout() {
                             : <img src="/menu_profil.png" alt="" style={{width:30,height:30,objectFit:'contain'}} />
                         }
                     </div>
-                    <span style={{fontSize:'0.65rem',marginTop:2}}>Profil</span>
+                    <span className={styles.bottomNavLabel}>Profil</span>
                 </NavLink>
                 <NavLink to="/standings" className={({ isActive }) => isActive ? styles.active : ''}>
                     <img src="/menu_skupiny.png" alt="" style={{width:30,height:30,objectFit:'contain'}} />
-                    <span style={{fontSize:'0.65rem',marginTop:2}}>Skupiny</span>
+                    <span className={styles.bottomNavLabel}>Skupiny</span>
                 </NavLink>
                 <NavLink to="/spravy"    className={({ isActive }) => isActive ? styles.active : ''}>
                     <img src="/menu_spravy.png" alt="" style={{width:30,height:30,objectFit:'contain'}} />
-                    <span style={{fontSize:'0.65rem',marginTop:2}}>Správy</span>
+                    <span className={styles.bottomNavLabel}>Správy</span>
                 </NavLink>
                 <NavLink to="/pravidla"  className={({ isActive }) => isActive ? styles.active : ''}>
                     <img src="/menu_pravidla.png" alt="" style={{width:30,height:30,objectFit:'contain'}} />
-                    <span style={{fontSize:'0.65rem',marginTop:2}}>Pravidlá</span>
+                    <span className={styles.bottomNavLabel}>Pravidlá</span>
                 </NavLink>
             </nav>
         </div>

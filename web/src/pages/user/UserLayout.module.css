@@ -158,10 +158,10 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        padding: 6px 4px 8px;
+        padding: 6px 2px 8px;
         color: rgba(255,255,255,0.65);
         text-decoration: none;
-        font-size: 0.65rem;
+        font-size: 0.6rem;
         gap: 2px;
         transition: color 0.15s, background 0.15s;
     }
@@ -170,6 +170,13 @@
     .bottomNav a.active { color: #fff; background: rgba(255,255,255,0.15); }
 
     .bottomNavIcon { font-size: 1.4rem; line-height: 1; }
+
+    .bottomNavLabel {
+        font-size: 0.6rem;
+        margin-top: 2px;
+        line-height: 1;
+        white-space: nowrap;
+    }
 
     /* Profil — avatar vyčnieva nad lištu */
     .profileNav {
