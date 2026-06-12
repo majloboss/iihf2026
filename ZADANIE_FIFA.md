@@ -294,8 +294,9 @@ Poradie migrácie:
 15. ✅ **Menu ikony** — vlastné obrázkové ikony navigácie z `sources/menu/` (Prehľad/Zápasy/Tabuľky/Skupiny/Profil/Pravidlá), transparentné rohy, sidebar 34px + bottom nav 30px; profil v mobile zobrazí avatar ak ho má
 16. ✅ **Mobil Zápasy filtre** — menšie tlačidlá filtrov (≤480px) aby sa TAB zmestil na obrazovku
 17. ✅ **Rozklik tipov v Skupinách** — flex layout (nie vnorená tabuľka), body vždy viditeľné aj na mobile; vlajka1/tím1/:/vlajka2/tím2 zarovnané stĺpce; mobil zápas pevných 110px
-18. 🔲 **Android aplikácia** (Kotlin) — neskôr, nie priorita
-19. 🟡 *Nice-to-have:* automatické párovanie knockout bracketu z víťazov skupín (teraz manuálne)
+18. 🟠 **História správ organizátora na Prehľade (FIFA)** — FifaDashboard doplnený o sekciu „História správ organizátora" (archív neaktívnych oznamov), rovnako ako v IIHF Dashboarde; predtým futbal zobrazoval len aktuálny oznam
+19. 🔲 **Android aplikácia** (Kotlin) — neskôr, nie priorita
+20. 🟡 *Nice-to-have:* automatické párovanie knockout bracketu z víťazov skupín (teraz manuálne)
 
 ---
 
