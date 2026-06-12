@@ -103,4 +103,11 @@ if ($finished) {
     fifa_recalc_game($pdo, $gid);
 }
 
+// Skupinový zápas → prepočítaj tabuľky skupín automaticky pri každej zmene stavu
+// výsledku (schválenie aj zrušenie), nech tabuľka vždy sedí so schválenými zápasmi.
+if ($status !== null && !$isPlayoff) {
+    require __DIR__ . '/../../helpers/fifa_standings_fn.php';
+    fifa_recalc_standings($pdo);
+}
+
 json_ok(['game_id' => $gid, 'saved' => true]);
