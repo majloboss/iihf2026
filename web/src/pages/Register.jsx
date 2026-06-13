@@ -59,11 +59,21 @@ export default function Register() {
                             <input
                                 className={styles.input}
                                 type="text"
-                                placeholder="Username (min. 3 znaky)"
+                                placeholder="Username (3–15 znakov)"
                                 value={username}
                                 onChange={e => setUsername(e.target.value)}
+                                maxLength={15}
                                 required autoFocus
                             />
+                            <p style={{
+                                margin: '-6px 2px 10px',
+                                fontSize: '0.78rem',
+                                color: username.length >= 15 ? '#c0392b' : '#888'
+                            }}>
+                                {username.length >= 15
+                                    ? 'Dosiahol si maximum 15 znakov.'
+                                    : `Max. 15 znakov (${username.length}/15).`}
+                            </p>
                             <input
                                 className={styles.input}
                                 type="password"
