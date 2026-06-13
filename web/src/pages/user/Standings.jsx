@@ -216,7 +216,7 @@ function GroupTable({ group, currentUserId, compId }) {
                                             ? <img src={m.avatar} className={styles.avatar} alt="" />
                                             : <span className={styles.avatarPh}>{m.username[0].toUpperCase()}</span>}
                                         <span className={styles.playerName}>{m.username}</span>
-                                        <span style={{marginLeft:4, color:'#aaa', fontSize:'0.7rem', flexShrink:0}}>
+                                        <span style={{marginLeft:1, color:'#aaa', fontSize:'0.7rem', flexShrink:0}}>
                                             {expanded.has(m.user_id) ? '▲' : '▼'}
                                         </span>
                                     </div>

@@ -152,8 +152,8 @@
 
 .table tr.me td { background: #f0f5ff; }
 
-/* Stĺpec Hráč pohltí voľné miesto a meno sa skráti — nikdy netlačí stĺpce s bodmi */
-.playerCell { width: 100%; max-width: 0; }
+/* Stĺpec Hráč pohltí voľné miesto; meno (max 15 znakov) sa zobrazí celé */
+.playerCell { width: 100%; white-space: nowrap; }
 
 .rank {
     font-size: 0.82rem;
@@ -173,12 +173,9 @@
     min-width: 0;
 }
 
-/* Meno hráča sa skráti (…) namiesto roztláčania stĺpcov s bodmi */
+/* Meno hráča sa zobrazuje celé (username je obmedzený na max 15 znakov) */
 .playerName {
-    overflow: hidden;
-    text-overflow: ellipsis;
     white-space: nowrap;
-    min-width: 0;
 }
 
 .avatar {
@@ -242,10 +239,12 @@
     .table th { font-size: 0.65rem; }
     .table td { font-size: 0.82rem; }
 
-    .rank { width: 20px; }
+    .rank { width: 18px; }
 
-    .avatar, .avatarPh { width: 22px; height: 22px; font-size: 0.65rem; }
-    .player { gap: 5px; }
+    /* avatar kúsok doľava: užší stĺpec # + menší padding bunky Hráč */
+    .table td:nth-child(2), .table th:nth-child(2) { padding-left: 2px; }
+    .avatar, .avatarPh { width: 20px; height: 20px; font-size: 0.62rem; }
+    .player { gap: 4px; }
 
     /* súčet Body bližšie k bucketom (kúsok doľava), bez zalomenia */
     .pts { font-size: 0.88rem; white-space: nowrap; }

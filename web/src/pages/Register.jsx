@@ -59,9 +59,10 @@ export default function Register() {
                             <input
                                 className={styles.input}
                                 type="text"
-                                placeholder="Username (min. 3 znaky)"
+                                placeholder="Username (3–15 znakov)"
                                 value={username}
                                 onChange={e => setUsername(e.target.value)}
+                                maxLength={15}
                                 required autoFocus
                             />
                             <input

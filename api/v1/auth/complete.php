@@ -10,7 +10,8 @@ $body     = json_decode(file_get_contents('php://input'), true);
 $username = trim($body['username'] ?? '');
 $password = $body['password'] ?? '';
 
-if (strlen($username) < 3) json_error('Username musí mať aspoň 3 znaky');
+if (mb_strlen($username) < 3)  json_error('Username musí mať aspoň 3 znaky');
+if (mb_strlen($username) > 15) json_error('Username môže mať najviac 15 znakov');
 if (strlen($password) < 6) json_error('Heslo musí mať aspoň 6 znakov');
 
 $pdo = db();
