@@ -295,6 +295,8 @@ Poradie migrácie:
 16. ✅ **Mobil Zápasy filtre** — menšie tlačidlá filtrov (≤480px) aby sa TAB zmestil na obrazovku
 17. ✅ **Rozklik tipov v Skupinách** — flex layout (nie vnorená tabuľka), body vždy viditeľné aj na mobile; vlajka1/tím1/:/vlajka2/tím2 zarovnané stĺpce; mobil zápas pevných 110px
 18. 🟠 **História správ organizátora na Prehľade (FIFA)** — FifaDashboard doplnený o sekciu „História správ organizátora" (archív neaktívnych oznamov), rovnako ako v IIHF Dashboarde; predtým futbal zobrazoval len aktuálny oznam
+18c. 🟠 **Admin štart → Výsledky** — admin po prihlásení/štarte appky padá na obrazovku Výsledky (`/admin/results`) namiesto Users (App.jsx: HomeRedirect, admin index, redirect z user rout).
+18d. 🟠 **Skupiny — oprava zobrazenia bodov** — dlhé mená hráčov tlačili stĺpce rozpadu bodov (1 a 0) mimo obrazovku. Meno sa teraz skracuje (ellipsis, `playerName`/`playerCell`), mobilné buckety 19→17px, tesnejšie paddingy, súčet Body posunutý kúsok doľava. Standings.jsx + Standings.module.css.
 18b. 🟠 **Auto-prepočet tabuliek skupín** — skupinové tabuľky boli nulové, lebo `group_standings` sa prepočítaval len manuálnym POST sync-om. Logika presunutá do `helpers/fifa_standings_fn.php::fifa_recalc_standings()` a volá sa teraz automaticky v `fifa_game_edit.php` pri každej zmene stavu výsledku skupinového zápasu (schválenie aj zrušenie). POST admin endpoint volá tú istú funkciu (fallback). **Pozn.:** existujúce odohrané zápasy treba raz manuálne presynchronizovať (POST /v1/admin/fifa-group-standings), potom už beží samo.
 19. 🔲 **Android aplikácia** (Kotlin) — neskôr, nie priorita
 20. 🟡 *Nice-to-have:* automatické párovanie knockout bracketu z víťazov skupín (teraz manuálne)

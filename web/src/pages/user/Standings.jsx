@@ -210,13 +210,13 @@ function GroupTable({ group, currentUserId, compId }) {
                                 <td className={`${styles.rank} ${i === 0 ? styles.top1 : i === 1 ? styles.top2 : i === 2 ? styles.top3 : ''}`}>
                                     {i + 1}.
                                 </td>
-                                <td>
+                                <td className={styles.playerCell}>
                                     <div className={styles.player}>
                                         {m.avatar
                                             ? <img src={m.avatar} className={styles.avatar} alt="" />
                                             : <span className={styles.avatarPh}>{m.username[0].toUpperCase()}</span>}
-                                        {m.username}
-                                        <span style={{marginLeft:4, color:'#aaa', fontSize:'0.7rem'}}>
+                                        <span className={styles.playerName}>{m.username}</span>
+                                        <span style={{marginLeft:4, color:'#aaa', fontSize:'0.7rem', flexShrink:0}}>
                                             {expanded.has(m.user_id) ? '▲' : '▼'}
                                         </span>
                                     </div>

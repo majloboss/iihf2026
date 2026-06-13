@@ -152,6 +152,9 @@
 
 .table tr.me td { background: #f0f5ff; }
 
+/* Stĺpec Hráč pohltí voľné miesto a meno sa skráti — nikdy netlačí stĺpce s bodmi */
+.playerCell { width: 100%; max-width: 0; }
+
 .rank {
     font-size: 0.82rem;
     font-weight: 700;
@@ -167,6 +170,15 @@
     display: flex;
     align-items: center;
     gap: 8px;
+    min-width: 0;
+}
+
+/* Meno hráča sa skráti (…) namiesto roztláčania stĺpcov s bodmi */
+.playerName {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
 }
 
 .avatar {
@@ -210,25 +222,33 @@
 .bucketZero { color: #d5d5d5; }
 
 @media (max-width: 480px) {
-    .bucketHead, .bucketCell { width: 19px; font-size: 0.72rem; }
+    .bucketHead, .bucketCell { width: 17px; font-size: 0.7rem; }
 }
 
 .empty { color: #aaa; text-align: center; padding: 40px 0; }
 
 @media (max-width: 480px) {
-    .wrap { padding: 10px 8px; }
+    .wrap { padding: 10px 4px; }
 
     .table th,
-    .table td { padding: 7px 5px; }
+    .table td { padding: 7px 3px; }
+
+    /* prvý/posledný stĺpec držia okraje, vnútorné stĺpce tesnejšie kvôli 8 bucketom */
+    .table th:first-child,
+    .table td:first-child { padding-left: 6px; }
+    .table th:last-child,
+    .table td:last-child { padding-right: 6px; }
 
     .table th { font-size: 0.65rem; }
     .table td { font-size: 0.82rem; }
 
-    .rank { width: 22px; }
+    .rank { width: 20px; }
 
     .avatar, .avatarPh { width: 22px; height: 22px; font-size: 0.65rem; }
     .player { gap: 5px; }
 
-    .pts { font-size: 0.88rem; }
+    /* súčet Body bližšie k bucketom (kúsok doľava), bez zalomenia */
+    .pts { font-size: 0.88rem; white-space: nowrap; }
+    .table td.pts, .table th.right { padding-left: 2px; padding-right: 4px; }
     .tipsCount { font-size: 0.72rem; }
 }

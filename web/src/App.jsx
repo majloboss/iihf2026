@@ -35,7 +35,7 @@ import Dashboard from './pages/user/Dashboard';
 function PrivateUserRoute({ children }) {
     const { user } = useAuth();
     if (!user) return <Navigate to="/login" replace />;
-    if (user.role === 'admin') return <Navigate to="/admin/users" replace />;
+    if (user.role === 'admin') return <Navigate to="/admin/results" replace />;
     return children;
 }
 
@@ -74,7 +74,7 @@ function AdminGroupStandingsRouter() {
 function HomeRedirect() {
     const { user } = useAuth();
     if (!user) return <Navigate to="/login" replace />;
-    if (user.role === 'admin') return <Navigate to="/admin/users" replace />;
+    if (user.role === 'admin') return <Navigate to="/admin/results" replace />;
     return <Navigate to="/dashboard" replace />;
 }
 
@@ -103,7 +103,7 @@ export default function App() {
                     <Route path="/admin" element={
                         <PrivateAdminRoute><CompetitionProvider><AdminLayout /></CompetitionProvider></PrivateAdminRoute>
                     }>
-                        <Route index          element={<Navigate to="users" replace />} />
+                        <Route index          element={<Navigate to="results" replace />} />
                         <Route path="users"   element={<Users />} />
                         <Route path="invites" element={<Invites />} />
                         <Route path="games"     element={<AdminGamesRouter />} />
