@@ -58,4 +58,11 @@ $pdo->prepare("
 ")->execute([(int)$h90, (int)$a90, $hFin !== null ? (int)$hFin : null,
              $aFin !== null ? (int)$aFin : null, $gid]);
 
+// Skupinový zápas → prepočítaj tabuľky skupín automaticky (rovnako ako fifa_game_edit).
+// Funkcia číta len schválené zápasy, takže funguje pri schválení aj zrušení výsledku.
+if (!$isPlayoff) {
+    require __DIR__ . '/../../helpers/fifa_standings_fn.php';
+    fifa_recalc_standings($pdo);
+}
+
 json_ok(['game_id' => $gid, 'saved' => true]);
