@@ -95,6 +95,10 @@ export default function UserLayout() {
                     <img src="/menu_zapasy.png" alt="" style={{width:30,height:30,objectFit:'contain'}} />
                     <span className={styles.bottomNavLabel}>Zápasy</span>
                 </NavLink>
+                <NavLink to="/tabulky"   className={({ isActive }) => isActive ? styles.active : ''}>
+                    <img src="/menu_tabulky.png" alt="" style={{width:30,height:30,objectFit:'contain'}} />
+                    <span className={styles.bottomNavLabel}>Tabuľky</span>
+                </NavLink>
                 <NavLink to="/profile" className={({ isActive }) => [styles.profileNav, isActive ? styles.active : ''].join(' ')}>
                     <div className={styles.profileNavAvatar}>
                         {profile?.avatar

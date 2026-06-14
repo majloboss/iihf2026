@@ -189,14 +189,9 @@
     .bottomNav a:hover  { background: rgba(255,255,255,0.08); }
     .bottomNav a.active { color: #fff; background: rgba(255,255,255,0.15); }
 
-    /* 6 položiek: 2 vľavo + Profil (stred) + 3 vpravo.
-       Ľavé 2 dostanú flex 1.5 (spolu 3), pravé 3 flex 1 (spolu 3) → Profil presne v strede. */
-    .bottomNav a:nth-child(1),
-    .bottomNav a:nth-child(2) { flex: 1.5; }
-    .bottomNav a:nth-child(3) { flex: 1.5; }   /* Profil */
-    .bottomNav a:nth-child(4),
-    .bottomNav a:nth-child(5),
-    .bottomNav a:nth-child(6) { flex: 1; }
+    /* 7 položiek: 3 vľavo (Prehľad, Zápasy, Tabuľky) + Profil (stred) + 3 vpravo
+       (Skupiny, Správy, Pravidlá). Symetria → všetky rovnaký flex, Profil presne v strede. */
+    .bottomNav a { flex: 1; }
 
     .bottomNavIcon { font-size: 1.4rem; line-height: 1; }
 
