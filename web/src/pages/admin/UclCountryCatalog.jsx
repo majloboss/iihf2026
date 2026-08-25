@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { createUclCountry, deleteUclCountry, getUclCountries, updateUclCountry } from '../../api/uclAdmin';
 import styles from './Admin.module.css';
 
-export default function UclCountryCatalog({ onChanged }) {
+export default function UclCountryCatalog({ onChanged = () => {} }) {
     const [countries, setCountries] = useState([]);
     const [draft, setDraft] = useState({ country_code: '', name_sk: '', name_en: '', name_original: '', flag_file: '' });
     const [editing, setEditing] = useState(null);
@@ -44,7 +44,9 @@ export default function UclCountryCatalog({ onChanged }) {
         <div style={{ overflowX: 'auto' }}><table className={styles.table} style={{ marginTop: 8 }}>
             <thead><tr><th>Vlajka</th><th>Kód</th><th>Slovensky</th><th>Anglicky</th><th>Originál</th><th>Akcie</th></tr></thead>
             <tbody>{countries.map(country => <tr key={country.country_code}>
-                <td>{country.flag_file ? <img src={`/flags/countries/${country.flag_file}`} alt={country.name_sk} style={{ width: 28, height: 18, objectFit: 'cover' }} /> : '—'}</td>
+                <td>{country.flag_file ? <img src={country.flag_file.startsWith('fifa_flag_') || country.flag_file.startsWith('team_flag_')
+                    ? `/flags/${country.flag_file}`
+                    : `/flags/countries/${country.flag_file}`} alt={country.name_sk} style={{ width: 28, height: 18, objectFit: 'cover' }} onError={e => { e.currentTarget.style.display = 'none'; }} /> : '—'}</td>
                 <td className={styles.mono}>{country.country_code}</td>
                 <td>{country.name_sk}</td>
                 <td>{country.name_en}</td>

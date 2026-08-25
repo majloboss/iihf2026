@@ -67,6 +67,7 @@ export default function AdminLayout() {
                     <NavLink to="/admin/messages"      className={({ isActive }) => isActive ? styles.active : ''} onClick={close}>
                         💬 Správy {unread > 0 && <span className={styles.navBadge}>{unread > 9 ? '9+' : unread}</span>}
                     </NavLink>
+                    <NavLink to="/admin/catalogs"     className={({ isActive }) => isActive ? styles.active : ''} onClick={close}>🗂️ Číselníky</NavLink>
 
                     <div className={styles.navSection}>Súťaž</div>
                     <NavLink to="/admin/games"           className={({ isActive }) => isActive ? styles.active : ''} onClick={close}>🏒 Zápasy</NavLink>

@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { createUclTeam, deleteUclTeam, getUclCountries, getUclTeams, updateUclTeam } from '../../api/uclAdmin';
-import UclCountryCatalog from './UclCountryCatalog';
 import styles from './Admin.module.css';
 
 const emptyTeam = { team_code: '', team_name: '', country_code: '', country_name: '', logo_file: '' };
@@ -132,7 +131,6 @@ export default function UclTeamCatalog() {
                 </table>
             </div>
             <p style={{ margin: '12px 0 0', fontSize: '0.78rem', color: '#777' }}>Klubov v číselníku: {teams.length}</p>
-            <UclCountryCatalog onChanged={load} />
         </div>
     );
 }

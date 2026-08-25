@@ -62,12 +62,12 @@ Tímy pri vytváraní zápasov môžu zostať dočasne prázdne, aby bolo možn�
 Zdrojový zoznam klubov a štátov je v `sources/lm2026-27/kluby_loga_staty.csv`.
 Obsahuje 81 klubov vrátane účastníkov kvalifikácie. Každý klub bude mať:
 
-- presný názov klubu,
-- názov štátu,
-- trojpísmenný kód štátu,
-- súbor loga.
+ presný názov klubu,
+ názov štátu,
+ trojpísmenný kód štátu,
+ súbor loga.
 
-Admin bude tieto údaje upravovať na obrazovke číselníka klubov a štátov. Klub si štát vyberá z číselníka; zmena názvu štátu sa preto automaticky prejaví pri všetkých jeho kluboch. V používateľskej časti sa klub zobrazí napríklad ako **Slovan Bratislava (SVK)** a logo sa načíta z jeho priradeného súboru.
+ Admin bude tieto údaje upravovať v **Správa → Číselníky → Štáty**. Klub si štát vyberá z číselníka; zmena názvu štátu sa preto automaticky prejaví pri všetkých jeho kluboch. V používateľskej časti sa klub zobrazí napríklad ako **Slovan Bratislava (SVK)** a logo sa načíta z jeho priradeného súboru.
 
 Pri úprave štátu platí:
 

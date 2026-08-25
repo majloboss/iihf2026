@@ -3,7 +3,6 @@ import { apiFetch } from '../../api/client';
 import { fifaTestSetup } from '../../api/fifaAdmin';
 import { getUsers, impersonate } from '../../api/admin';
 import { useCompetition } from '../../context/CompetitionContext';
-import UclTeamCatalog from './UclTeamCatalog';
 
 const BASE = import.meta.env.VITE_API_URL ?? '/api';
 import styles from './Admin.module.css';
@@ -19,7 +18,6 @@ const GEN_ACTIONS = [
 
 const TABS = [
     { key: 'login',  label: 'Prihlasovanie' },
-    { key: 'ucl',   label: 'LM 2026/27' },
     { key: 'fifa',   label: 'FIFA 2026' },
     { key: 'iihf',   label: 'IIHF 2026' },
     { key: 'notif',  label: 'Notifikácie' },
@@ -249,9 +247,6 @@ export default function AdminTools() {
                     {impMsg && <p style={{ marginTop: 8, fontSize: '0.85rem', color: impMsg.startsWith('✓') ? '#28a745' : '#dc3545' }}>{impMsg}</p>}
                 </div>
             )}
-
-            {/* ════════ LM 2026/27 ════════ */}
-            {tab === 'ucl' && <UclTeamCatalog />}
 
             {/* ════════ COMMON ════════ */}
             {tab === 'common' && <>
