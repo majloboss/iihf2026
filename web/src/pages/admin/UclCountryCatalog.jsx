@@ -30,15 +30,37 @@ export default function UclCountryCatalog({ onChanged = () => {} }) {
     return <div className={styles.card} style={{ padding: 20, marginTop: 12, borderLeft: '4px solid #6f42c1' }}>
         <h3 style={{ margin: '0 0 4px', color: '#6f42c1' }}>🌍 Štáty</h3>
         <p style={{ margin: '0 0 14px', fontSize: '0.82rem', color: '#666' }}>Spoločný číselník štátov používaný klubmi.</p>
-        <form onSubmit={save} style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'end' }}>
+        {editing && <div className={styles.uclEditorBackdrop} role="dialog" aria-modal="true" aria-labelledby="country-editor-title">
+            <form className={styles.uclEditor} onSubmit={save}>
+                <div className={styles.uclEditorHeader}>
+                    <div>
+                        <h3 id="country-editor-title">Upraviť štát</h3>
+                        <p>{draft.name_sk || draft.name_en || draft.country_code}</p>
+                    </div>
+                    <button className={styles.uclEditorClose} type="button" onClick={reset} aria-label="Zavrieť">×</button>
+                </div>
+                <div className={styles.uclEditorFields}>
+                    <label>Kód štátu<input value={draft.country_code} onChange={e => setDraft({ ...draft, country_code: e.target.value.toUpperCase() })} maxLength={3} required /></label>
+                    <label>Slovenský názov<input value={draft.name_sk} onChange={e => setDraft({ ...draft, name_sk: e.target.value })} maxLength={100} required /></label>
+                    <label>Anglický názov<input value={draft.name_en} onChange={e => setDraft({ ...draft, name_en: e.target.value })} maxLength={100} required /></label>
+                    <label>Originálny názov<input value={draft.name_original} onChange={e => setDraft({ ...draft, name_original: e.target.value })} maxLength={100} /></label>
+                    <label className={styles.uclEditorFull}>Súbor vlajky<input value={draft.flag_file} onChange={e => setDraft({ ...draft, flag_file: e.target.value })} maxLength={255} placeholder="svk.png" /></label>
+                </div>
+                {error && <p className={styles.error}>✗ {error}</p>}
+                <div className={styles.uclEditorActions}>
+                    <button className={styles.btn} type="submit">Uložiť zmeny</button>
+                    <button className={styles.btnSmall} type="button" onClick={reset}>Zrušiť</button>
+                </div>
+            </form>
+        </div>}
+        {!editing && <form onSubmit={save} style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'end' }}>
             <label>Kód štátu<input value={draft.country_code} onChange={e => setDraft({ ...draft, country_code: e.target.value.toUpperCase() })} maxLength={3} required placeholder="SVK" /></label>
-            <label>Slovensky<input value={draft.name_sk} onChange={e => setDraft({ ...draft, name_sk: e.target.value })} maxLength={100} required placeholder="Slovensko" /></label>
-            <label>Anglicky<input value={draft.name_en} onChange={e => setDraft({ ...draft, name_en: e.target.value })} maxLength={100} required placeholder="Slovakia" /></label>
+            <label>Slovenský názov<input value={draft.name_sk} onChange={e => setDraft({ ...draft, name_sk: e.target.value })} maxLength={100} required placeholder="Slovensko" /></label>
+            <label>Anglický názov<input value={draft.name_en} onChange={e => setDraft({ ...draft, name_en: e.target.value })} maxLength={100} required placeholder="Slovakia" /></label>
             <label>Originálny názov<input value={draft.name_original} onChange={e => setDraft({ ...draft, name_original: e.target.value })} maxLength={100} placeholder="Slovensko" /></label>
             <label>Vlajka<input value={draft.flag_file} onChange={e => setDraft({ ...draft, flag_file: e.target.value })} maxLength={255} placeholder="svk.png" /></label>
-            <button className={styles.btn} type="submit">{editing ? 'Uložiť štát' : 'Pridať štát'}</button>
-            {editing && <button className={styles.btnSmall} type="button" onClick={reset}>Zrušiť</button>}
-        </form>
+            <button className={styles.btn} type="submit">Pridať štát</button>
+        </form>}
         {message && <p className={styles.success}>{message}</p>}
         {error && <p className={styles.error}>✗ {error}</p>}
         <div style={{ overflowX: 'auto' }}><table className={styles.table} style={{ marginTop: 8 }}>
