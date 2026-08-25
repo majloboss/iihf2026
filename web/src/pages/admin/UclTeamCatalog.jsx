@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
-import { createUclTeam, deleteUclTeam, getUclTeams, updateUclTeam } from '../../api/uclAdmin';
+import { createUclTeam, deleteUclTeam, getUclCountries, getUclTeams, updateUclTeam } from '../../api/uclAdmin';
+import UclCountryCatalog from './UclCountryCatalog';
 import styles from './Admin.module.css';
 
 const emptyTeam = { team_code: '', team_name: '', country_code: '', country_name: '', logo_file: '' };
 
 export default function UclTeamCatalog() {
     const [teams, setTeams] = useState([]);
+    const [countries, setCountries] = useState([]);
     const [draft, setDraft] = useState(emptyTeam);
     const [editingId, setEditingId] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -13,8 +15,8 @@ export default function UclTeamCatalog() {
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
 
-    const load = () => getUclTeams()
-        .then(setTeams)
+    const load = () => Promise.all([getUclTeams(), getUclCountries()])
+        .then(([teamRows, countryRows]) => { setTeams(teamRows); setCountries(countryRows); })
         .catch(e => setError(e.message))
         .finally(() => setLoading(false));
 
@@ -31,9 +33,8 @@ export default function UclTeamCatalog() {
             const saved = editingId
                 ? await updateUclTeam({ ...draft, team_id: editingId })
                 : await createUclTeam(draft);
-            setTeams(current => editingId
-                ? current.map(team => team.team_id === editingId ? saved : team)
-                : [...current, saved].sort((a, b) => a.team_name.localeCompare(b.team_name, 'sk')));
+            if (editingId) await load();
+            else setTeams(current => [...current, saved].sort((a, b) => a.team_name.localeCompare(b.team_name, 'sk')));
             setMessage(editingId ? '✓ Klub bol uložený.' : '✓ Klub bol pridaný.');
             reset();
         } catch (e) { setError(e.message); }
@@ -78,8 +79,7 @@ export default function UclTeamCatalog() {
                         <div className={styles.uclEditorFields}>
                             <label>Kód klubu<input value={draft.team_code} onChange={e => change('team_code', e.target.value)} maxLength={20} required /></label>
                             <label>Názov klubu<input value={draft.team_name} onChange={e => change('team_name', e.target.value)} maxLength={100} required /></label>
-                            <label>Kód štátu<input value={draft.country_code} onChange={e => change('country_code', e.target.value.toUpperCase())} maxLength={3} /></label>
-                            <label>Štát<input value={draft.country_name} onChange={e => change('country_name', e.target.value)} maxLength={100} /></label>
+                            <label>Štát<select value={draft.country_code} onChange={e => change('country_code', e.target.value)} required><option value="">Vyber štát</option>{countries.map(country => <option key={country.country_code} value={country.country_code}>{country.country_name} ({country.country_code})</option>)}</select></label>
                             <label className={styles.uclEditorFull}>Súbor loga<input value={draft.logo_file} onChange={e => change('logo_file', e.target.value)} placeholder="s_bratislava_logo.png" /></label>
                         </div>
                         {error && <p className={styles.error}>✗ {error}</p>}
@@ -98,8 +98,7 @@ export default function UclTeamCatalog() {
             <form onSubmit={save} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 8, alignItems: 'end', marginBottom: 16 }}>
                 <label>Kód klubu<input value={draft.team_code} onChange={e => change('team_code', e.target.value)} maxLength={20} required placeholder="SLOVAN" /></label>
                 <label>Názov klubu<input value={draft.team_name} onChange={e => change('team_name', e.target.value)} maxLength={100} required placeholder="Slovan Bratislava" /></label>
-                <label>Kód štátu<input value={draft.country_code} onChange={e => change('country_code', e.target.value.toUpperCase())} maxLength={3} placeholder="SVK" /></label>
-                <label>Štát<input value={draft.country_name} onChange={e => change('country_name', e.target.value)} maxLength={100} placeholder="Slovakia" /></label>
+                <label>Štát<select value={draft.country_code} onChange={e => change('country_code', e.target.value)} required><option value="">Vyber štát</option>{countries.map(country => <option key={country.country_code} value={country.country_code}>{country.country_name} ({country.country_code})</option>)}</select></label>
                 <label>Súbor loga<input value={draft.logo_file} onChange={e => change('logo_file', e.target.value)} placeholder="s_bratislavasvk_logo.png" /></label>
                 <div style={{ display: 'flex', gap: 6 }}>
                     <button className={styles.btn} type="submit" disabled={saving}>{saving ? 'Ukladám…' : 'Pridať klub'}</button>
@@ -133,6 +132,7 @@ export default function UclTeamCatalog() {
                 </table>
             </div>
             <p style={{ margin: '12px 0 0', fontSize: '0.78rem', color: '#777' }}>Klubov v číselníku: {teams.length}</p>
+            <UclCountryCatalog onChanged={load} />
         </div>
     );
 }

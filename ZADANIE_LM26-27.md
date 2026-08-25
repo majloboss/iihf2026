@@ -53,6 +53,7 @@ Migrácia `044_ucl_competition.sql` pripravuje:
 - `"lm2026-27".tips` — tipy používateľov
 - `"lm2026-27".scoring_config` — bodovanie
 - `"lm2026-27".group_standings` — jedna spoločná tabuľka s fázou `LEAGUE`
+- `"lm2026-27".countries` — číselník štátov (`country_code`, `country_name`)
 
 Tímy pri vytváraní zápasov môžu zostať dočasne prázdne, aby bolo možné pripraviť zápasy pred dokončením žrebu.
 
@@ -66,7 +67,7 @@ Obsahuje 81 klubov vrátane účastníkov kvalifikácie. Každý klub bude mať:
 - trojpísmenný kód štátu,
 - súbor loga.
 
-Admin bude tieto údaje upravovať na samostatnej obrazovke číselníka klubov. V používateľskej časti sa klub zobrazí napríklad ako **Slovan Bratislava (SVK)** a logo sa načíta z jeho priradeného súboru.
+Admin bude tieto údaje upravovať na obrazovke číselníka klubov a štátov. Klub si štát vyberá z číselníka; zmena názvu štátu sa preto automaticky prejaví pri všetkých jeho kluboch. V používateľskej časti sa klub zobrazí napríklad ako **Slovan Bratislava (SVK)** a logo sa načíta z jeho priradeného súboru.
 
 ## Bodovanie
 
@@ -95,11 +96,12 @@ Hodnotí sa výsledok po 90 minútach. Predĺženie a penalty sa do tipu nezapo�
 5. ✅ Importovať 81 klubov, názvov štátov a kódov štátov z CSV (`046`) na DB-DEV-BET
 6. ✅ Pridať admin číselník klubov s editáciou názvu, štátu, kódu a loga
 7. ✅ Spustiť migráciu oprávnení `047` na DB-DEV-BET
-8. 🔲 Doplniť vyžrebované zápasy do `"lm2026-27".games`
-9. 🔲 Pridať UCL API endpointy
-10. 🔲 Pridať UCL stránky a routing vo webovej aplikácii
-11. 🔲 Otestovať ligovú tabuľku, tipovanie a bodovanie
-12. 🔲 Aktivovať súťaž pre používateľov
+8. ✅ Spustiť migráciu číselníka štátov `048` na DB-DEV-BET
+9. 🔲 Doplniť vyžrebované zápasy do `"lm2026-27".games`
+10. 🔲 Pridať UCL API endpointy
+11. 🔲 Pridať UCL stránky a routing vo webovej aplikácii
+12. 🔲 Otestovať ligovú tabuľku, tipovanie a bodovanie
+13. 🔲 Aktivovať súťaž pre používateľov
 
 ## Pravidlá práce
 

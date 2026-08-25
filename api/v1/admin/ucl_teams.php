@@ -4,7 +4,7 @@ require_auth(true);
 $pdo = db();
 
 if ($method === 'GET') {
-    $rows = $pdo->query("SELECT team_id, team_code, team_name, country_code, country_name, logo_file FROM \"lm2026-27\".teams ORDER BY team_name, team_id")->fetchAll();
+    $rows = $pdo->query("SELECT t.team_id, t.team_code, t.team_name, t.country_code, c.country_name, t.logo_file FROM \"lm2026-27\".teams t LEFT JOIN \"lm2026-27\".countries c ON c.country_code = t.country_code ORDER BY t.team_name, t.team_id")->fetchAll();
     json_ok($rows);
 }
 
@@ -30,11 +30,19 @@ $clean = function (array $data, bool $requireCode = true) {
     return [$teamCode, $teamName, $countryCode ?: null, $countryName ?: null, $logoFile ?: null];
 };
 
+$countryExists = function (?string $countryCode) use ($pdo) {
+    if ($countryCode === null) return;
+    $stmt = $pdo->prepare('SELECT 1 FROM "lm2026-27".countries WHERE country_code = ?');
+    $stmt->execute([$countryCode]);
+    if (!$stmt->fetch()) json_error('Vybraný štát neexistuje v číselníku', 400);
+};
+
 if ($method === 'POST') {
     [$teamCode, $teamName, $countryCode, $countryName, $logoFile] = $clean($body);
+    $countryExists($countryCode);
     try {
-        $stmt = $pdo->prepare("INSERT INTO \"lm2026-27\".teams (team_code, team_name, country_code, country_name, logo_file) VALUES (?, ?, ?, ?, ?) RETURNING team_id, team_code, team_name, country_code, country_name, logo_file");
-        $stmt->execute([$teamCode, $teamName, $countryCode, $countryName, $logoFile]);
+        $stmt = $pdo->prepare("INSERT INTO \"lm2026-27\".teams (team_code, team_name, country_code, logo_file) VALUES (?, ?, ?, ?) RETURNING team_id, team_code, team_name, country_code, logo_file");
+        $stmt->execute([$teamCode, $teamName, $countryCode, $logoFile]);
         json_ok($stmt->fetch(), 201);
     } catch (PDOException $e) {
         if ($e->getCode() === '23505') json_error('Kód klubu už existuje', 409);
@@ -47,13 +55,23 @@ if ($method === 'PUT') {
     if (!$teamId) json_error('Chýba team_id', 400);
     [$teamCode, $teamName, $countryCode, $countryName, $logoFile] = $clean($body);
     try {
-        $stmt = $pdo->prepare("UPDATE \"lm2026-27\".teams SET team_code = ?, team_name = ?, country_code = ?, country_name = ?, logo_file = ? WHERE team_id = ? RETURNING team_id, team_code, team_name, country_code, country_name, logo_file");
-        $stmt->execute([$teamCode, $teamName, $countryCode, $countryName, $logoFile, $teamId]);
+        $oldStmt = $pdo->prepare('SELECT country_code FROM "lm2026-27".teams WHERE team_id = ?');
+        $oldStmt->execute([$teamId]);
+        $oldTeam = $oldStmt->fetch();
+        if (!$oldTeam) json_error('Klub neexistuje', 404);
+
+        $pdo->beginTransaction();
+        $stmt = $pdo->prepare("UPDATE \"lm2026-27\".teams SET team_code = ?, team_name = ?, country_code = ?, logo_file = ? WHERE team_id = ? RETURNING team_id, team_code, team_name, country_code, logo_file");
+        $stmt->execute([$teamCode, $teamName, $countryCode, $logoFile, $teamId]);
         $row = $stmt->fetch();
-        if (!$row) json_error('Klub neexistuje', 404);
+        $pdo->commit();
         json_ok($row);
     } catch (PDOException $e) {
+        if ($pdo->inTransaction()) $pdo->rollBack();
         if ($e->getCode() === '23505') json_error('Kód klubu už existuje', 409);
+        throw $e;
+    } catch (Throwable $e) {
+        if ($pdo->inTransaction()) $pdo->rollBack();
         throw $e;
     }
 }
