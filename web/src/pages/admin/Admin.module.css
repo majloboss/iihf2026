@@ -28,6 +28,47 @@
 .table tr:last-child td { border-bottom: none; }
 .table tr:hover td { background: #f8f9ff; }
 
+.uclEditorBackdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(15, 32, 54, 0.52);
+}
+
+.uclEditor {
+    width: min(620px, 100%);
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+    padding: 22px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+}
+
+.uclEditorHeader { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; margin-bottom: 18px; }
+.uclEditorHeader h3 { margin: 0; color: #1a3a6b; }
+.uclEditorHeader p { margin: 4px 0 0; color: #777; font-size: 0.85rem; }
+.uclEditorClose { border: 0; background: transparent; color: #777; font-size: 1.8rem; line-height: 1; cursor: pointer; }
+.uclEditorFields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.uclEditorFields label, .uclEditorFields input { display: block; width: 100%; box-sizing: border-box; }
+.uclEditorFields label { color: #555; font-size: 0.8rem; font-weight: 600; }
+.uclEditorFields input { margin-top: 5px; padding: 9px 10px; border: 1px solid #ced4da; border-radius: 5px; font: inherit; font-weight: 400; }
+.uclEditorFull { grid-column: 1 / -1; }
+.uclEditorActions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; }
+
+@media (max-width: 520px) {
+    .uclEditorBackdrop { padding: 10px; align-items: flex-end; }
+    .uclEditor { max-height: calc(100vh - 20px); padding: 18px; border-radius: 10px 10px 0 0; }
+    .uclEditorFields { grid-template-columns: 1fr; }
+    .uclEditorFull { grid-column: auto; }
+    .uclEditorActions { justify-content: stretch; }
+    .uclEditorActions button { flex: 1; }
+}
+
 @media (max-width: 700px) {
     .uclTeamsTable,
     .uclTeamsTable tbody,

@@ -65,6 +65,31 @@ export default function UclTeamCatalog() {
 
     return (
         <div className={styles.card} style={{ padding: 20, marginTop: 16, borderLeft: '4px solid #0d6efd' }}>
+            {editingId && (
+                <div className={styles.uclEditorBackdrop} role="dialog" aria-modal="true" aria-labelledby="ucl-editor-title">
+                    <form className={styles.uclEditor} onSubmit={save}>
+                        <div className={styles.uclEditorHeader}>
+                            <div>
+                                <h3 id="ucl-editor-title">Upraviť klub</h3>
+                                <p>{draft.team_name || 'Nový klub'}</p>
+                            </div>
+                            <button className={styles.uclEditorClose} type="button" onClick={reset} aria-label="Zavrieť">×</button>
+                        </div>
+                        <div className={styles.uclEditorFields}>
+                            <label>Kód klubu<input value={draft.team_code} onChange={e => change('team_code', e.target.value)} maxLength={20} required /></label>
+                            <label>Názov klubu<input value={draft.team_name} onChange={e => change('team_name', e.target.value)} maxLength={100} required /></label>
+                            <label>Kód štátu<input value={draft.country_code} onChange={e => change('country_code', e.target.value.toUpperCase())} maxLength={3} /></label>
+                            <label>Štát<input value={draft.country_name} onChange={e => change('country_name', e.target.value)} maxLength={100} /></label>
+                            <label className={styles.uclEditorFull}>Súbor loga<input value={draft.logo_file} onChange={e => change('logo_file', e.target.value)} placeholder="s_bratislava_logo.png" /></label>
+                        </div>
+                        {error && <p className={styles.error}>✗ {error}</p>}
+                        <div className={styles.uclEditorActions}>
+                            <button className={styles.btn} type="submit" disabled={saving}>{saving ? 'Ukladám…' : 'Uložiť zmeny'}</button>
+                            <button className={styles.btnSmall} type="button" onClick={reset}>Zrušiť</button>
+                        </div>
+                    </form>
+                </div>
+            )}
             <h3 style={{ margin: '0 0 4px', color: '#0d6efd' }}>⚽ Kluby</h3>
             <p style={{ margin: '0 0 16px', fontSize: '0.82rem', color: '#666' }}>
                 Číselník klubov Ligy majstrov UEFA 2026/27. Zobrazenie klubu: názov + kód štátu.
@@ -77,8 +102,7 @@ export default function UclTeamCatalog() {
                 <label>Štát<input value={draft.country_name} onChange={e => change('country_name', e.target.value)} maxLength={100} placeholder="Slovakia" /></label>
                 <label>Súbor loga<input value={draft.logo_file} onChange={e => change('logo_file', e.target.value)} placeholder="s_bratislavasvk_logo.png" /></label>
                 <div style={{ display: 'flex', gap: 6 }}>
-                    <button className={styles.btn} type="submit" disabled={saving}>{saving ? 'Ukladám…' : editingId ? 'Uložiť' : 'Pridať klub'}</button>
-                    {editingId && <button className={styles.btnSmall} type="button" onClick={reset}>Zrušiť</button>}
+                    <button className={styles.btn} type="submit" disabled={saving}>{saving ? 'Ukladám…' : 'Pridať klub'}</button>
                 </div>
             </form>
 
