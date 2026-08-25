@@ -59,7 +59,7 @@ Tímy pri vytváraní zápasov môžu zostať dočasne prázdne, aby bolo možn�
 ### Číselník klubov
 
 Zdrojový zoznam klubov a štátov je v `sources/lm2026-27/kluby_loga_staty.csv`.
-Obsahuje 80 klubov vrátane účastníkov kvalifikácie. Každý klub bude mať:
+Obsahuje 81 klubov vrátane účastníkov kvalifikácie. Každý klub bude mať:
 
 - presný názov klubu,
 - názov štátu,
@@ -92,7 +92,7 @@ Hodnotí sa výsledok po 90 minútach. Predĺženie a penalty sa do tipu nezapo�
 2. ✅ Spustiť migrácie `044` a `045` na DB-DEV-BET
 3. ✅ Pripraviť logo Ligy majstrov UEFA
 4. ✅ Pripraviť logá klubov z `sources/lm2026-27/`
-5. 🔲 Importovať kluby, názvy štátov a kódy štátov z CSV
+5. 🟠 Pripraviť a spustiť import 81 klubov, názvov štátov a kódov štátov z CSV (`046`)
 6. ✅ Pridať admin číselník klubov s editáciou názvu, štátu, kódu a loga
 7. 🔲 Doplniť vyžrebované zápasy do `"lm2026-27".games`
 8. 🔲 Pridať UCL API endpointy
