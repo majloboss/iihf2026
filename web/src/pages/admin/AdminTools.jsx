@@ -27,8 +27,7 @@ const TABS = [
 ];
 
 export default function AdminTools() {
-    const { activeCompetition } = useCompetition();
-    const [tab, setTab]               = useState(activeCompetition?.slug === 'fifa2026' ? 'fifa' : 'iihf');
+    const [tab, setTab]               = useState('ucl');
     const [running,    setRunning]    = useState(null);
     const [results,    setResults]    = useState({});
     const [errors,     setErrors]     = useState({});
@@ -61,13 +60,6 @@ export default function AdminTools() {
             .then(r => setVapidStatus(r.ok ? 'ok' : 'missing'))
             .catch(() => setVapidStatus('missing'));
     }, []);
-
-    // Pri prepnutí turnaja v sidebari prepni focus na jeho záložku
-    useEffect(() => {
-        if (activeCompetition?.slug === 'fifa2026') setTab('fifa');
-        else if (activeCompetition?.slug === 'ucl2026') setTab('ucl');
-        else if (activeCompetition?.slug) setTab('iihf');
-    }, [activeCompetition?.slug]);
 
     const run = async (action) => {
         setConfirm(null);

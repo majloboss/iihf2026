@@ -86,7 +86,7 @@ export default function UclTeamCatalog() {
             {error && <p className={styles.error}>✗ {error}</p>}
 
             <div style={{ overflowX: 'auto' }}>
-                <table className={styles.table} style={{ marginTop: 8 }}>
+                <table className={`${styles.table} ${styles.uclTeamsTable}`} style={{ marginTop: 8 }}>
                     <thead><tr><th>Logo</th><th>Kód</th><th>Klub</th><th>Štát</th><th>Kód štátu</th><th>Akcie</th></tr></thead>
                     <tbody>
                         {teams.map(team => (

@@ -28,6 +28,40 @@
 .table tr:last-child td { border-bottom: none; }
 .table tr:hover td { background: #f8f9ff; }
 
+@media (max-width: 700px) {
+    .uclTeamsTable,
+    .uclTeamsTable tbody,
+    .uclTeamsTable tr,
+    .uclTeamsTable td { display: block; width: 100%; }
+
+    .uclTeamsTable { border-radius: 8px; }
+    .uclTeamsTable thead { display: none; }
+    .uclTeamsTable tr { padding: 8px 10px; border-bottom: 1px solid #e9ecef; }
+    .uclTeamsTable tr:last-child { border-bottom: none; }
+    .uclTeamsTable td {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 5px 0;
+        border-bottom: none;
+        font-size: 0.86rem;
+    }
+    .uclTeamsTable td::before {
+        flex: 0 0 88px;
+        color: #777;
+        font-size: 0.72rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    .uclTeamsTable td:nth-child(1)::before { content: 'Logo'; }
+    .uclTeamsTable td:nth-child(2)::before { content: 'Kód'; }
+    .uclTeamsTable td:nth-child(3)::before { content: 'Klub'; }
+    .uclTeamsTable td:nth-child(4)::before { content: 'Štát'; }
+    .uclTeamsTable td:nth-child(5)::before { content: 'Kód štátu'; }
+    .uclTeamsTable td:nth-child(6)::before { content: 'Akcie'; }
+    .uclTeamsTable td:nth-child(6) .actions { flex: 1; }
+}
+
 .badge {
     background: #e8f4f8;
     color: #1a6b9b;
