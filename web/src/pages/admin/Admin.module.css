@@ -304,8 +304,9 @@
 }
 
 .toolsWrap {
-    max-width: 600px;
+    width: 100%;
     padding: 24px;
+    box-sizing: border-box;
 }
 
 /* ── Mobile (max 900px) ── */

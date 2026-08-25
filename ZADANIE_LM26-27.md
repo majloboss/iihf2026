@@ -94,7 +94,7 @@ Hodnotí sa výsledok po 90 minútach. Predĺženie a penalty sa do tipu nezapo�
 4. ✅ Pripraviť logá klubov z `sources/lm2026-27/`
 5. ✅ Importovať 81 klubov, názvov štátov a kódov štátov z CSV (`046`) na DB-DEV-BET
 6. ✅ Pridať admin číselník klubov s editáciou názvu, štátu, kódu a loga
-7. 🔲 Spustiť migráciu oprávnení `047` na DB-DEV-BET
+7. ✅ Spustiť migráciu oprávnení `047` na DB-DEV-BET
 8. 🔲 Doplniť vyžrebované zápasy do `"lm2026-27".games`
 9. 🔲 Pridať UCL API endpointy
 10. 🔲 Pridať UCL stránky a routing vo webovej aplikácii
