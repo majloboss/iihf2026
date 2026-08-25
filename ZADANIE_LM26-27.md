@@ -92,13 +92,14 @@ Hodnotí sa výsledok po 90 minútach. Predĺženie a penalty sa do tipu nezapo�
 2. ✅ Spustiť migrácie `044` a `045` na DB-DEV-BET
 3. ✅ Pripraviť logo Ligy majstrov UEFA
 4. ✅ Pripraviť logá klubov z `sources/lm2026-27/`
-5. 🟠 Pripraviť a spustiť import 81 klubov, názvov štátov a kódov štátov z CSV (`046`)
+5. ✅ Importovať 81 klubov, názvov štátov a kódov štátov z CSV (`046`) na DB-DEV-BET
 6. ✅ Pridať admin číselník klubov s editáciou názvu, štátu, kódu a loga
-7. 🔲 Doplniť vyžrebované zápasy do `"lm2026-27".games`
-8. 🔲 Pridať UCL API endpointy
-9. 🔲 Pridať UCL stránky a routing vo webovej aplikácii
-10. 🔲 Otestovať ligovú tabuľku, tipovanie a bodovanie
-11. 🔲 Aktivovať súťaž pre používateľov
+7. 🔲 Spustiť migráciu oprávnení `047` na DB-DEV-BET
+8. 🔲 Doplniť vyžrebované zápasy do `"lm2026-27".games`
+9. 🔲 Pridať UCL API endpointy
+10. 🔲 Pridať UCL stránky a routing vo webovej aplikácii
+11. 🔲 Otestovať ligovú tabuľku, tipovanie a bodovanie
+12. 🔲 Aktivovať súťaž pre používateľov
 
 ## Pravidlá práce
 
