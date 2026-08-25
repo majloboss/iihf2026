@@ -17,7 +17,6 @@ https://dashboard.sportdb.dev/api-keys: 2sJeeo35xgIMNx0mNZumlDFc2YKBpiUyKmBE0VV0
 
 ✅ *BetClub platforma + FIFA modul nasadený na produkciu (betclub.fellow.sk).*
 Web funkčný: multi-turnaj, FIFA zápasy/tipy/tabuľky/poradie/tretie miesta, admin (výsledky, živé skóre, bracket, finalizácia), generovanie testovacích dát, impersonácia, token-versioning, flashscore ikony, BetClub favicon + PWA ikony, pozvánky (soft delete, BetClub text), impersonácia opravená (tv claim).
-Zostáva: Android.
 
 ---
 
@@ -265,13 +264,26 @@ Poradie migrácie:
 | 041 group invite flags (allow_member_invite + is_closed) | ✅ | ✅ |
 | 042 admin.messages (chat user↔admin) + GRANT | ✅ | ✅ |
 | 043 messages.image_url + body nullable | ✅ | ✅ |
+| 044 UCL 2026/27: prázdna schéma pre ligovú fázu a knockout | 🔲 | 🔲 |
 
 ---
 
 ## Platforma
 
 - ✅ Web aplikácia — React + Vite PWA — betclub.fellow.sk (prod) + dev_betclub.fellow.sk (dev)
-- 🔲 Android aplikácia — Kotlin (neskôr, nie je priorita)
+
+---
+
+## Liga majstrov UEFA 2026/27 — pripravená štruktúra
+
+- Súťaž: `ucl2026`, zatiaľ neaktívna
+- Organizátor: UEFA
+- Samostatná schéma: `ucl2026`
+- Fázy: `QUALIFYING`, `LEAGUE`, `R16`, `QF`, `SF`, `BM`, `F`
+- Jedna spoločná ligová fáza bez skupín; všetky tímy budú v jednej tabuľke `ucl2026.group_standings` s fázou `LEAGUE`
+- Tímy a zápasy sa doplnia po posledných kvalifikačných zápasoch a žrebe
+- Zápasy môžu byť vytvorené pred žrebom s prázdnymi tímami
+- Ďalší krok: import potvrdených tímov a vyžrebovaných zápasov, potom UCL API/UI routing
 
 ---
 
@@ -301,8 +313,7 @@ Poradie migrácie:
 18g. 🟠 **Mobil bottom nav: pridaná Tabuľky** — do spodného menu pribudla položka Tabuľky (vľavo od Profilu). Teraz 7 položiek: 3 vľavo (Prehľad, Zápasy, Tabuľky) + Profil v strede + 3 vpravo (Skupiny, Správy, Pravidlá) → symetria, všetky flex:1.
 18f. 🟠 **Auto-prepočet tabuliek aj cez obrazovku Výsledky** — `fifa_game_update.php` (volaný z FifaAdminResults, hlavný spôsob zadávania výsledkov adminom) neprepočítaval tabuľky skupín — robil to len `fifa_game_edit.php`. Doplnené volanie `fifa_recalc_standings()` pre skupinové zápasy aj do `fifa_game_update.php`.
 18b. 🟠 **Auto-prepočet tabuliek skupín** — skupinové tabuľky boli nulové, lebo `group_standings` sa prepočítaval len manuálnym POST sync-om. Logika presunutá do `helpers/fifa_standings_fn.php::fifa_recalc_standings()` a volá sa teraz automaticky v `fifa_game_edit.php` pri každej zmene stavu výsledku skupinového zápasu (schválenie aj zrušenie). POST admin endpoint volá tú istú funkciu (fallback). **Pozn.:** existujúce odohrané zápasy treba raz manuálne presynchronizovať (POST /v1/admin/fifa-group-standings), potom už beží samo.
-19. 🔲 **Android aplikácia** (Kotlin) — neskôr, nie priorita
-20. 🟡 *Nice-to-have:* automatické párovanie knockout bracketu z víťazov skupín (teraz manuálne)
+19. 🟡 *Nice-to-have:* automatické párovanie knockout bracketu z víťazov skupín (teraz manuálne)
 
 ---
 
