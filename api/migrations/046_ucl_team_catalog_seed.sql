@@ -82,7 +82,7 @@ INSERT INTO "lm2026-27".teams (team_code, team_name, country_code, country_name,
     ('SUTJESKA', 'Sutjeska', 'MNE', 'MNE', 'sutjeska_logo.png'),
     ('THE_NEW_SAINTS', 'The New Saints', 'WAL', 'Wales', 'the_new_saints_logo.png'),
     ('TRE_FIORI', 'Tre Fiori', 'SMR', 'SMR', 'tre_fiori_logo.png'),
-    ('VARDAR', 'Vardar', 'MKD', 'MKD', 'vardar_logo.png');
+    ('VARDAR', 'Vardar', 'MKD', 'MKD', 'vardar_logo.png')
 ON CONFLICT (team_code) DO UPDATE SET team_name = EXCLUDED.team_name, country_code = EXCLUDED.country_code, country_name = EXCLUDED.country_name, logo_file = EXCLUDED.logo_file;
 
 INSERT INTO admin.schema_versions (version, description)
