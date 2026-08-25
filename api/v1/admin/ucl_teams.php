@@ -4,7 +4,7 @@ require_auth(true);
 $pdo = db();
 
 if ($method === 'GET') {
-    $rows = $pdo->query("SELECT t.team_id, t.team_code, t.team_name, t.country_code, c.country_name, t.logo_file FROM \"lm2026-27\".teams t LEFT JOIN \"lm2026-27\".countries c ON c.country_code = t.country_code ORDER BY t.team_name, t.team_id")->fetchAll();
+    $rows = $pdo->query("SELECT t.team_id, t.team_code, t.team_name, t.country_code, c.name_en AS country_name, t.logo_file FROM \"lm2026-27\".teams t LEFT JOIN admin.countries c ON c.country_code = t.country_code ORDER BY t.team_name, t.team_id")->fetchAll();
     json_ok($rows);
 }
 

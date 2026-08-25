@@ -79,7 +79,7 @@ export default function UclTeamCatalog() {
                         <div className={styles.uclEditorFields}>
                             <label>Kód klubu<input value={draft.team_code} onChange={e => change('team_code', e.target.value)} maxLength={20} required /></label>
                             <label>Názov klubu<input value={draft.team_name} onChange={e => change('team_name', e.target.value)} maxLength={100} required /></label>
-                            <label>Štát<select value={draft.country_code} onChange={e => change('country_code', e.target.value)} required><option value="">Vyber štát</option>{countries.map(country => <option key={country.country_code} value={country.country_code}>{country.country_name} ({country.country_code})</option>)}</select></label>
+                            <label>Štát<select value={draft.country_code} onChange={e => change('country_code', e.target.value)} required><option value="">Vyber štát</option>{countries.map(country => <option key={country.country_code} value={country.country_code}>{country.name_sk} ({country.country_code})</option>)}</select></label>
                             <label className={styles.uclEditorFull}>Súbor loga<input value={draft.logo_file} onChange={e => change('logo_file', e.target.value)} placeholder="s_bratislava_logo.png" /></label>
                         </div>
                         {error && <p className={styles.error}>✗ {error}</p>}
@@ -98,7 +98,7 @@ export default function UclTeamCatalog() {
             <form onSubmit={save} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 8, alignItems: 'end', marginBottom: 16 }}>
                 <label>Kód klubu<input value={draft.team_code} onChange={e => change('team_code', e.target.value)} maxLength={20} required placeholder="SLOVAN" /></label>
                 <label>Názov klubu<input value={draft.team_name} onChange={e => change('team_name', e.target.value)} maxLength={100} required placeholder="Slovan Bratislava" /></label>
-                <label>Štát<select value={draft.country_code} onChange={e => change('country_code', e.target.value)} required><option value="">Vyber štát</option>{countries.map(country => <option key={country.country_code} value={country.country_code}>{country.country_name} ({country.country_code})</option>)}</select></label>
+                <label>Štát<select value={draft.country_code} onChange={e => change('country_code', e.target.value)} required><option value="">Vyber štát</option>{countries.map(country => <option key={country.country_code} value={country.country_code}>{country.name_sk} ({country.country_code})</option>)}</select></label>
                 <label>Súbor loga<input value={draft.logo_file} onChange={e => change('logo_file', e.target.value)} placeholder="s_bratislavasvk_logo.png" /></label>
                 <div style={{ display: 'flex', gap: 6 }}>
                     <button className={styles.btn} type="submit" disabled={saving}>{saving ? 'Ukladám…' : 'Pridať klub'}</button>
