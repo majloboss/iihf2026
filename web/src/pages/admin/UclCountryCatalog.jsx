@@ -31,7 +31,7 @@ export default function UclCountryCatalog({ onChanged }) {
         <h3 style={{ margin: '0 0 4px', color: '#6f42c1' }}>🌍 Štáty</h3>
         <p style={{ margin: '0 0 14px', fontSize: '0.82rem', color: '#666' }}>Číselník štátov používaný klubmi.</p>
         <form onSubmit={save} style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'end' }}>
-            <label>Kód štátu<input value={draft.country_code} onChange={e => setDraft({ ...draft, country_code: e.target.value.toUpperCase() })} maxLength={3} required disabled={!!editing} placeholder="SVK" /></label>
+            <label>Kód štátu<input value={draft.country_code} onChange={e => setDraft({ ...draft, country_code: e.target.value.toUpperCase() })} maxLength={3} required placeholder="SVK" /></label>
             <label>Názov štátu<input value={draft.country_name} onChange={e => setDraft({ ...draft, country_name: e.target.value })} maxLength={100} required placeholder="Slovakia" /></label>
             <button className={styles.btn} type="submit">{editing ? 'Uložiť štát' : 'Pridať štát'}</button>
             {editing && <button className={styles.btnSmall} type="button" onClick={reset}>Zrušiť</button>}

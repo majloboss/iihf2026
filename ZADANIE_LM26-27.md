@@ -69,6 +69,12 @@ Obsahuje 81 klubov vrátane účastníkov kvalifikácie. Každý klub bude mať:
 
 Admin bude tieto údaje upravovať na obrazovke číselníka klubov a štátov. Klub si štát vyberá z číselníka; zmena názvu štátu sa preto automaticky prejaví pri všetkých jeho kluboch. V používateľskej časti sa klub zobrazí napríklad ako **Slovan Bratislava (SVK)** a logo sa načíta z jeho priradeného súboru.
 
+Pri úprave štátu platí:
+
+1. Zmení sa iba kód: štát sa presunie pod nový kód a všetky jeho kluby sa prepoja na nový kód.
+2. Zmení sa iba názov: aktualizuje sa názov štátu a všetky kluby ho prevezmú.
+3. Zmení sa kód aj názov: existujúci štát pod novým kódom sa aktualizuje, alebo sa vytvorí nový štát; kluby sa následne prepoja na nový kód.
+
 ## Bodovanie
 
 Hodnotí sa výsledok po 90 minútach. Predĺženie a penalty sa do tipu nezapočítavajú.
@@ -97,11 +103,12 @@ Hodnotí sa výsledok po 90 minútach. Predĺženie a penalty sa do tipu nezapo�
 6. ✅ Pridať admin číselník klubov s editáciou názvu, štátu, kódu a loga
 7. ✅ Spustiť migráciu oprávnení `047` na DB-DEV-BET
 8. ✅ Spustiť migráciu číselníka štátov `048` na DB-DEV-BET
-9. 🔲 Doplniť vyžrebované zápasy do `"lm2026-27".games`
-10. 🔲 Pridať UCL API endpointy
-11. 🔲 Pridať UCL stránky a routing vo webovej aplikácii
-12. 🔲 Otestovať ligovú tabuľku, tipovanie a bodovanie
-13. 🔲 Aktivovať súťaž pre používateľov
+9. 🔲 Spustiť synchronizáciu starších názvov štátov `049` na DB-DEV-BET
+10. 🔲 Doplniť vyžrebované zápasy do `"lm2026-27".games`
+11. 🔲 Pridať UCL API endpointy
+12. 🔲 Pridať UCL stránky a routing vo webovej aplikácii
+13. 🔲 Otestovať ligovú tabuľku, tipovanie a bodovanie
+14. 🔲 Aktivovať súťaž pre používateľov
 
 ## Pravidlá práce
 

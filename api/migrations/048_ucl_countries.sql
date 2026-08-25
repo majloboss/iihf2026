@@ -20,6 +20,11 @@ ALTER TABLE "lm2026-27".teams
 ALTER TABLE "lm2026-27".teams
     VALIDATE CONSTRAINT ucl_teams_country_code_fkey;
 
+UPDATE "lm2026-27".teams t
+SET country_name = c.country_name
+FROM "lm2026-27".countries c
+WHERE c.country_code = t.country_code;
+
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE "lm2026-27".countries TO "dbbet-admin";
 
 INSERT INTO admin.schema_versions (version, description)

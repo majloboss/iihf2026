@@ -24,14 +24,33 @@ try {
     if ($method === 'PUT') {
         $oldCode = strtoupper(trim((string)($body['old_country_code'] ?? $code)));
         $pdo->beginTransaction();
-        $stmt = $pdo->prepare('UPDATE "lm2026-27".countries SET country_code = ?, country_name = ? WHERE country_code = ? RETURNING country_code, country_name');
-        $stmt->execute([$code, $name, $oldCode]);
-        $row = $stmt->fetch();
-        if (!$row) json_error('Štát neexistuje', 404);
+        $exists = $pdo->prepare('SELECT 1 FROM "lm2026-27".countries WHERE country_code = ?');
+        $exists->execute([$oldCode]);
+        if (!$exists->fetch()) json_error('Štát neexistuje', 404);
+
         if ($oldCode !== $code) {
-            $move = $pdo->prepare('UPDATE "lm2026-27".teams SET country_code = ? WHERE country_code = ?');
-            $move->execute([$code, $oldCode]);
+            $target = $pdo->prepare('SELECT 1 FROM "lm2026-27".countries WHERE country_code = ?');
+            $target->execute([$code]);
+            if (!$target->fetch()) {
+                $create = $pdo->prepare('INSERT INTO "lm2026-27".countries (country_code, country_name) VALUES (?, ?)');
+                $create->execute([$code, $name]);
+            } else {
+                $rename = $pdo->prepare('UPDATE "lm2026-27".countries SET country_name = ? WHERE country_code = ?');
+                $rename->execute([$name, $code]);
+            }
+            $move = $pdo->prepare('UPDATE "lm2026-27".teams SET country_code = ?, country_name = ? WHERE country_code = ?');
+            $move->execute([$code, $name, $oldCode]);
+            $remove = $pdo->prepare('DELETE FROM "lm2026-27".countries WHERE country_code = ?');
+            $remove->execute([$oldCode]);
+        } else {
+            $rename = $pdo->prepare('UPDATE "lm2026-27".countries SET country_name = ? WHERE country_code = ?');
+            $rename->execute([$name, $code]);
         }
+        $sync = $pdo->prepare('UPDATE "lm2026-27".teams SET country_name = ? WHERE country_code = ?');
+        $sync->execute([$name, $code]);
+        $result = $pdo->prepare('SELECT country_code, country_name FROM "lm2026-27".countries WHERE country_code = ?');
+        $result->execute([$code]);
+        $row = $result->fetch();
         $pdo->commit();
         json_ok($row);
     }
