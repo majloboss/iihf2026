@@ -68,7 +68,7 @@ export default function UclCountryCatalog({ onChanged = () => {} }) {
             <tbody>{countries.map(country => <tr key={country.country_code}>
                 <td>{country.flag_file ? <img src={country.flag_file.startsWith('fifa_flag_') || country.flag_file.startsWith('team_flag_')
                     ? `/flags/${country.flag_file}`
-                    : `/flags/countries/${country.flag_file}`} alt={country.name_sk} style={{ width: 28, height: 18, objectFit: 'cover' }} onError={e => { e.currentTarget.style.display = 'none'; }} /> : '—'}</td>
+                    : `/flags/${country.flag_file}`} alt={country.name_sk} style={{ width: 28, height: 18, objectFit: 'cover' }} onError={e => { e.currentTarget.style.display = 'none'; }} /> : '—'}</td>
                 <td className={styles.mono}>{country.country_code}</td>
                 <td>{country.name_sk}</td>
                 <td>{country.name_en}</td>

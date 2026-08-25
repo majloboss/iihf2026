@@ -1,6 +1,6 @@
 -- Migration 051: jednotne nazvy vlajok pre admin.countries
 -- Zdroj: existujuce FIFA vlajky, potom IIHF vlajky.
--- Nove subory maju format flag_<country_code>.png.
+-- Nove subory maju format flag_<country_code>.png a su priamo v /flags/.
 
 UPDATE admin.countries
 SET flag_file = CASE country_code
