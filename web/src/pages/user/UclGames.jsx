@@ -5,12 +5,16 @@ import UclGroupTips from './UclGroupTips';
 import styles from './Games.module.css';
 
 // start_time je naive UTC, preto ho tak treba aj interpretovať.
+// Zoskupenie podľa miestneho dňa, nie podľa UTC — inak by neskorý zápas
+// spadol pod nasledujúci dátum.
 const dayKey = s => {
     const d = asDate(s);
-    return isValidDate(d) ? d.toISOString().slice(0, 10) : '';
+    if (!isValidDate(d)) return '';
+    const p = n => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
 };
-const timeFmtRaw = new Intl.DateTimeFormat('sk-SK', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' });
-const dayFmtRaw = new Intl.DateTimeFormat('sk-SK', { weekday: 'short', day: 'numeric', month: 'numeric', timeZone: 'UTC' });
+const timeFmtRaw = new Intl.DateTimeFormat('sk-SK', { hour: '2-digit', minute: '2-digit' });
+const dayFmtRaw = new Intl.DateTimeFormat('sk-SK', { weekday: 'short', day: 'numeric', month: 'numeric' });
 const timeFmt = s => { const d = asDate(s); return isValidDate(d) ? timeFmtRaw.format(d) : '—'; };
 const dayFmt = s => { const d = asDate(s); return isValidDate(d) ? dayFmtRaw.format(d) : '—'; };
 // Dátum bez roka — súťaž beží v jednom ročníku.

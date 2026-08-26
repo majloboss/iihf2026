@@ -1,13 +1,14 @@
--- Migration 058: oprava casu zapasov LM na UTC
+-- Migration 058: oprava casu vykopu zapasov LM na UTC
 --
 -- start_time sa v celej aplikacii uklada ako naive UTC (rovnako ako FIFA a IIHF)
--- a frontend ho tak aj cita (new Date(start_time + 'Z')).
+-- a rozhranie ho prepocitava na miestny cas pouzivatela.
 --
--- Generator vsak zapisal 21:00 v zmysle miestneho casu, co sa cita ako 23:00 CEST.
--- Vykop 21:00 stredoeurospkeho casu je 19:00 UTC, preto sa casy posunu o 2 hodiny.
+-- Generator vsak zapisal 21:00 v zmysle miestneho casu. Ulozene ako UTC to znamena
+-- vykop o 23:00 stredoeuropskeho casu, co je pre futbalovy zapas nezmysel.
+-- Bezny vykop LM je 21:00 SELC = 19:00 UTC, preto sa casy posunu o 2 hodiny spat.
 --
--- Posun sa tyka iba zapasov, ktore este maju povodny cas 21:00 — rucne upravene
--- zapasy zostanu nedotknute.
+-- Posun sa tyka iba zapasov s povodnym casom 21:00 — rucne upravene zapasy
+-- zostanu nedotknute.
 
 BEGIN;
 
@@ -16,7 +17,7 @@ UPDATE "lm2026-27".games
        updated_at = NOW()
  WHERE start_time::time = TIME '21:00:00';
 
--- Kontrola: po oprave nesmie zostat ziadny zapas s casom 21:00.
+-- Kontrola: po oprave nesmie zostat ziadny zapas s povodnym casom 21:00.
 DO $$
 DECLARE zvysok INTEGER;
 BEGIN
@@ -29,7 +30,7 @@ BEGIN
 END $$;
 
 INSERT INTO admin.schema_versions (version, description)
-VALUES (58, 'Oprava casu zapasov LM z miestneho na UTC (posun o 2 hodiny)')
+VALUES (58, 'Oprava casu vykopu zapasov LM na 19:00 UTC (21:00 miestneho)')
 ON CONFLICT (version) DO NOTHING;
 
 COMMIT;

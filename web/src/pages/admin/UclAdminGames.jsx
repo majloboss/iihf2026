@@ -14,12 +14,23 @@ const PHASES = {
 
 // start_time je naive UTC.
 const asDate = s => new Date(String(s).replace(' ', 'T') + 'Z');
+const isValid = d => d instanceof Date && !Number.isNaN(d.getTime());
+// DB -> formulár: naive UTC prepočítaj na miestny čas, v ktorom admin zadáva.
 const toInput = s => {
     const d = asDate(s);
+    if (!isValid(d)) return '';
     const p = n => String(n).padStart(2, '0');
-    return `${d.getUTCFullYear()}-${p(d.getUTCMonth() + 1)}-${p(d.getUTCDate())}T${p(d.getUTCHours())}:${p(d.getUTCMinutes())}`;
+    return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
 };
-const isValid = d => d instanceof Date && !Number.isNaN(d.getTime());
+
+// Formulár -> DB: miestny čas prepočítaj späť na naive UTC.
+const fromInput = v => {
+    const d = new Date(v);
+    if (Number.isNaN(d.getTime())) return null;
+    const p = n => String(n).padStart(2, '0');
+    return `${d.getUTCFullYear()}-${p(d.getUTCMonth() + 1)}-${p(d.getUTCDate())} `
+         + `${p(d.getUTCHours())}:${p(d.getUTCMinutes())}:00`;
+};
 const dayFmtRaw = new Intl.DateTimeFormat('sk-SK', { day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' });
 // Neplatny datum by vo format() vyhodil vynimku a zhodil stranku.
 const dayFmt = s => { const d = asDate(s); return isValid(d) ? dayFmtRaw.format(d) : '—'; };
@@ -93,7 +104,7 @@ export default function UclAdminGames() {
                 game_id: editing.game_id,
                 home_team_id: editing.home_team_id || null,
                 away_team_id: editing.away_team_id || null,
-                start_time: editing.start_time.replace('T', ' ') + ':00',
+                start_time: fromInput(editing.start_time),
                 venue: editing.venue || '',
                 tips_open: editing.tips_open,
             });

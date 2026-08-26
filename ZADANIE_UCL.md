@@ -91,6 +91,29 @@ Kým výsledok nie je schválený, body sa počítajú priebežne z live skóre.
 
 ---
 
+## Časové zóny
+
+`start_time` sa v DB ukladá ako **naive UTC** — rovnako ako pri FIFA a IIHF.
+Rozhranie ho vždy prepočítava na miestny čas používateľa.
+
+| Miesto | Prevod |
+|---|---|
+| DB → zobrazenie | `new Date(start_time + 'Z')`, formátovanie **bez** `timeZone: 'UTC'` |
+| DB → admin formulár | `toInput()` — `getFullYear/getHours` (miestne) |
+| Admin formulár → DB | `fromInput()` — `getUTCFullYear/getUTCHours` |
+| Generátor | zapisuje 19:00 UTC = 21:00 miestneho |
+
+**Pozor:** ak sa čas zobrazuje v UTC, ale o tipovaní sa rozhoduje v miestnom čase,
+používateľ vidí iný čas, než podľa ktorého systém počíta. Obe strany musia
+používať rovnakú zónu.
+
+Kontrola v DB musí porovnávať v UTC:
+```sql
+SELECT start_time < NOW() AT TIME ZONE 'UTC' AS uz_zacal FROM "lm2026-27".games;
+```
+
+---
+
 ## Databáza
 
 | Objekt | Poznámka |
