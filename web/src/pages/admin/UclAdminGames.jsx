@@ -19,7 +19,10 @@ const toInput = s => {
     const p = n => String(n).padStart(2, '0');
     return `${d.getUTCFullYear()}-${p(d.getUTCMonth() + 1)}-${p(d.getUTCDate())}T${p(d.getUTCHours())}:${p(d.getUTCMinutes())}`;
 };
-const dayFmt = new Intl.DateTimeFormat('sk-SK', { day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' });
+const isValid = d => d instanceof Date && !Number.isNaN(d.getTime());
+const dayFmtRaw = new Intl.DateTimeFormat('sk-SK', { day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' });
+// Neplatny datum by vo format() vyhodil vynimku a zhodil stranku.
+const dayFmt = s => { const d = asDate(s); return isValid(d) ? dayFmtRaw.format(d) : '—'; };
 
 export default function UclAdminGames() {
     const [games, setGames] = useState([]);
@@ -174,7 +177,7 @@ export default function UclAdminGames() {
                     <tbody>
                         {list.map(g => (
                             <tr key={g.game_id}>
-                                <td style={{ whiteSpace: 'nowrap' }}>{dayFmt.format(asDate(g.start_time))}</td>
+                                <td style={{ whiteSpace: 'nowrap' }}>{dayFmt(g.start_time)}</td>
                                 <td>
                                     {g.home_name && g.away_name
                                         ? <>{g.home_name} <span style={{ color: '#999' }}>—</span> {g.away_name}</>

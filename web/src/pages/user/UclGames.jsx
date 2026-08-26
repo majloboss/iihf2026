@@ -4,13 +4,19 @@ import styles from './Games.module.css';
 
 // start_time je naive UTC, preto ho tak treba aj interpretovať.
 const asDate = s => new Date(String(s).replace(' ', 'T') + 'Z');
-const dayKey = s => asDate(s).toISOString().slice(0, 10);
-const timeFmt = new Intl.DateTimeFormat('sk-SK', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' });
-const dayFmt = new Intl.DateTimeFormat('sk-SK', { weekday: 'short', day: 'numeric', month: 'numeric', timeZone: 'UTC' });
+const isValid = d => d instanceof Date && !Number.isNaN(d.getTime());
+const dayKey = s => {
+    const d = asDate(s);
+    return isValid(d) ? d.toISOString().slice(0, 10) : '';
+};
+const timeFmtRaw = new Intl.DateTimeFormat('sk-SK', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' });
+const dayFmtRaw = new Intl.DateTimeFormat('sk-SK', { weekday: 'short', day: 'numeric', month: 'numeric', timeZone: 'UTC' });
+const timeFmt = s => { const d = asDate(s); return isValid(d) ? timeFmtRaw.format(d) : '—'; };
+const dayFmt = s => { const d = asDate(s); return isValid(d) ? dayFmtRaw.format(d) : '—'; };
 // Dátum bez roka — súťaž beží v jednom ročníku.
 const chipDay = key => {
     const [, m, d] = key.split('-');
-    return `${Number(d)}.${Number(m)}.`;
+    return m && d ? `${Number(d)}.${Number(m)}.` : key;
 };
 
 // Fázy v poradí, ako idú v súťaži. LF1–LF8 sú kolá ligovej fázy.
@@ -201,7 +207,7 @@ export default function UclGames() {
             {byDay.map(([d, list]) => (
                 <div key={d} style={{ marginTop: 16 }}>
                     <h4 style={{ margin: '0 0 6px', fontSize: '0.85rem', color: '#666' }}>
-                        {dayFmt.format(asDate(list[0].start_time))}
+                        {dayFmt(list[0].start_time)}
                     </h4>
                     {list.map(g => {
                         const known = g.home_team_id && g.away_team_id;
@@ -211,7 +217,7 @@ export default function UclGames() {
                             <div key={g.game_id} className={styles.card}
                                  style={{ padding: 12, marginBottom: 6, display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
                                 <div style={{ minWidth: 92, fontSize: '0.78rem', color: '#666' }}>
-                                    {timeFmt.format(asDate(g.start_time))}
+                                    {timeFmt(g.start_time)}
                                     <div style={{ fontSize: '0.7rem', color: '#999' }}>
                                         {g.round_no ? `LF${g.round_no}` : g.game_type_code}
                                     </div>

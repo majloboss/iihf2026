@@ -4,9 +4,12 @@ import { getUclGames, saveUclTip } from '../../api/ucl';
 
 // start_time je naive UTC, preto ho tak treba aj interpretovať.
 const asDate = s => new Date(String(s).replace(' ', 'T') + 'Z');
-const dayFmt = new Intl.DateTimeFormat('sk-SK', {
+const isValid = d => d instanceof Date && !Number.isNaN(d.getTime());
+const dayFmtRaw = new Intl.DateTimeFormat('sk-SK', {
     weekday: 'short', day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit',
 });
+// Neplatny datum by vo format() vyhodil vynimku a zhodil stranku.
+const dayFmt = s => { const d = asDate(s); return isValid(d) ? dayFmtRaw.format(d) : '—'; };
 
 function Club({ name, logo, align }) {
     if (!name) return <span style={{ color: '#999' }}>neurčený</span>;
@@ -105,7 +108,7 @@ export default function UclDashboard() {
                 <div key={g.game_id} style={{ background: '#fff', border: '1px solid #e9ecef', borderRadius: 10,
                                               padding: 12, marginBottom: 8, display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
                     <div style={{ minWidth: 120, fontSize: '0.78rem', color: '#666' }}>
-                        {dayFmt.format(asDate(g.start_time))}
+                        {dayFmt(g.start_time)}
                         <div style={{ fontSize: '0.7rem', color: '#999' }}>{g.game_type_name}</div>
                     </div>
                     <div style={{ flex: 1, minWidth: 240, display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: 8 }}>

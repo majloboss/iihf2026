@@ -16,7 +16,7 @@ export default function Profile() {
     const [switchingId, setSwitchingId] = useState(null);
 
     const [searchParams, setSearchParams] = useSearchParams();
-    const TABS = ['profil', 'sutaze', 'skupiny', 'pozvanky', 'notifikacie'];
+    const TABS = ['profil', 'sutaze', 'skupiny', 'pozvanky', 'notif', 'odhlasenie'];
     const urlTab = searchParams.get('tab');
     const [tab, setTabState] = useState(TABS.includes(urlTab) ? urlTab : 'profil');
 
@@ -26,10 +26,6 @@ export default function Profile() {
         setSearchParams(next === 'profil' ? {} : { tab: next }, { replace: true });
     };
 
-    // Reaguj aj na zmenu URL zvonka (napr. opakovaný klik na logo súťaže).
-    useEffect(() => {
-        if (urlTab && TABS.includes(urlTab) && urlTab !== tab) setTabState(urlTab);
-    }, [urlTab]);
     const [form, setForm]     = useState({ first_name: '', last_name: '', email: '', phone: '' });
     const [avatar, setAvatar] = useState(null);
     const [pass, setPass]     = useState({ old_password: '', new_password: '', confirm: '' });
@@ -38,6 +34,12 @@ export default function Profile() {
     const [msg, setMsg]       = useState({ profile: '', pass: '', del: '', avatar: '' });
     const [err, setErr]       = useState({ profile: '', pass: '', del: '', avatar: '' });
     const [busy, setBusy]     = useState('');
+
+    // Reaguj aj na zmenu URL zvonka (napr. opakovaný klik na logo súťaže).
+    // Musí stáť až za všetkými useState — poradie hookov sa nesmie meniť.
+    useEffect(() => {
+        if (urlTab && TABS.includes(urlTab) && urlTab !== tab) setTabState(urlTab);
+    }, [urlTab]);
 
     useEffect(() => {
         getProfile().then(d => {
