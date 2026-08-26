@@ -34,10 +34,12 @@ CREATE TABLE admin.countries_new (
     created_at      TIMESTAMP    NOT NULL DEFAULT NOW(),
     updated_at      TIMESTAMP    NOT NULL DEFAULT NOW(),
 
-    CONSTRAINT countries_pkey PRIMARY KEY (country_code),
-    CONSTRAINT countries_code_format
+    -- Nazvy obmedzeni su v ramci schemy unikatne, a stara tabulka ich este drzi.
+    -- Preto docasne nazvy; po zahodeni starej tabulky sa premenuju na cielove.
+    CONSTRAINT countries_new_pkey PRIMARY KEY (country_code),
+    CONSTRAINT countries_new_code_format
         CHECK (country_code ~ '^[A-Z]{2,3}(-[A-Z]{2,3})?$'),
-    CONSTRAINT countries_code2_format
+    CONSTRAINT countries_new_code2_format
         CHECK (country_code2 IS NULL OR country_code2 ~ '^[A-Z]{2,3}(-[A-Z]{2,3})?$')
 );
 
@@ -71,6 +73,11 @@ END $$;
 -- 5. Vymenit tabulky.
 DROP TABLE admin.countries;
 ALTER TABLE admin.countries_new RENAME TO countries;
+
+-- 5b. Premenovat obmedzenia z docasnych nazvov na cielove.
+ALTER TABLE admin.countries RENAME CONSTRAINT countries_new_pkey         TO countries_pkey;
+ALTER TABLE admin.countries RENAME CONSTRAINT countries_new_code_format  TO countries_code_format;
+ALTER TABLE admin.countries RENAME CONSTRAINT countries_new_code2_format TO countries_code2_format;
 
 -- 6. Obnovit indexy (nazvy zostavaju rovnake ako pred prestavbou).
 CREATE UNIQUE INDEX countries_code2_uniq

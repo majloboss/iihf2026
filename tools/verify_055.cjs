@@ -44,9 +44,32 @@ for (const idx of ['countries_code2_uniq', 'countries_source_id_uniq', 'countrie
 }
 
 // --- 5. Obmedzenia ---
-check(/CONSTRAINT countries_pkey PRIMARY KEY \(country_code\)/.test(sql), 'primarny kluc na country_code');
-check(/countries_code_format[\s\S]{0,120}\{2,3\}/.test(sql), 'CHECK na country_code povoluje GB-ENG');
-check(/countries_code2_format/.test(sql), 'CHECK na country_code2');
+check(/CONSTRAINT countries_new_pkey PRIMARY KEY \(country_code\)/.test(sql), 'primarny kluc na country_code');
+check(/countries_new_code_format[\s\S]{0,120}\{2,3\}/.test(sql), 'CHECK na country_code povoluje GB-ENG');
+check(/countries_new_code2_format/.test(sql), 'CHECK na country_code2');
+
+// Nazvy obmedzeni a indexov su v ramci schemy unikatne. Kym stara tabulka zije,
+// nova nesmie pouzit ziadny z jej nazvov, inak Postgres vrati 42P07.
+{
+    const before = sql.slice(0, sql.indexOf('DROP TABLE admin.countries;'));
+    const made = [
+        ...[...before.matchAll(/CONSTRAINT (\w+)/g)].map(m => m[1]),
+        ...[...before.matchAll(/CREATE (?:UNIQUE )?INDEX (\w+)/g)].map(m => m[1]),
+    ];
+    const oldNames = ['countries_pkey', 'countries_code_format', 'countries_code2_format',
+        'countries_code2_uniq', 'countries_source_id_uniq', 'countries_sport_fifa_uniq',
+        'countries_sport_iihf_uniq', 'countries_sport_uefa_uniq', 'countries_sport_codes_idx'];
+    const clash = made.filter(n => oldNames.includes(n));
+    check(clash.length === 0, 'ziadna kolizia nazvov so starou tabulkou' + (clash.length ? ': ' + clash.join(', ') : ''));
+}
+
+// Docasne nazvy sa musia premenovat na cielove.
+for (const [tmp, final] of [['countries_new_pkey', 'countries_pkey'],
+                            ['countries_new_code_format', 'countries_code_format'],
+                            ['countries_new_code2_format', 'countries_code2_format']]) {
+    check(new RegExp('RENAME CONSTRAINT ' + tmp + '\\s+TO ' + final).test(sql),
+        'obmedzenie ' + tmp + ' sa premenuje na ' + final);
+}
 
 // --- 6. FK sa odpoji a znova napoji ---
 check(/DROP CONSTRAINT IF EXISTS ucl_teams_admin_country_code_fkey/.test(sql), 'FK sa odpoji pred prestavbou');
