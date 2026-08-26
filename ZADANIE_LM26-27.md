@@ -112,11 +112,12 @@ Hodnotí sa výsledok po 90 minútach. Predĺženie a penalty sa do tipu nezapo�
 7. ✅ Spustiť migráciu oprávnení `047` na DB-DEV-BET
 8. ✅ Spustiť migráciu číselníka štátov `048` na DB-DEV-BET
 9. 🔲 Spustiť synchronizáciu starších názvov štátov `049` na DB-DEV-BET
-10. 🔲 Doplniť vyžrebované zápasy do `"lm2026-27".games`
-11. 🔲 Pridať UCL API endpointy
-12. 🔲 Pridať UCL stránky a routing vo webovej aplikácii
-13. 🔲 Otestovať ligovú tabuľku, tipovanie a bodovanie
-14. 🔲 Aktivovať súťaž pre používateľov
+10. 🟠 Generátor rozlosovania v **Nástroje → LM 2026/27** (kostra súťaže pred žrebom)
+11. 🔲 Po oficiálnom žrebe opraviť dvojice a termíny v správe zápasov
+12. 🔲 Pridať UCL API endpointy
+13. 🔲 Pridať UCL stránky a routing vo webovej aplikácii
+14. 🔲 Otestovať ligovú tabuľku, tipovanie a bodovanie
+15. 🔲 Aktivovať súťaž pre používateľov
 
 ## Pravidlá práce
 
@@ -124,3 +125,28 @@ Hodnotí sa výsledok po 90 minútach. Predĺženie a penalty sa do tipu nezapo�
 - Na produkčný `main` sa neposiela nič bez explicitného pokynu
 - Súťaž zostáva neaktívna, kým nebude známy oficiálny zoznam tímov a vyžrebované zápasy
 - Oficiálne názvy, termíny, výsledky a postupové kritériá sa overia podľa UEFA po žrebe
+
+## Generátor rozlosovania
+
+**Nástroje → LM 2026/27** vygeneruje kostru súťaže ešte pred oficiálnym žrebom.
+Po žrebe stačí opraviť dvojice a termíny, štruktúra zostáva.
+
+| Fáza | Zápasov | Poznámka |
+|---|---:|---|
+| `LEAGUE` | 144 | 8 kôl × 18 zápasov, tímy priradené náhodne |
+| `PO` | 16 | 8 dvojíc, zápas + odveta |
+| `R16` | 16 | 8 dvojíc, zápas + odveta |
+| `QF` | 8 | 4 dvojice, zápas + odveta |
+| `SF` | 4 | 2 dvojice, zápas + odveta |
+| `F` | 1 | jediný zápas, o 3. miesto sa nehrá |
+| **Spolu** | **189** | |
+
+Ligová fáza používa kruhový systém: z 35 možných kôl sa berie 8, čím je zaručené,
+že sa žiadna dvojica nestretne dvakrát. Každý tím má 8 zápasov, z toho 4 doma.
+Kolo sa hrá v utorok (8 zápasov) a stredu (8 zápasov), ďalšie o dva týždne.
+
+Play-off zápasy sa zakladajú s prázdnymi tímami — dopĺňajú sa podľa výsledkov
+ligovej fázy (miesta 9–24 hrajú o postup, víťazi sa pripoja k tímom z miest 1–8).
+
+Generovanie je zablokované, keď k zápasom už existujú tipy — kostra sa robí
+pred spustením tipovania.

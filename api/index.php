@@ -58,6 +58,7 @@ try {
         $path === 'v1/admin/fifa-game-live'   => require __DIR__ . '/v1/admin/fifa_game_live.php',
         $path === 'v1/admin/ucl-teams'        => require __DIR__ . '/v1/admin/ucl_teams.php',
             $path === 'v1/admin/ucl-countries'    => require __DIR__ . '/v1/admin/ucl_countries.php',
+        $path === 'v1/admin/ucl-generate-games' => require __DIR__ . '/v1/admin/ucl_generate_games.php',
         $path === 'v1/admin/impersonate'      => require __DIR__ . '/v1/admin/impersonate.php',
         $path === 'v1/fifa/teams'          => require __DIR__ . '/v1/fifa/teams.php',
         $path === 'v1/fifa/games'          => require __DIR__ . '/v1/fifa/games.php',

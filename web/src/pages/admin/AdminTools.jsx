@@ -5,6 +5,7 @@ import { getUsers, impersonate } from '../../api/admin';
 import { useCompetition } from '../../context/CompetitionContext';
 
 const BASE = import.meta.env.VITE_API_URL ?? '/api';
+import UclGameGenerator from './UclGameGenerator';
 import styles from './Admin.module.css';
 
 const isDev = (import.meta.env.VITE_API_URL ?? '').includes('dev_');
@@ -20,12 +21,13 @@ const TABS = [
     { key: 'login',  label: 'Prihlasovanie' },
     { key: 'fifa',   label: 'FIFA 2026' },
     { key: 'iihf',   label: 'IIHF 2026' },
+    { key: 'ucl',    label: 'LM 2026/27' },
     { key: 'notif',  label: 'Notifikácie' },
     { key: 'common', label: 'Common' },
 ];
 
 export default function AdminTools() {
-    const [tab, setTab]               = useState('ucl');
+    const [tab, setTab]               = useState('login');
     const [running,    setRunning]    = useState(null);
     const [results,    setResults]    = useState({});
     const [errors,     setErrors]     = useState({});
@@ -219,6 +221,9 @@ export default function AdminTools() {
                     </button>
                 ))}
             </div>
+
+            {/* ════════ LIGA MAJSTROV 2026/27 ════════ */}
+            {tab === 'ucl' && <UclGameGenerator />}
 
             {/* ════════ PRIHLASOVANIE (impersonácia) ════════ */}
             {tab === 'login' && (

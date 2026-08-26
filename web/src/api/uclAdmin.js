@@ -20,3 +20,8 @@ export const updateUclTeam = (data) => apiFetch('v1/admin/ucl-teams', {
 export const deleteUclTeam = (team_id) => apiFetch('v1/admin/ucl-teams', {
     method: 'DELETE', body: JSON.stringify({ team_id })
 });
+
+export const getUclGamesStatus = () => apiFetch('v1/admin/ucl-generate-games');
+export const generateUclGames = (data) => apiFetch('v1/admin/ucl-generate-games', {
+    method: 'POST', body: JSON.stringify(data)
+});
