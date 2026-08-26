@@ -3,8 +3,8 @@ import { createUclCountry, deleteUclCountry, getUclCountries, updateUclCountry }
 import styles from './Admin.module.css';
 
 // Poradie zodpoveda ciselniku v DB (migracia 055).
+// source_id a flag_check su technicke stlpce zo zdrojoveho CSV, v rozhrani sa neukazuju.
 const FIELDS = [
-    { key: 'source_id',       label: 'Zdrojové ID', width: 90,  mono: true, placeholder: '1' },
     { key: 'country_code',    label: 'Kód štátu',   width: 100, mono: true, required: true, upper: true, maxLength: 6, placeholder: 'SVK' },
     { key: 'country_code2',   label: 'Kód 2',       width: 90,  mono: true, upper: true, maxLength: 6, placeholder: 'SK' },
     { key: 'sport_code_fifa', label: 'FIFA',        width: 80,  mono: true, upper: true, maxLength: 3, placeholder: 'GER' },
@@ -16,7 +16,6 @@ const FIELDS = [
     { key: 'name_original',   label: 'Názov pôvodný', width: 180, maxLength: 100, placeholder: 'Slovensko' },
     { key: 'flag_file',       label: 'Vlajka malá', width: 170, maxLength: 255, placeholder: 'flag_sk_24.png' },
     { key: 'flag_file_big',   label: 'Vlajka veľká', width: 170, maxLength: 255, placeholder: 'flag_sk_240.png' },
-    { key: 'flag_check',      label: 'Kontrola',    width: 100, maxLength: 50, placeholder: 'OK' },
 ];
 
 const EMPTY = { ...Object.fromEntries(FIELDS.map(f => [f.key, ''])), is_active: true };
