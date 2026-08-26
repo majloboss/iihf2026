@@ -59,8 +59,10 @@ if ($tipCount > 0) {
 }
 
 // Prvy utorok od zadaneho datumu.
+// start_time sa v DB uklada ako naive UTC (rovnako ako FIFA a IIHF) a frontend
+// ho tak aj cita. Vykop 21:00 stredoeurospkeho casu je teda 19:00 UTC.
 $firstTuesday = function (string $date): DateTimeImmutable {
-    $d = new DateTimeImmutable($date . ' 21:00:00');
+    $d = new DateTimeImmutable($date . ' 19:00:00', new DateTimeZone('UTC'));
     while ((int)$d->format('N') !== 2) $d = $d->modify('+1 day');
     return $d;
 };
