@@ -20,6 +20,12 @@ const FIELDS = [
 
 const EMPTY = { ...Object.fromEntries(FIELDS.map(f => [f.key, ''])), is_active: true };
 
+// Prehlad zobrazuje kazdy stat na dvoch riadkoch: nazvy hore, kody dole.
+const NAME_FIELDS = ['name_sk', 'name_sk_long', 'name_en', 'name_original'];
+const CODE_FIELDS = ['country_code', 'country_code2', 'sport_code_fifa', 'sport_code_iihf', 'sport_code_uefa'];
+const fieldOf = key => FIELDS.find(f => f.key === key);
+const show = v => (v === null || v === undefined || v === '' ? '—' : v);
+
 export default function UclCountryCatalog({ onChanged = () => {} }) {
     const [countries, setCountries] = useState([]);
     const [draft, setDraft] = useState(EMPTY);
@@ -115,22 +121,42 @@ export default function UclCountryCatalog({ onChanged = () => {} }) {
         </div>
         {message && <p className={styles.success}>{message}</p>}
         {error && <p className={styles.error}>✗ {error}</p>}
-        <div style={{ overflowX: 'auto' }}><table className={styles.table} style={{ marginTop: 8, whiteSpace: 'nowrap' }}>
+        <div style={{ overflowX: 'auto' }}><table className={styles.table} style={{ marginTop: 8 }}>
             <thead><tr>
-                <th>Vlajka</th>
-                {FIELDS.map(f => <th key={f.key}>{f.label}</th>)}
-                <th>Aktívny</th><th>Tímy</th><th>Akcie</th>
+                <th style={{ width: 40 }}>Vlajka</th>
+                <th>Štát</th>
+                <th style={{ width: 70 }}>Aktívny</th>
+                <th style={{ width: 60 }}>Tímy</th>
+                <th style={{ width: 150 }}>Akcie</th>
             </tr></thead>
             <tbody>{shown.map(country => <tr key={country.country_code}>
-                <td>{country.flag_file
-                    ? <img src={`/flags/${country.flag_file}`} alt={country.name_sk} style={{ width: 28, height: 18, objectFit: 'cover' }} onError={e => { e.currentTarget.style.display = 'none'; }} />
-                    : '—'}</td>
-                {FIELDS.map(f => <td key={f.key} className={f.mono ? styles.mono : undefined}>
-                    {country[f.key] === null || country[f.key] === undefined || country[f.key] === '' ? '—' : country[f.key]}
-                </td>)}
-                <td>{country.is_active === false ? '—' : '✓'}</td>
-                <td>{Number(country.team_count) || 0}</td>
-                <td><div className={styles.actions}><button className={styles.btnSmall} onClick={() => edit(country)}>Upraviť</button><button className={styles.btnSmallDanger} onClick={() => remove(country)}>Zmazať</button></div></td>
+                <td style={{ verticalAlign: 'top', paddingTop: 10 }}>
+                    {country.flag_file
+                        ? <img src={`/flags/${country.flag_file}`} alt={country.name_sk} style={{ width: 28, height: 18, objectFit: 'cover' }} onError={e => { e.currentTarget.style.display = 'none'; }} />
+                        : '—'}
+                </td>
+                <td>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2px 16px', alignItems: 'baseline' }}>
+                        <strong>{country.name_sk}</strong>
+                        {NAME_FIELDS.slice(1).map(k => country[k] && country[k] !== country.name_sk
+                            ? <span key={k} style={{ color: '#666', fontSize: '0.85rem' }}>{country[k]}</span>
+                            : null)}
+                    </div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2px 14px', marginTop: 3, fontSize: '0.78rem' }}>
+                        {CODE_FIELDS.map(k => <span key={k} style={{ color: country[k] ? '#333' : '#bbb' }}>
+                            <span style={{ color: '#888' }}>{fieldOf(k).label}:</span>{' '}
+                            <span className={styles.mono}>{show(country[k])}</span>
+                        </span>)}
+                        <span style={{ color: '#888' }}>
+                            Vlajky: <span className={styles.mono} style={{ color: country.flag_file ? '#333' : '#bbb' }}>{show(country.flag_file)}</span>
+                            {' / '}
+                            <span className={styles.mono} style={{ color: country.flag_file_big ? '#333' : '#bbb' }}>{show(country.flag_file_big)}</span>
+                        </span>
+                    </div>
+                </td>
+                <td style={{ verticalAlign: 'top', paddingTop: 10 }}>{country.is_active === false ? '—' : '✓'}</td>
+                <td style={{ verticalAlign: 'top', paddingTop: 10 }}>{Number(country.team_count) || 0}</td>
+                <td style={{ verticalAlign: 'top', paddingTop: 6 }}><div className={styles.actions}><button className={styles.btnSmall} onClick={() => edit(country)}>Upraviť</button><button className={styles.btnSmallDanger} onClick={() => remove(country)}>Zmazať</button></div></td>
             </tr>)}</tbody>
         </table></div>
         <p style={{ margin: '10px 0 0', fontSize: '0.78rem', color: '#777' }}>Štátov v číselníku: {countries.length}{needle && ` · zobrazených: ${shown.length}`}</p>
