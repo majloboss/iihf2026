@@ -30,6 +30,7 @@ import FifaAdminGroupStandings from './pages/admin/FifaAdminGroupStandings';
 import GroupStandings from './pages/user/GroupStandings';
 import UclGames from './pages/user/UclGames';
 import UclStandings from './pages/user/UclStandings';
+import UclDashboard from './pages/user/UclDashboard';
 import UclAdminGames from './pages/admin/UclAdminGames';
 import Standings from './pages/user/Standings';
 import Pravidla from './pages/user/Pravidla';
@@ -52,6 +53,7 @@ function PrivateAdminRoute({ children }) {
 
 function DashboardRouter() {
     const { activeCompetition } = useCompetition();
+    if (activeCompetition?.slug === 'ucl2026') return <UclDashboard />;
     return activeCompetition?.slug === 'fifa2026' ? <FifaDashboard /> : <Dashboard />;
 }
 

@@ -14,7 +14,12 @@ if ($cid) {
 }
 
 // Dynamický join + stĺpec podľa súťaže
-if ($slug === 'fifa2026') {
+if ($slug === 'ucl2026') {
+    // Kluby LM: maximum je 5 bodov v ligovej faze a 7 v playoff.
+    $tipsJoin  = "LEFT JOIN \"lm2026-27\".tips t ON t.user_id = u.id AND t.points_earned IS NOT NULL";
+    $ptsCol    = "t.points_earned";
+    $maxPts    = 7;
+} elseif ($slug === 'fifa2026') {
     $tipsJoin  = "LEFT JOIN fifa2026.tips t ON t.user_id = u.id AND t.points_earned IS NOT NULL";
     $ptsCol    = "t.points_earned";
     $maxPts    = 3;
