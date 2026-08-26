@@ -4,7 +4,7 @@ require_auth(true);
 $pdo = db();
 
 if ($method === 'GET') {
-    $rows = $pdo->query("SELECT t.team_id, t.team_code, t.team_name, t.country_code, c.name_en AS country_name, t.logo_file FROM \"lm2026-27\".teams t LEFT JOIN admin.countries c ON c.country_code = t.country_code ORDER BY t.team_name, t.team_id")->fetchAll();
+    $rows = $pdo->query("SELECT t.team_id, t.team_code, t.team_name, t.country_code, c.name_sk AS country_name, COALESCE(c.sport_code_uefa, c.country_code) AS country_display_code, c.flag_file, c.flag_file_big, t.logo_file FROM \"lm2026-27\".teams t LEFT JOIN admin.countries c ON c.country_code = t.country_code ORDER BY t.team_name, t.team_id")->fetchAll();
     json_ok($rows);
 }
 
@@ -14,20 +14,19 @@ $clean = function (array $data, bool $requireCode = true) {
     $teamCode = strtoupper(trim((string)($data['team_code'] ?? '')));
     $teamName = trim((string)($data['team_name'] ?? ''));
     $countryCode = strtoupper(trim((string)($data['country_code'] ?? '')));
-    $countryName = trim((string)($data['country_name'] ?? ''));
     $logoFile = trim((string)($data['logo_file'] ?? ''));
 
     if ($requireCode && ($teamCode === '' || !preg_match('/^[A-Z0-9_-]{2,20}$/', $teamCode))) {
         json_error('Kód klubu musí mať 2 až 20 znakov: A-Z, 0-9, _ alebo -', 400);
     }
     if ($teamName === '' || mb_strlen($teamName) > 100) json_error('Názov klubu je povinný a môže mať najviac 100 znakov', 400);
-    if ($countryCode !== '' && !preg_match('/^[A-Z]{3}$/', $countryCode)) json_error('Kód štátu musí mať presne 3 písmená', 400);
-    if ($countryName !== '' && mb_strlen($countryName) > 100) json_error('Názov štátu môže mať najviac 100 znakov', 400);
+    // Ciselnik pouziva ISO 3166, pri britskych krajinach ISO 3166-2 (GB-ENG).
+    if ($countryCode !== '' && !preg_match('/^[A-Z]{2,3}(-[A-Z]{2,3})?$/', $countryCode)) json_error('Kód štátu má neplatný formát', 400);
     if ($logoFile !== '' && (basename($logoFile) !== $logoFile || !preg_match('/^[A-Za-z0-9_.-]+\.png$/i', $logoFile))) {
         json_error('Logo musí byť názov PNG súboru bez cesty', 400);
     }
 
-    return [$teamCode, $teamName, $countryCode ?: null, $countryName ?: null, $logoFile ?: null];
+    return [$teamCode, $teamName, $countryCode ?: null, $logoFile ?: null];
 };
 
 $countryExists = function (?string $countryCode) use ($pdo) {
@@ -38,7 +37,7 @@ $countryExists = function (?string $countryCode) use ($pdo) {
 };
 
 if ($method === 'POST') {
-    [$teamCode, $teamName, $countryCode, $countryName, $logoFile] = $clean($body);
+    [$teamCode, $teamName, $countryCode, $logoFile] = $clean($body);
     $countryExists($countryCode);
     try {
         $stmt = $pdo->prepare("INSERT INTO \"lm2026-27\".teams (team_code, team_name, country_code, logo_file) VALUES (?, ?, ?, ?) RETURNING team_id, team_code, team_name, country_code, logo_file");
@@ -53,7 +52,7 @@ if ($method === 'POST') {
 if ($method === 'PUT') {
     $teamId = (int)($body['team_id'] ?? 0);
     if (!$teamId) json_error('Chýba team_id', 400);
-    [$teamCode, $teamName, $countryCode, $countryName, $logoFile] = $clean($body);
+    [$teamCode, $teamName, $countryCode, $logoFile] = $clean($body);
     try {
         $oldStmt = $pdo->prepare('SELECT country_code FROM "lm2026-27".teams WHERE team_id = ?');
         $oldStmt->execute([$teamId]);
