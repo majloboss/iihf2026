@@ -47,11 +47,19 @@ export default function UclAdminGames() {
         return map;
     }, [games]);
 
+    const FIELD = { home: 'home_score_regular', away: 'away_score_regular',
+                    homeFin: 'home_score_final', awayFin: 'away_score_final' };
     const scoreOf = (g, side) => {
         const s = scores[g.game_id];
         if (s && s[side] !== undefined) return s[side];
-        const v = side === 'home' ? g.home_score_regular : g.away_score_regular;
+        const v = g[FIELD[side]];
         return v === null || v === undefined ? '' : String(v);
+    };
+    // Predĺženie sa hrá len v play-off a len pri remíze po 90 minútach.
+    const needsFinal = (g) => {
+        if (g.game_type_code === 'LEAGUE') return false;
+        const h = scoreOf(g, 'home'), a = scoreOf(g, 'away');
+        return h !== '' && a !== '' && h === a;
     };
     const setScore = (id, side, value) =>
         setScores(cur => ({ ...cur, [id]: { ...cur[id], [side]: value.replace(/[^0-9]/g, '').slice(0, 2) } }));
@@ -61,10 +69,14 @@ export default function UclAdminGames() {
         if (approve && (home === '' || away === '')) { setError('Na schválenie treba vyplniť skóre.'); return; }
         setBusy(g.game_id); setError(''); setMessage('');
         try {
+            const hFin = scoreOf(g, 'homeFin'), aFin = scoreOf(g, 'awayFin');
+            const withFinal = needsFinal(g) && hFin !== '' && aFin !== '';
             await updateUclGameResult({
                 game_id: g.game_id,
                 home_score_regular: home === '' ? null : Number(home),
                 away_score_regular: away === '' ? null : Number(away),
+                home_score_final: withFinal ? Number(hFin) : null,
+                away_score_final: withFinal ? Number(aFin) : null,
                 result_approved: approve,
             });
             await load();
@@ -184,12 +196,24 @@ export default function UclAdminGames() {
                                         : <span className={styles.unused}>tímy zatiaľ neurčené</span>}
                                 </td>
                                 <td>
-                                    <span style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+                                    <span style={{ display: 'flex', gap: 4, alignItems: 'center', flexWrap: 'wrap' }}>
                                         <input value={scoreOf(g, 'home')} onChange={e => setScore(g.game_id, 'home', e.target.value)}
-                                               inputMode="numeric" style={{ width: 38, textAlign: 'center' }} disabled={!g.home_team_id} />
+                                               inputMode="numeric" style={{ width: 38, textAlign: 'center' }} disabled={!g.home_team_id}
+                                               title="Skóre po 90 minútach" />
                                         <span>:</span>
                                         <input value={scoreOf(g, 'away')} onChange={e => setScore(g.game_id, 'away', e.target.value)}
-                                               inputMode="numeric" style={{ width: 38, textAlign: 'center' }} disabled={!g.home_team_id} />
+                                               inputMode="numeric" style={{ width: 38, textAlign: 'center' }} disabled={!g.home_team_id}
+                                               title="Skóre po 90 minútach" />
+                                        {needsFinal(g) && <>
+                                            <span style={{ fontSize: '0.72rem', color: '#888', marginLeft: 4 }}>pp</span>
+                                            <input value={scoreOf(g, 'homeFin')} onChange={e => setScore(g.game_id, 'homeFin', e.target.value)}
+                                                   inputMode="numeric" style={{ width: 38, textAlign: 'center' }}
+                                                   title="Konečný výsledok po predĺžení alebo penaltách" />
+                                            <span>:</span>
+                                            <input value={scoreOf(g, 'awayFin')} onChange={e => setScore(g.game_id, 'awayFin', e.target.value)}
+                                                   inputMode="numeric" style={{ width: 38, textAlign: 'center' }}
+                                                   title="Konečný výsledok po predĺžení alebo penaltách" />
+                                        </>}
                                     </span>
                                 </td>
                                 <td>{g.result_approved

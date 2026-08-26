@@ -1,18 +1,17 @@
 import { useEffect, useMemo, useState } from 'react';
 import { getUclGames, saveUclTip } from '../../api/ucl';
+import { asDate, canTip, isUntipped as isUntippedGame, isValidDate } from '../../utils/tipWindow';
 import styles from './Games.module.css';
 
 // start_time je naive UTC, preto ho tak treba aj interpretovať.
-const asDate = s => new Date(String(s).replace(' ', 'T') + 'Z');
-const isValid = d => d instanceof Date && !Number.isNaN(d.getTime());
 const dayKey = s => {
     const d = asDate(s);
-    return isValid(d) ? d.toISOString().slice(0, 10) : '';
+    return isValidDate(d) ? d.toISOString().slice(0, 10) : '';
 };
 const timeFmtRaw = new Intl.DateTimeFormat('sk-SK', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' });
 const dayFmtRaw = new Intl.DateTimeFormat('sk-SK', { weekday: 'short', day: 'numeric', month: 'numeric', timeZone: 'UTC' });
-const timeFmt = s => { const d = asDate(s); return isValid(d) ? timeFmtRaw.format(d) : '—'; };
-const dayFmt = s => { const d = asDate(s); return isValid(d) ? dayFmtRaw.format(d) : '—'; };
+const timeFmt = s => { const d = asDate(s); return isValidDate(d) ? timeFmtRaw.format(d) : '—'; };
+const dayFmt = s => { const d = asDate(s); return isValidDate(d) ? dayFmtRaw.format(d) : '—'; };
 // Dátum bez roka — súťaž beží v jednom ročníku.
 const chipDay = key => {
     const [, m, d] = key.split('-');
@@ -31,6 +30,14 @@ const PHASES = [
     { key: 'SF',  label: 'SF',  code: 'SF',  title: 'Semifinále' },
     { key: 'F',   label: 'F',   code: 'F',   title: 'Finále' },
 ];
+
+// Po predĺžení alebo penaltách sa ukáže aj konečný výsledok: 2:1 (4:3 pp).
+function scoreText(g) {
+    if (g.home_score_regular === null || g.away_score_regular === null) return null;
+    const base = `${g.home_score_regular} : ${g.away_score_regular}`;
+    const hasFinal = g.home_score_final !== null && g.away_score_final !== null;
+    return hasFinal ? `${base} (${g.home_score_final}:${g.away_score_final} pp)` : base;
+}
 
 function Club({ name, logo, align }) {
     if (!name) return <span style={{ color: '#999', fontSize: '0.85rem' }}>zatiaľ neurčený</span>;
@@ -72,9 +79,7 @@ export default function UclGames() {
         return p.round ? Number(g.round_no) === p.round : true;
     };
     const matchesClub = (g) => !club || g.home_code === club || g.away_code === club;
-    const isUntipped = (g) =>
-        g.home_team_id && g.away_team_id && g.tips_open
-        && g.home_score_tip == null && asDate(g.start_time) - Date.now() > 5 * 60000;
+    const isUntipped = (g) => isUntippedGame(g);
 
     // Kluby a dni sa ponúkajú podľa ostatných filtrov, nech nevznikne prázdny výber.
     const clubs = useMemo(() => {
@@ -211,7 +216,7 @@ export default function UclGames() {
                     </h4>
                     {list.map(g => {
                         const known = g.home_team_id && g.away_team_id;
-                        const closed = !g.tips_open || asDate(g.start_time) <= new Date();
+                        const closed = !canTip(g);
                         const hasResult = g.home_score_regular !== null && g.away_score_regular !== null;
                         return (
                             <div key={g.game_id} className={styles.card}
@@ -226,7 +231,7 @@ export default function UclGames() {
                                 <div style={{ flex: 1, minWidth: 250, display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: 10 }}>
                                     <Club name={g.home_name} logo={g.home_logo} align="right" />
                                     <strong style={{ color: hasResult ? '#1a3a6b' : '#bbb' }}>
-                                        {hasResult ? `${g.home_score_regular} : ${g.away_score_regular}` : 'vs'}
+                                        {hasResult ? scoreText(g) : 'vs'}
                                     </strong>
                                     <Club name={g.away_name} logo={g.away_logo} />
                                 </div>

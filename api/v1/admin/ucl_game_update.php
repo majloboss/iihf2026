@@ -24,6 +24,32 @@ if ($approved && ($hr === null || $ar === null)) {
     json_error('Na schválenie výsledku treba vyplniť skóre po 90 minútach', 400);
 }
 
+$gs = $pdo->prepare('SELECT start_time, game_type_code FROM "lm2026-27".games WHERE game_id = ?');
+$gs->execute([$gameId]);
+$game = $gs->fetch();
+if (!$game) json_error('Zápas neexistuje', 404);
+
+// Vysledok sa neda zadat skor, nez sa zapas zacne hrat.
+if ($hr !== null || $ar !== null) {
+    $start = new DateTime($game['start_time'], new DateTimeZone('UTC'));
+    if (new DateTime('now', new DateTimeZone('UTC')) < $start) {
+        json_error('Zápas sa ešte nezačal, výsledok sa nedá zadať', 400);
+    }
+}
+
+// V ligovej faze je remiza platny konecny vysledok; predlzenie sa hra len v playoff.
+$isPlayoff = $game['game_type_code'] !== 'LEAGUE';
+$isDraw90  = $hr !== null && $ar !== null && $hr === $ar;
+$hasFinal  = $hf !== null && $af !== null;
+
+if ($isPlayoff && $isDraw90 && $approved) {
+    if (!$hasFinal) json_error('Remíza v play-off — zadaj konečný výsledok po predĺžení alebo penaltách', 400);
+    if ($hf < $hr || $af < $ar) json_error('Konečný výsledok nemôže byť nižší ako po 90 minútach', 400);
+    if ($hf === $af) json_error('Po predĺžení alebo penaltách musí byť víťaz, nie remíza', 400);
+} elseif ($hasFinal && !($isPlayoff && $isDraw90)) {
+    json_error('Konečný výsledok sa zadáva len pri remíze v play-off po 90 minútach', 400);
+}
+
 try {
     $pdo->beginTransaction();
     $stmt = $pdo->prepare('

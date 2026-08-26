@@ -1,15 +1,22 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getUclGames, saveUclTip } from '../../api/ucl';
+import { asDate, canTip, isValidDate } from '../../utils/tipWindow';
 
 // start_time je naive UTC, preto ho tak treba aj interpretovať.
-const asDate = s => new Date(String(s).replace(' ', 'T') + 'Z');
-const isValid = d => d instanceof Date && !Number.isNaN(d.getTime());
 const dayFmtRaw = new Intl.DateTimeFormat('sk-SK', {
     weekday: 'short', day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit',
 });
 // Neplatny datum by vo format() vyhodil vynimku a zhodil stranku.
-const dayFmt = s => { const d = asDate(s); return isValid(d) ? dayFmtRaw.format(d) : '—'; };
+const dayFmt = s => { const d = asDate(s); return isValidDate(d) ? dayFmtRaw.format(d) : '—'; };
+
+// Po predĺžení alebo penaltách sa ukáže aj konečný výsledok: 2:1 (4:3 pp).
+function scoreText(g) {
+    if (g.home_score_regular === null || g.away_score_regular === null) return null;
+    const base = `${g.home_score_regular} : ${g.away_score_regular}`;
+    const hasFinal = g.home_score_final !== null && g.away_score_final !== null;
+    return hasFinal ? `${base} (${g.home_score_final}:${g.away_score_final} pp)` : base;
+}
 
 function Club({ name, logo, align }) {
     if (!name) return <span style={{ color: '#999' }}>neurčený</span>;
@@ -37,11 +44,10 @@ export default function UclDashboard() {
         getUclGames().then(setGames).catch(e => setError(e.message)).finally(() => setLoading(false));
     }, []);
 
-    const now = new Date();
-
-    // Zápasy, ktoré sa dajú tipovať: majú tímy, otvorené tipovanie a ešte nezačali.
+    // Zápasy, ktoré sa dajú tipovať — rovnaké pravidlo ako na serveri.
     const upcoming = useMemo(() => games
-        .filter(g => g.home_team_id && g.away_team_id && g.tips_open && asDate(g.start_time) > now)
+        .filter(g => canTip(g))
+        .sort((a, b) => asDate(a.start_time) - asDate(b.start_time))
         .slice(0, 8), [games]);
 
     const played = useMemo(() => games
@@ -137,7 +143,7 @@ export default function UclDashboard() {
                                                       padding: '10px 12px', marginBottom: 6, display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
                             <div style={{ flex: 1, minWidth: 240, display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: 8 }}>
                                 <Club name={g.home_name} logo={g.home_logo} align="right" />
-                                <strong>{g.home_score_regular} : {g.away_score_regular}</strong>
+                                <strong>{scoreText(g)}</strong>
                                 <Club name={g.away_name} logo={g.away_logo} />
                             </div>
                             <div style={{ fontSize: '0.82rem' }}>
