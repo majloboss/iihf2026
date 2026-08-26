@@ -2,9 +2,28 @@ import { useEffect, useState } from 'react';
 import { createUclCountry, deleteUclCountry, getUclCountries, updateUclCountry } from '../../api/uclAdmin';
 import styles from './Admin.module.css';
 
+// Poradie zodpoveda ciselniku v DB (migracia 055).
+const FIELDS = [
+    { key: 'source_id',       label: 'Zdrojové ID', width: 90,  mono: true, placeholder: '1' },
+    { key: 'country_code',    label: 'Kód štátu',   width: 100, mono: true, required: true, upper: true, maxLength: 6, placeholder: 'SVK' },
+    { key: 'country_code2',   label: 'Kód 2',       width: 90,  mono: true, upper: true, maxLength: 6, placeholder: 'SK' },
+    { key: 'sport_code_fifa', label: 'FIFA',        width: 80,  mono: true, upper: true, maxLength: 3, placeholder: 'GER' },
+    { key: 'sport_code_iihf', label: 'IIHF',        width: 80,  mono: true, upper: true, maxLength: 3, placeholder: 'SLO' },
+    { key: 'sport_code_uefa', label: 'UEFA',        width: 80,  mono: true, upper: true, maxLength: 3, placeholder: 'SVN' },
+    { key: 'name_sk',         label: 'Názov SK',    width: 180, required: true, maxLength: 100, placeholder: 'Slovensko' },
+    { key: 'name_sk_long',    label: 'Názov SK dlhý', width: 220, maxLength: 150, placeholder: 'Slovenská republika' },
+    { key: 'name_en',         label: 'Názov EN',    width: 180, required: true, maxLength: 100, placeholder: 'Slovakia' },
+    { key: 'name_original',   label: 'Názov pôvodný', width: 180, maxLength: 100, placeholder: 'Slovensko' },
+    { key: 'flag_file',       label: 'Vlajka malá', width: 170, maxLength: 255, placeholder: 'flag_sk_24.png' },
+    { key: 'flag_file_big',   label: 'Vlajka veľká', width: 170, maxLength: 255, placeholder: 'flag_sk_240.png' },
+    { key: 'flag_check',      label: 'Kontrola',    width: 100, maxLength: 50, placeholder: 'OK' },
+];
+
+const EMPTY = { ...Object.fromEntries(FIELDS.map(f => [f.key, ''])), is_active: true };
+
 export default function UclCountryCatalog({ onChanged = () => {} }) {
     const [countries, setCountries] = useState([]);
-    const [draft, setDraft] = useState({ country_code: '', country_code2: '', name_sk: '', name_sk_long: '', name_en: '', name_original: '', flag_file: '', flag_file_big: '', sport_code_fifa: '', sport_code_iihf: '', sport_code_uefa: '' });
+    const [draft, setDraft] = useState(EMPTY);
     const [editing, setEditing] = useState(null);
     const [error, setError] = useState('');
     const [message, setMessage] = useState('');
@@ -12,7 +31,7 @@ export default function UclCountryCatalog({ onChanged = () => {} }) {
 
     const load = () => getUclCountries().then(setCountries).catch(e => setError(e.message));
     useEffect(() => { load(); }, []);
-    const reset = () => { setEditing(null); setDraft({ country_code: '', country_code2: '', name_sk: '', name_sk_long: '', name_en: '', name_original: '', flag_file: '', flag_file_big: '', sport_code_fifa: '', sport_code_iihf: '', sport_code_uefa: '' }); };
+    const reset = () => { setEditing(null); setDraft(EMPTY); };
     const save = async e => {
         e.preventDefault(); setError(''); setMessage('');
         try {
@@ -21,7 +40,15 @@ export default function UclCountryCatalog({ onChanged = () => {} }) {
             await load(); onChanged(); reset(); setMessage('✓ Štát bol uložený.');
         } catch (err) { setError(err.message); }
     };
-    const edit = country => { setEditing(country.country_code); setDraft(Object.fromEntries(Object.entries(country).map(([k, v]) => [k, v ?? '']))); setMessage(''); setError(''); };
+    // Do draftu iba editovatelne polia; team_count je pocitany udaj, nie stlpec ciselnika.
+    const edit = country => {
+        setEditing(country.country_code);
+        setDraft({
+            ...Object.fromEntries(FIELDS.map(f => [f.key, country[f.key] ?? ''])),
+            is_active: country.is_active !== false,
+        });
+        setMessage(''); setError('');
+    };
     const remove = async country => {
         if (!window.confirm(`Odstrániť štát ${country.name_sk}?`)) return;
         try { await deleteUclCountry(country.country_code); await load(); onChanged(); setMessage('✓ Štát bol odstránený.'); }
@@ -29,9 +56,22 @@ export default function UclCountryCatalog({ onChanged = () => {} }) {
     };
 
     const needle = filter.trim().toLowerCase();
-    const shown = needle ? countries.filter(c => [c.country_code, c.country_code2, c.name_sk, c.name_sk_long, c.name_en,
-        c.sport_code_fifa, c.sport_code_iihf, c.sport_code_uefa]
-        .some(v => (v || '').toLowerCase().includes(needle))) : countries;
+    const shown = needle
+        ? countries.filter(c => FIELDS.some(f => String(c[f.key] ?? '').toLowerCase().includes(needle)))
+        : countries;
+
+    const field = (f, extra = {}) => <label key={f.key} style={{ display: 'flex', flexDirection: 'column', gap: 2, ...extra.labelStyle }}>
+        <span style={{ fontSize: '0.75rem', color: '#555' }}>{f.label}{f.required && ' *'}</span>
+        <input
+            value={draft[f.key] ?? ''}
+            onChange={e => setDraft({ ...draft, [f.key]: f.upper ? e.target.value.toUpperCase() : e.target.value })}
+            maxLength={f.maxLength}
+            required={f.required}
+            placeholder={f.placeholder}
+            className={f.mono ? styles.mono : undefined}
+            style={{ width: extra.width ?? f.width }}
+        />
+    </label>;
 
     return <div className={styles.card} style={{ padding: 20, marginTop: 12, borderLeft: '4px solid #6f42c1' }}>
         <h3 style={{ margin: '0 0 4px', color: '#6f42c1' }}>🌍 Štáty</h3>
@@ -46,17 +86,11 @@ export default function UclCountryCatalog({ onChanged = () => {} }) {
                     <button className={styles.uclEditorClose} type="button" onClick={reset} aria-label="Zavrieť">×</button>
                 </div>
                 <div className={styles.uclEditorFields}>
-                    <label>Kód štátu<input value={draft.country_code} onChange={e => setDraft({ ...draft, country_code: e.target.value.toUpperCase() })} maxLength={3} required /></label>
-                    <label>Kód 2 znaky<input value={draft.country_code2} onChange={e => setDraft({ ...draft, country_code2: e.target.value.toUpperCase() })} maxLength={2} placeholder="SK" /></label>
-                    <label>Slovenský názov<input value={draft.name_sk} onChange={e => setDraft({ ...draft, name_sk: e.target.value })} maxLength={100} required /></label>
-                    <label>Slovenský názov dlhý<input value={draft.name_sk_long} onChange={e => setDraft({ ...draft, name_sk_long: e.target.value })} maxLength={150} placeholder="Slovenská republika" /></label>
-                    <label>Anglický názov<input value={draft.name_en} onChange={e => setDraft({ ...draft, name_en: e.target.value })} maxLength={100} required /></label>
-                    <label>Originálny názov<input value={draft.name_original} onChange={e => setDraft({ ...draft, name_original: e.target.value })} maxLength={100} /></label>
-                    <label>Kód FIFA<input value={draft.sport_code_fifa} onChange={e => setDraft({ ...draft, sport_code_fifa: e.target.value.toUpperCase() })} maxLength={3} placeholder="GER" /></label>
-                    <label>Kód IIHF<input value={draft.sport_code_iihf} onChange={e => setDraft({ ...draft, sport_code_iihf: e.target.value.toUpperCase() })} maxLength={3} placeholder="SLO" /></label>
-                    <label>Kód UEFA<input value={draft.sport_code_uefa} onChange={e => setDraft({ ...draft, sport_code_uefa: e.target.value.toUpperCase() })} maxLength={3} placeholder="SVN" /></label>
-                    <label>Malá vlajka<input value={draft.flag_file} onChange={e => setDraft({ ...draft, flag_file: e.target.value })} maxLength={255} placeholder="svk.png" /></label>
-                    <label>Veľká vlajka<input value={draft.flag_file_big} onChange={e => setDraft({ ...draft, flag_file_big: e.target.value })} maxLength={255} placeholder="svk_big.png" /></label>
+                    {FIELDS.map(f => field(f, { width: '100%' }))}
+                    <label className={styles.uclEditorFull} style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                        <input type="checkbox" checked={draft.is_active !== false} onChange={e => setDraft({ ...draft, is_active: e.target.checked })} />
+                        <span>Aktívny štát</span>
+                    </label>
                     <div className={styles.uclEditorFull} style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
                         {draft.flag_file && <img src={`/flags/${draft.flag_file}`} alt="malá vlajka" style={{ width: 40, height: 26, objectFit: 'cover', border: '1px solid #ddd' }} onError={e => { e.currentTarget.style.visibility = 'hidden'; }} />}
                         {draft.flag_file_big && <img src={`/flags/${draft.flag_file_big}`} alt="veľká vlajka" style={{ width: 72, height: 46, objectFit: 'cover', border: '1px solid #ddd' }} onError={e => { e.currentTarget.style.visibility = 'hidden'; }} />}
@@ -69,31 +103,33 @@ export default function UclCountryCatalog({ onChanged = () => {} }) {
                 </div>
             </form>
         </div>}
-        {!editing && <form onSubmit={save} style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'end' }}>
-            <label>Kód štátu<input value={draft.country_code} onChange={e => setDraft({ ...draft, country_code: e.target.value.toUpperCase() })} maxLength={3} required placeholder="SVK" /></label>
-            <label>Kód 2<input value={draft.country_code2} onChange={e => setDraft({ ...draft, country_code2: e.target.value.toUpperCase() })} maxLength={2} placeholder="SK" style={{ width: 60 }} /></label>
-            <label>Slovenský názov<input value={draft.name_sk} onChange={e => setDraft({ ...draft, name_sk: e.target.value })} maxLength={100} required placeholder="Slovensko" /></label>
-            <label>Anglický názov<input value={draft.name_en} onChange={e => setDraft({ ...draft, name_en: e.target.value })} maxLength={100} required placeholder="Slovakia" /></label>
-            <label>Originálny názov<input value={draft.name_original} onChange={e => setDraft({ ...draft, name_original: e.target.value })} maxLength={100} placeholder="Slovensko" /></label>
-            <label>Vlajka<input value={draft.flag_file} onChange={e => setDraft({ ...draft, flag_file: e.target.value })} maxLength={255} placeholder="svk.png" /></label>
-            <button className={styles.btn} type="submit">Pridať štát</button>
+        {!editing && <form onSubmit={save} style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'flex-end' }}>
+            {FIELDS.map(f => field(f))}
+            <label style={{ display: 'flex', alignItems: 'center', gap: 6, height: 30 }}>
+                <input type="checkbox" checked={draft.is_active !== false} onChange={e => setDraft({ ...draft, is_active: e.target.checked })} />
+                <span style={{ fontSize: '0.8rem' }}>Aktívny</span>
+            </label>
+            <button className={styles.btn} type="submit" style={{ height: 30 }}>Pridať štát</button>
         </form>}
         <div style={{ marginTop: 12 }}>
             <input value={filter} onChange={e => setFilter(e.target.value)} placeholder="Hľadať štát, kód alebo športový kód…" style={{ width: '100%', maxWidth: 340, padding: '6px 10px' }} />
         </div>
         {message && <p className={styles.success}>{message}</p>}
         {error && <p className={styles.error}>✗ {error}</p>}
-        <div style={{ overflowX: 'auto' }}><table className={styles.table} style={{ marginTop: 8 }}>
-            <thead><tr><th>Vlajka</th><th>Kód</th><th>Kód 2</th><th>Slovensky</th><th>Anglicky</th><th>FIFA</th><th>IIHF</th><th>UEFA</th><th>Kluby</th><th>Akcie</th></tr></thead>
+        <div style={{ overflowX: 'auto' }}><table className={styles.table} style={{ marginTop: 8, whiteSpace: 'nowrap' }}>
+            <thead><tr>
+                <th>Vlajka</th>
+                {FIELDS.map(f => <th key={f.key}>{f.label}</th>)}
+                <th>Aktívny</th><th>Tímy</th><th>Akcie</th>
+            </tr></thead>
             <tbody>{shown.map(country => <tr key={country.country_code}>
-                <td>{country.flag_file ? <img src={`/flags/${country.flag_file}`} alt={country.name_sk} style={{ width: 28, height: 18, objectFit: 'cover' }} onError={e => { e.currentTarget.style.display = 'none'; }} /> : '—'}</td>
-                <td className={styles.mono}>{country.country_code}</td>
-                <td className={styles.mono}>{country.country_code2 || '—'}</td>
-                <td title={country.name_sk_long || ''}>{country.name_sk}</td>
-                <td>{country.name_en}</td>
-                <td className={styles.mono}>{country.sport_code_fifa || '—'}</td>
-                <td className={styles.mono}>{country.sport_code_iihf || '—'}</td>
-                <td className={styles.mono}>{country.sport_code_uefa || '—'}</td>
+                <td>{country.flag_file
+                    ? <img src={`/flags/${country.flag_file}`} alt={country.name_sk} style={{ width: 28, height: 18, objectFit: 'cover' }} onError={e => { e.currentTarget.style.display = 'none'; }} />
+                    : '—'}</td>
+                {FIELDS.map(f => <td key={f.key} className={f.mono ? styles.mono : undefined}>
+                    {country[f.key] === null || country[f.key] === undefined || country[f.key] === '' ? '—' : country[f.key]}
+                </td>)}
+                <td>{country.is_active === false ? '—' : '✓'}</td>
                 <td>{Number(country.team_count) || 0}</td>
                 <td><div className={styles.actions}><button className={styles.btnSmall} onClick={() => edit(country)}>Upraviť</button><button className={styles.btnSmallDanger} onClick={() => remove(country)}>Zmazať</button></div></td>
             </tr>)}</tbody>
