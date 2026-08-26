@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { getUclGames, saveUclTip } from '../../api/ucl';
 import { asDate, canTip, isUntipped as isUntippedGame, isValidDate } from '../../utils/tipWindow';
+import UclGroupTips from './UclGroupTips';
 import styles from './Games.module.css';
 
 // start_time je naive UTC, preto ho tak treba aj interpretovať.
@@ -217,6 +218,7 @@ export default function UclGames() {
                     {list.map(g => {
                         const known = g.home_team_id && g.away_team_id;
                         const closed = !canTip(g);
+                        const started = isValidDate(asDate(g.start_time)) && asDate(g.start_time) <= new Date();
                         const hasResult = g.home_score_regular !== null && g.away_score_regular !== null;
                         return (
                             <div key={g.game_id} className={styles.card}
@@ -257,6 +259,8 @@ export default function UclGames() {
                                                 </button>
                                               </>}
                                 </div>
+
+                                {started && <UclGroupTips game={g} />}
                             </div>
                         );
                     })}

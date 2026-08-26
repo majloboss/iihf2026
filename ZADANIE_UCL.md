@@ -70,9 +70,13 @@ počítať uzáver rovnako, inak sa ponúknu políčka na zápas, ktorý sa už 
 teda všetkého okrem `LEAGUE`. V ligovej fáze je remíza platný konečný výsledok.
 
 ### Zobrazenie
+Tipy skupín sa riadia rovnakým pravidlom ako FIFA: zobrazia sa len členovia
+**mojich skupín priateľov** a až **po začiatku zápasu** (server ich dovtedy nevydá).
+Kým výsledok nie je schválený, body sa počítajú priebežne z live skóre.
+
 - 🟠 Konečný výsledok po predĺžení ako `X:Y (A:B pp)` v Zápasoch aj Prehľade
-- 🔲 Tipy ostatných hráčov (rozklik zápasu) — endpoint hotový, rozhranie chýba
-- 🔲 Rozpad bodov v Poradí hráčov (mriežka 7–0)
+- 🟠 Tipy skupín v rozkliku zápasu vrátane priebežných bodov počas zápasu
+- 🟠 Rozpad bodov v Poradí hráčov (mriežka 7–0) + rozklik tipov hráča
 - 🟠 Poradie hráčov číta z `"lm2026-27".tips`, maximum 7 bodov
 
 ### Filtre v Zápasoch
@@ -141,8 +145,8 @@ Prepínajú sa podľa slugu `ucl2026` v `App.jsx`:
 4. 🟠 Používateľské aj admin obrazovky, tipovanie, tabuľka, bodovanie
 5. 🟠 **Validácie výsledku** — zákaz pred začiatkom, pravidlá predĺženia (overené 10 testami)
 6. 🟠 **Zobrazenie `X:Y (A:B pp)`** po predĺžení
-7. 🔲 **Tipy ostatných hráčov** v rozkliku zápasu
-8. 🔲 **Rozpad bodov** v Poradí hráčov
+7. 🟠 **Tipy skupín** v rozkliku zápasu
+8. 🟠 **Rozpad bodov** v Poradí hráčov
 9. 🔲 Po oficiálnom žrebe opraviť dvojice a termíny
 
 ---

@@ -12,7 +12,10 @@ $cs->execute([$cid]);
 $slug = $cs->fetchColumn();
 if (!$slug) json_error('Súťaž neexistuje', 404);
 
-if ($slug === 'fifa2026') {
+if ($slug === 'ucl2026') {
+    // UCL: kluby z trvaleho ciselnika
+    $rows = $pdo->query('SELECT club_code AS team_code, club_name AS team_name FROM admin.uefa_clubs')->fetchAll();
+} elseif ($slug === 'fifa2026') {
     $rows = $pdo->query("SELECT team_code, team_name FROM fifa2026.teams")->fetchAll();
 } else {
     // IIHF: stĺpce code / name

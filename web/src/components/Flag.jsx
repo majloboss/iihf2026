@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { apiFetch } from '../api/client';
+import { useCompetition } from '../context/CompetitionContext';
 
 // ── Cache mapovania skratka→názov per competition_id ──
 const cache = {};            // { [compId]: { CODE: name } }
@@ -27,15 +28,21 @@ export function useTeamNames(compId) {
     return names;
 }
 
-const flagUrl = (code, compId) => compId === 2
-    ? `/flags/fifa_flag_${code?.toLowerCase()}.png`
-    : `/flags/team_flag_${code?.toLowerCase()}.png`;
+const flagUrl = (code, compId, slug) => {
+    // UCL sú kluby, nie reprezentácie — namiesto vlajky sa zobrazí logo klubu.
+    if (slug === 'ucl2026') return `/logos/ucl2026/${code?.toLowerCase()}_logo.png`;
+    if (compId === 2) return `/flags/fifa_flag_${code?.toLowerCase()}.png`;
+    return `/flags/team_flag_${code?.toLowerCase()}.png`;
+};
 
 // Zdieľaný komponent vlajky s názvom krajiny v `title` (web hover tooltip).
 // Na mobile long-press nepoužívame — natívne menu obrázka tomu prekáža.
 // className/style sa aplikujú na samotný <img> (kvôli existujúcim CSS triedam).
 export function Flag({ code, compId, width, height, style, className }) {
     const names = useTeamNames(compId);
+    // Flag sa môže vykresliť aj mimo CompetitionProvider — kontext je vtedy null.
+    const comp = useCompetition();
+    const slug = comp?.competitions?.find(c => c.id === compId)?.slug;
     const fullName = names[code?.toUpperCase()] || code || '';
 
     const imgStyle = className
@@ -44,7 +51,7 @@ export function Flag({ code, compId, width, height, style, className }) {
 
     return (
         <img
-            src={flagUrl(code, compId)}
+            src={flagUrl(code, compId, slug)}
             alt={code}
             title={fullName}
             className={className}
