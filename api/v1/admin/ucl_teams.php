@@ -32,7 +32,7 @@ $clean = function (array $data, bool $requireCode = true) {
 
 $countryExists = function (?string $countryCode) use ($pdo) {
     if ($countryCode === null) return;
-    $stmt = $pdo->prepare('SELECT 1 FROM "lm2026-27".countries WHERE country_code = ?');
+    $stmt = $pdo->prepare('SELECT 1 FROM admin.countries WHERE country_code = ?');
     $stmt->execute([$countryCode]);
     if (!$stmt->fetch()) json_error('Vybraný štát neexistuje v číselníku', 400);
 };
