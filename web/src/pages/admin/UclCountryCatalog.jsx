@@ -130,12 +130,12 @@ export default function UclCountryCatalog({ onChanged = () => {} }) {
                 <th style={{ width: 150 }}>Akcie</th>
             </tr></thead>
             <tbody>{shown.map(country => <tr key={country.country_code}>
-                <td style={{ verticalAlign: 'top', paddingTop: 10 }}>
+                <td data-label="Vlajka" style={{ verticalAlign: 'middle' }}>
                     {country.flag_file
-                        ? <img src={`/flags/${country.flag_file}`} alt={country.name_sk} style={{ width: 28, height: 18, objectFit: 'cover' }} onError={e => { e.currentTarget.style.display = 'none'; }} />
+                        ? <img src={`/flags/${country.flag_file}`} alt={country.name_sk} style={{ width: 28, height: 18, objectFit: 'cover', display: 'block' }} onError={e => { e.currentTarget.style.display = 'none'; }} />
                         : '—'}
                 </td>
-                <td>
+                <td data-label="Štát">
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2px 16px', alignItems: 'baseline' }}>
                         <strong>{country.name_sk}</strong>
                         {NAME_FIELDS.slice(1).map(k => country[k] && country[k] !== country.name_sk
@@ -154,9 +154,9 @@ export default function UclCountryCatalog({ onChanged = () => {} }) {
                         </span>
                     </div>
                 </td>
-                <td style={{ verticalAlign: 'top', paddingTop: 10 }}>{country.is_active === false ? '—' : '✓'}</td>
-                <td style={{ verticalAlign: 'top', paddingTop: 10 }}>{Number(country.team_count) || 0}</td>
-                <td style={{ verticalAlign: 'top', paddingTop: 6 }}><div className={styles.actions}><button className={styles.btnSmall} onClick={() => edit(country)}>Upraviť</button><button className={styles.btnSmallDanger} onClick={() => remove(country)}>Zmazať</button></div></td>
+                <td data-label="Aktívny" style={{ verticalAlign: 'middle' }}>{country.is_active === false ? '—' : '✓'}</td>
+                <td data-label="Tímy" style={{ verticalAlign: 'middle' }}>{Number(country.team_count) || 0}</td>
+                <td data-label="" style={{ verticalAlign: 'middle' }}><div className={styles.actions}><button className={styles.btnSmall} onClick={() => edit(country)}>Upraviť</button><button className={styles.btnSmallDanger} onClick={() => remove(country)}>Zmazať</button></div></td>
             </tr>)}</tbody>
         </table></div>
         <p style={{ margin: '10px 0 0', fontSize: '0.78rem', color: '#777' }}>Štátov v číselníku: {countries.length}{needle && ` · zobrazených: ${shown.length}`}</p>
