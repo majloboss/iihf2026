@@ -4,7 +4,7 @@ require_auth(true);
 $pdo = db();
 
 if ($method === 'GET') {
-    $rows = $pdo->query('SELECT c.source_id, c.country_code, c.country_code2, c.sport_code_fifa, c.sport_code_iihf, c.sport_code_uefa, c.name_sk, c.name_sk_long, c.name_en, c.name_original, c.flag_file, c.flag_file_big, c.flag_check, c.is_active, COUNT(t.team_id) AS team_count FROM admin.countries c LEFT JOIN "lm2026-27".teams t ON t.country_code = c.country_code GROUP BY c.source_id, c.country_code, c.country_code2, c.sport_code_fifa, c.sport_code_iihf, c.sport_code_uefa, c.name_sk, c.name_sk_long, c.name_en, c.name_original, c.flag_file, c.flag_file_big, c.flag_check, c.is_active ORDER BY c.name_sk, c.country_code')->fetchAll();
+    $rows = $pdo->query('SELECT c.source_id, c.country_code, c.country_code2, c.sport_code_fifa, c.sport_code_iihf, c.sport_code_uefa, c.name_sk, c.name_sk_long, c.name_en, c.name_original, c.flag_file, c.flag_file_big, c.flag_check, c.is_active, COUNT(t.club_id) AS team_count FROM admin.countries c LEFT JOIN admin.uefa_clubs t ON t.country_code = c.country_code GROUP BY c.source_id, c.country_code, c.country_code2, c.sport_code_fifa, c.sport_code_iihf, c.sport_code_uefa, c.name_sk, c.name_sk_long, c.name_en, c.name_original, c.flag_file, c.flag_file_big, c.flag_check, c.is_active ORDER BY c.name_sk, c.country_code')->fetchAll();
     json_ok($rows);
 }
 
@@ -63,17 +63,14 @@ try {
                 $rename = $pdo->prepare('UPDATE admin.countries SET source_id = COALESCE(?, source_id), country_code2 = ?, sport_code_fifa = ?, sport_code_iihf = ?, sport_code_uefa = ?, name_sk = ?, name_sk_long = ?, name_en = ?, name_original = ?, flag_file = ?, flag_file_big = ?, flag_check = COALESCE(?, flag_check), is_active = ?, updated_at = NOW() WHERE country_code = ?');
                 $rename->execute([$hasSourceId && $sourceId !== '' ? (int)$sourceId : null, $code2 ?: null, $sportFifa ?: null, $sportIihf ?: null, $sportUefa ?: null, $nameSk, $nameSkLong ?: null, $nameEn, $nameOriginal ?: null, $flagFile ?: null, $flagFileBig ?: null, $hasFlagCheck && $flagCheck !== '' ? $flagCheck : null, $isActive, $code]);
             }
-            $move = $pdo->prepare('UPDATE "lm2026-27".teams SET country_code = ?, country_name = ? WHERE country_code = ?');
-            $move->execute([$code, $nameSk, $oldCode]);
+            $move = $pdo->prepare('UPDATE admin.uefa_clubs SET country_code = ?, updated_at = NOW() WHERE country_code = ?');
+            $move->execute([$code, $oldCode]);
             $remove = $pdo->prepare('DELETE FROM admin.countries WHERE country_code = ?');
             $remove->execute([$oldCode]);
         } else {
             $rename = $pdo->prepare('UPDATE admin.countries SET source_id = ?, country_code2 = ?, sport_code_fifa = ?, sport_code_iihf = ?, sport_code_uefa = ?, name_sk = ?, name_sk_long = ?, name_en = ?, name_original = ?, flag_file = ?, flag_file_big = ?, flag_check = ?, is_active = ?, updated_at = NOW() WHERE country_code = ?');
             $rename->execute([$hasSourceId && $sourceId !== '' ? (int)$sourceId : null, $code2 ?: null, $sportFifa ?: null, $sportIihf ?: null, $sportUefa ?: null, $nameSk, $nameSkLong ?: null, $nameEn, $nameOriginal ?: null, $flagFile ?: null, $flagFileBig ?: null, $hasFlagCheck && $flagCheck !== '' ? $flagCheck : null, $isActive, $code]);
         }
-        // country_name v teams je pozostatok; ciselnik je zdroj pravdy, drzime ho zosynchronizovany.
-        $sync = $pdo->prepare('UPDATE "lm2026-27".teams SET country_name = ? WHERE country_code = ?');
-        $sync->execute([$nameSk, $code]);
         $result = $pdo->prepare('SELECT source_id, country_code, country_code2, sport_code_fifa, sport_code_iihf, sport_code_uefa, name_sk, name_sk_long, name_en, name_original, flag_file, flag_file_big, flag_check, is_active FROM admin.countries WHERE country_code = ?');
         $result->execute([$code]);
         $row = $result->fetch();

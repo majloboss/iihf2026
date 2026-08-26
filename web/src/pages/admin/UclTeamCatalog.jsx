@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { createUclTeam, deleteUclTeam, getUclCountries, getUclTeams, updateUclTeam } from '../../api/uclAdmin';
 import styles from './Admin.module.css';
 
-const emptyTeam = { team_code: '', team_name: '', country_code: '', logo_file: '' };
+const emptyTeam = { team_code: '', team_name: '', country_code: '', logo_file: '', is_active: true };
 
 export default function UclTeamCatalog() {
     const [teams, setTeams] = useState([]);
@@ -47,18 +47,39 @@ export default function UclTeamCatalog() {
             team_code: team.team_code ?? '', team_name: team.team_name ?? '',
             country_code: team.country_code ?? '',
             logo_file: team.logo_file ?? '',
+            is_active: team.is_active !== false,
         });
         setMessage(''); setError('');
     };
 
+    // Klub bez zapasov sa zmaze, klub s historiou sa iba deaktivuje. Rozhoduje server.
     const remove = async (team) => {
-        if (!window.confirm(`Odstrániť klub ${team.team_name}?`)) return;
+        const used = Number(team.game_count) > 0;
+        const question = used
+            ? `Klub ${team.team_name} má odohrané alebo naplánované zápasy, preto sa nezmaže, iba deaktivuje. Pokračovať?`
+            : `Odstrániť klub ${team.team_name}?`;
+        if (!window.confirm(question)) return;
         setError(''); setMessage('');
         try {
-            await deleteUclTeam(team.team_id);
-            setTeams(current => current.filter(item => item.team_id !== team.team_id));
+            const res = await deleteUclTeam(team.team_id);
+            if (res?.deactivated) {
+                setTeams(current => current.map(item => item.team_id === team.team_id ? { ...item, is_active: false } : item));
+                setMessage('✓ Klub bol deaktivovaný.');
+            } else {
+                setTeams(current => current.filter(item => item.team_id !== team.team_id));
+                setMessage('✓ Klub bol odstránený.');
+            }
             if (editingId === team.team_id) reset();
-            setMessage('✓ Klub bol odstránený.');
+        } catch (e) { setError(e.message); }
+    };
+
+    const toggleActive = async (team) => {
+        setError(''); setMessage('');
+        try {
+            await updateUclTeam({ ...team, is_active: !(team.is_active !== false) });
+            setTeams(current => current.map(item => item.team_id === team.team_id
+                ? { ...item, is_active: !(item.is_active !== false) } : item));
+            setMessage(team.is_active !== false ? '✓ Klub bol deaktivovaný.' : '✓ Klub bol aktivovaný.');
         } catch (e) { setError(e.message); }
     };
 
@@ -98,7 +119,8 @@ export default function UclTeamCatalog() {
             )}
             <h3 style={{ margin: '0 0 4px', color: '#0d6efd' }}>⚽ Kluby</h3>
             <p style={{ margin: '0 0 16px', fontSize: '0.82rem', color: '#666' }}>
-                Číselník klubov Ligy majstrov UEFA 2026/27. Zobrazenie klubu: názov + kód štátu.
+                Trvalý číselník klubov UEFA naprieč ročníkmi. Zobrazenie klubu: názov + kód štátu.
+                Klub, ktorý sa v aktuálnom ročníku nekvalifikoval, v číselníku zostáva.
             </p>
 
             <form onSubmit={save} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 8, alignItems: 'end', marginBottom: 16 }}>
@@ -120,10 +142,10 @@ export default function UclTeamCatalog() {
 
             <div style={{ overflowX: 'auto' }}>
                 <table className={`${styles.table} ${styles.uclTeamsTable}`} style={{ marginTop: 8 }}>
-                    <thead><tr><th>Logo</th><th>Kód</th><th>Klub</th><th>Štát</th><th>Kód štátu</th><th>Akcie</th></tr></thead>
+                    <thead><tr><th>Logo</th><th>Kód</th><th>Klub</th><th>Štát</th><th>Kód štátu</th><th>Zápasy</th><th>Stav</th><th>Akcie</th></tr></thead>
                     <tbody>
                         {shownTeams.map(team => (
-                            <tr key={team.team_id}>
+                            <tr key={team.team_id} style={team.is_active === false ? { opacity: 0.55 } : undefined}>
                                 <td>{team.logo_file
                                     ? <img src={`/logos/ucl2026/${team.logo_file}`} alt="" style={{ width: 34, height: 34, objectFit: 'contain' }} onError={e => { e.currentTarget.style.display = 'none'; }} />
                                     : <span className={styles.unused}>—</span>}</td>
@@ -131,13 +153,20 @@ export default function UclTeamCatalog() {
                                 <td><strong>{team.team_name}</strong></td>
                                 <td>{team.country_name || <span className={styles.unused}>—</span>}</td>
                                 <td className={styles.mono}>{team.country_display_code || <span className={styles.unused}>—</span>}</td>
+                                <td>{Number(team.game_count) || 0}</td>
+                                <td>{team.is_active === false
+                                    ? <span className={styles.unused}>neaktívny</span>
+                                    : '✓'}</td>
                                 <td><div className={styles.actions}>
                                     <button className={styles.btnSmall} onClick={() => edit(team)}>Upraviť</button>
-                                    <button className={styles.btnSmallDanger} onClick={() => remove(team)}>Zmazať</button>
+                                    <button className={styles.btnSmall} onClick={() => toggleActive(team)}>
+                                        {team.is_active === false ? 'Aktivovať' : 'Deaktivovať'}
+                                    </button>
+                                    {Number(team.game_count) === 0 && <button className={styles.btnSmallDanger} onClick={() => remove(team)}>Zmazať</button>}
                                 </div></td>
                             </tr>
                         ))}
-                        {shownTeams.length === 0 && <tr><td colSpan="6" style={{ textAlign: 'center', color: '#888' }}>
+                        {shownTeams.length === 0 && <tr><td colSpan="8" style={{ textAlign: 'center', color: '#888' }}>
                             {teams.length === 0 ? 'Číselník je zatiaľ prázdny.' : 'Žiadny klub nezodpovedá hľadaniu.'}
                         </td></tr>}
                     </tbody>

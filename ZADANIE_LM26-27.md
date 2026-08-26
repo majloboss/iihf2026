@@ -59,6 +59,14 @@ Tímy pri vytváraní zápasov môžu zostať dočasne prázdne, aby bolo možn�
 
 ### Číselník klubov
 
+**Kluby nie sú viazané na ročník.** Klub, ktorý sa tento rok nekvalifikoval, v číselníku
+zostáva a o rok sa môže vrátiť. Preto od migrácie `056` žijú v `admin.uefa_clubs`,
+nie v ročníkovej schéme, a namiesto mazania majú príznak `is_active`.
+
+Klub, na ktorom visia zápasy, sa nedá zmazať — iba deaktivovať. Ročníkové schémy sa
+na číselník odkazujú cez `club_id`.
+
+
 Zdrojový zoznam klubov a štátov je v `sources/lm2026-27/kluby_loga_staty.csv`.
 Obsahuje 81 klubov vrátane účastníkov kvalifikácie. Každý klub bude mať:
 

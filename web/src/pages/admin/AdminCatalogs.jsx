@@ -16,7 +16,7 @@ export default function AdminCatalogs() {
                 </button>
                 <button onClick={() => setTab('teams')}
                     style={{ padding: '8px 18px', border: 'none', background: 'none', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 600, marginBottom: -2, borderBottom: '2px solid ' + (tab === 'teams' ? '#1a3a6b' : 'transparent'), color: tab === 'teams' ? '#1a3a6b' : '#999' }}>
-                    Kluby LM
+                    Kluby UEFA
                 </button>
             </div>
             {tab === 'countries' && <UclCountryCatalog />}

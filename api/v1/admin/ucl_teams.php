@@ -1,10 +1,20 @@
 <?php
 // GET/POST/PUT/DELETE /v1/admin/ucl-teams
+// Trvaly ciselnik klubov UEFA (admin.uefa_clubs), nie je viazany na rocnik.
+// Kluby sa nemazu, ked na nich visia zapasy — deaktivuju sa.
 require_auth(true);
 $pdo = db();
 
 if ($method === 'GET') {
-    $rows = $pdo->query("SELECT t.team_id, t.team_code, t.team_name, t.country_code, c.name_sk AS country_name, COALESCE(c.sport_code_uefa, c.country_code) AS country_display_code, c.flag_file, c.flag_file_big, t.logo_file FROM \"lm2026-27\".teams t LEFT JOIN admin.countries c ON c.country_code = t.country_code ORDER BY t.team_name, t.team_id")->fetchAll();
+    $rows = $pdo->query("SELECT c.club_id AS team_id, c.club_code AS team_code, c.club_name AS team_name,
+               c.country_code, c.is_active, c.logo_file,
+               s.name_sk AS country_name,
+               COALESCE(s.sport_code_uefa, s.country_code) AS country_display_code,
+               (SELECT COUNT(*) FROM \"lm2026-27\".games g
+                 WHERE g.home_team_id = c.club_id OR g.away_team_id = c.club_id) AS game_count
+          FROM admin.uefa_clubs c
+          LEFT JOIN admin.countries s ON s.country_code = c.country_code
+         ORDER BY c.club_name, c.club_id")->fetchAll();
     json_ok($rows);
 }
 
@@ -15,6 +25,7 @@ $clean = function (array $data, bool $requireCode = true) {
     $teamName = trim((string)($data['team_name'] ?? ''));
     $countryCode = strtoupper(trim((string)($data['country_code'] ?? '')));
     $logoFile = trim((string)($data['logo_file'] ?? ''));
+    $isActive = !isset($data['is_active']) || filter_var($data['is_active'], FILTER_VALIDATE_BOOLEAN);
 
     if ($requireCode && ($teamCode === '' || !preg_match('/^[A-Z0-9_-]{2,20}$/', $teamCode))) {
         json_error('Kód klubu musí mať 2 až 20 znakov: A-Z, 0-9, _ alebo -', 400);
@@ -26,7 +37,7 @@ $clean = function (array $data, bool $requireCode = true) {
         json_error('Logo musí byť názov PNG súboru bez cesty', 400);
     }
 
-    return [$teamCode, $teamName, $countryCode ?: null, $logoFile ?: null];
+    return [$teamCode, $teamName, $countryCode ?: null, $logoFile ?: null, $isActive];
 };
 
 $countryExists = function (?string $countryCode) use ($pdo) {
@@ -36,12 +47,15 @@ $countryExists = function (?string $countryCode) use ($pdo) {
     if (!$stmt->fetch()) json_error('Vybraný štát neexistuje v číselníku', 400);
 };
 
+$returning = 'club_id AS team_id, club_code AS team_code, club_name AS team_name, country_code, logo_file, is_active';
+
 if ($method === 'POST') {
-    [$teamCode, $teamName, $countryCode, $logoFile] = $clean($body);
+    [$teamCode, $teamName, $countryCode, $logoFile, $isActive] = $clean($body);
     $countryExists($countryCode);
     try {
-        $stmt = $pdo->prepare("INSERT INTO \"lm2026-27\".teams (team_code, team_name, country_code, logo_file) VALUES (?, ?, ?, ?) RETURNING team_id, team_code, team_name, country_code, logo_file");
-        $stmt->execute([$teamCode, $teamName, $countryCode, $logoFile]);
+        $stmt = $pdo->prepare("INSERT INTO admin.uefa_clubs (club_code, club_name, country_code, logo_file, is_active)
+                               VALUES (?, ?, ?, ?, ?) RETURNING $returning");
+        $stmt->execute([$teamCode, $teamName, $countryCode, $logoFile, $isActive]);
         json_ok($stmt->fetch(), 201);
     } catch (PDOException $e) {
         if ($e->getCode() === '23505') json_error('Kód klubu už existuje', 409);
@@ -52,25 +66,19 @@ if ($method === 'POST') {
 if ($method === 'PUT') {
     $teamId = (int)($body['team_id'] ?? 0);
     if (!$teamId) json_error('Chýba team_id', 400);
-    [$teamCode, $teamName, $countryCode, $logoFile] = $clean($body);
+    [$teamCode, $teamName, $countryCode, $logoFile, $isActive] = $clean($body);
+    $countryExists($countryCode);
     try {
-        $oldStmt = $pdo->prepare('SELECT country_code FROM "lm2026-27".teams WHERE team_id = ?');
-        $oldStmt->execute([$teamId]);
-        $oldTeam = $oldStmt->fetch();
-        if (!$oldTeam) json_error('Klub neexistuje', 404);
-
-        $pdo->beginTransaction();
-        $stmt = $pdo->prepare("UPDATE \"lm2026-27\".teams SET team_code = ?, team_name = ?, country_code = ?, logo_file = ? WHERE team_id = ? RETURNING team_id, team_code, team_name, country_code, logo_file");
-        $stmt->execute([$teamCode, $teamName, $countryCode, $logoFile, $teamId]);
+        $stmt = $pdo->prepare("UPDATE admin.uefa_clubs
+                                  SET club_code = ?, club_name = ?, country_code = ?, logo_file = ?,
+                                      is_active = ?, updated_at = NOW()
+                                WHERE club_id = ? RETURNING $returning");
+        $stmt->execute([$teamCode, $teamName, $countryCode, $logoFile, $isActive, $teamId]);
         $row = $stmt->fetch();
-        $pdo->commit();
+        if (!$row) json_error('Klub neexistuje', 404);
         json_ok($row);
     } catch (PDOException $e) {
-        if ($pdo->inTransaction()) $pdo->rollBack();
         if ($e->getCode() === '23505') json_error('Kód klubu už existuje', 409);
-        throw $e;
-    } catch (Throwable $e) {
-        if ($pdo->inTransaction()) $pdo->rollBack();
         throw $e;
     }
 }
@@ -78,10 +86,23 @@ if ($method === 'PUT') {
 if ($method === 'DELETE') {
     $teamId = (int)($body['team_id'] ?? 0);
     if (!$teamId) json_error('Chýba team_id', 400);
-    $stmt = $pdo->prepare('DELETE FROM "lm2026-27".teams WHERE team_id = ?');
+
+    // Klub so zapasmi je sucastou historie, nesmie zmiznut — deaktivuje sa.
+    $used = $pdo->prepare('SELECT COUNT(*) FROM "lm2026-27".games WHERE home_team_id = ? OR away_team_id = ?');
+    $used->execute([$teamId, $teamId]);
+    if ((int)$used->fetchColumn() > 0) {
+        $stmt = $pdo->prepare("UPDATE admin.uefa_clubs SET is_active = FALSE, updated_at = NOW()
+                                WHERE club_id = ? RETURNING $returning");
+        $stmt->execute([$teamId]);
+        $row = $stmt->fetch();
+        if (!$row) json_error('Klub neexistuje', 404);
+        json_ok(['deactivated' => true, 'team' => $row]);
+    }
+
+    $stmt = $pdo->prepare('DELETE FROM admin.uefa_clubs WHERE club_id = ?');
     $stmt->execute([$teamId]);
     if ($stmt->rowCount() === 0) json_error('Klub neexistuje', 404);
-    json_ok(['team_id' => $teamId]);
+    json_ok(['team_id' => $teamId, 'deleted' => true]);
 }
 
 json_error('Method not allowed', 405);
