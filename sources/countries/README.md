@@ -54,6 +54,14 @@ Formát `flag_<code2 lowercase>_24.png` (malá) a `_240.png` (veľká), napr. `f
 | `052` | `052_admin_countries_csv_struct.sql` | stĺpce `source_id`, `country_code2`, `name_sk_long`, `flag_file_big`, `flag_check` |
 | `053` | `053_admin_countries_sport_codes.sql` | športové kódy + uvoľnenie formátu kódu na `GB-ENG` |
 | `054` | `054_countries_import.sql` | **vyprázdni** číselník, nahrá 254 štátov, premapuje UCL kluby na ISO |
+| `055` | `055_admin_countries_reorder.sql` | prestavia tabuľku do logického poradia stĺpcov |
+
+Poradie stĺpcov bolo dané históriou migrácií, nie logikou (`country_code2` až za
+`updated_at`, `flag_file` ďaleko od `flag_file_big`). Postgres poradie existujúcich
+stĺpcov meniť nevie, preto `055` tabuľku prestavia cez dočasnú kópiu. Názvy, typy ani
+obmedzenia sa nemenia — iba poradie, takže PHP kód netreba upravovať.
+
+Cieľové poradie: identifikátory → kódy → názvy → vlajky → metadáta.
 
 Migrácia `054` beží v jednej transakcii: odpojí FK klubov, vyprázdni číselník, nahrá dáta,
 premapuje kluby z UEFA kódov na ISO (`GER`→`DEU`, `ENG`→`GB-ENG`), overí, že žiadny klub
