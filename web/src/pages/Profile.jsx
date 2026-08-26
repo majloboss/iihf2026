@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCompetition } from '../context/CompetitionContext';
 import { getProfile, updateProfile, changePassword, deleteAccount, uploadAvatar } from '../api/profile';
@@ -15,7 +15,21 @@ export default function Profile() {
     const { competitions, activeCompetition, switchCompetition } = useCompetition();
     const [switchingId, setSwitchingId] = useState(null);
 
-    const [tab, setTab]       = useState('profil');
+    const [searchParams, setSearchParams] = useSearchParams();
+    const TABS = ['profil', 'sutaze', 'skupiny', 'pozvanky', 'notifikacie'];
+    const urlTab = searchParams.get('tab');
+    const [tab, setTabState] = useState(TABS.includes(urlTab) ? urlTab : 'profil');
+
+    // Zmena záložky sa premietne do URL, aby sa dala zdieľať aj obnoviť.
+    const setTab = (next) => {
+        setTabState(next);
+        setSearchParams(next === 'profil' ? {} : { tab: next }, { replace: true });
+    };
+
+    // Reaguj aj na zmenu URL zvonka (napr. opakovaný klik na logo súťaže).
+    useEffect(() => {
+        if (urlTab && TABS.includes(urlTab) && urlTab !== tab) setTabState(urlTab);
+    }, [urlTab]);
     const [form, setForm]     = useState({ first_name: '', last_name: '', email: '', phone: '' });
     const [avatar, setAvatar] = useState(null);
     const [pass, setPass]     = useState({ old_password: '', new_password: '', confirm: '' });

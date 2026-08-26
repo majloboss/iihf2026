@@ -44,7 +44,14 @@ export default function UserLayout() {
                         )}
                     </div>
                     {activeCompetition && (
-                        <div className={styles.brandName}>{activeCompetition.name}</div>
+                        <button
+                            type="button"
+                            className={styles.brandSwitch}
+                            onClick={() => navigate('/profile?tab=sutaze')}
+                            title="Prepnúť súťaž">
+                            <span className={styles.brandName}>{activeCompetition.name}</span>
+                            <span className={styles.brandSwitchHint}>zmeniť súťaž ▾</span>
+                        </button>
                     )}
                 </div>
                 <nav>
