@@ -13,6 +13,7 @@ export default function UclTeamCatalog() {
     const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
+    const [filter, setFilter] = useState('');
 
     const load = () => Promise.all([getUclTeams(), getUclCountries()])
         .then(([teamRows, countryRows]) => { setTeams(teamRows); setCountries(countryRows); })
@@ -61,6 +62,12 @@ export default function UclTeamCatalog() {
         } catch (e) { setError(e.message); }
     };
 
+    const needle = filter.trim().toLowerCase();
+    const shownTeams = needle
+        ? teams.filter(t => [t.team_name, t.team_code, t.country_name, t.country_display_code, t.country_code]
+            .some(v => String(v ?? '').toLowerCase().includes(needle)))
+        : teams;
+
     if (loading) return <p>Načítavam kluby…</p>;
 
     return (
@@ -104,6 +111,10 @@ export default function UclTeamCatalog() {
                 </div>
             </form>
 
+            <div style={{ marginTop: 12 }}>
+                <input value={filter} onChange={e => setFilter(e.target.value)} placeholder="Hľadať klub, kód alebo štát…" style={{ width: '100%', maxWidth: 340, padding: '6px 10px' }} />
+            </div>
+
             {message && <p className={styles.success}>{message}</p>}
             {error && <p className={styles.error}>✗ {error}</p>}
 
@@ -111,7 +122,7 @@ export default function UclTeamCatalog() {
                 <table className={`${styles.table} ${styles.uclTeamsTable}`} style={{ marginTop: 8 }}>
                     <thead><tr><th>Logo</th><th>Kód</th><th>Klub</th><th>Štát</th><th>Kód štátu</th><th>Akcie</th></tr></thead>
                     <tbody>
-                        {teams.map(team => (
+                        {shownTeams.map(team => (
                             <tr key={team.team_id}>
                                 <td>{team.logo_file
                                     ? <img src={`/logos/ucl2026/${team.logo_file}`} alt="" style={{ width: 34, height: 34, objectFit: 'contain' }} onError={e => { e.currentTarget.style.display = 'none'; }} />
@@ -126,11 +137,13 @@ export default function UclTeamCatalog() {
                                 </div></td>
                             </tr>
                         ))}
-                        {teams.length === 0 && <tr><td colSpan="6" style={{ textAlign: 'center', color: '#888' }}>Číselník je zatiaľ prázdny.</td></tr>}
+                        {shownTeams.length === 0 && <tr><td colSpan="6" style={{ textAlign: 'center', color: '#888' }}>
+                            {teams.length === 0 ? 'Číselník je zatiaľ prázdny.' : 'Žiadny klub nezodpovedá hľadaniu.'}
+                        </td></tr>}
                     </tbody>
                 </table>
             </div>
-            <p style={{ margin: '12px 0 0', fontSize: '0.78rem', color: '#777' }}>Klubov v číselníku: {teams.length}</p>
+            <p style={{ margin: '12px 0 0', fontSize: '0.78rem', color: '#777' }}>Klubov v číselníku: {teams.length}{needle && ` · zobrazených: ${shownTeams.length}`}</p>
         </div>
     );
 }
