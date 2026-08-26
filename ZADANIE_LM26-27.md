@@ -114,10 +114,10 @@ Hodnotí sa výsledok po 90 minútach. Predĺženie a penalty sa do tipu nezapo�
 9. 🔲 Spustiť synchronizáciu starších názvov štátov `049` na DB-DEV-BET
 10. 🟠 Generátor rozlosovania v **Nástroje → LM 2026/27** (kostra súťaže pred žrebom)
 11. 🔲 Po oficiálnom žrebe opraviť dvojice a termíny v správe zápasov
-12. 🔲 Pridať UCL API endpointy
-13. 🔲 Pridať UCL stránky a routing vo webovej aplikácii
+12. 🟠 Pridať UCL API endpointy
+13. 🟠 Pridať UCL stránky a routing vo webovej aplikácii
 14. 🔲 Otestovať ligovú tabuľku, tipovanie a bodovanie
-15. 🔲 Aktivovať súťaž pre používateľov
+15. 🟠 Aktivovať súťaž (migrácia 057) pre používateľov
 
 ## Pravidlá práce
 
@@ -150,3 +150,36 @@ ligovej fázy (miesta 9–24 hrajú o postup, víťazi sa pripoja k tímom z mie
 
 Generovanie je zablokované, keď k zápasom už existujú tipy — kostra sa robí
 pred spustením tipovania.
+
+## Súťaž v aplikácii
+
+Oficiálny názov: **UEFA Champions League 2026/27**, slug `ucl2026`.
+Migrácia `057` súťaž premenuje, doplní livescore stĺpce, indexy a **zapne ju**
+v prepínači (`is_active = TRUE`) — dovtedy sa v aplikácii neponúka.
+
+### API endpointy
+
+| Endpoint | Účel |
+|---|---|
+| `GET /v1/ucl/games` | zápasy + môj tip (`?id=` detail) |
+| `GET /v1/ucl/teams` | kluby účastníkov |
+| `GET,POST /v1/ucl/tips` | moje tipy, zadanie tipu |
+| `GET /v1/ucl/game-tips` | tipy ostatných (až po uzavretí) |
+| `GET /v1/ucl/standings` | ligová tabuľka s postupovými pásmami |
+| `POST /v1/admin/ucl-game-update` | výsledok + schválenie, prepočíta tabuľku a body |
+| `PUT /v1/admin/ucl-game-edit` | dvojice, termín, štadión, tipovanie |
+| `POST /v1/admin/ucl-recalc` | ručný prepočet |
+
+### Obrazovky
+
+Prepínajú sa podľa slugu `ucl2026` v `App.jsx`:
+Zápasy → `UclGames`, Tabuľky → `UclStandings`, admin Výsledky aj Zápasy → `UclAdminGames`.
+
+### Bodovanie
+
+Overené: maximum 5 bodov v ligovej fáze, 7 v play-off.
+Góly sa hodnotia nezávisle od výsledku — tip `1:1` pri výsledku `2:1` dá 1 bod
+za správny počet gólov hostí.
+
+Tipovať sa dá len zápas, ktorý má určené oba tímy — play-off zostáva zamknuté,
+kým sa nedoplnia postupujúci.

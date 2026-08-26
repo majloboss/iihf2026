@@ -28,6 +28,9 @@ import FifaAdminResults from './pages/admin/FifaAdminResults';
 import FifaAdminGames from './pages/admin/FifaAdminGames';
 import FifaAdminGroupStandings from './pages/admin/FifaAdminGroupStandings';
 import GroupStandings from './pages/user/GroupStandings';
+import UclGames from './pages/user/UclGames';
+import UclStandings from './pages/user/UclStandings';
+import UclAdminGames from './pages/admin/UclAdminGames';
 import Standings from './pages/user/Standings';
 import Pravidla from './pages/user/Pravidla';
 import Messages from './pages/user/Messages';
@@ -54,21 +57,30 @@ function DashboardRouter() {
 
 function GamesRouter() {
     const { activeCompetition } = useCompetition();
+    if (activeCompetition?.slug === 'ucl2026') return <UclGames />;
     return activeCompetition?.slug === 'fifa2026' ? <FifaGames /> : <Games />;
 }
 
 function AdminResultsRouter() {
     const { activeCompetition } = useCompetition();
+    if (activeCompetition?.slug === 'ucl2026') return <UclAdminGames />;
     return activeCompetition?.slug === 'fifa2026' ? <FifaAdminResults /> : <AdminResults />;
 }
 
 function AdminGamesRouter() {
     const { activeCompetition } = useCompetition();
+    if (activeCompetition?.slug === 'ucl2026') return <UclAdminGames />;
     return activeCompetition?.slug === 'fifa2026' ? <FifaAdminGames /> : <AdminGames />;
+}
+
+function TabulkyRouter() {
+    const { activeCompetition } = useCompetition();
+    return activeCompetition?.slug === 'ucl2026' ? <UclStandings /> : <GroupStandings />;
 }
 
 function AdminGroupStandingsRouter() {
     const { activeCompetition } = useCompetition();
+    if (activeCompetition?.slug === 'ucl2026') return <UclStandings />;
     return activeCompetition?.slug === 'fifa2026' ? <FifaAdminGroupStandings /> : <AdminGroupStandings />;
 }
 
@@ -93,7 +105,7 @@ export default function App() {
                     <Route element={<PrivateUserRoute><CompetitionProvider><UserLayout /></CompetitionProvider></PrivateUserRoute>}>
                         <Route path="/dashboard" element={<DashboardRouter />} />
                         <Route path="/games"     element={<GamesRouter />} />
-                        <Route path="/tabulky"   element={<GroupStandings />} />
+                        <Route path="/tabulky"   element={<TabulkyRouter />} />
                         <Route path="/groups"    element={<Navigate to="/profile" replace />} />
                         <Route path="/standings" element={<Standings />} />
                         <Route path="/profile"   element={<Profile />} />
