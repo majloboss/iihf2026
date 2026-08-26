@@ -305,3 +305,28 @@ Práca je hotová, keď:
 - používateľské rozhranie nepoužíva súťažné hardcoded mapovanie vlajok,
 - všetky migračné a regresné testy prejdú na develop,
 - zmeny sú pushnuté iba na `develop`.
+
+## Import zdrojového CSV štátov
+
+Štáty sa napĺňajú z jedného zdrojového CSV so stiahnutými vlajkami.
+Podrobnosti a formát: `sources/countries/README.md`.
+
+Štruktúra CSV (oddeľovač `;`):
+
+```
+id;state_code_2;state_code_3;state_name_origin;state_name_english;state_name_slovak;state_name_slovak_long;state_flag_big;state_flag_small;flag_check
+```
+
+Mapovanie na `admin.countries`: `state_code_3` → `country_code` (primárny kľúč, zostáva
+alpha-3 kvôli existujúcim FK na tímy), `state_code_2` → `country_code2`,
+`state_name_slovak_long` → `name_sk_long`, `state_flag_small` → `flag_file`,
+`state_flag_big` → `flag_file_big`, `id` → `source_id`.
+
+Postup:
+
+1. 🟠 Migrácia `052_admin_countries_csv_struct.sql` — rozšírenie tabuľky o nové stĺpce
+2. 🔲 Doplniť `sources/countries/staty.csv` a vlajky do `web/public/flags/`
+3. 🔲 Vygenerovať migráciu `053` cez `tools/import_countries_csv.cjs`
+4. 🔲 Spustiť `052` a `053` na DB-DEV-BET
+5. 🟠 Admin obrazovka Štáty upravená o nové polia a náhľad oboch vlajok
+6. 🔲 Prepnúť IIHF/FIFA/UCL zobrazenia na `flag_file` z číselníka
