@@ -123,7 +123,7 @@ export default function UclCountryCatalog({ onChanged = () => {} }) {
         {error && <p className={styles.error}>✗ {error}</p>}
         <div style={{ overflowX: 'auto' }}><table className={styles.table} style={{ marginTop: 8 }}>
             <thead><tr>
-                <th style={{ width: 40 }}>Vlajka</th>
+                <th style={{ width: 60 }}>Vlajka</th>
                 <th>Štát</th>
                 <th style={{ width: 70 }}>Aktívny</th>
                 <th style={{ width: 60 }}>Tímy</th>
@@ -131,8 +131,12 @@ export default function UclCountryCatalog({ onChanged = () => {} }) {
             </tr></thead>
             <tbody>{shown.map(country => <tr key={country.country_code}>
                 <td data-label="Vlajka" style={{ verticalAlign: 'middle' }}>
-                    {country.flag_file
-                        ? <img src={`/flags/${country.flag_file}`} alt={country.name_sk} style={{ width: 28, height: 18, objectFit: 'cover', display: 'block' }} onError={e => { e.currentTarget.style.display = 'none'; }} />
+                    {(country.flag_file_big || country.flag_file)
+                        ? <img
+                            src={`/flags/${country.flag_file_big || country.flag_file}`}
+                            alt={country.name_sk}
+                            style={{ width: 52, height: 34, objectFit: 'cover', display: 'block', borderRadius: 3, border: '1px solid #e2e2e2' }}
+                            onError={e => { e.currentTarget.style.display = 'none'; }} />
                         : '—'}
                 </td>
                 <td data-label="Štát">
