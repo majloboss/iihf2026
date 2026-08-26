@@ -144,7 +144,7 @@ try {
         }
     };
 
-    $addPhase('PO',  'Play-off o osemfinále', 8, true);
+    $addPhase('PO',  'Baráž o postup do play-off', 8, true);
     $addPhase('R16', 'Osemfinále',            8, true);
     $addPhase('QF',  'Štvrťfinále',           4, true);
     $addPhase('SF',  'Semifinále',            2, true);

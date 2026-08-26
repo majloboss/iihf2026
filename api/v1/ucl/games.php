@@ -24,6 +24,8 @@ $select = '
            g.home_score_final,   g.away_score_final,
            g.result_approved, g.game_type_code, g.game_type_name,
            g.home_team_id, g.away_team_id, g.flashscore_url,
+           -- Cislo kola ligovej fazy sa da odvodit z nazvu ("Ligová fáza — 3. kolo").
+           NULLIF(substring(g.game_type_name from '([0-9]+)\. kolo'), '')::int AS round_no,
            g.ls_home, g.ls_away, g.ls_status, g.ls_updated_at,
            hc.club_code AS home_code, hc.club_name AS home_name,
            hc.logo_file AS home_logo, hs.name_sk AS home_country,

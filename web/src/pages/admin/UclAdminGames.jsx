@@ -5,7 +5,7 @@ import styles from './Admin.module.css';
 
 const PHASES = {
     LEAGUE: 'Ligová fáza',
-    PO: 'Play-off o osemfinále',
+    PO: 'Baráž o play-off',
     R16: 'Osemfinále',
     QF: 'Štvrťfinále',
     SF: 'Semifinále',

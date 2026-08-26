@@ -389,3 +389,33 @@
     opacity: 0.6;
 }
 .filterChip button:hover { opacity: 1; }
+
+/* Kluby LM — 36 klubov v mriežke 9×4. Kódy sú dlhšie než kódy štátov,
+   preto sa orezávajú a na úzkych obrazovkách sa mriežka zúži. */
+.clubsRow {
+    display: grid;
+    grid-template-columns: repeat(9, minmax(0, 1fr));
+    gap: 4px;
+    margin: 10px 0 0;
+}
+.clubLogo { width: 26px; height: 26px; object-fit: contain; display: block; }
+.clubCode {
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: #555;
+    letter-spacing: 0.02em;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.flagBtnActive .clubCode { color: #1a3a6b; }
+
+@media (max-width: 700px) {
+    .clubsRow { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+}
+@media (max-width: 480px) {
+    .clubsRow { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 3px; }
+    .clubLogo { width: 22px; height: 22px; }
+    .clubCode { font-size: 0.54rem; }
+}
