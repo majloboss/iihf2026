@@ -333,13 +333,30 @@ Aplikácia si pri každom športe povie, ktorý kód zobrazuje.
 ### Stav
 
 1. ✅ Migrácia `052` — rozšírenie tabuľky (spustená na DB-DEV-BET)
-2. 🟠 Migrácia `053` — športové kódy a uvoľnený formát kódu (`GB-ENG`)
+2. ✅ Migrácia `053` — športové kódy a uvoľnený formát kódu (`GB-ENG`)
 3. 🟠 Migrácia `054` — vyprázdnenie číselníka a import 254 štátov
-4. 🟠 508 vlajok skopírovaných do `web/public/flags/`
+4. 🟠 508 vlajok nasadených do `web/public/flags/`
 5. 🟠 Admin API a obrazovka Štáty rozšírené o športové kódy a vyhľadávanie
-6. 🔲 Spustiť `053` a `054` na DB-DEV-BET
+6. 🔲 Spustiť `054` na DB-DEV-BET
 7. 🔲 Prepnúť IIHF/FIFA/UCL zobrazenia na `flag_file` a športové kódy z číselníka
-8. 🔲 Odstrániť pozostatok `"lm2026-27".teams.country_name` a tabuľku `"lm2026-27".countries`
+8. 🔲 Odstrániť pozostatok `"lm2026-27".teams.country_name`
+
+Tabuľku `"lm2026-27".countries` odstraňuje priamo migrácia `054` — nahradil ju
+`admin.countries` a žiadny kód ju už nepoužíva.
+
+### Pozor: dva FK na `teams.country_code`
+
+Prvý pokus o spustenie `054` zlyhal na `ucl_teams_country_code_fkey`. Na stĺpci
+`"lm2026-27".teams.country_code` sú **dva** cudzie kľúče:
+
+| Constraint | Vytvorila | Odkazuje na |
+|---|---|---|
+| `ucl_teams_country_code_fkey` | `048` | `"lm2026-27".countries` |
+| `ucl_teams_admin_country_code_fkey` | `050` | `admin.countries` |
+
+Migrácia `054` pôvodne odpájala iba druhý, takže prvý naďalej blokoval ISO kódy,
+ktoré v starej tabuľke nie sú (`GB-ENG`). Opravené — odpájajú sa oba a stará
+tabuľka sa na konci zahodí.
 
 Migrácia `054` beží v jednej transakcii: odpojí FK klubov, vyprázdni číselník, nahrá dáta,
 premapuje kluby z UEFA kódov na ISO, overí platnosť a až potom FK znova napojí.

@@ -43,9 +43,13 @@ check(!/'-'/.test(insertSection), 'ziadna hodnota "-" sa neuklada doslovne');
 // --- 7. Transakcia je uzavreta ---
 check(/^BEGIN;/m.test(sql) && /^COMMIT;/m.test(sql), 'migracia je obalena v BEGIN/COMMIT');
 
-// --- 8. FK sa odpoji aj znova napoji ---
+// --- 8. Oba FK sa odpoja; novy sa znova napoji ---
 check(/DROP CONSTRAINT IF EXISTS ucl_teams_admin_country_code_fkey/.test(sql) &&
-      /ADD CONSTRAINT ucl_teams_admin_country_code_fkey/.test(sql), 'FK sa odpoji a znova napoji');
+      /ADD CONSTRAINT ucl_teams_admin_country_code_fkey/.test(sql), 'FK na admin.countries sa odpoji a znova napoji');
+check(/DROP CONSTRAINT IF EXISTS ucl_teams_country_code_fkey/.test(sql),
+      'stary FK z migracie 048 sa tiez odpoji');
+check(/DROP TABLE IF EXISTS "lm2026-27"\.countries/.test(sql),
+      'stary UCL ciselnik statov sa odstrani');
 
 // --- 9. Konflikty IIHF vs UEFA su spravne ---
 const row = code => (mapSection.match(new RegExp("\\('" + code + "'[^)]*\\)")) || [''])[0];

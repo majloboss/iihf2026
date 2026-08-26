@@ -68,8 +68,12 @@ const sql = `-- Migration 054: naplnenie ciselnika statov zo zdrojoveho CSV
 
 BEGIN;
 
--- 1. Odpojit kluby od ciselnika, aby sa dal vyprazdnit.
+-- 1. Odpojit kluby od oboch ciselnikov, aby sa dali vyprazdnit.
+--    Na teams.country_code su dva FK: z migracie 048 na stary "lm2026-27".countries
+--    a z migracie 050 na admin.countries. Oba musia prec, inak stary FK zablokuje
+--    ISO kody, ktore v starej tabulke nie su (napr. GB-ENG).
 ALTER TABLE "lm2026-27".teams DROP CONSTRAINT IF EXISTS ucl_teams_admin_country_code_fkey;
+ALTER TABLE "lm2026-27".teams DROP CONSTRAINT IF EXISTS ucl_teams_country_code_fkey;
 
 -- 2. Vyprazdnit ciselnik.
 DELETE FROM admin.countries;
@@ -112,10 +116,13 @@ BEGIN
     END IF;
 END $$;
 
--- 7. Znova napojit FK.
+-- 7. Znova napojit FK, uz iba na spolocny admin.countries.
 ALTER TABLE "lm2026-27".teams
     ADD CONSTRAINT ucl_teams_admin_country_code_fkey
     FOREIGN KEY (country_code) REFERENCES admin.countries(country_code);
+
+-- 8. Stary UCL ciselnik statov nahradil admin.countries, uz sa nepouziva.
+DROP TABLE IF EXISTS "lm2026-27".countries;
 
 INSERT INTO admin.schema_versions (version, description)
 VALUES (54, 'Import ${values.length} statov z CSV, sportove kody a premapovanie UCL klubov na ISO')
