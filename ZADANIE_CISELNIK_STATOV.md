@@ -308,25 +308,39 @@ Práca je hotová, keď:
 
 ## Import zdrojového CSV štátov
 
-Štáty sa napĺňajú z jedného zdrojového CSV so stiahnutými vlajkami.
-Podrobnosti a formát: `sources/countries/README.md`.
+Zdroj: `sources/flags/state_flag_list.csv` (254 štátov) + 508 vlajok v `sources/flags/`.
+Detaily formátu: `sources/countries/README.md`.
 
-Štruktúra CSV (oddeľovač `;`):
+### Kódy štátov vs športové kódy
 
-```
-id;state_code_2;state_code_3;state_name_origin;state_name_english;state_name_slovak;state_name_slovak_long;state_flag_big;state_flag_small;flag_check
-```
+Číselník je **ISO 3166**. Súťaže používajú vlastné športové kódy, ktoré sa od ISO líšia
+v 21 prípadoch a navzájom aj medzi sebou:
 
-Mapovanie na `admin.countries`: `state_code_3` → `country_code` (primárny kľúč, zostáva
-alpha-3 kvôli existujúcim FK na tímy), `state_code_2` → `country_code2`,
-`state_name_slovak_long` → `name_sk_long`, `state_flag_small` → `flag_file`,
-`state_flag_big` → `flag_file_big`, `id` → `source_id`.
+| Štát | ISO | FIFA | IIHF | UEFA |
+|---|---|---|---|---|
+| Slovinsko | `SVN` | — | `SLO` | `SVN` |
+| Lotyšsko | `LVA` | — | `LAT` | `LVA` |
+| Nemecko | `DEU` | `GER` | `GER` | `GER` |
+| Anglicko | `GB-ENG` | `ENG` | — | `ENG` |
+| Spojené kráľovstvo | `GBR` | — | `GBR` | — |
 
-Postup:
+Posledné dva riadky nie sú len iný kód, ale iný subjekt: IIHF má jeden britský tím,
+futbal má štyri samostatné krajiny.
 
-1. 🟠 Migrácia `052_admin_countries_csv_struct.sql` — rozšírenie tabuľky o nové stĺpce
-2. 🔲 Doplniť `sources/countries/staty.csv` a vlajky do `web/public/flags/`
-3. 🔲 Vygenerovať migráciu `053` cez `tools/import_countries_csv.cjs`
-4. 🔲 Spustiť `052` a `053` na DB-DEV-BET
-5. 🟠 Admin obrazovka Štáty upravená o nové polia a náhľad oboch vlajok
-6. 🔲 Prepnúť IIHF/FIFA/UCL zobrazenia na `flag_file` z číselníka
+Preto má `admin.countries` stĺpce `sport_code_fifa`, `sport_code_iihf`, `sport_code_uefa`.
+Aplikácia si pri každom športe povie, ktorý kód zobrazuje.
+
+### Stav
+
+1. ✅ Migrácia `052` — rozšírenie tabuľky (spustená na DB-DEV-BET)
+2. 🟠 Migrácia `053` — športové kódy a uvoľnený formát kódu (`GB-ENG`)
+3. 🟠 Migrácia `054` — vyprázdnenie číselníka a import 254 štátov
+4. 🟠 508 vlajok skopírovaných do `web/public/flags/`
+5. 🟠 Admin API a obrazovka Štáty rozšírené o športové kódy a vyhľadávanie
+6. 🔲 Spustiť `053` a `054` na DB-DEV-BET
+7. 🔲 Prepnúť IIHF/FIFA/UCL zobrazenia na `flag_file` a športové kódy z číselníka
+8. 🔲 Odstrániť pozostatok `"lm2026-27".teams.country_name` a tabuľku `"lm2026-27".countries`
+
+Migrácia `054` beží v jednej transakcii: odpojí FK klubov, vyprázdni číselník, nahrá dáta,
+premapuje kluby z UEFA kódov na ISO, overí platnosť a až potom FK znova napojí.
+Pri chybe sa nezmení nič.
