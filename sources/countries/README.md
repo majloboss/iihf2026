@@ -39,3 +39,17 @@ vo vlajke migráciu nevygeneruje a vypíše čísla chybných riadkov.
 Vygenerovaná migrácia je idempotentná — opakované spustenie iba prepíše názvy a vlajky.
 
 Poradie spustenia na DB-DEV-BET: `052` (rozšírenie štruktúry), potom `053` (import dát).
+
+## Spúšťanie migrácií
+
+Endpoint `/v1/admin/run-migration` (iba admin):
+
+- `GET` — vypíše všetky migrácie a ich stav (`applied`, `untracked`, `pending`)
+- `POST` — spustí čakajúce migrácie
+- `POST {"dry_run": true}` — iba vypíše, čo by spustil
+- `POST {"version": 53}` — spustí adresne jednu migráciu
+
+Stav sa vyhodnocuje podľa `admin.schema_versions`. Migrácie `002`–`011`, `020` a `036`
+sa do tejto tabuľky nikdy nezapisovali, preto sú označené ako `untracked` a automaticky
+sa **nespúšťajú** — bežia iba migrácie novšie ako najvyššia zaznamenaná verzia.
+Každá migrácia beží vo vlastnej transakcii, takže chyba nezruší už spustené.
