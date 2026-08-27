@@ -8,48 +8,7 @@ const val = v => (v === null || v === undefined || v === '' ? '—' : String(v))
 const score = (a, b) => (a === null || b === null || a === undefined || b === undefined ? '—' : `${a} : ${b}`);
 
 // Jeden sledovaný zápas. Sám sa obnovuje, kým beží a nie je zastavený.
-function Watch({ item, onUpdate, onStop, onRemove, model }) {
-    const timer = useRef(null);
-    // Bez tejto poistky by zmena stavu z load() spustila effect znova a zacyklila sa.
-    const started = useRef(false);
-    const busy = useRef(false);
-
-    const load = async () => {
-        if (busy.current) return;
-        busy.current = true;
-        onUpdate(item.id, { loading: true, error: '' });
-        try {
-            const r = await apiFetch('v1/admin/livescore-test', {
-                method: 'POST', body: JSON.stringify({ url: item.url, model: model || undefined }),
-            });
-            onUpdate(item.id, { loading: false, result: r, checked: new Date() });
-        } catch (e) {
-            onUpdate(item.id, { loading: false, error: e.message });
-        } finally {
-            busy.current = false;
-        }
-    };
-
-    // Prvé načítanie práve raz — ak už výsledok máme z úložiska, nečaká sa naň.
-    useEffect(() => {
-        if (started.current) return;
-        started.current = true;
-        if (!item.result) load();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-    // Obnovovanie beží, kým používateľ nedá STOP a zápas neskončil.
-    useEffect(() => {
-        clearInterval(timer.current);
-        const r = item.result?.data;
-        const finished = r !== null && typeof r === 'object' && !Array.isArray(r) ? r.finished === true : false;
-        if (!item.stopped && !finished) {
-            timer.current = setInterval(load, POLL_MS);
-        }
-        return () => clearInterval(timer.current);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [item.stopped, item.result?.data?.finished]);
-
+function Watch({ item, onRefresh, onStop, onRemove }) {
     // Model nemusí vrátiť objekt — pole ani reťazec sa nesmú pokúsiť vykresliť ako údaje.
     const raw = item.result?.data;
     const d = raw !== null && typeof raw === 'object' && !Array.isArray(raw) ? raw : null;
@@ -77,7 +36,7 @@ function Watch({ item, onUpdate, onStop, onRemove, model }) {
                     </div>
                 </div>
                 <div className={styles.actions}>
-                    <button className={styles.btnSmall} onClick={load} disabled={item.loading}>
+                    <button className={styles.btnSmall} onClick={onRefresh} disabled={item.loading}>
                         Zistiť teraz
                     </button>
                     {!item.stopped && !d?.finished && (
@@ -320,10 +279,56 @@ export default function LivescoreTest() {
         setError('');
         setItems(cur => [{ id: Date.now(), url: clean, stopped: false }, ...cur]);
         setUrl('');
+        setTimeout(refreshAll, 0);
     };
 
     const update = (id, patch) =>
         setItems(cur => cur.map(i => (i.id === id ? { ...i, ...patch } : i)));
+
+    // Aktuálny zoznam pre interval, ktorý sa nesmie viazať na starý stav.
+    // Musí stáť pred refreshAll — inak by sa použil pred inicializáciou.
+    const itemsRef = useRef(items);
+    useEffect(() => { itemsRef.current = items; }, [items]);
+
+    // Všetky sledované zápasy naraz — jeden feed z Flashscore, jedno volanie modelu.
+    const busy = useRef(false);
+    const refreshAll = async () => {
+        if (busy.current) return;
+        const active = itemsRef.current.filter(i => !i.stopped);
+        if (!active.length) return;
+        busy.current = true;
+        setItems(cur => cur.map(i => (i.stopped ? i : { ...i, loading: true, error: '' })));
+        try {
+            const r = await apiFetch('v1/admin/livescore-batch', {
+                method: 'POST',
+                body: JSON.stringify({ urls: active.map(i => i.url), model: model || undefined }),
+            });
+            const now = new Date();
+            setItems(cur => cur.map(i => {
+                if (i.stopped) return i;
+                const data = r.results?.[i.url] ?? null;
+                return {
+                    ...i, loading: false, checked: now,
+                    result: data
+                        ? { data, model: r.model, usage: r.usage, took_ms: r.took_ms, log_error: r.log_error }
+                        : i.result,
+                    error: data ? '' : 'Zápas sa vo feede Flashscore nenašiel',
+                };
+            }));
+        } catch (e) {
+            setItems(cur => cur.map(i => (i.stopped ? i : { ...i, loading: false, error: e.message })));
+        } finally { busy.current = false; }
+    };
+
+    // Obnovovanie beží, kým je aspoň jeden zápas sledovaný a neskončil.
+    useEffect(() => {
+        const t = setInterval(() => {
+            const live = itemsRef.current.some(i => !i.stopped && i.result?.data?.finished !== true);
+            if (live) refreshAll();
+        }, POLL_MS);
+        return () => clearInterval(t);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     return (
         <div className={styles.card} style={{ padding: 20, marginTop: 16, borderLeft: '4px solid #20c997' }}>
@@ -378,8 +383,8 @@ export default function LivescoreTest() {
             )}
 
             {items.map(item => (
-                <Watch key={item.id} item={item} model={model}
-                       onUpdate={update}
+                <Watch key={item.id} item={item}
+                       onRefresh={refreshAll}
                        onStop={id => update(id, { stopped: true })}
                        onRemove={id => setItems(cur => cur.filter(i => i.id !== id))} />
             ))}
