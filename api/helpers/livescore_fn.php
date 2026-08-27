@@ -47,6 +47,11 @@ function livescore_fetch_feed(string $matchId): string {
         curl_close($ch);
         if ($resp && $code === 200 && !str_contains($resp, '<html')) {
             $out .= "\n\n$label:\n" . mb_substr($resp, 0, 4000);
+            // Minutu spocita server, model ju uz len prevezme.
+            if ($label === 'STAV A SKORE') {
+                $min = livescore_minute(livescore_parse_feed($resp));
+                $out .= "\n\nVYPOCITANA_MINUTA: " . ($min === null ? 'null' : $min);
+            }
         }
     }
     return $out;
@@ -146,14 +151,8 @@ Pravidlá:
   DD = čas začiatku prebiehajúcej časti (v 2. polčase je to jeho začiatok),
   DK = čas poslednej udalosti — na výpočet minúty ho NEPOUŽÍVAJ.
   Ak je DE alebo DF vyplnené, zápas UŽ ZAČAL — started musí byť true.
-- AKTUÁLNU MINÚTU počítaj podľa DB a bez výnimiek:
-    DB = 12 (1. polčas):  minute = (AKTUALNY_CAS − DC) / 60, zaokrúhlené nadol
-    DB = 13 (2. polčas):  minute = (AKTUALNY_CAS − DD) / 60, zaokrúhlené nadol, PLUS 45
-    DB = 6  (predĺženie): minute = (AKTUALNY_CAS − DD) / 60, zaokrúhlené nadol, PLUS 90
-    DB = 38 (prestávka), 7 (penalty) alebo zápas skončil: minute = null
-  V prvom polčase sa počíta od začiatku zápasu (DC), v druhom od začiatku
-  druhého polčasu (DD) — preto sa tam pripočítava 45.
-  Príklad: DB = 13, AKTUALNY_CAS − DD = 33 minút → minute = 78.
+- MINÚTU NEPOČÍTAJ. Do poľa "minute" opíš presne hodnotu VYPOCITANA_MINUTA
+  uvedenú vo feede. Ak je tam "null", daj null. Nič neuprav ani neprepočítavaj.
   Nikdy neber minútu z gólov — tá hovorí, kedy padol gól, nie koľko sa hrá.
 - V sekcii PRIEBEH sú udalosti: IB = minúta, IK = typ (Goal, Yellow Card,
   Red Card, Substitution), IF = hráč, IA = 1 pre domácich a 2 pre hostí.
