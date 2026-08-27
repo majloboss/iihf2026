@@ -44,7 +44,7 @@ function livescore_bulk_fetch(): array {
 
 // Zostavi z vybranych zapasov kratky vstup pre model.
 // $wanted je pole id zapasov (AA) — zvycajne z flashscore_url v DB.
-function livescore_bulk_input(array $games, array $wanted): array {
+function livescore_bulk_input(array $games, array $wanted, bool $withDetails = false): array {
     $rows = [];
     $missing = [];
     foreach ($wanted as $id) {
@@ -59,9 +59,65 @@ function livescore_bulk_input(array $games, array $wanted): array {
                                'DD' => $f['AD'] ?? null]);
         $parts[] = 'MINUTA÷' . ($m['minute'] === null ? 'null' : $m['minute']);
         if ($m['note'] !== null) $parts[] = 'POZNAMKA÷' . $m['note'];
-        $rows[] = implode('¬', $parts);
+        $row = implode('¬', $parts);
+
+        // Priebeh zapasu (goly, karty) je len v detailnom feede a vracia cely
+        // zoznam od zaciatku. Stahuje sa preto len ked sa nieco zmenilo —
+        // pri nezmenenom zapase by dal ten isty obsah znova.
+        if ($withDetails && ($f['AC'] ?? '1') !== '1' && livescore_needs_detail($id, $f)) {
+            $detail = livescore_fetch_events($id);
+            if ($detail !== '') $row .= "\n  UDALOSTI: " . $detail;
+        }
+        $rows[] = $row;
     }
     return ['input' => implode("\n", $rows), 'missing' => $missing, 'found' => count($rows)];
+}
+
+// Rozhodne, ci sa oplati stiahnut detailny feed. Porovnava skore a stav
+// s predchadzajucim volanim — pri nezmenenom zapase by detail dal to iste.
+function livescore_needs_detail(string $id, array $f): bool {
+    static $last = null;
+    $file = sys_get_temp_dir() . '/livescore_state.json';
+
+    if ($last === null) {
+        $raw  = @file_get_contents($file);
+        $last = $raw ? (json_decode($raw, true) ?: []) : [];
+    }
+
+    $now = ($f['AG'] ?? '') . ':' . ($f['AH'] ?? '') . '|' . ($f['AC'] ?? '');
+    $changed = !isset($last[$id]) || $last[$id] !== $now;
+    if ($changed) {
+        $last[$id] = $now;
+        @file_put_contents($file, json_encode($last));
+    }
+    return $changed;
+}
+
+// Priebeh jedneho zapasu — goly a karty. Skrateny na podstatne polia.
+function livescore_fetch_events(string $matchId): string {
+    $ch = curl_init('https://local-global.flashscore.ninja/2/x/feed/df_sui_1_' . $matchId);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_TIMEOUT        => 10,
+        CURLOPT_HTTPHEADER     => ['x-fsign: SW9D1eZo'],
+        CURLOPT_USERAGENT      => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120',
+    ]);
+    $raw  = curl_exec($ch);
+    $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    if (!$raw || $code !== 200 || str_contains($raw, '<html')) return '';
+
+    // Z kazdej udalosti staci strana, minuta, typ a hrac.
+    $out = [];
+    foreach (explode('~', $raw) as $chunk) {
+        if (!str_contains($chunk, 'IK÷')) continue;
+        $e = livescore_parse_feed($chunk);
+        $type = $e['IK'] ?? '';
+        if (!preg_match('/goal|card/i', $type)) continue;
+        $out[] = ($e['IA'] ?? '?') . '|' . ($e['IB'] ?? '?') . '|' . $type . '|' . ($e['IF'] ?? '');
+    }
+    return implode(' ; ', array_slice($out, 0, 40));
 }
 
 function livescore_bulk_prompt(string $rows): string {
@@ -78,6 +134,10 @@ Význam polí:
   AD = čas začiatku (unixový)
   MINUTA = už vypočítaná minúta, len ju opíš (null znamená null)
   POZNAMKA = doplnok k minúte (prestávka, penalty), inak sa neuvádza
+  UDALOSTI = priebeh zápasu, jedna udalosť má tvar
+             strana|minúta|typ|hráč, oddelené bodkočiarkou.
+             Strana 1 = domáci, 2 = hostia.
+             Typ Goal, Own Goal, Penalty, Yellow Card, Red Card.
 
 Vráť VÝHRADNE JSON pole, jeden objekt na zápas, bez komentárov:
 [
@@ -92,7 +152,12 @@ Vráť VÝHRADNE JSON pole, jeden objekt na zápas, bez komentárov:
     "finished": true/false,
     "minute": číslo alebo null,
     "minute_note": "text alebo null",
-    "status": "Naplánovaný / 1. polčas / Polčas / 2. polčas / Predĺženie / Penalty / Koniec"
+    "status": "Naplánovaný / 1. polčas / Polčas / 2. polčas / Predĺženie / Penalty / Koniec",
+    "home_yellow_cards": číslo alebo null,
+    "away_yellow_cards": číslo alebo null,
+    "home_red_cards": číslo alebo null,
+    "away_red_cards": číslo alebo null,
+    "notes": "strelci gólov s minútami, prípadne karty; ak UDALOSTI nie sú, daj null"
   }
 ]
 
@@ -100,6 +165,11 @@ Pravidlá:
 - Skóre vráť ako čísla. Ak AG alebo AH chýba, daj null.
 - Polčasové skóre ber z BC a BD. Ak tam nie sú, daj null — nedopočítavaj ho.
 - started = true, ak AC nie je 1. finished = true, len ak AC je 3.
+- Karty spočítaj z UDALOSTI podľa typu a strany. Ak sú UDALOSTI uvedené,
+  ale karta v nich nie je, daj 0. Ak UDALOSTI pri zápase vôbec nie sú,
+  daj null — znamená to, že sa od minula nič nezmenilo, nie že karty nie sú.
+- Do notes napíš strelcov s minútami, prípadne kto dostal kartu. Stručne.
+  Ak UDALOSTI nie sú uvedené, daj do notes null.
 - Nikdy si nič nedomýšľaj a nepridávaj zápasy, ktoré v zozname nie sú.
 
 ZÁPASY:
@@ -112,7 +182,8 @@ function livescore_bulk_check(array $wantedIds, string $model): array {
     $feed = livescore_bulk_fetch();
     if (!$feed['ok']) return ['ok' => false, 'error' => $feed['error'], 'games' => []];
 
-    $prep = livescore_bulk_input($feed['games'], $wantedIds);
+    // Detaily sa dotahuju len pre sledovane zapasy, nie pre cely feed.
+    $prep = livescore_bulk_input($feed['games'], $wantedIds, true);
     if ($prep['found'] === 0) {
         return ['ok' => true, 'games' => [], 'missing' => $prep['missing'],
                 'note' => 'Žiadny zo sledovaných zápasov dnes vo feede nie je'];
