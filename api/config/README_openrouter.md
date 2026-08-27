@@ -20,6 +20,12 @@ otestuje ich na zadanej adrese a ukáže, ktorý vráti najviac údajov.
 
 Víťaza zapíš do `OPENROUTER_MODEL`.
 
+### Výber modelu v rozhraní
+
+Pod poľom na adresu je rozbaľovací zoznam s aktuálne bezplatnými modelmi.
+Výber platí len pre tvoj prehliadač a prebije nastavenie servera — hodí sa
+na skúšanie bez zásahu do konfigurácie.
+
 Bezplatné modely majú nižšie limity požiadaviek za minútu, preto sa v porovnaní
 testujú postupne, nie naraz. Vstup sa kráti na ~12 000 znakov.
 

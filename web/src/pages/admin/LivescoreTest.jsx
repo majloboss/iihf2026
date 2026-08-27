@@ -8,7 +8,7 @@ const val = v => (v === null || v === undefined || v === '' ? '—' : String(v))
 const score = (a, b) => (a === null || b === null || a === undefined || b === undefined ? '—' : `${a} : ${b}`);
 
 // Jeden sledovaný zápas. Sám sa obnovuje, kým beží a nie je zastavený.
-function Watch({ item, onUpdate, onStop, onRemove }) {
+function Watch({ item, onUpdate, onStop, onRemove, model }) {
     const timer = useRef(null);
     // Bez tejto poistky by zmena stavu z load() spustila effect znova a zacyklila sa.
     const started = useRef(false);
@@ -20,7 +20,7 @@ function Watch({ item, onUpdate, onStop, onRemove }) {
         onUpdate(item.id, { loading: true, error: '' });
         try {
             const r = await apiFetch('v1/admin/livescore-test', {
-                method: 'POST', body: JSON.stringify({ url: item.url }),
+                method: 'POST', body: JSON.stringify({ url: item.url, model: model || undefined }),
             });
             onUpdate(item.id, { loading: false, result: r, checked: new Date() });
         } catch (e) {
@@ -204,11 +204,41 @@ function ModelCompare({ url, onClose }) {
     );
 }
 
+const STORE_KEY = 'livescore_watch';
+
+// Ukladajú sa len adresy a príznak zastavenia — výsledky sa načítajú znova.
+const loadStored = () => {
+    try {
+        const raw = JSON.parse(localStorage.getItem(STORE_KEY) || '[]');
+        return Array.isArray(raw)
+            ? raw.filter(i => i?.url).map(i => ({ id: i.id ?? Date.now() + Math.random(), url: i.url, stopped: !!i.stopped }))
+            : [];
+    } catch { return []; }
+};
+
 export default function LivescoreTest() {
     const [url, setUrl] = useState('');
-    const [items, setItems] = useState([]);
+    const [items, setItems] = useState(loadStored);
     const [error, setError] = useState('');
     const [compareUrl, setCompareUrl] = useState(null);
+    const [models, setModels] = useState([]);
+    const [model, setModel] = useState(() => localStorage.getItem('livescore_model') || '');
+
+    useEffect(() => {
+        apiFetch('v1/admin/livescore-models').then(r => setModels(r.models || [])).catch(() => {});
+    }, []);
+
+    useEffect(() => {
+        if (model) localStorage.setItem('livescore_model', model);
+        else localStorage.removeItem('livescore_model');
+    }, [model]);
+
+    useEffect(() => {
+        try {
+            localStorage.setItem(STORE_KEY, JSON.stringify(
+                items.map(i => ({ id: i.id, url: i.url, stopped: i.stopped }))));
+        } catch { /* plné úložisko nesmie zhodiť obrazovku */ }
+    }, [items]);
 
     const add = (e) => {
         e.preventDefault();
@@ -251,6 +281,24 @@ export default function LivescoreTest() {
                 </button>
             </form>
 
+            <div style={{ marginTop: 8, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '0.78rem', color: '#666' }}>Model:</span>
+                <select value={model} onChange={e => setModel(e.target.value)}
+                        style={{ padding: '5px 8px', fontSize: '0.8rem', maxWidth: 360 }}>
+                    <option value="">— podľa nastavenia servera —</option>
+                    {models.map(m => (
+                        <option key={m.id} value={m.id}>
+                            {m.id}{m.context ? ` (${Math.round(m.context / 1000)}k)` : ''}
+                        </option>
+                    ))}
+                </select>
+                {models.length > 0 && (
+                    <span style={{ fontSize: '0.72rem', color: '#999' }}>
+                        {models.length} bezplatných modelov
+                    </span>
+                )}
+            </div>
+
             {compareUrl && <ModelCompare url={compareUrl} onClose={() => setCompareUrl(null)} />}
 
             {error && <p className={styles.error} style={{ marginTop: 8 }}>✗ {error}</p>}
@@ -262,7 +310,7 @@ export default function LivescoreTest() {
             )}
 
             {items.map(item => (
-                <Watch key={item.id} item={item}
+                <Watch key={item.id} item={item} model={model}
                        onUpdate={update}
                        onStop={id => update(id, { stopped: true })}
                        onRemove={id => setItems(cur => cur.filter(i => i.id !== id))} />
