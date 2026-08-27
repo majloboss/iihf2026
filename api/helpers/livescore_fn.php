@@ -128,7 +128,7 @@ Vráť VÝHRADNE JSON bez akéhokoľvek komentára, v tomto tvare:
   "away_red_cards": číslo alebo null,
   "start_time": "dátum a čas začiatku, ak je uvedený, inak null",
   "competition": "názov súťaže alebo null",
-  "notes": "čokoľvek podstatné, čo si našiel a nezmestilo sa vyššie, alebo null"
+  "notes": "strelci gólov a minúty, prípadne iné podstatné; NIE vysvetľovanie výpočtu"
 }
 
 Pravidlá:
@@ -144,11 +144,14 @@ Pravidlá:
        6 = predĺženie, 7 = penalty, 3 = koniec),
   DC = čas začiatku (unixový čas), DK = čas, od ktorého beží prebiehajúca časť.
   Ak je DE alebo DF vyplnené, zápas UŽ ZAČAL — started musí byť true.
-- AKTUÁLNU MINÚTU vypočítaj z DK a hodnoty AKTUALNY_CAS uvedenej vyššie:
-  minúta = (AKTUALNY_CAS − DK) / 60 zaokrúhlene nadol, a ak DB = 13, pripočítaj 45
-  (druhý polčas sa počíta od 45. minúty). Nikdy neber minútu z gólov —
-  tá hovorí, kedy padol gól, nie koľko sa práve hrá.
-  Ak zápas skončil, minute daj null.
+- AKTUÁLNU MINÚTU počítaj takto a bez výnimiek:
+    krok 1: X = (AKTUALNY_CAS − DK) / 60, zaokrúhlené nadol
+    krok 2: ak DB = 12 (1. polčas) → minute = X
+            ak DB = 13 (2. polčas) → minute = X + 45   (VŽDY pripočítaj 45)
+            ak DB = 6  (predĺženie) → minute = X + 90
+            ak DB = 38 (prestávka) alebo zápas skončil → minute = null
+  Príklad: DB = 13 a X = 44 znamená minute = 89, nie 44.
+  Nikdy neber minútu z gólov — tá hovorí, kedy padol gól, nie koľko sa hrá.
 - V sekcii PRIEBEH sú udalosti: IB = minúta, IK = typ (Goal, Yellow Card,
   Red Card, Substitution), IF = hráč, IA = 1 pre domácich a 2 pre hostí.
   Karty spočítaj podľa IK a IA. Ak zápas beží a žiadna karta v PRIEBEHU nie je,
