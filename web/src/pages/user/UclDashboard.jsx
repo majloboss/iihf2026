@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getUclGames, saveUclTip } from '../../api/ucl';
+import { apiFetch } from '../../api/client';
 import { asDate, canTip, isValidDate } from '../../utils/tipWindow';
+import UclGroupTips from './UclGroupTips';
 
 // start_time je naive UTC, preto ho tak treba aj interpretovať.
 const dayFmtRaw = new Intl.DateTimeFormat('sk-SK', {
@@ -40,15 +42,45 @@ export default function UclDashboard() {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(true);
 
+    const [announcement, setAnnouncement] = useState(null);
+
     useEffect(() => {
         getUclGames().then(setGames).catch(e => setError(e.message)).finally(() => setLoading(false));
+        apiFetch('v1/announcement').then(setAnnouncement).catch(() => {});
+        // Priebežné skóre a body sa menia počas zápasu.
+        const iv = setInterval(() => { getUclGames().then(setGames).catch(() => {}); }, 30000);
+        return () => clearInterval(iv);
     }, []);
+
+    // Zápas už začal, ale ešte nie je schválený výsledok.
+    const live = useMemo(() => games
+        .filter(g => g.home_team_id && g.away_team_id && !g.result_approved
+                     && isValidDate(asDate(g.start_time)) && asDate(g.start_time) <= new Date())
+        .sort((a, b) => asDate(a.start_time) - asDate(b.start_time)), [games]);
 
     // Zápasy, ktoré sa dajú tipovať — rovnaké pravidlo ako na serveri.
     const upcoming = useMemo(() => games
         .filter(g => canTip(g))
         .sort((a, b) => asDate(a.start_time) - asDate(b.start_time))
         .slice(0, 8), [games]);
+
+    // Zápasy z hornej sekcie sa v Najbližších neopakujú.
+    const upcomingRest = useMemo(() => {
+        const shown = new Set(untipped.map(g => g.game_id));
+        return upcoming.filter(g => !shown.has(g.game_id));
+    }, [upcoming, untipped]);
+
+    // Netipované zápasy, ktoré sa hrajú dnes alebo zajtra — na tie sa dá zabudnúť.
+    const untipped = useMemo(() => {
+        const dayOf = d => d.toLocaleDateString('sk-SK');
+        const today = dayOf(new Date());
+        const tomorrow = dayOf(new Date(Date.now() + 86400000));
+        return games.filter(g => {
+            if (!canTip(g) || g.home_score_tip != null) return false;
+            const day = dayOf(asDate(g.start_time));
+            return day === today || day === tomorrow;
+        }).sort((a, b) => asDate(a.start_time) - asDate(b.start_time));
+    }, [games]);
 
     const played = useMemo(() => games
         .filter(g => g.result_approved && g.home_score_tip !== null)
@@ -101,16 +133,88 @@ export default function UclDashboard() {
                 ))}
             </div>
 
+            {announcement?.body && (
+                <div style={{ background: '#fff8e1', border: '1px solid #ffe0a3', borderRadius: 10,
+                              padding: '12px 16px', marginBottom: 16 }}>
+                    <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#a67c00', marginBottom: 4 }}>
+                        📢 Oznam organizátora
+                    </div>
+                    <div style={{ whiteSpace: 'pre-wrap', fontSize: '0.88rem' }}>{announcement.body}</div>
+                </div>
+            )}
+
             {message && <p style={{ color: '#28a745', fontSize: '0.85rem' }}>{message}</p>}
             {error && <p style={{ color: '#c0392b', fontSize: '0.85rem' }}>✗ {error}</p>}
 
+            {live.length > 0 && (
+                <>
+                    <h3 style={{ marginTop: 20, display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{ color: '#dc3545' }}>●</span> Prebiehajúce zápasy
+                    </h3>
+                    {live.map(g => (
+                        <div key={g.game_id} style={{ background: '#fff', border: '1px solid #f2c2c2', borderRadius: 10,
+                                                      padding: 12, marginBottom: 8 }}>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
+                                <div style={{ minWidth: 120, fontSize: '0.78rem', color: '#666' }}>
+                                    {dayFmt(g.start_time)}
+                                    <div style={{ fontSize: '0.7rem', color: '#dc3545', fontWeight: 700 }}>LIVE</div>
+                                </div>
+                                <div style={{ flex: 1, minWidth: 240, display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: 8 }}>
+                                    <Club name={g.home_name} logo={g.home_logo} align="right" />
+                                    <strong style={{ color: '#dc3545' }}>
+                                        {scoreText(g) ?? 'vs'}
+                                    </strong>
+                                    <Club name={g.away_name} logo={g.away_logo} />
+                                </div>
+                                <div style={{ fontSize: '0.82rem' }}>
+                                    {g.home_score_tip !== null
+                                        ? <>Tip: <strong>{g.home_score_tip}:{g.away_score_tip}</strong></>
+                                        : <span style={{ color: '#999' }}>netipoval si</span>}
+                                </div>
+                            </div>
+                            <UclGroupTips game={g} />
+                        </div>
+                    ))}
+                </>
+            )}
+
+            {untipped.length > 0 && (
+                <>
+                    <h3 style={{ marginTop: 20 }}>Netipované — dnes a zajtra</h3>
+                    {untipped.map(g => (
+                        <div key={g.game_id} style={{ background: '#fffbf0', border: '1px solid #ffe0a3', borderRadius: 10,
+                                                      padding: 12, marginBottom: 8, display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
+                            <div style={{ minWidth: 120, fontSize: '0.78rem', color: '#666' }}>
+                                {dayFmt(g.start_time)}
+                                <div style={{ fontSize: '0.7rem', color: '#999' }}>{g.game_type_name}</div>
+                            </div>
+                            <div style={{ flex: 1, minWidth: 240, display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: 8 }}>
+                                <Club name={g.home_name} logo={g.home_logo} align="right" />
+                                <span style={{ color: '#bbb' }}>vs</span>
+                                <Club name={g.away_name} logo={g.away_logo} />
+                            </div>
+                            <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                                <input value={draftOf(g, 'home')} onChange={e => setDraft(g.game_id, 'home', e.target.value)}
+                                       inputMode="numeric" style={{ width: 38, textAlign: 'center' }} aria-label="Tip domáci" />
+                                <span>:</span>
+                                <input value={draftOf(g, 'away')} onChange={e => setDraft(g.game_id, 'away', e.target.value)}
+                                       inputMode="numeric" style={{ width: 38, textAlign: 'center' }} aria-label="Tip hostia" />
+                                <button onClick={() => save(g)} disabled={saving === g.game_id}>
+                                    {saving === g.game_id ? '…' : 'Uložiť'}
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                </>
+            )}
+
             <h3 style={{ marginTop: 20 }}>Najbližšie zápasy na tipovanie</h3>
-            {upcoming.length === 0 && (
+            {upcomingRest.length === 0 && untipped.length === 0 && (
                 <p style={{ color: '#888' }}>
                     Momentálne nie je čo tipovať. Play-off sa odomkne, keď budú známi postupujúci.
                 </p>
             )}
-            {upcoming.map(g => (
+            {upcomingRest.map(g => (
                 <div key={g.game_id} style={{ background: '#fff', border: '1px solid #e9ecef', borderRadius: 10,
                                               padding: 12, marginBottom: 8, display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
                     <div style={{ minWidth: 120, fontSize: '0.78rem', color: '#666' }}>
