@@ -26,6 +26,48 @@ function livescore_match_id(string $url): ?string {
     return null;
 }
 
+// Rozlozi feed "KLUC÷hodnota¬KLUC÷hodnota" na pole.
+function livescore_parse_feed(string $raw): array {
+    $out = [];
+    foreach (explode('¬', $raw) as $pair) {
+        $i = mb_strpos($pair, '÷');
+        if ($i !== false) $out[mb_substr($pair, 0, $i)] = mb_substr($pair, $i + 1);
+    }
+    return $out;
+}
+
+// Minuta sa da z feedu spocitat jednoznacne, preto ju neprenechavame modelu.
+// DB urcuje fazu, DC je zaciatok zapasu a DD zaciatok prebiehajucej casti.
+// Pri prestavkach sa vracia minuta, v ktorej sa stalo, aby bolo co zobrazit.
+function livescore_minute(array $f): array {
+    $db  = isset($f['DB']) ? (int)$f['DB'] : 0;
+    $now = time();
+    $from = static function (?string $ts) use ($now): ?int {
+        if ($ts === null || $ts === '') return null;
+        $mins = (int)floor(($now - (int)$ts) / 60);
+        return $mins >= 0 ? $mins : null;
+    };
+
+    switch ($db) {
+        case 12:  // 1. polcas
+            return ['minute' => $from($f['DC'] ?? null), 'note' => null];
+        case 13:  // 2. polcas
+            $m = $from($f['DD'] ?? null);
+            return ['minute' => $m === null ? null : $m + 45, 'note' => null];
+        case 6:   // predlzenie
+            $m = $from($f['DD'] ?? null);
+            return ['minute' => $m === null ? null : $m + 90, 'note' => null];
+        case 38:  // polcasova prestavka
+            return ['minute' => 45, 'note' => 'prestávka'];
+        case 46:  // prestavka pred predlzenim
+            return ['minute' => 90, 'note' => 'pred predĺžením'];
+        case 7:   // penalty
+            return ['minute' => 120, 'note' => 'penalty'];
+        default:
+            return ['minute' => null, 'note' => null];
+    }
+}
+
 // Vrati surovy feed so skore a priebehom zapasu, alebo prazdny retazec.
 function livescore_fetch_feed(string $matchId): string {
     $out = '';
@@ -49,8 +91,9 @@ function livescore_fetch_feed(string $matchId): string {
             $out .= "\n\n$label:\n" . mb_substr($resp, 0, 4000);
             // Minutu spocita server, model ju uz len prevezme.
             if ($label === 'STAV A SKORE') {
-                $min = livescore_minute(livescore_parse_feed($resp));
-                $out .= "\n\nVYPOCITANA_MINUTA: " . ($min === null ? 'null' : $min);
+                $m = livescore_minute(livescore_parse_feed($resp));
+                $out .= "\n\nVYPOCITANA_MINUTA: " . ($m['minute'] === null ? 'null' : $m['minute']);
+                if ($m['note'] !== null) $out .= "\nPOZNAMKA_K_MINUTE: " . $m['note'];
             }
         }
     }
@@ -121,6 +164,7 @@ Vráť VÝHRADNE JSON bez akéhokoľvek komentára, v tomto tvare:
   "started": true/false,
   "finished": true/false,
   "minute": číslo prebiehajúcej minúty alebo null,
+  "minute_note": "prestávka / pred predĺžením / penalty, inak null",
   "period": "1. polčas / 2. polčas / predĺženie / penalty / null",
   "status": "krátky stav: Naplánovaný / 1. polčas / Polčas / 2. polčas / Predĺženie / Penalty / Koniec / iné",
   "home_score": číslo alebo null,
@@ -154,6 +198,8 @@ Pravidlá:
 - MINÚTU NEPOČÍTAJ. Do poľa "minute" opíš presne hodnotu VYPOCITANA_MINUTA
   uvedenú vo feede. Ak je tam "null", daj null. Nič neuprav ani neprepočítavaj.
   Nikdy neber minútu z gólov — tá hovorí, kedy padol gól, nie koľko sa hrá.
+- Ak je uvedená POZNAMKA_K_MINUTE, prepíš ju do poľa "minute_note".
+  Inak daj do "minute_note" null.
 - V sekcii PRIEBEH sú udalosti: IB = minúta, IK = typ (Goal, Yellow Card,
   Red Card, Substitution), IF = hráč, IA = 1 pre domácich a 2 pre hostí.
   Karty spočítaj podľa IK a IA. Ak zápas beží a žiadna karta v PRIEBEHU nie je,

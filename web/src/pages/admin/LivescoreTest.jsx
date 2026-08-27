@@ -99,7 +99,8 @@ function Watch({ item, onUpdate, onStop, onRemove, model }) {
                             ['Stav', d.status],
                             ['Začal', d.started === null ? null : d.started ? 'áno' : 'nie'],
                             ['Skončil', d.finished === null ? null : d.finished ? 'áno' : 'nie'],
-                            ['Minúta', d.minute],
+                            ['Minúta', d.minute === null || d.minute === undefined ? null
+                                : d.minute_note ? `${d.minute} (${d.minute_note})` : d.minute],
                             ['Časť', d.period],
                             ['Skóre', score(d.home_score, d.away_score)],
                             ['Polčas', score(d.home_score_halftime, d.away_score_halftime)],
