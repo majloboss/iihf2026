@@ -227,10 +227,29 @@ function livescore_ask_model(string $input, string $model): array {
     return $res;
 }
 
+// Posle modelu hotovy prompt (nie surovy vstup) — pouziva hromadne zistovanie.
+function livescore_ask_model_raw(string $prompt, string $model): array {
+    $res = livescore_call_model_prompt($prompt, $model);
+    $prechodna = $res['error'] !== null && preg_match(
+        '/provider returned error|rate limit|timeout|temporarily|overloaded|503|502|429/i',
+        $res['error']);
+    if ($prechodna) {
+        sleep(2);
+        $druhy = livescore_call_model_prompt($prompt, $model);
+        if ($druhy['error'] === null) return $druhy;
+        $res['error'] .= ' (opakovaný pokus zlyhal tiež)';
+    }
+    return $res;
+}
+
 function livescore_call_model(string $input, string $model): array {
+    return livescore_call_model_prompt(livescore_prompt($input), $model);
+}
+
+function livescore_call_model_prompt(string $prompt, string $model): array {
     $payload = json_encode([
         'model'       => $model,
-        'messages'    => [['role' => 'user', 'content' => livescore_prompt($input)]],
+        'messages'    => [['role' => 'user', 'content' => $prompt]],
         'temperature' => 0,
         'max_tokens'  => 900,
     ], JSON_UNESCAPED_UNICODE);
@@ -265,7 +284,7 @@ function livescore_call_model(string $input, string $model): array {
 
     $content = $ai['choices'][0]['message']['content'] ?? '';
     // Model niekedy obali JSON do ```json ... ``` alebo pripoji komentar.
-    if (preg_match('/\{.*\}/s', $content, $m)) $content = $m[0];
+    if (preg_match('/[\[{].*[\]}]/s', $content, $m)) $content = $m[0];
 
     return [
         'data'    => json_decode($content, true),

@@ -21,3 +21,5 @@ export const editUclGame = (data) =>
 export const recalcUcl = () => apiFetch('v1/admin/ucl-recalc', { method: 'POST' });
 export const editUclTie = (data) =>
     apiFetch('v1/admin/ucl-tie-edit', { method: 'PUT', body: JSON.stringify(data) });
+export const getUclLivescore = () => apiFetch('v1/admin/ucl-livescore');
+export const refreshUclLivescore = () => apiFetch('v1/admin/ucl-livescore', { method: 'POST' });

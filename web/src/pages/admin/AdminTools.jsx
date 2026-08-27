@@ -6,6 +6,7 @@ import { useCompetition } from '../../context/CompetitionContext';
 
 const BASE = import.meta.env.VITE_API_URL ?? '/api';
 import UclGameGenerator from './UclGameGenerator';
+import UclLivescore from './UclLivescore';
 import LivescoreTest from './LivescoreTest';
 import styles from './Admin.module.css';
 
@@ -216,7 +217,10 @@ export default function AdminTools() {
             </div>
 
             {/* ════════ LIGA MAJSTROV 2026/27 ════════ */}
-            {tab === 'ucl' && <UclGameGenerator />}
+            {tab === 'ucl' && <>
+                <UclLivescore />
+                <UclGameGenerator />
+            </>}
 
             {/* ════════ PRIHLASOVANIE (impersonácia) ════════ */}
             {tab === 'login' && (

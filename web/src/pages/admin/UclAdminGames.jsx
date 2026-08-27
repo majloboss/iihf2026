@@ -106,6 +106,7 @@ export default function UclAdminGames() {
                 away_team_id: editing.away_team_id || null,
                 start_time: fromInput(editing.start_time),
                 venue: editing.venue || '',
+                flashscore_url: editing.flashscore_url || '',
                 tips_open: editing.tips_open,
             });
             setEditing(null);
@@ -238,7 +239,8 @@ export default function UclAdminGames() {
                                     <button className={styles.btnSmall} onClick={() => setEditing({
                                         game_id: g.game_id, game_type_name: g.game_type_name,
                                         home_team_id: g.home_team_id || '', away_team_id: g.away_team_id || '',
-                                        start_time: toInput(g.start_time), venue: g.venue || '', tips_open: g.tips_open,
+                                        start_time: toInput(g.start_time), venue: g.venue || '',
+                                        flashscore_url: g.flashscore_url || '', tips_open: g.tips_open,
                                     })}>Upraviť</button>
                                 </div></td>
                             </tr>
