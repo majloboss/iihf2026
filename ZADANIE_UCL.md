@@ -146,6 +146,22 @@ klub, ktorý sa nekvalifikoval, v číselníku zostáva a o rok sa môže vráti
 
 ---
 
+## Endpointy prepínajúce podľa súťaže
+
+Tieto čítajú tipy podľa slugu. **Každý nový endpoint tohto typu musí dostať vetvu
+pre `ucl2026`** — inak ticho spadne na IIHF a zobrazí body z inej súťaže.
+
+| Súbor | Účel |
+|---|---|
+| `v1/standings.php` | poradie hráčov v skupinách |
+| `v1/admin/standings.php` | to isté v admin sekcii |
+| `v1/player_tips.php` | rozklik tipov hráča |
+| `v1/team-names.php` | názvy tímov pre popisky |
+| `v1/global-standings.php` | celkové poradie naprieč súťažami |
+| `v1/hall-of-fame.php` | sieň slávy |
+
+---
+
 ## Obrazovky
 
 Prepínajú sa podľa slugu `ucl2026` v `App.jsx`:
