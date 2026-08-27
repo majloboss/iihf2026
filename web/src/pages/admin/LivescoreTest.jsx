@@ -129,10 +129,86 @@ function Watch({ item, onUpdate, onStop, onRemove }) {
     );
 }
 
+// Porovnanie bezplatných modelov na tej istej adrese — ukáže, ktorý je použiteľný.
+function ModelCompare({ url, onClose }) {
+    const [rows, setRows] = useState([]);
+    const [running, setRunning] = useState(true);
+    const [error, setError] = useState('');
+
+    useEffect(() => {
+        let stop = false;
+        (async () => {
+            try {
+                const { models } = await apiFetch('v1/admin/livescore-models');
+                if (stop) return;
+                setRows(models.map(m => ({ ...m, state: 'čaká' })));
+                // Postupne, nie naraz — bezplatné modely majú limit požiadaviek za minútu.
+                for (const m of models) {
+                    if (stop) return;
+                    setRows(cur => cur.map(r => r.id === m.id ? { ...r, state: 'testujem…' } : r));
+                    try {
+                        const r = await apiFetch('v1/admin/livescore-models', {
+                            method: 'POST', body: JSON.stringify({ url, model: m.id }),
+                        });
+                        if (stop) return;
+                        setRows(cur => cur.map(x => x.id === m.id ? { ...x, ...r, state: 'hotovo' } : x));
+                    } catch (e) {
+                        if (stop) return;
+                        setRows(cur => cur.map(x => x.id === m.id ? { ...x, state: 'chyba', error: e.message } : x));
+                    }
+                }
+            } catch (e) { if (!stop) setError(e.message); }
+            finally { if (!stop) setRunning(false); }
+        })();
+        return () => { stop = true; };
+    }, [url]);
+
+    const filled = d => (d ? Object.values(d).filter(v => v !== null && v !== undefined && v !== '').length : 0);
+
+    return (
+        <div style={{ marginTop: 14, borderTop: '1px solid #e9ecef', paddingTop: 12 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                <strong style={{ fontSize: '0.88rem' }}>
+                    Porovnanie modelov {running && '— prebieha, netreba čakať pri obrazovke'}
+                </strong>
+                <button className={styles.btnSmall} onClick={onClose}>Zavrieť</button>
+            </div>
+            {error && <p className={styles.error}>✗ {error}</p>}
+            <div style={{ overflowX: 'auto' }}>
+                <table className={styles.table}>
+                    <thead><tr>
+                        <th>Model</th><th>Stav</th><th>Zápas</th><th>Skóre</th>
+                        <th>Vyplnených polí</th><th>Čas</th>
+                    </tr></thead>
+                    <tbody>
+                        {rows.map(r => (
+                            <tr key={r.id} style={r.ok ? { background: '#f2fbf5' } : undefined}>
+                                <td className={styles.mono} style={{ fontSize: '0.75rem' }}>{r.id}</td>
+                                <td>{r.state === 'hotovo' ? (r.ok ? '✓ JSON' : '✗ nie JSON') : r.state}</td>
+                                <td style={{ fontSize: '0.8rem' }}>
+                                    {r.data?.home_team ? `${r.data.home_team} — ${r.data.away_team ?? '?'}` : '—'}
+                                </td>
+                                <td>{score(r.data?.home_score, r.data?.away_score)}</td>
+                                <td>{r.data ? `${filled(r.data)} / 17` : '—'}</td>
+                                <td>{r.ms ? `${(r.ms / 1000).toFixed(1)} s` : '—'}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+            <p style={{ margin: '8px 0 0', fontSize: '0.75rem', color: '#888' }}>
+                Model s najviac vyplnenými poľami a platným JSON je najvhodnejší —
+                zapíš jeho id do <code>api/config/openrouter.php</code>.
+            </p>
+        </div>
+    );
+}
+
 export default function LivescoreTest() {
     const [url, setUrl] = useState('');
     const [items, setItems] = useState([]);
     const [error, setError] = useState('');
+    const [compareUrl, setCompareUrl] = useState(null);
 
     const add = (e) => {
         e.preventDefault();
@@ -168,7 +244,14 @@ export default function LivescoreTest() {
                     style={{ flex: 1, minWidth: 260, padding: '7px 10px' }}
                 />
                 <button className={styles.btn} type="submit">Sledovať</button>
+                <button className={styles.btnSmall} type="button"
+                        disabled={!url.trim()}
+                        onClick={() => setCompareUrl(url.trim())}>
+                    Porovnať modely
+                </button>
             </form>
+
+            {compareUrl && <ModelCompare url={compareUrl} onClose={() => setCompareUrl(null)} />}
 
             {error && <p className={styles.error} style={{ marginTop: 8 }}>✗ {error}</p>}
 

@@ -11,11 +11,17 @@ Súbor je v `.gitignore`, takže sa kľúč nedostane do repozitára.
 
 ## Model
 
-Predvolený je bezplatný `meta-llama/llama-3.3-70b-instruct:free`.
-Ďalšie bezplatné modely majú príponu `:free` — zoznam na https://openrouter.ai/models.
+Predvolený je bezplatný `google/gemma-4-31b-it:free`.
 
-Bezplatné modely majú nižšie limity požiadaviek za minútu a menšie kontextové okno.
-Preto sa vstup kráti na ~12 000 znakov (text stránky + dátový feed).
+**Ktoré modely sú bezplatné, sa v čase mení.** Model, ktorý bol včera zadarmo,
+môže dnes vrátiť `This model is unavailable for free`. Preto je v rozhraní
+tlačidlo **Porovnať modely** — načíta aktuálny zoznam `:free` modelov,
+otestuje ich na zadanej adrese a ukáže, ktorý vráti najviac údajov.
+
+Víťaza zapíš do `OPENROUTER_MODEL`.
+
+Bezplatné modely majú nižšie limity požiadaviek za minútu, preto sa v porovnaní
+testujú postupne, nie naraz. Vstup sa kráti na ~12 000 znakov.
 
 ## Ako to funguje
 

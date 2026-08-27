@@ -8,5 +8,5 @@
 define('OPENROUTER_KEY',   'sk-or-v1-...');
 // Bezplatne modely maju priponu :free. Maju nizsie limity na pocet
 // poziadaviek za minutu, na testovanie livescore to staci.
-define('OPENROUTER_MODEL', 'meta-llama/llama-3.3-70b-instruct:free');
+define('OPENROUTER_MODEL', 'google/gemma-4-31b-it:free');
 define('OPENROUTER_URL',   'https://openrouter.ai/api/v1/chat/completions');

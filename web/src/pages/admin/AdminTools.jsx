@@ -32,10 +32,7 @@ export default function AdminTools() {
     const [running,    setRunning]    = useState(null);
     const [results,    setResults]    = useState({});
     const [errors,     setErrors]     = useState({});
-    const [confirm,  setConfirm]  = useState(null); // 'init' | 'reset' | null
-    const [syncRes,  setSyncRes]  = useState(null);
-    const [syncErr,  setSyncErr]  = useState('');
-    const [syncing,  setSyncing]  = useState(false);
+    const [confirm,  setConfirm]  = useState(null);
     const [testMailTo,  setTestMailTo]  = useState('');
     const [testMailRes, setTestMailRes] = useState('');
     const [testMailing, setTestMailing] = useState(false);
@@ -80,7 +77,7 @@ export default function AdminTools() {
         }
     };
 
-    const busy = running !== null || syncing;
+    const busy = running !== null;
 
     const sendTestMail = async () => {
         setTestMailing(true); setTestMailRes('');
@@ -199,15 +196,6 @@ export default function AdminTools() {
         finally { setFifaAction(null); }
     };
 
-    const syncScores = async () => {
-        setSyncing(true); setSyncRes(null); setSyncErr('');
-        try {
-            const r = await apiFetch('v1/admin/sync-scores', { method: 'POST' });
-            setSyncRes(r);
-        } catch (e) { setSyncErr(e.message); }
-        finally { setSyncing(false); }
-    };
-
     return (
         <div className={styles.toolsWrap}>
             <h2>Nástroje</h2>
@@ -262,25 +250,6 @@ export default function AdminTools() {
             {tab === 'common' && <>
             {/* ── Test livescore cez OpenRouter ───────────────────────── */}
             <LivescoreTest />
-
-            {/* ── Sync výsledkov z API-Sports ─────────────────────────── */}
-            <div className={styles.card} style={{ padding: 20, marginTop: 16, borderLeft: '4px solid #1a3a6b' }}>
-                <h3 style={{ margin: '0 0 4px', fontSize: '1rem', color: '#1a3a6b' }}>🌐 Sync výsledkov (API-Sports)</h3>
-                <p style={{ margin: '0 0 12px', fontSize: '0.82rem', color: '#666' }}>
-                    Stiahne dnešné výsledky z API-Sports a aktualizuje skóre + stav zápasov.
-                    Dostupné od 15.5.2026 keď turnaj začne.
-                </p>
-                <button className={styles.btn} onClick={syncScores} disabled={busy}>
-                    {syncing ? 'Sťahujem…' : '↓ Sync výsledkov'}
-                </button>
-                {syncErr && <p style={{ color: '#dc3545', marginTop: 8, fontSize: '0.85rem' }}>{syncErr}</p>}
-                {syncRes && (
-                    <div style={{ background: '#f0f5ff', border: '1px solid #1a3a6b', borderRadius: 6, padding: '8px 12px', fontSize: '0.85rem', marginTop: 8 }}>
-                        <div>📅 Dátum: <strong>{syncRes.date}</strong> | Stiahnutých: <strong>{syncRes.fetched}</strong> | Aktualizovaných: <strong>{syncRes.updated}</strong></div>
-                        {syncRes.log?.map((l, i) => <div key={i} style={{ marginLeft: 8, marginTop: 2 }}>{l}</div>)}
-                    </div>
-                )}
-            </div>
 
             </>}
 
@@ -491,32 +460,6 @@ export default function AdminTools() {
 
             </>}
 
-            {/* ════════ COMMON (Inicializácia) ════════ */}
-            {tab === 'common' && <>
-            {/* ── Inicializácia systému ───────────────────────────────── */}
-            <div className={styles.card} style={{ padding: 20, marginTop: 12, borderLeft: '4px solid #dc3545' }}>
-                <h3 style={{ margin: '0 0 4px', fontSize: '1rem', color: '#dc3545' }}>⚠ Inicializácia systému</h3>
-                <p style={{ margin: '0 0 12px', fontSize: '0.82rem', color: '#666' }}>
-                    Vymaže <strong>všetkých userov, tipy, pozývacie linky, skupiny a tabuľky</strong>.
-                    Zápasy zostanú. Admini zostávajú. <strong>Nezvratné!</strong>
-                </p>
-                {confirm === 'init'
-                    ? <ConfirmInline
-                        text="Naozaj vymazať VŠETKÝCH userov a všetky dáta?"
-                        onYes={() => run('init')}
-                        onNo={() => setConfirm(null)}
-                      />
-                    : <button
-                        className={styles.btnSmallDanger}
-                        style={{ fontSize: '0.9rem', padding: '8px 16px' }}
-                        onClick={() => setConfirm('init')}
-                        disabled={busy}>
-                        {running === 'init' ? 'Prebieha…' : '⚠ Inicializovať systém'}
-                      </button>
-                }
-                <ResultArea keys={['init']} results={results} errors={errors} />
-            </div>
-            </>}
         </div>
     );
 }
@@ -591,10 +534,6 @@ function PushDiagBlock({ diag }) {
 function ResultBlock({ r }) {
     if (r.action === 'group') return <>
         <div>✓ Zápasy: <strong>{r.games}</strong>, Hráči: <strong>{r.users}</strong>, Tipy: <strong>{r.tips}</strong></div>
-    </>;
-    if (r.action === 'init') return <>
-        <div>✓ Userov vymazaných: <strong>{r.users_deleted}</strong></div>
-        <div>✓ Linkov vymazaných: <strong>{r.links_deleted}</strong></div>
     </>;
     if (r.action === 'load_pdf') return <>
         <div>✓ Zápasov načítaných z PDF: <strong>{r.games_loaded}</strong></div>
