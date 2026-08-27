@@ -16,6 +16,42 @@ function livescore_check_url(string $url): void {
     }
 }
 
+// Flashscore drzi zive udaje mimo HTML — stranka si ich dotahuje samostatnym
+// feedom podla id zapasu v URL (parameter mid alebo posledny segment cesty).
+function livescore_match_id(string $url): ?string {
+    $q = [];
+    parse_str(parse_url($url, PHP_URL_QUERY) ?? '', $q);
+    if (!empty($q['mid']) && preg_match('/^[A-Za-z0-9]{6,12}$/', $q['mid'])) return $q['mid'];
+    if (preg_match('#/match/[^?]*?([A-Za-z0-9]{8})/?(?:\?|$)#', $url, $m)) return $m[1];
+    return null;
+}
+
+// Vrati surovy feed so skore a priebehom zapasu, alebo prazdny retazec.
+function livescore_fetch_feed(string $matchId): string {
+    $out = '';
+    $feeds = [
+        'STAV A SKORE' => 'dc_1_' . $matchId,      // DA stav, DE/DF skore, DG/DH polcas
+        'PRIEBEH'      => 'df_sui_1_' . $matchId,  // goly, karty, striedania
+    ];
+    foreach ($feeds as $label => $path) {
+        $ch = curl_init('https://local-global.flashscore.ninja/2/x/feed/' . $path);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_TIMEOUT        => 12,
+            CURLOPT_HTTPHEADER     => ['x-fsign: SW9D1eZo'],
+            CURLOPT_USERAGENT      => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120',
+        ]);
+        $resp = curl_exec($ch);
+        $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        if ($resp && $code === 200 && !str_contains($resp, '<html')) {
+            $out .= "\n\n$label:\n" . mb_substr($resp, 0, 4000);
+        }
+    }
+    return $out;
+}
+
 // Stiahne stranku a pripravi z nej vstup pre model.
 function livescore_fetch_page(string $url): array {
     $ch = curl_init($url);
@@ -61,7 +97,8 @@ function livescore_fetch_page(string $url): array {
     return [
         'http_code' => $code,
         'chars'     => mb_strlen($text),
-        'input'     => mb_substr($text, 0, 5000) . mb_substr($extra, 0, 7000),
+        'match_id'  => livescore_match_id($url),
+        'input'     => mb_substr($text, 0, 3000) . mb_substr($extra, 0, 9000),
     ];
 }
 
