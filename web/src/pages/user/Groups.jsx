@@ -251,6 +251,9 @@ export default function Groups() {
                     const grpMembers = members[g.id];
                     // Po rozbalení počítaj z načítaných členov (je čerstvejšie),
                     // inak použi hodnotu z API — nech je počet vidieť aj zabalený.
+                    const invitedCnt = grpMembers
+                        ? grpMembers.filter(m => m.status === 'invited').length
+                        : Number(g.invited_count) || 0;
                     const pendingCnt = grpMembers
                         ? grpMembers.filter(m => m.status === 'pending').length
                         : Number(g.pending_count) || 0;
@@ -269,7 +272,8 @@ export default function Groups() {
                                         <span className={styles.groupName}>{g.name}</span>
                                         <span className={styles.meta}>
                                             {g.member_count} {Number(g.member_count) === 1 ? 'člen' : 'členov'}
-                                            {pendingCnt > 0 && <>{' · '}{pendingCnt} {pendingCnt === 1 ? 'pozvánka' : pendingCnt < 5 ? 'pozvánky' : 'pozvánok'}</>}
+                                            {invitedCnt > 0 && <>{' · '}{invitedCnt} {invitedCnt === 1 ? 'pozvánka' : invitedCnt < 5 ? 'pozvánky' : 'pozvánok'}</>}
+                                            {pendingCnt > 0 && <>{' · '}{pendingCnt} {pendingCnt === 1 ? 'žiadosť' : pendingCnt < 5 ? 'žiadosti' : 'žiadostí'}</>}
                                             {' · '}zakladateľ: {g.creator_username}
                                         </span>
                                         {g.description && (
