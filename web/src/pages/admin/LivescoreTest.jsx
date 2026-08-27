@@ -49,7 +49,9 @@ function Watch({ item, onUpdate, onStop, onRemove, model }) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [item.stopped, item.result?.data?.finished]);
 
-    const d = item.result?.data;
+    // Model nemusí vrátiť objekt — pole ani reťazec sa nesmú pokúsiť vykresliť ako údaje.
+    const raw = item.result?.data;
+    const d = raw !== null && typeof raw === 'object' && !Array.isArray(raw) ? raw : null;
     const usage = item.result?.usage;
 
     return (
@@ -123,7 +125,7 @@ function Watch({ item, onUpdate, onStop, onRemove, model }) {
                     </summary>
                     <pre style={{ background: '#f8f9fa', padding: 8, borderRadius: 6, fontSize: '0.7rem',
                                   overflowX: 'auto', marginTop: 4, whiteSpace: 'pre-wrap' }}>
-                        {JSON.stringify(d, null, 2)}
+                        {(() => { try { return JSON.stringify(d, null, 2); } catch { return String(d); } })()}
                     </pre>
                 </details>
             )}
@@ -134,7 +136,9 @@ function Watch({ item, onUpdate, onStop, onRemove, model }) {
                         Model nevrátil platný JSON — zobraziť odpoveď
                     </summary>
                     <pre style={{ background: '#f8f9fa', padding: 10, borderRadius: 6, fontSize: '0.72rem',
-                                  overflowX: 'auto', marginTop: 6 }}>{item.result.raw}</pre>
+                                  overflowX: 'auto', marginTop: 6, whiteSpace: 'pre-wrap' }}>
+                        {String(item.result.raw)}
+                    </pre>
                 </details>
             )}
         </div>
@@ -175,9 +179,15 @@ function ModelCompare({ url, onClose }) {
         return () => { stop = true; };
     }, [url]);
 
-    const filledKeys = d => (d
+    const isObj = d => d !== null && typeof d === 'object' && !Array.isArray(d);
+    const filledKeys = d => (isObj(d)
         ? Object.entries(d).filter(([, v]) => v !== null && v !== undefined && v !== '').map(([k]) => k)
         : []);
+    // JSON.stringify padne na cyklickej strukture — obsah od modelu nie je overeny.
+    const safeJson = v => {
+        try { return JSON.stringify(v, null, 2); }
+        catch { return String(v); }
+    };
 
     return (
         <div style={{ marginTop: 14, borderTop: '1px solid #e9ecef', paddingTop: 12 }}>
@@ -200,16 +210,17 @@ function ModelCompare({ url, onClose }) {
                                 <td className={styles.mono} style={{ fontSize: '0.75rem' }}>{r.id}</td>
                                 <td>{r.state === 'hotovo' ? (r.ok ? '✓ JSON' : '✗ nie JSON') : r.state}</td>
                                 <td style={{ fontSize: '0.8rem' }}>
-                                    {r.data?.home_team ? `${r.data.home_team} — ${r.data.away_team ?? '?'}` : '—'}
+                                    {isObj(r.data) && r.data.home_team
+                                        ? `${r.data.home_team} — ${r.data.away_team ?? '?'}` : '—'}
                                 </td>
-                                <td>{score(r.data?.home_score, r.data?.away_score)}</td>
-                                <td>{r.data ? `${filledKeys(r.data).length} / 17` : '—'}</td>
+                                <td>{isObj(r.data) ? score(r.data.home_score, r.data.away_score) : '—'}</td>
+                                <td>{isObj(r.data) ? `${filledKeys(r.data).length} / 17` : '—'}</td>
                                 <td>{r.ms ? `${(r.ms / 1000).toFixed(1)} s` : '—'}</td>
                             </tr>,
                             (r.data || r.raw || r.error) && (
                                 <tr key={r.id + '-d'} style={r.ok ? { background: '#f2fbf5' } : undefined}>
                                     <td colSpan="6" style={{ paddingTop: 0 }}>
-                                        {r.data && (
+                                        {isObj(r.data) && (
                                             <div style={{ fontSize: '0.75rem', color: '#555', marginBottom: 4 }}>
                                                 <strong>Vyplnil:</strong> {filledKeys(r.data).join(', ') || 'nič'}
                                             </div>
@@ -221,7 +232,7 @@ function ModelCompare({ url, onClose }) {
                                             <pre style={{ background: '#f8f9fa', padding: 8, borderRadius: 6,
                                                           fontSize: '0.7rem', overflowX: 'auto', marginTop: 4,
                                                           whiteSpace: 'pre-wrap' }}>
-                                                {r.data ? JSON.stringify(r.data, null, 2) : (r.raw || r.error)}
+                                                {r.data != null ? safeJson(r.data) : String(r.raw || r.error || '')}
                                             </pre>
                                         </details>
                                     </td>
