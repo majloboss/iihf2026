@@ -285,8 +285,15 @@ function livescore_call_model_prompt(string $prompt, string $model, int $maxToke
     $finish = $ai['choices'][0]['finish_reason'] ?? null;
     $content = $ai['choices'][0]['message']['content'] ?? '';
     if ($finish === 'length') {
-        return ['data' => null, 'content' => $content, 'usage' => $ai['usage'] ?? null,
-                'error' => 'Odpoveď modelu bola orezaná — priveľa zápasov naraz'];
+        // Z pola sa daju zachranit celé objekty, ktore sa stihli dopisat.
+        $saved = null;
+        if (preg_match('/\[.*\}/s', $content, $m)) {
+            $saved = json_decode($m[0] . ']', true);
+        }
+        return ['data' => is_array($saved) ? $saved : null,
+                'content' => $content, 'usage' => $ai['usage'] ?? null,
+                'error' => is_array($saved) ? null
+                    : 'Odpoveď modelu bola orezaná — priveľa zápasov naraz'];
     }
     // Model niekedy obali JSON do ```json ... ``` alebo pripoji komentar.
     if (preg_match('/[\[{].*[\]}]/s', $content, $m)) $content = $m[0];

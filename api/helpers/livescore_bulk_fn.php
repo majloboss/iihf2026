@@ -151,6 +151,9 @@ function livescore_bulk_prompt(string $rows): string {
     return <<<PROMPT
 Z feedu Flashscore vyčítaj stav každého zápasu. Každý riadok je jeden zápas.
 
+Odpovedz rovno JSON polom. Nepíš žiadny úvod, vysvetlenie ani úvahu —
+prvý znak odpovede musí byť [ a posledný ].
+
 Význam polí:
   AA = identifikátor zápasu (vráť ho v poli "id")
   AE = domáci tím, AF = hosťujúci tím
@@ -217,7 +220,7 @@ function livescore_bulk_check(array $wantedIds, string $model): array {
     }
 
     // Odpoved rastie s poctom zapasov — jeden zabera zhruba 160 tokenov.
-    $maxTokens = min(400 + $prep['found'] * 200, 8000);
+    $maxTokens = min(1200 + $prep['found'] * 250, 12000);
     $res = livescore_ask_model_raw(livescore_bulk_prompt($prep['input']), $model, $maxTokens);
     if ($res['error'] !== null) return ['ok' => false, 'error' => $res['error'], 'games' => []];
 
