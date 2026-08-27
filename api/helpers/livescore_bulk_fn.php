@@ -55,8 +55,12 @@ function livescore_bulk_input(array $games, array $wanted, bool $withDetails = f
             if (isset($f[$k]) && $f[$k] !== '') $parts[] = $k . '÷' . $f[$k];
         }
         // Minutu spocita server — model ju uz len prevezme.
-        $m = livescore_minute(['DB' => $f['AC'] ?? null, 'DC' => $f['AD'] ?? null,
-                               'DD' => $f['AD'] ?? null]);
+        $state = ['DB' => $f['AC'] ?? null, 'DC' => $f['AD'] ?? null, 'DD' => null];
+        // V 2. polcase a predlzeni treba zaciatok tej casti, ktory hromadny feed nema.
+        if (in_array((string)($f['AC'] ?? ''), ['13', '6'], true)) {
+            $state['DD'] = livescore_half_start($id);
+        }
+        $m = livescore_minute($state);
         $parts[] = 'MINUTA÷' . ($m['minute'] === null ? 'null' : $m['minute']);
         if ($m['note'] !== null) $parts[] = 'POZNAMKA÷' . $m['note'];
         $row = implode('¬', $parts);
@@ -71,6 +75,29 @@ function livescore_bulk_input(array $games, array $wanted, bool $withDetails = f
         $rows[] = $row;
     }
     return ['input' => implode("\n", $rows), 'missing' => $missing, 'found' => count($rows)];
+}
+
+// Zaciatok prebiehajucej casti zapasu (DD) — hromadny feed ho neobsahuje.
+// Vysledok sa drzi kratko v pamati, aby sa pri kazdom zapase nestahoval znova.
+function livescore_half_start(string $matchId): ?string {
+    static $cache = [];
+    if (array_key_exists($matchId, $cache)) return $cache[$matchId];
+
+    $ch = curl_init('https://local-global.flashscore.ninja/2/x/feed/dc_1_' . $matchId);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_TIMEOUT        => 10,
+        CURLOPT_HTTPHEADER     => ['x-fsign: SW9D1eZo'],
+        CURLOPT_USERAGENT      => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120',
+    ]);
+    $raw  = curl_exec($ch);
+    $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if (!$raw || $code !== 200 || str_contains($raw, '<html')) return $cache[$matchId] = null;
+    $f = livescore_parse_feed($raw);
+    return $cache[$matchId] = ($f['DD'] ?? null);
 }
 
 // Rozhodne, ci sa oplati stiahnut detailny feed. Porovnava skore a stav
