@@ -64,11 +64,6 @@ export default function UclDashboard() {
         .sort((a, b) => asDate(a.start_time) - asDate(b.start_time))
         .slice(0, 8), [games]);
 
-    // Zápasy z hornej sekcie sa v Najbližších neopakujú.
-    const upcomingRest = useMemo(() => {
-        const shown = new Set(untipped.map(g => g.game_id));
-        return upcoming.filter(g => !shown.has(g.game_id));
-    }, [upcoming, untipped]);
 
     // Netipované zápasy, ktoré sa hrajú dnes alebo zajtra — na tie sa dá zabudnúť.
     const untipped = useMemo(() => {
@@ -81,6 +76,13 @@ export default function UclDashboard() {
             return day === today || day === tomorrow;
         }).sort((a, b) => asDate(a.start_time) - asDate(b.start_time));
     }, [games]);
+
+    // Zápasy z hornej sekcie sa v Najbližších neopakujú.
+    // Musí stáť až za `untipped` — inak by sa použilo pred inicializáciou.
+    const upcomingRest = useMemo(() => {
+        const shown = new Set(untipped.map(g => g.game_id));
+        return upcoming.filter(g => !shown.has(g.game_id));
+    }, [upcoming, untipped]);
 
     const played = useMemo(() => games
         .filter(g => g.result_approved && g.home_score_tip !== null)
