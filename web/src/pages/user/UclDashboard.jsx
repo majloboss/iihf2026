@@ -20,7 +20,11 @@ function scoreText(g) {
     if (g.home_score_regular === null || g.away_score_regular === null) return null;
     const base = `${g.home_score_regular} : ${g.away_score_regular}`;
     const hasFinal = g.home_score_final !== null && g.away_score_final !== null;
-    return hasFinal ? `${base} (${g.home_score_final}:${g.away_score_final} pp)` : base;
+    if (hasFinal) return `${base} (${g.home_score_final}:${g.away_score_final} pp)`;
+    // Polčasové skóre poteší, kým zápas beží.
+    const ht = g.home_score_halftime !== null && g.home_score_halftime !== undefined
+            && g.away_score_halftime !== null && g.away_score_halftime !== undefined;
+    return ht && !g.result_approved ? `${base} (${g.home_score_halftime}:${g.away_score_halftime})` : base;
 }
 
 function Club({ name, logo, align }) {

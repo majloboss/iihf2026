@@ -11,7 +11,7 @@ if ($method !== 'GET') json_error('Method not allowed', 405);
 function ucl_cast_game(?array $r): ?array {
     if ($r === null) return null;
     $ints  = ['game_id','home_score_regular','away_score_regular','home_score_final','away_score_final',
-              'home_team_id','away_team_id','ls_home','ls_away','home_score_tip','away_score_tip','points_earned'];
+              'home_team_id','away_team_id','ls_home','ls_away','home_score_halftime','away_score_halftime','home_score_tip','away_score_tip','points_earned'];
     $bools = ['result_approved','tips_open'];
     foreach ($ints  as $c) if (array_key_exists($c, $r)) $r[$c] = $r[$c] === null ? null : (int)$r[$c];
     foreach ($bools as $c) if (array_key_exists($c, $r)) $r[$c] = ($r[$c] === true || $r[$c] === 't' || $r[$c] === '1' || $r[$c] === 1);
@@ -22,6 +22,7 @@ $select = '
     SELECT g.game_id, g.start_time, g.venue, g.tips_open,
            g.home_score_regular, g.away_score_regular,
            g.home_score_final,   g.away_score_final,
+           g.home_score_halftime, g.away_score_halftime,
            g.result_approved, g.game_type_code, g.game_type_name,
            g.home_team_id, g.away_team_id, g.flashscore_url,
            -- Cislo kola ligovej fazy sa da odvodit z nazvu ("Ligová fáza — 3. kolo").

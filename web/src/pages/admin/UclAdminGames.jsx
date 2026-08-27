@@ -60,11 +60,22 @@ export default function UclAdminGames() {
 
     const FIELD = { home: 'home_score_regular', away: 'away_score_regular',
                     homeFin: 'home_score_final', awayFin: 'away_score_final' };
+    const LIVE_FIELD = { home: 'ls_home', away: 'ls_away' };
+    // Poradie: čo admin práve píše > čo je uložené > návrh z livescore.
     const scoreOf = (g, side) => {
         const s = scores[g.game_id];
         if (s && s[side] !== undefined) return s[side];
         const v = g[FIELD[side]];
-        return v === null || v === undefined ? '' : String(v);
+        if (v !== null && v !== undefined) return String(v);
+        const live = LIVE_FIELD[side] ? g[LIVE_FIELD[side]] : null;
+        return live === null || live === undefined ? '' : String(live);
+    };
+    // Návrh z livescore, ktorý admin ešte nepotvrdil.
+    const isSuggested = (g, side) => {
+        const s = scores[g.game_id];
+        if (s && s[side] !== undefined) return false;
+        if (g[FIELD[side]] !== null && g[FIELD[side]] !== undefined) return false;
+        return LIVE_FIELD[side] ? g[LIVE_FIELD[side]] !== null && g[LIVE_FIELD[side]] !== undefined : false;
     };
     // Predĺženie sa hrá len v play-off a len pri remíze po 90 minútach.
     const needsFinal = (g) => {
@@ -128,6 +139,7 @@ export default function UclAdminGames() {
 
     if (loading) return <p>Načítavam zápasy…</p>;
     const list = byPhase[phase] || [];
+    const suggested = list.filter(g => isSuggested(g, 'home') || isSuggested(g, 'away')).length;
 
     return (
         <div>
@@ -152,6 +164,15 @@ export default function UclAdminGames() {
 
             {message && <p className={styles.success}>{message}</p>}
             {error && <p className={styles.error}>✗ {error}</p>}
+
+            {suggested > 0 && (
+                <p style={{ fontSize: '0.82rem', color: '#e67e22', margin: '0 0 10px' }}>
+                    {suggested === 1
+                        ? 'Jeden zápas má návrh skóre z livescore'
+                        : `${suggested} zápasov má návrh skóre z livescore`}
+                    {' '}(oranžovo) — skontroluj a schváľ.
+                </p>
+            )}
 
             {editing && (
                 <div className={styles.uclEditorBackdrop} role="dialog" aria-modal="true">
@@ -210,12 +231,16 @@ export default function UclAdminGames() {
                                 <td>
                                     <span style={{ display: 'flex', gap: 4, alignItems: 'center', flexWrap: 'wrap' }}>
                                         <input value={scoreOf(g, 'home')} onChange={e => setScore(g.game_id, 'home', e.target.value)}
-                                               inputMode="numeric" style={{ width: 38, textAlign: 'center' }} disabled={!g.home_team_id}
-                                               title="Skóre po 90 minútach" />
+                                               inputMode="numeric" disabled={!g.home_team_id}
+                                               style={{ width: 38, textAlign: 'center',
+                                                        ...(isSuggested(g, 'home') ? { color: '#e67e22', fontStyle: 'italic' } : {}) }}
+                                               title={isSuggested(g, 'home') ? 'Návrh z livescore — ulož alebo schváľ' : 'Skóre po 90 minútach'} />
                                         <span>:</span>
                                         <input value={scoreOf(g, 'away')} onChange={e => setScore(g.game_id, 'away', e.target.value)}
-                                               inputMode="numeric" style={{ width: 38, textAlign: 'center' }} disabled={!g.home_team_id}
-                                               title="Skóre po 90 minútach" />
+                                               inputMode="numeric" disabled={!g.home_team_id}
+                                               style={{ width: 38, textAlign: 'center',
+                                                        ...(isSuggested(g, 'away') ? { color: '#e67e22', fontStyle: 'italic' } : {}) }}
+                                               title={isSuggested(g, 'away') ? 'Návrh z livescore — ulož alebo schváľ' : 'Skóre po 90 minútach'} />
                                         {needsFinal(g) && <>
                                             <span style={{ fontSize: '0.72rem', color: '#888', marginLeft: 4 }}>pp</span>
                                             <input value={scoreOf(g, 'homeFin')} onChange={e => setScore(g.game_id, 'homeFin', e.target.value)}
