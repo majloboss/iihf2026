@@ -116,6 +116,18 @@ function Watch({ item, onUpdate, onStop, onRemove, model }) {
                 </>
             )}
 
+            {d && (
+                <details style={{ marginTop: 8 }}>
+                    <summary style={{ cursor: 'pointer', fontSize: '0.75rem', color: '#0d6efd' }}>
+                        Celá odpoveď modelu
+                    </summary>
+                    <pre style={{ background: '#f8f9fa', padding: 8, borderRadius: 6, fontSize: '0.7rem',
+                                  overflowX: 'auto', marginTop: 4, whiteSpace: 'pre-wrap' }}>
+                        {JSON.stringify(d, null, 2)}
+                    </pre>
+                </details>
+            )}
+
             {item.result?.raw && (
                 <details style={{ marginTop: 8 }}>
                     <summary style={{ cursor: 'pointer', fontSize: '0.78rem', color: '#c0392b' }}>
@@ -163,7 +175,9 @@ function ModelCompare({ url, onClose }) {
         return () => { stop = true; };
     }, [url]);
 
-    const filled = d => (d ? Object.values(d).filter(v => v !== null && v !== undefined && v !== '').length : 0);
+    const filledKeys = d => (d
+        ? Object.entries(d).filter(([, v]) => v !== null && v !== undefined && v !== '').map(([k]) => k)
+        : []);
 
     return (
         <div style={{ marginTop: 14, borderTop: '1px solid #e9ecef', paddingTop: 12 }}>
@@ -181,7 +195,7 @@ function ModelCompare({ url, onClose }) {
                         <th>Vyplnených polí</th><th>Čas</th>
                     </tr></thead>
                     <tbody>
-                        {rows.map(r => (
+                        {rows.flatMap(r => [
                             <tr key={r.id} style={r.ok ? { background: '#f2fbf5' } : undefined}>
                                 <td className={styles.mono} style={{ fontSize: '0.75rem' }}>{r.id}</td>
                                 <td>{r.state === 'hotovo' ? (r.ok ? '✓ JSON' : '✗ nie JSON') : r.state}</td>
@@ -189,10 +203,31 @@ function ModelCompare({ url, onClose }) {
                                     {r.data?.home_team ? `${r.data.home_team} — ${r.data.away_team ?? '?'}` : '—'}
                                 </td>
                                 <td>{score(r.data?.home_score, r.data?.away_score)}</td>
-                                <td>{r.data ? `${filled(r.data)} / 17` : '—'}</td>
+                                <td>{r.data ? `${filledKeys(r.data).length} / 17` : '—'}</td>
                                 <td>{r.ms ? `${(r.ms / 1000).toFixed(1)} s` : '—'}</td>
-                            </tr>
-                        ))}
+                            </tr>,
+                            (r.data || r.raw || r.error) && (
+                                <tr key={r.id + '-d'} style={r.ok ? { background: '#f2fbf5' } : undefined}>
+                                    <td colSpan="6" style={{ paddingTop: 0 }}>
+                                        {r.data && (
+                                            <div style={{ fontSize: '0.75rem', color: '#555', marginBottom: 4 }}>
+                                                <strong>Vyplnil:</strong> {filledKeys(r.data).join(', ') || 'nič'}
+                                            </div>
+                                        )}
+                                        <details>
+                                            <summary style={{ cursor: 'pointer', fontSize: '0.75rem', color: '#0d6efd' }}>
+                                                {r.data ? 'Celá odpoveď modelu' : 'Prečo neuspel'}
+                                            </summary>
+                                            <pre style={{ background: '#f8f9fa', padding: 8, borderRadius: 6,
+                                                          fontSize: '0.7rem', overflowX: 'auto', marginTop: 4,
+                                                          whiteSpace: 'pre-wrap' }}>
+                                                {r.data ? JSON.stringify(r.data, null, 2) : (r.raw || r.error)}
+                                            </pre>
+                                        </details>
+                                    </td>
+                                </tr>
+                            ),
+                        ])}
                     </tbody>
                 </table>
             </div>
