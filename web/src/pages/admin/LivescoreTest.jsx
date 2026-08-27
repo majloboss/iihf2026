@@ -10,8 +10,13 @@ const score = (a, b) => (a === null || b === null || a === undefined || b === un
 // Jeden sledovaný zápas. Sám sa obnovuje, kým beží a nie je zastavený.
 function Watch({ item, onUpdate, onStop, onRemove }) {
     const timer = useRef(null);
+    // Bez tejto poistky by zmena stavu z load() spustila effect znova a zacyklila sa.
+    const started = useRef(false);
+    const busy = useRef(false);
 
     const load = async () => {
+        if (busy.current) return;
+        busy.current = true;
         onUpdate(item.id, { loading: true, error: '' });
         try {
             const r = await apiFetch('v1/admin/livescore-test', {
@@ -20,11 +25,16 @@ function Watch({ item, onUpdate, onStop, onRemove }) {
             onUpdate(item.id, { loading: false, result: r, checked: new Date() });
         } catch (e) {
             onUpdate(item.id, { loading: false, error: e.message });
+        } finally {
+            busy.current = false;
         }
     };
 
+    // Prvé načítanie práve raz.
     useEffect(() => {
-        if (!item.result && !item.loading && !item.error) load();
+        if (started.current) return;
+        started.current = true;
+        load();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
