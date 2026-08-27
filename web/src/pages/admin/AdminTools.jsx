@@ -8,6 +8,7 @@ const BASE = import.meta.env.VITE_API_URL ?? '/api';
 import UclGameGenerator from './UclGameGenerator';
 import UclLivescore from './UclLivescore';
 import LivescoreTest from './LivescoreTest';
+import LivescoreLog from './LivescoreLog';
 import styles from './Admin.module.css';
 
 const isDev = (import.meta.env.VITE_API_URL ?? '').includes('dev_');
@@ -254,6 +255,7 @@ export default function AdminTools() {
             {tab === 'common' && <>
             {/* ── Test livescore cez OpenRouter ───────────────────────── */}
             <LivescoreTest />
+            <LivescoreLog />
 
             </>}
 

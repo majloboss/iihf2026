@@ -64,6 +64,7 @@ try {
         $path === 'v1/admin/ucl-tie-edit'       => require __DIR__ . '/v1/admin/ucl_tie_edit.php',
         $path === 'v1/admin/livescore-test'     => require __DIR__ . '/v1/admin/livescore_test.php',
         $path === 'v1/admin/livescore-models'   => require __DIR__ . '/v1/admin/livescore_models.php',
+        $path === 'v1/admin/livescore-log'      => require __DIR__ . '/v1/admin/livescore_log.php',
         $path === 'v1/admin/ucl-livescore'      => require __DIR__ . '/v1/admin/ucl_livescore.php',
         $path === 'v1/admin/ucl-recalc'         => require __DIR__ . '/v1/admin/ucl_recalc.php',
         $path === 'v1/ucl/games'                => require __DIR__ . '/v1/ucl/games.php',
