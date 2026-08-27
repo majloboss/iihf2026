@@ -48,8 +48,14 @@ function livescore_fetch_page(string $url): array {
     if (preg_match_all('/[^~]*AA÷[^~]{0,1200}/', $html, $m)) {
         $extra .= "\n\nDATOVY FEED:\n" . implode("\n", array_slice($m[0], 0, 8));
     }
-    if (preg_match('/window\.environment\s*=\s*(\{.{0,6000})/s', $html, $m)) {
+    if (preg_match('/window\.environment\s*=\s*(\{.{0,3000})/s', $html, $m)) {
         $extra .= "\n\nWINDOW.ENVIRONMENT (skratene):\n" . $m[1];
+    }
+
+    // Zive skore v HTML nie je — Flashscore si ho dotahuje samostatnym feedom.
+    $mid = livescore_match_id($url);
+    if ($mid !== null) {
+        $extra .= "\n\n=== ZIVE UDAJE ZAPASU (id $mid) ===" . livescore_fetch_feed($mid);
     }
 
     return [
@@ -70,6 +76,7 @@ Vráť VÝHRADNE JSON bez akéhokoľvek komentára, v tomto tvare:
   "started": true/false,
   "finished": true/false,
   "minute": číslo prebiehajúcej minúty alebo null,
+  "period": "1. polčas / 2. polčas / predĺženie / penalty / null",
   "status": "krátky stav: Naplánovaný / 1. polčas / Polčas / 2. polčas / Predĺženie / Penalty / Koniec / iné",
   "home_score": číslo alebo null,
   "away_score": číslo alebo null,
@@ -89,6 +96,15 @@ Pravidlá:
 - Skóre uvádzaj ako čísla, nie text.
 - Vo feede Flashscore znamená AE domáci tím, AF hosťujúci, AG skóre domácich,
   AH skóre hostí, AB stav zápasu, AD čas začiatku.
+- V sekcii ZIVE UDAJE ZAPASU (feed STAV A SKORE) platí:
+  DE = góly domácich, DF = góly hostí (aktuálne skóre),
+  DG = góly domácich za 1. polčas, DH = góly hostí za 1. polčas,
+  DA = stav zápasu (1 = ešte nezačal, 2 = prebieha alebo skončil),
+  DB = fáza (13 = 2. polčas), DC = čas začiatku, DD = čas poslednej zmeny.
+  Ak je DE alebo DF vyplnené, zápas UŽ ZAČAL — started musí byť true.
+- V sekcii PRIEBEH sú udalosti: IB = minúta, IK = typ (Goal, Yellow Card,
+  Red Card), IF = hráč, IA = 1 pre domácich a 2 pre hostí. Karty spočítaj.
+  Najvyššia minúta v PRIEBEHU napovie, v ktorej minúte sa hrá.
 
 OBSAH STRÁNKY:
 $input
