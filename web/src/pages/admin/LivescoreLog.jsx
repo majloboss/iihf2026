@@ -134,8 +134,8 @@ export default function LivescoreLog() {
                                 <th>Skóre</th><th>Polčas</th><th>Žlté</th><th>Červené</th><th></th>
                             </tr></thead>
                             <tbody>
-                                {rows.map(r => (
-                                    <tr key={r.id}>
+                                {rows.flatMap(r => [
+                                    <tr key={r.id} style={r.notes ? { borderBottom: 'none' } : undefined}>
                                         <td style={{ fontSize: '0.75rem' }}>{timeFmt(r.checked_at)}</td>
                                         <td style={{ fontSize: '0.8rem' }}>{r.home_team ?? '?'} — {r.away_team ?? '?'}</td>
                                         <td>{val(r.status)}</td>
@@ -150,8 +150,16 @@ export default function LivescoreLog() {
                                                 {open === r.id ? 'skryť' : 'detail'}
                                             </button>
                                         </td>
-                                    </tr>
-                                ))}
+                                    </tr>,
+                                    r.notes ? (
+                                        <tr key={r.id + '-n'}>
+                                            <td colSpan="9" style={{ paddingTop: 0, fontSize: '0.76rem',
+                                                                     color: '#555', whiteSpace: 'normal' }}>
+                                                {String(r.notes)}
+                                            </td>
+                                        </tr>
+                                    ) : null,
+                                ])}
                             </tbody>
                         </table>
                     </div>
