@@ -6,7 +6,7 @@ import { getAdminUnread } from '../../api/messages';
 import styles from './AdminLayout.module.css';
 
 export default function AdminLayout() {
-    const { signOut } = useAuth();
+    const { signOut, impersonating, user } = useAuth();
     const navigate    = useNavigate();
     const location    = useLocation();
     const [menuOpen, setMenuOpen] = useState(false);
@@ -82,6 +82,25 @@ export default function AdminLayout() {
             </aside>
 
             <main className={styles.content} onClick={() => menuOpen && close()}>
+                {(impersonating || user?.role !== 'admin') && (
+                    <div style={{ background: '#fff3cd', border: '1px solid #ffe0a3', borderRadius: 8,
+                                  padding: '10px 14px', marginBottom: 14, fontSize: '0.85rem', color: '#7a5c00',
+                                  display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+                        <span>
+                            <strong>Nie si prihlásený ako admin.</strong>{' '}
+                            {impersonating
+                                ? 'Toto okno beží v impersonovanej relácii, takže server admin operácie odmietne.'
+                                : 'Server admin operácie odmietne (403).'}
+                        </span>
+                        {impersonating && (
+                            <button
+                                onClick={() => { sessionStorage.removeItem('imp_token'); window.location.reload(); }}
+                                style={{ padding: '5px 12px', cursor: 'pointer' }}>
+                                Ukončiť impersonáciu
+                            </button>
+                        )}
+                    </div>
+                )}
                 <Outlet />
             </main>
         </div>
