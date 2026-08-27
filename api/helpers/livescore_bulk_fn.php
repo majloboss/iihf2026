@@ -189,12 +189,17 @@ function livescore_bulk_check(array $wantedIds, string $model): array {
                 'note' => 'Žiadny zo sledovaných zápasov dnes vo feede nie je'];
     }
 
-    $res = livescore_ask_model_raw(livescore_bulk_prompt($prep['input']), $model);
+    // Odpoved rastie s poctom zapasov — jeden zabera zhruba 160 tokenov.
+    $maxTokens = min(400 + $prep['found'] * 200, 8000);
+    $res = livescore_ask_model_raw(livescore_bulk_prompt($prep['input']), $model, $maxTokens);
     if ($res['error'] !== null) return ['ok' => false, 'error' => $res['error'], 'games' => []];
 
     $data = $res['data'];
     if (!is_array($data)) {
-        return ['ok' => false, 'error' => 'Model nevrátil pole zápasov',
+        // Najcastejsia pricina je orezana odpoved — hlaska to ma povedat.
+        $hint = str_ends_with(trim($res['content']), '}') ? '' : ' (odpoveď vyzerá nedokončene)';
+        return ['ok' => false,
+                'error' => 'Model nevrátil pole zápasov' . $hint,
                 'raw' => mb_substr($res['content'], 0, 400), 'games' => []];
     }
 

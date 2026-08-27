@@ -228,14 +228,14 @@ function livescore_ask_model(string $input, string $model): array {
 }
 
 // Posle modelu hotovy prompt (nie surovy vstup) — pouziva hromadne zistovanie.
-function livescore_ask_model_raw(string $prompt, string $model): array {
-    $res = livescore_call_model_prompt($prompt, $model);
+function livescore_ask_model_raw(string $prompt, string $model, int $maxTokens = 900): array {
+    $res = livescore_call_model_prompt($prompt, $model, $maxTokens);
     $prechodna = $res['error'] !== null && preg_match(
         '/provider returned error|rate limit|timeout|temporarily|overloaded|503|502|429/i',
         $res['error']);
     if ($prechodna) {
         sleep(2);
-        $druhy = livescore_call_model_prompt($prompt, $model);
+        $druhy = livescore_call_model_prompt($prompt, $model, $maxTokens);
         if ($druhy['error'] === null) return $druhy;
         $res['error'] .= ' (opakovaný pokus zlyhal tiež)';
     }
@@ -246,12 +246,12 @@ function livescore_call_model(string $input, string $model): array {
     return livescore_call_model_prompt(livescore_prompt($input), $model);
 }
 
-function livescore_call_model_prompt(string $prompt, string $model): array {
+function livescore_call_model_prompt(string $prompt, string $model, int $maxTokens = 900): array {
     $payload = json_encode([
         'model'       => $model,
         'messages'    => [['role' => 'user', 'content' => $prompt]],
         'temperature' => 0,
-        'max_tokens'  => 900,
+        'max_tokens'  => $maxTokens,
     ], JSON_UNESCAPED_UNICODE);
 
     $ch = curl_init(defined('OPENROUTER_URL') ? OPENROUTER_URL : 'https://openrouter.ai/api/v1/chat/completions');
@@ -282,7 +282,12 @@ function livescore_call_model_prompt(string $prompt, string $model): array {
                 'error' => $ai['error']['message'] ?? ('HTTP ' . $code)];
     }
 
+    $finish = $ai['choices'][0]['finish_reason'] ?? null;
     $content = $ai['choices'][0]['message']['content'] ?? '';
+    if ($finish === 'length') {
+        return ['data' => null, 'content' => $content, 'usage' => $ai['usage'] ?? null,
+                'error' => 'Odpoveď modelu bola orezaná — priveľa zápasov naraz'];
+    }
     // Model niekedy obali JSON do ```json ... ``` alebo pripoji komentar.
     if (preg_match('/[\[{].*[\]}]/s', $content, $m)) $content = $m[0];
 
