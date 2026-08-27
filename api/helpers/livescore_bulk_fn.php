@@ -12,7 +12,7 @@ require_once __DIR__ . '/livescore_fn.php';
 const LIVESCORE_BULK_URL = 'https://local-global.flashscore.ninja/2/x/feed/f_1_0_3_en_1';
 
 // Polia, ktore nesu stav zapasu. Ostatne (loga, kurzy, TV) sa zahadzuju.
-const LIVESCORE_KEEP = ['AA', 'AE', 'AF', 'AG', 'AH', 'AB', 'AC', 'AD'];
+const LIVESCORE_KEEP = ['AA', 'AE', 'AF', 'AG', 'AH', 'BC', 'BD', 'AB', 'AC', 'AD'];
 
 // Stiahne hromadny feed a vrati zapasy indexovane podla id (AA).
 function livescore_bulk_fetch(): array {
@@ -72,6 +72,7 @@ Význam polí:
   AA = identifikátor zápasu (vráť ho v poli "id")
   AE = domáci tím, AF = hosťujúci tím
   AG = góly domácich, AH = góly hostí
+  BC = góly domácich po 1. polčase, BD = góly hostí po 1. polčase
   AC = stav: 1 nezačal, 12 prvý polčas, 38 polčasová prestávka,
        13 druhý polčas, 6 predĺženie, 7 penalty, 3 koniec
   AD = čas začiatku (unixový)
@@ -85,6 +86,8 @@ Vráť VÝHRADNE JSON pole, jeden objekt na zápas, bez komentárov:
     "home_team": "…", "away_team": "…",
     "home_score": číslo alebo null,
     "away_score": číslo alebo null,
+    "home_score_halftime": číslo alebo null,
+    "away_score_halftime": číslo alebo null,
     "started": true/false,
     "finished": true/false,
     "minute": číslo alebo null,
@@ -95,6 +98,7 @@ Vráť VÝHRADNE JSON pole, jeden objekt na zápas, bez komentárov:
 
 Pravidlá:
 - Skóre vráť ako čísla. Ak AG alebo AH chýba, daj null.
+- Polčasové skóre ber z BC a BD. Ak tam nie sú, daj null — nedopočítavaj ho.
 - started = true, ak AC nie je 1. finished = true, len ak AC je 3.
 - Nikdy si nič nedomýšľaj a nepridávaj zápasy, ktoré v zozname nie sú.
 

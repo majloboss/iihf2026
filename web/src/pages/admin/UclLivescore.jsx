@@ -91,7 +91,7 @@ export default function UclLivescore() {
                 <div style={{ overflowX: 'auto' }}>
                     <table className={styles.table} style={{ marginTop: 8 }}>
                         <thead><tr>
-                            <th>Čas</th><th>Zápas</th><th>Live skóre</th><th>Stav</th>
+                            <th>Čas</th><th>Zápas</th><th>Live skóre</th><th>Polčas</th><th>Stav</th>
                             <th>Adresa</th><th>Aktualizované</th>
                         </tr></thead>
                         <tbody>
@@ -103,6 +103,9 @@ export default function UclLivescore() {
                                         : <span className={styles.unused}>tímy neurčené</span>}</td>
                                     <td><strong>{g.ls_home !== null && g.ls_away !== null
                                         ? `${g.ls_home} : ${g.ls_away}` : '—'}</strong></td>
+                                    <td>{g.home_score_halftime !== null && g.away_score_halftime !== null
+                                        ? `${g.home_score_halftime} : ${g.away_score_halftime}`
+                                        : <span className={styles.unused}>—</span>}</td>
                                     <td>{g.ls_status || <span className={styles.unused}>—</span>}</td>
                                     <td>{g.flashscore_url
                                         ? <a href={g.flashscore_url} target="_blank" rel="noreferrer"

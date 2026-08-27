@@ -86,8 +86,22 @@ Kým výsledok nie je schválený, body sa počítajú priebežne z live skóre.
 - 🟠 Zoznamy sa prispôsobujú ostatným filtrom
 
 ### Live výsledky
-- Manuálne, rovnako ako FIFA — admin zadáva výsledky, automatické API nie je plánované
-- 🟠 Stĺpce `ls_*` pripravené v migrácii `057`
+Priebežné skóre sa načítava z Flashscore cez OpenRouter — **Nástroje → LM 2026/27
+→ Priebežné výsledky**. Model je použitý zámerne: vie sa zorientovať aj keď
+Flashscore zmení štruktúru, na rozdiel od pevného parsera.
+
+- 🟠 Jeden dopyt na Flashscore a jedno volanie modelu bez ohľadu na počet zápasov
+- 🟠 Ukladá sa skóre (`ls_home`, `ls_away`), stav (`ls_status`) a polčas (migrácia `060`)
+- 🟠 Adresu zápasu zadáva admin v **Zápasy → Upraviť** — bez nej sa zápas nesleduje
+- 🟠 Keď livescore potvrdí začiatok zápasu, tipovanie sa uzavrie
+- 🔲 **Cron** — zatiaľ sa spúšťa ručne alebo zaškrtnutím v admin obrazovke
+- 🔲 **Návrh výsledku** — predvyplnenie skóre v správe výsledkov po skončení zápasu
+
+**Neukladajú sa** karty ani strelci: keby livescore vypadol, nemal by ich kto
+doplniť ručne a nekompletný údaj je horší než žiadny.
+
+Zdroj dát je neoficiálny feed Flashscore. Môže sa kedykoľvek zmeniť —
+vtedy treba upraviť polia v `api/helpers/livescore_bulk_fn.php`.
 
 ---
 
