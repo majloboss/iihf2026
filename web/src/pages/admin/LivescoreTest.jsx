@@ -30,11 +30,11 @@ function Watch({ item, onUpdate, onStop, onRemove, model }) {
         }
     };
 
-    // Prvé načítanie práve raz.
+    // Prvé načítanie práve raz — ak už výsledok máme z úložiska, nečaká sa naň.
     useEffect(() => {
         if (started.current) return;
         started.current = true;
-        load();
+        if (!item.result) load();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -260,13 +260,18 @@ function ModelCompare({ url, onClose }) {
 
 const STORE_KEY = 'livescore_watch';
 
-// Ukladajú sa len adresy a príznak zastavenia — výsledky sa načítajú znova.
+// Ukladá sa aj posledný výsledok, nech je po návrate hneď čo zobraziť.
 const loadStored = () => {
     try {
         const raw = JSON.parse(localStorage.getItem(STORE_KEY) || '[]');
-        return Array.isArray(raw)
-            ? raw.filter(i => i?.url).map(i => ({ id: i.id ?? Date.now() + Math.random(), url: i.url, stopped: !!i.stopped }))
-            : [];
+        if (!Array.isArray(raw)) return [];
+        return raw.filter(i => i?.url).map(i => ({
+            id: i.id ?? Date.now() + Math.random(),
+            url: i.url,
+            stopped: !!i.stopped,
+            result: i.result ?? null,
+            checked: i.checked ?? null,
+        }));
     } catch { return []; }
 };
 
@@ -289,8 +294,11 @@ export default function LivescoreTest() {
 
     useEffect(() => {
         try {
-            localStorage.setItem(STORE_KEY, JSON.stringify(
-                items.map(i => ({ id: i.id, url: i.url, stopped: i.stopped }))));
+            localStorage.setItem(STORE_KEY, JSON.stringify(items.map(i => ({
+                id: i.id, url: i.url, stopped: i.stopped,
+                result: i.result ?? null,
+                checked: i.checked instanceof Date ? i.checked.toISOString() : i.checked ?? null,
+            }))));
         } catch { /* plné úložisko nesmie zhodiť obrazovku */ }
     }, [items]);
 
