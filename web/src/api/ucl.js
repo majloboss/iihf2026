@@ -19,3 +19,5 @@ export const updateUclGameResult = (data) =>
 export const editUclGame = (data) =>
     apiFetch('v1/admin/ucl-game-edit', { method: 'PUT', body: JSON.stringify(data) });
 export const recalcUcl = () => apiFetch('v1/admin/ucl-recalc', { method: 'POST' });
+export const editUclTie = (data) =>
+    apiFetch('v1/admin/ucl-tie-edit', { method: 'PUT', body: JSON.stringify(data) });

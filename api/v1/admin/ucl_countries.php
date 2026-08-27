@@ -25,6 +25,8 @@ $hasFlagCheck = array_key_exists('flag_check', $body);
 $sourceId = trim((string)($body['source_id'] ?? ''));
 $flagCheck = trim((string)($body['flag_check'] ?? ''));
 $isActive = !isset($body['is_active']) || filter_var($body['is_active'], FILTER_VALIDATE_BOOLEAN);
+// PDO posiela PHP false ako prazdny retazec, Postgres ho pre boolean neprijme.
+$isActiveSql = $isActive ? 'TRUE' : 'FALSE';
 if (!preg_match('/^[A-Z]{2,3}(-[A-Z]{2,3})?$/', $code)) json_error('Kód štátu musí byť napr. SVK alebo GB-ENG', 400);
 foreach ([$nameSk, $nameEn] as $name) if ($name === '' || mb_strlen($name) > 100) json_error('Slovenský a anglický názov štátu sú povinné, najviac 100 znakov', 400);
 if ($nameOriginal !== '' && mb_strlen($nameOriginal) > 100) json_error('Originálny názov môže mať najviac 100 znakov', 400);
@@ -41,8 +43,8 @@ foreach ([$flagFile, $flagFileBig] as $flag) {
 
 try {
     if ($method === 'POST') {
-        $stmt = $pdo->prepare('INSERT INTO admin.countries (source_id, country_code, country_code2, sport_code_fifa, sport_code_iihf, sport_code_uefa, name_sk, name_sk_long, name_en, name_original, flag_file, flag_file_big, flag_check, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING source_id, country_code, country_code2, sport_code_fifa, sport_code_iihf, sport_code_uefa, name_sk, name_sk_long, name_en, name_original, flag_file, flag_file_big, flag_check, is_active');
-        $stmt->execute([$sourceId !== '' ? (int)$sourceId : null, $code, $code2 ?: null, $sportFifa ?: null, $sportIihf ?: null, $sportUefa ?: null, $nameSk, $nameSkLong ?: null, $nameEn, $nameOriginal ?: null, $flagFile ?: null, $flagFileBig ?: null, $flagCheck ?: null, $isActive]);
+        $stmt = $pdo->prepare('INSERT INTO admin.countries (source_id, country_code, country_code2, sport_code_fifa, sport_code_iihf, sport_code_uefa, name_sk, name_sk_long, name_en, name_original, flag_file, flag_file_big, flag_check, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ' . $isActiveSql . ') RETURNING source_id, country_code, country_code2, sport_code_fifa, sport_code_iihf, sport_code_uefa, name_sk, name_sk_long, name_en, name_original, flag_file, flag_file_big, flag_check, is_active');
+        $stmt->execute([$sourceId !== '' ? (int)$sourceId : null, $code, $code2 ?: null, $sportFifa ?: null, $sportIihf ?: null, $sportUefa ?: null, $nameSk, $nameSkLong ?: null, $nameEn, $nameOriginal ?: null, $flagFile ?: null, $flagFileBig ?: null, $flagCheck ?: null]);
         json_ok($stmt->fetch(), 201);
     }
 
@@ -57,19 +59,19 @@ try {
             $target = $pdo->prepare('SELECT 1 FROM admin.countries WHERE country_code = ?');
             $target->execute([$code]);
             if (!$target->fetch()) {
-                $create = $pdo->prepare('INSERT INTO admin.countries (source_id, country_code, country_code2, sport_code_fifa, sport_code_iihf, sport_code_uefa, name_sk, name_sk_long, name_en, name_original, flag_file, flag_file_big, flag_check, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
-                $create->execute([$sourceId !== '' ? (int)$sourceId : null, $code, $code2 ?: null, $sportFifa ?: null, $sportIihf ?: null, $sportUefa ?: null, $nameSk, $nameSkLong ?: null, $nameEn, $nameOriginal ?: null, $flagFile ?: null, $flagFileBig ?: null, $flagCheck ?: null, $isActive]);
+                $create = $pdo->prepare('INSERT INTO admin.countries (source_id, country_code, country_code2, sport_code_fifa, sport_code_iihf, sport_code_uefa, name_sk, name_sk_long, name_en, name_original, flag_file, flag_file_big, flag_check, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ' . $isActiveSql . ')');
+                $create->execute([$sourceId !== '' ? (int)$sourceId : null, $code, $code2 ?: null, $sportFifa ?: null, $sportIihf ?: null, $sportUefa ?: null, $nameSk, $nameSkLong ?: null, $nameEn, $nameOriginal ?: null, $flagFile ?: null, $flagFileBig ?: null, $flagCheck ?: null]);
             } else {
-                $rename = $pdo->prepare('UPDATE admin.countries SET source_id = COALESCE(?, source_id), country_code2 = ?, sport_code_fifa = ?, sport_code_iihf = ?, sport_code_uefa = ?, name_sk = ?, name_sk_long = ?, name_en = ?, name_original = ?, flag_file = ?, flag_file_big = ?, flag_check = COALESCE(?, flag_check), is_active = ?, updated_at = NOW() WHERE country_code = ?');
-                $rename->execute([$hasSourceId && $sourceId !== '' ? (int)$sourceId : null, $code2 ?: null, $sportFifa ?: null, $sportIihf ?: null, $sportUefa ?: null, $nameSk, $nameSkLong ?: null, $nameEn, $nameOriginal ?: null, $flagFile ?: null, $flagFileBig ?: null, $hasFlagCheck && $flagCheck !== '' ? $flagCheck : null, $isActive, $code]);
+                $rename = $pdo->prepare('UPDATE admin.countries SET source_id = COALESCE(?, source_id), country_code2 = ?, sport_code_fifa = ?, sport_code_iihf = ?, sport_code_uefa = ?, name_sk = ?, name_sk_long = ?, name_en = ?, name_original = ?, flag_file = ?, flag_file_big = ?, flag_check = COALESCE(?, flag_check), is_active = ' . $isActiveSql . ', updated_at = NOW() WHERE country_code = ?');
+                $rename->execute([$hasSourceId && $sourceId !== '' ? (int)$sourceId : null, $code2 ?: null, $sportFifa ?: null, $sportIihf ?: null, $sportUefa ?: null, $nameSk, $nameSkLong ?: null, $nameEn, $nameOriginal ?: null, $flagFile ?: null, $flagFileBig ?: null, $hasFlagCheck && $flagCheck !== '' ? $flagCheck : null, $code]);
             }
             $move = $pdo->prepare('UPDATE admin.uefa_clubs SET country_code = ?, updated_at = NOW() WHERE country_code = ?');
             $move->execute([$code, $oldCode]);
             $remove = $pdo->prepare('DELETE FROM admin.countries WHERE country_code = ?');
             $remove->execute([$oldCode]);
         } else {
-            $rename = $pdo->prepare('UPDATE admin.countries SET source_id = ?, country_code2 = ?, sport_code_fifa = ?, sport_code_iihf = ?, sport_code_uefa = ?, name_sk = ?, name_sk_long = ?, name_en = ?, name_original = ?, flag_file = ?, flag_file_big = ?, flag_check = ?, is_active = ?, updated_at = NOW() WHERE country_code = ?');
-            $rename->execute([$hasSourceId && $sourceId !== '' ? (int)$sourceId : null, $code2 ?: null, $sportFifa ?: null, $sportIihf ?: null, $sportUefa ?: null, $nameSk, $nameSkLong ?: null, $nameEn, $nameOriginal ?: null, $flagFile ?: null, $flagFileBig ?: null, $hasFlagCheck && $flagCheck !== '' ? $flagCheck : null, $isActive, $code]);
+            $rename = $pdo->prepare('UPDATE admin.countries SET source_id = ?, country_code2 = ?, sport_code_fifa = ?, sport_code_iihf = ?, sport_code_uefa = ?, name_sk = ?, name_sk_long = ?, name_en = ?, name_original = ?, flag_file = ?, flag_file_big = ?, flag_check = ?, is_active = ' . $isActiveSql . ', updated_at = NOW() WHERE country_code = ?');
+            $rename->execute([$hasSourceId && $sourceId !== '' ? (int)$sourceId : null, $code2 ?: null, $sportFifa ?: null, $sportIihf ?: null, $sportUefa ?: null, $nameSk, $nameSkLong ?: null, $nameEn, $nameOriginal ?: null, $flagFile ?: null, $flagFileBig ?: null, $hasFlagCheck && $flagCheck !== '' ? $flagCheck : null, $code]);
         }
         $result = $pdo->prepare('SELECT source_id, country_code, country_code2, sport_code_fifa, sport_code_iihf, sport_code_uefa, name_sk, name_sk_long, name_en, name_original, flag_file, flag_file_big, flag_check, is_active FROM admin.countries WHERE country_code = ?');
         $result->execute([$code]);

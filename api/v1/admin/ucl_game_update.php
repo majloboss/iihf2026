@@ -24,7 +24,7 @@ if ($approved && ($hr === null || $ar === null)) {
     json_error('Na schválenie výsledku treba vyplniť skóre po 90 minútach', 400);
 }
 
-$gs = $pdo->prepare('SELECT start_time, game_type_code FROM "lm2026-27".games WHERE game_id = ?');
+$gs = $pdo->prepare('SELECT start_time, game_type_code, tie_id, leg FROM "lm2026-27".games WHERE game_id = ?');
 $gs->execute([$gameId]);
 $game = $gs->fetch();
 if (!$game) json_error('Zápas neexistuje', 404);
@@ -37,31 +37,57 @@ if ($hr !== null || $ar !== null) {
     }
 }
 
-// V ligovej faze je remiza platny konecny vysledok; predlzenie sa hra len v playoff.
-$isPlayoff = $game['game_type_code'] !== 'LEAGUE';
-$isDraw90  = $hr !== null && $ar !== null && $hr === $ar;
-$hasFinal  = $hf !== null && $af !== null;
+// Kedy sa hra predlzenie:
+//   ligova faza  — nikdy, remiza je platny vysledok
+//   1. zapas     — nikdy, remiza je platna, rozhodne az sucet po odvete
+//   odveta       — len ked je SUCET golov z oboch zapasov rovnaky
+//   finale       — pri remize po 90 minutach (hra sa na jeden zapas)
+$hasFinal = $hf !== null && $af !== null;
+$needsFinal = false;
 
-if ($isPlayoff && $isDraw90 && $approved) {
-    if (!$hasFinal) json_error('Remíza v play-off — zadaj konečný výsledok po predĺžení alebo penaltách', 400);
+if ($game['game_type_code'] === 'F') {
+    $needsFinal = $hr !== null && $ar !== null && $hr === $ar;
+} elseif ((int)$game['leg'] === 2 && $game['tie_id'] !== null && $hr !== null && $ar !== null) {
+    // Sucet za dvojicu: domaci tejto odvety bol v prvom zapase hostom.
+    $first = $pdo->prepare('SELECT home_score_regular, away_score_regular, home_team_id
+                              FROM "lm2026-27".games
+                             WHERE tie_id = ? AND leg = 1');
+    $first->execute([$game['tie_id']]);
+    $prev = $first->fetch();
+
+    if ($approved && (!$prev || $prev['home_score_regular'] === null || $prev['away_score_regular'] === null)) {
+        json_error('Najprv zadaj výsledok prvého zápasu tejto dvojice', 400);
+    }
+    if ($prev && $prev['home_score_regular'] !== null && $prev['away_score_regular'] !== null) {
+        // Domaci odvety = hostia prveho zapasu, preto sa skore prehadzuje.
+        $sumHome = $hr + (int)$prev['away_score_regular'];
+        $sumAway = $ar + (int)$prev['home_score_regular'];
+        $needsFinal = $sumHome === $sumAway;
+    }
+}
+
+if ($needsFinal && $approved) {
+    if (!$hasFinal) json_error('Rovnaký súčet gólov — zadaj konečný výsledok po predĺžení alebo penaltách', 400);
     if ($hf < $hr || $af < $ar) json_error('Konečný výsledok nemôže byť nižší ako po 90 minútach', 400);
     if ($hf === $af) json_error('Po predĺžení alebo penaltách musí byť víťaz, nie remíza', 400);
-} elseif ($hasFinal && !($isPlayoff && $isDraw90)) {
-    json_error('Konečný výsledok sa zadáva len pri remíze v play-off po 90 minútach', 400);
+} elseif ($hasFinal && !$needsFinal) {
+    json_error('Predĺženie sa hrá len vo finále pri remíze alebo v odvete pri rovnakom súčte gólov', 400);
 }
 
 try {
     $pdo->beginTransaction();
+    $approvedSql = $approved ? 'TRUE' : 'FALSE';
+    $tipsOpenSql = $approved ? 'FALSE' : 'tips_open';
     $stmt = $pdo->prepare('
         UPDATE "lm2026-27".games
            SET home_score_regular = ?, away_score_regular = ?,
                home_score_final = ?, away_score_final = ?,
-               result_approved = ?, tips_open = CASE WHEN ? THEN FALSE ELSE tips_open END,
+               result_approved = ' . $approvedSql . ', tips_open = ' . $tipsOpenSql . ',
                updated_at = NOW()
          WHERE game_id = ?
         RETURNING game_id, home_score_regular, away_score_regular,
                   home_score_final, away_score_final, result_approved, tips_open');
-    $stmt->execute([$hr, $ar, $hf, $af, $approved, $approved, $gameId]);
+    $stmt->execute([$hr, $ar, $hf, $af, $gameId]);
     $row = $stmt->fetch();
     if (!$row) json_error('Zápas neexistuje', 404);
 

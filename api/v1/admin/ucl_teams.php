@@ -52,10 +52,12 @@ $returning = 'club_id AS team_id, club_code AS team_code, club_name AS team_name
 if ($method === 'POST') {
     [$teamCode, $teamName, $countryCode, $logoFile, $isActive] = $clean($body);
     $countryExists($countryCode);
+    // PDO posiela PHP false ako prazdny retazec, Postgres ho pre boolean neprijme.
+    $isActiveSql = $isActive ? 'TRUE' : 'FALSE';
     try {
         $stmt = $pdo->prepare("INSERT INTO admin.uefa_clubs (club_code, club_name, country_code, logo_file, is_active)
-                               VALUES (?, ?, ?, ?, ?) RETURNING $returning");
-        $stmt->execute([$teamCode, $teamName, $countryCode, $logoFile, $isActive]);
+                               VALUES (?, ?, ?, ?, $isActiveSql) RETURNING $returning");
+        $stmt->execute([$teamCode, $teamName, $countryCode, $logoFile]);
         json_ok($stmt->fetch(), 201);
     } catch (PDOException $e) {
         if ($e->getCode() === '23505') json_error('Kód klubu už existuje', 409);
@@ -68,12 +70,13 @@ if ($method === 'PUT') {
     if (!$teamId) json_error('Chýba team_id', 400);
     [$teamCode, $teamName, $countryCode, $logoFile, $isActive] = $clean($body);
     $countryExists($countryCode);
+    $isActiveSql = $isActive ? 'TRUE' : 'FALSE';
     try {
         $stmt = $pdo->prepare("UPDATE admin.uefa_clubs
                                   SET club_code = ?, club_name = ?, country_code = ?, logo_file = ?,
-                                      is_active = ?, updated_at = NOW()
+                                      is_active = $isActiveSql, updated_at = NOW()
                                 WHERE club_id = ? RETURNING $returning");
-        $stmt->execute([$teamCode, $teamName, $countryCode, $logoFile, $isActive, $teamId]);
+        $stmt->execute([$teamCode, $teamName, $countryCode, $logoFile, $teamId]);
         $row = $stmt->fetch();
         if (!$row) json_error('Klub neexistuje', 404);
         json_ok($row);

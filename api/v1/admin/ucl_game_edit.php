@@ -30,14 +30,16 @@ $exists = function (?int $clubId) use ($pdo) {
 $exists($homeId);
 $exists($awayId);
 
+// PDO posiela PHP false ako prazdny retazec, ktory Postgres pre boolean neprijme.
+$tipsOpenSql = $tipsOpen ? 'TRUE' : 'FALSE';
 $stmt = $pdo->prepare('
     UPDATE "lm2026-27".games
        SET home_team_id = ?, away_team_id = ?, start_time = ?, venue = ?,
-           flashscore_url = ?, tips_open = ?, updated_at = NOW()
+           flashscore_url = ?, tips_open = ' . $tipsOpenSql . ', updated_at = NOW()
      WHERE game_id = ?
     RETURNING game_id, home_team_id, away_team_id, start_time, venue, flashscore_url, tips_open');
 $stmt->execute([$homeId, $awayId, date('Y-m-d H:i:s', strtotime($start)), $venue,
-                $flash ?: null, $tipsOpen, $gameId]);
+                $flash ?: null, $gameId]);
 $row = $stmt->fetch();
 if (!$row) json_error('Zápas neexistuje', 404);
 json_ok($row);

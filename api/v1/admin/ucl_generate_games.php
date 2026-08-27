@@ -93,8 +93,8 @@ try {
     $pdo->exec('DELETE FROM ' . UCL_SCHEMA . '.games');
 
     $ins = $pdo->prepare('INSERT INTO ' . UCL_SCHEMA . '.games
-        (game_id, home_team_id, away_team_id, start_time, venue, game_type_code, game_type_name)
-        VALUES (?, ?, ?, ?, ?, ?, ?)');
+        (game_id, home_team_id, away_team_id, start_time, venue, game_type_code, game_type_name, tie_id, leg)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)');
 
     $gameId = 0;
     $created = ['LEAGUE' => 0, 'PO' => 0, 'R16' => 0, 'QF' => 0, 'SF' => 0, 'F' => 0];
@@ -122,7 +122,7 @@ try {
 
             // Prvych 8 zapasov kola v utorok, zvysnych 8 v stredu.
             $day = $i < 8 ? $roundTuesday : $roundTuesday->modify('+1 day');
-            $ins->execute([++$gameId, $home, $away, $day->format('Y-m-d H:i:s'), '', 'LEAGUE', 'Ligová fáza — ' . ($r + 1) . '. kolo']);
+            $ins->execute([++$gameId, $home, $away, $day->format('Y-m-d H:i:s'), '', 'LEAGUE', 'Ligová fáza — ' . ($r + 1) . '. kolo', null, null]);
             $created['LEAGUE']++;
         }
     }
@@ -139,7 +139,10 @@ try {
                 // Polovica dvojic v utorok, polovica v stredu.
                 $day = $p < ceil($pairs / 2) ? $tue : $tue->modify('+1 day');
                 $label = $twoLegs ? ($name . ($leg === 1 ? ' — 1. zápas' : ' — odveta')) : $name;
-                $ins->execute([++$gameId, null, null, $day->format('Y-m-d H:i:s'), '', $code, $label]);
+                // Dvojica zapas-odveta zdiela tie_id, aby sa dal spocitat sucet golov.
+                $tieId = $twoLegs ? ($code . '-' . ($p + 1)) : null;
+                $ins->execute([++$gameId, null, null, $day->format('Y-m-d H:i:s'), '', $code, $label,
+                               $tieId, $twoLegs ? $leg : null]);
                 $created[$code]++;
             }
             $week++;
