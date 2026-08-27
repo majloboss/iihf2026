@@ -91,7 +91,10 @@ function livescore_fetch_page(string $url): array {
     // Zive skore v HTML nie je — Flashscore si ho dotahuje samostatnym feedom.
     $mid = livescore_match_id($url);
     if ($mid !== null) {
-        $extra .= "\n\n=== ZIVE UDAJE ZAPASU (id $mid) ===" . livescore_fetch_feed($mid);
+        // Aktualny cas treba modelu dodat — z feedu ho nevycita.
+        $extra .= "\n\n=== ZIVE UDAJE ZAPASU (id $mid) ==="
+                . "\nAKTUALNY_CAS: " . time() . " (unixovy cas, " . gmdate('H:i:s') . " UTC)"
+                . livescore_fetch_feed($mid);
     }
 
     return [
@@ -137,11 +140,19 @@ Pravidlá:
   DE = góly domácich, DF = góly hostí (aktuálne skóre),
   DG = góly domácich za 1. polčas, DH = góly hostí za 1. polčas,
   DA = stav zápasu (1 = ešte nezačal, 2 = prebieha alebo skončil),
-  DB = fáza (13 = 2. polčas), DC = čas začiatku, DD = čas poslednej zmeny.
+  DB = fáza (12 = 1. polčas, 13 = 2. polčas, 38 = polčasová prestávka,
+       6 = predĺženie, 7 = penalty, 3 = koniec),
+  DC = čas začiatku (unixový čas), DK = čas, od ktorého beží prebiehajúca časť.
   Ak je DE alebo DF vyplnené, zápas UŽ ZAČAL — started musí byť true.
+- AKTUÁLNU MINÚTU vypočítaj z DK a hodnoty AKTUALNY_CAS uvedenej vyššie:
+  minúta = (AKTUALNY_CAS − DK) / 60 zaokrúhlene nadol, a ak DB = 13, pripočítaj 45
+  (druhý polčas sa počíta od 45. minúty). Nikdy neber minútu z gólov —
+  tá hovorí, kedy padol gól, nie koľko sa práve hrá.
+  Ak zápas skončil, minute daj null.
 - V sekcii PRIEBEH sú udalosti: IB = minúta, IK = typ (Goal, Yellow Card,
-  Red Card), IF = hráč, IA = 1 pre domácich a 2 pre hostí. Karty spočítaj.
-  Najvyššia minúta v PRIEBEHU napovie, v ktorej minúte sa hrá.
+  Red Card, Substitution), IF = hráč, IA = 1 pre domácich a 2 pre hostí.
+  Karty spočítaj podľa IK a IA. Ak zápas beží a žiadna karta v PRIEBEHU nie je,
+  daj 0, nie null — znamená to, že karta zatiaľ nepadla.
 
 OBSAH STRÁNKY:
 $input
