@@ -195,6 +195,10 @@ export default function Groups() {
     const fullName = (u) =>
         (u.first_name || u.last_name) ? `${u.first_name || ''} ${u.last_name || ''}`.trim() : u.username;
 
+    // Hráčske meno je hlavný identifikátor, celé meno len upresňuje.
+    const realName = (u) =>
+        (u.first_name || u.last_name) ? `${u.first_name || ''} ${u.last_name || ''}`.trim() : '';
+
     const filtered = myOnly
         ? groups.filter(g => g.my_status === 'accepted' || g.my_status === 'invited' || g.created_by === user.user_id)
         : groups;
@@ -369,8 +373,8 @@ export default function Groups() {
                                                                     onMouseDown={() => { setInviteQuery(u.username); setInviteShowDrop(false); }}
                                                                 >
                                                                     <Avatar src={u.avatar} name={fullName(u)} size={24} />
-                                                                    <span className={styles.dropName}>{fullName(u)}</span>
-                                                                    <small className={styles.dropUser}>@{u.username}</small>
+                                                                    <span className={styles.dropName}>{u.username}</span>
+                                                                    {realName(u) && <small className={styles.dropUser}>({realName(u)})</small>}
                                                                 </button>
                                                             ))}
                                                         </div>
@@ -445,8 +449,8 @@ export default function Groups() {
                                         <div key={m.user_id} className={styles.memberRow}>
                                             <button className={styles.memberBtn} onClick={() => openDetail(m.user_id)}>
                                                 <Avatar src={m.avatar} name={fullName(m)} size={32} />
-                                                <span className={styles.memberName}>{fullName(m)}</span>
-                                                <small className={styles.memberUser}>@{m.username}</small>
+                                                <span className={styles.memberName}>{m.username}</span>
+                                                {realName(m) && <small className={styles.memberUser}>({realName(m)})</small>}
                                             </button>
                                             {m.status === 'pending' && isFounder && (
                                                 <div className={styles.approveActions}>
@@ -485,8 +489,8 @@ export default function Groups() {
                                 <div className={styles.modalAvatarWrap}>
                                     <Avatar src={userDetail.data.avatar} name={fullName(userDetail.data)} size={80} />
                                 </div>
-                                <h3 className={styles.modalName}>{fullName(userDetail.data)}</h3>
-                                <p className={styles.modalUsername}>@{userDetail.data.username}</p>
+                                <h3 className={styles.modalName}>{userDetail.data.username}</h3>
+                                {realName(userDetail.data) && <p className={styles.modalUsername}>{realName(userDetail.data)}</p>}
 
                                 <div className={styles.modalFields}>
                                     <div className={styles.modalField}>
