@@ -142,15 +142,18 @@ Pravidlá:
   DA = stav zápasu (1 = ešte nezačal, 2 = prebieha alebo skončil),
   DB = fáza (12 = 1. polčas, 13 = 2. polčas, 38 = polčasová prestávka,
        6 = predĺženie, 7 = penalty, 3 = koniec),
-  DC = čas začiatku (unixový čas), DK = čas, od ktorého beží prebiehajúca časť.
+  DC = čas začiatku zápasu (unixový čas),
+  DD = čas začiatku prebiehajúcej časti (v 2. polčase je to jeho začiatok),
+  DK = čas poslednej udalosti — na výpočet minúty ho NEPOUŽÍVAJ.
   Ak je DE alebo DF vyplnené, zápas UŽ ZAČAL — started musí byť true.
-- AKTUÁLNU MINÚTU počítaj takto a bez výnimiek:
-    krok 1: X = (AKTUALNY_CAS − DK) / 60, zaokrúhlené nadol
-    krok 2: ak DB = 12 (1. polčas) → minute = X
-            ak DB = 13 (2. polčas) → minute = X + 45   (VŽDY pripočítaj 45)
-            ak DB = 6  (predĺženie) → minute = X + 90
-            ak DB = 38 (prestávka) alebo zápas skončil → minute = null
-  Príklad: DB = 13 a X = 44 znamená minute = 89, nie 44.
+- AKTUÁLNU MINÚTU počítaj podľa DB a bez výnimiek:
+    DB = 12 (1. polčas):  minute = (AKTUALNY_CAS − DC) / 60, zaokrúhlené nadol
+    DB = 13 (2. polčas):  minute = (AKTUALNY_CAS − DD) / 60, zaokrúhlené nadol, PLUS 45
+    DB = 6  (predĺženie): minute = (AKTUALNY_CAS − DD) / 60, zaokrúhlené nadol, PLUS 90
+    DB = 38 (prestávka), 7 (penalty) alebo zápas skončil: minute = null
+  V prvom polčase sa počíta od začiatku zápasu (DC), v druhom od začiatku
+  druhého polčasu (DD) — preto sa tam pripočítava 45.
+  Príklad: DB = 13, AKTUALNY_CAS − DD = 33 minút → minute = 78.
   Nikdy neber minútu z gólov — tá hovorí, kedy padol gól, nie koľko sa hrá.
 - V sekcii PRIEBEH sú udalosti: IB = minúta, IK = typ (Goal, Yellow Card,
   Red Card, Substitution), IF = hráč, IA = 1 pre domácich a 2 pre hostí.
