@@ -57,13 +57,20 @@ function livescore_bulk_input(array $games, array $wanted, bool $withDetails = f
         }
         // Minutu spocita server — model ju uz len prevezme.
         $state = ['DB' => $f['AC'] ?? null, 'DC' => $f['AD'] ?? null, 'DD' => null];
-        // V 2. polcase a predlzeni treba zaciatok tej casti, ktory hromadny feed nema.
-        if (in_array((string)($f['AC'] ?? ''), ['13', '6'], true)) {
-            $state['DD'] = livescore_half_start($id);
+        // Po polcase uz hromadnemu feedu neverime: jeho AC pri prechodoch
+        // zaostava. Stav aj zaciatok casti berieme z detailu naraz.
+        if (!in_array((string)($f['AC'] ?? ''), ['1', '12'], true)) {
+            $d = livescore_half_start($id);
+            if (isset($d['DB'])) $state['DB'] = $d['DB'];
+            $state['DD'] = $d['DD'] ?? null;
         }
         $m = livescore_minute($state);
         $parts[] = 'MINUTA÷' . ($m['minute'] === null ? 'null' : $m['minute']);
         if ($m['note'] !== null) $parts[] = 'POZNAMKA÷' . $m['note'];
+        // Nazov stavu pozna server vzdy, ked zapas bezi. Pred zapasom a po
+        // nom v detaile DB nie je — tam ho doplni model.
+        $st = livescore_status($state);
+        if ($st !== null) $extra[$id]['status'] = $st;
         $row = implode('¬', $parts);
 
         // Priebeh zapasu (goly, karty) je len v detailnom feede a vracia cely
@@ -73,11 +80,10 @@ function livescore_bulk_input(array $games, array $wanted, bool $withDetails = f
             $detail = livescore_fetch_events($id);
             $events = $detail['events'] ?? [];
             if ($events || !empty($detail['periods'])) {
-                $extra[$id] = [
-                    'notes'    => livescore_events_text($events, $f['AE'] ?? 'domáci', $f['AF'] ?? 'hostia'),
-                    'cards'    => livescore_count_cards($events),
-                    'halftime' => livescore_halftime($detail['periods'] ?? []),
-                ];
+                $extra[$id] = ($extra[$id] ?? []) + [];
+                $extra[$id]['notes']    = livescore_events_text($events, $f['AE'] ?? 'domáci', $f['AF'] ?? 'hostia');
+                $extra[$id]['cards']    = livescore_count_cards($events);
+                $extra[$id]['halftime'] = livescore_halftime($detail['periods'] ?? []);
             }
         }
         $rows[] = $row;
@@ -86,9 +92,12 @@ function livescore_bulk_input(array $games, array $wanted, bool $withDetails = f
             'found' => count($rows), 'extra' => $extra];
 }
 
-// Zaciatok prebiehajucej casti zapasu (DD) — hromadny feed ho neobsahuje.
+// Stav (DB) a zaciatok prebiehajucej casti (DD) z detailneho feedu.
+// Hromadny feed ich nema a jeho AC navyse pri prechodoch zaostava — pri
+// penaltach este ukazoval prestavku pred predlzenim. Obe hodnoty preto
+// musia pochadzat z jedneho okamihu, inak sa minuta pocita z cudzej casti.
 // Vysledok sa drzi kratko v pamati, aby sa pri kazdom zapase nestahoval znova.
-function livescore_half_start(string $matchId): ?string {
+function livescore_half_start(string $matchId): array {
     static $cache = [];
     if (array_key_exists($matchId, $cache)) return $cache[$matchId];
 
@@ -104,9 +113,9 @@ function livescore_half_start(string $matchId): ?string {
     $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
 
-    if (!$raw || $code !== 200 || str_contains($raw, '<html')) return $cache[$matchId] = null;
+    if (!$raw || $code !== 200 || str_contains($raw, '<html')) return $cache[$matchId] = [];
     $f = livescore_parse_feed($raw);
-    return $cache[$matchId] = ($f['DD'] ?? null);
+    return $cache[$matchId] = ['DB' => $f['DB'] ?? null, 'DD' => $f['DD'] ?? null];
 }
 
 // Rozhodne, ci sa oplati stiahnut detailny feed. Porovnava skore a stav
@@ -289,11 +298,20 @@ function livescore_bulk_check(array $wantedIds, string $model): array {
         if (!is_array($g) || empty($g['id'])) continue;
         $id = $g['id'];
         if (isset($prep['extra'][$id])) {
-            $g = array_merge($g, $prep['extra'][$id]['cards']);
-            $g['notes'] = $prep['extra'][$id]['notes'] ?: null;
-            $ht = $prep['extra'][$id]['halftime'] ?? null;
-            $g['home_score_halftime'] = $ht[0] ?? null;
-            $g['away_score_halftime'] = $ht[1] ?? null;
+            if (isset($prep['extra'][$id]['cards'])) {
+                $g = array_merge($g, $prep['extra'][$id]['cards']);
+            }
+            if (array_key_exists('notes', $prep['extra'][$id])) {
+                $g['notes'] = $prep['extra'][$id]['notes'] ?: null;
+            }
+            if (array_key_exists('halftime', $prep['extra'][$id])) {
+                $ht = $prep['extra'][$id]['halftime'];
+                $g['home_score_halftime'] = $ht[0] ?? null;
+                $g['away_score_halftime'] = $ht[1] ?? null;
+            }
+            if (isset($prep['extra'][$id]['status'])) {
+                $g['status'] = $prep['extra'][$id]['status'];
+            }
         }
         $out[$id] = $g;
     }

@@ -39,6 +39,20 @@ function livescore_parse_feed(string $raw): array {
 // Minuta sa da z feedu spocitat jednoznacne, preto ju neprenechavame modelu.
 // DB urcuje fazu, DC je zaciatok zapasu a DD zaciatok prebiehajucej casti.
 // Pri prestavkach sa vracia minuta, v ktorej sa stalo, aby bolo co zobrazit.
+// Nazov stavu zapasu. Model ho predtym formuloval sam a pri tom istom
+// kode kolisal medzi 'Predlzenie' a '2. polcas'.
+function livescore_status(array $f): ?string {
+    switch (isset($f['DB']) ? (int)$f['DB'] : 0) {
+        case 12: return '1. polčas';
+        case 13: return '2. polčas';
+        case 38: return 'polčas';
+        case 46: return 'pred predĺžením';
+        case 6:  return 'predĺženie';
+        case 7:  return 'penaltový rozstrel';
+        default: return null;
+    }
+}
+
 function livescore_minute(array $f): array {
     $db  = isset($f['DB']) ? (int)$f['DB'] : 0;
     $now = time();
@@ -55,14 +69,18 @@ function livescore_minute(array $f): array {
             $m = $from($f['DD'] ?? null);
             return ['minute' => $m === null ? null : $m + 45, 'note' => null];
         case 6:   // predlzenie
+            // DD je zaciatok prebiehajucej casti. Predlzenie ma dva polcasy,
+            // preto sa v druhom pripocitava 105, nie 90.
             $m = $from($f['DD'] ?? null);
-            return ['minute' => $m === null ? null : $m + 90, 'note' => null];
+            if ($m === null) return ['minute' => null, 'note' => null];
+            $base = $m > 15 ? 105 : 90;
+            return ['minute' => min($m + $base, 120), 'note' => null];
         case 38:  // polcasova prestavka
             return ['minute' => 45, 'note' => 'prestávka'];
         case 46:  // prestavka pred predlzenim
             return ['minute' => 90, 'note' => 'pred predĺžením'];
-        case 7:   // penalty
-            return ['minute' => 120, 'note' => 'penalty'];
+        case 7:   // penalty — rozstrel nema hraciu minutu
+            return ['minute' => 120, 'note' => 'penaltový rozstrel'];
         default:
             return ['minute' => null, 'note' => null];
     }
