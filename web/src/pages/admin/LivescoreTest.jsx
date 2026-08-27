@@ -41,7 +41,8 @@ function Watch({ item, onUpdate, onStop, onRemove, model }) {
     // Obnovovanie beží, kým používateľ nedá STOP a zápas neskončil.
     useEffect(() => {
         clearInterval(timer.current);
-        const finished = item.result?.data?.finished;
+        const r = item.result?.data;
+        const finished = r !== null && typeof r === 'object' && !Array.isArray(r) ? r.finished === true : false;
         if (!item.stopped && !finished) {
             timer.current = setInterval(load, POLL_MS);
         }
@@ -53,6 +54,12 @@ function Watch({ item, onUpdate, onStop, onRemove, model }) {
     const raw = item.result?.data;
     const d = raw !== null && typeof raw === 'object' && !Array.isArray(raw) ? raw : null;
     const usage = item.result?.usage;
+    // Po obnovení stránky môže byť čas uložený ako reťazec, nie Date.
+    const checkedAt = (() => {
+        if (!item.checked) return null;
+        const t = item.checked instanceof Date ? item.checked : new Date(item.checked);
+        return Number.isNaN(t.getTime()) ? null : t.toLocaleTimeString('sk-SK');
+    })();
 
     return (
         <div className={styles.card} style={{ padding: 14, marginTop: 10, borderLeft: '4px solid #0d6efd' }}>
@@ -66,7 +73,7 @@ function Watch({ item, onUpdate, onStop, onRemove, model }) {
                         {item.loading ? 'Zisťujem…'
                             : item.stopped ? 'Sledovanie zastavené'
                             : d?.finished ? 'Zápas skončil, sledovanie ukončené'
-                            : `Obnovuje sa každú minútu${item.checked ? ' · naposledy ' + item.checked.toLocaleTimeString('sk-SK') : ''}`}
+                            : `Obnovuje sa každú minútu${checkedAt ? ' · naposledy ' + checkedAt : ''}`}
                     </div>
                 </div>
                 <div className={styles.actions}>
@@ -108,13 +115,13 @@ function Watch({ item, onUpdate, onStop, onRemove, model }) {
                     </div>
                     {d.notes && (
                         <div style={{ marginTop: 8, fontSize: '0.8rem', color: '#555' }}>
-                            <strong>Poznámka modelu:</strong> {d.notes}
+                            <strong>Poznámka modelu:</strong> {val(d.notes)}
                         </div>
                     )}
                     <div style={{ marginTop: 8, fontSize: '0.7rem', color: '#aaa' }}>
-                        {item.result.model}
-                        {usage && ` · ${usage.total_tokens} tokenov`}
-                        {item.result.page_chars && ` · stránka ${item.result.page_chars} znakov`}
+                        {String(item.result.model ?? '')}
+                        {usage?.total_tokens ? ` · ${usage.total_tokens} tokenov` : ''}
+                        {Number(item.result.page_chars) ? ` · stránka ${item.result.page_chars} znakov` : ''}
                     </div>
                 </>
             )}
