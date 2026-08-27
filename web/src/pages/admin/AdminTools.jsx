@@ -6,6 +6,7 @@ import { useCompetition } from '../../context/CompetitionContext';
 
 const BASE = import.meta.env.VITE_API_URL ?? '/api';
 import UclGameGenerator from './UclGameGenerator';
+import LivescoreTest from './LivescoreTest';
 import styles from './Admin.module.css';
 
 const isDev = (import.meta.env.VITE_API_URL ?? '').includes('dev_');
@@ -259,6 +260,9 @@ export default function AdminTools() {
 
             {/* ════════ COMMON ════════ */}
             {tab === 'common' && <>
+            {/* ── Test livescore cez OpenRouter ───────────────────────── */}
+            <LivescoreTest />
+
             {/* ── Sync výsledkov z API-Sports ─────────────────────────── */}
             <div className={styles.card} style={{ padding: 20, marginTop: 16, borderLeft: '4px solid #1a3a6b' }}>
                 <h3 style={{ margin: '0 0 4px', fontSize: '1rem', color: '#1a3a6b' }}>🌐 Sync výsledkov (API-Sports)</h3>
