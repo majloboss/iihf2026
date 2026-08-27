@@ -249,7 +249,11 @@ export default function Groups() {
                     const myStatus   = g.my_status;
                     const isOpen     = expanded === g.id;
                     const grpMembers = members[g.id];
-                    const pendingCnt = grpMembers?.filter(m => m.status === 'pending').length ?? 0;
+                    // Po rozbalení počítaj z načítaných členov (je čerstvejšie),
+                    // inak použi hodnotu z API — nech je počet vidieť aj zabalený.
+                    const pendingCnt = grpMembers
+                        ? grpMembers.filter(m => m.status === 'pending').length
+                        : Number(g.pending_count) || 0;
                     const isClosed   = !!g.is_closed;
                     const allowMemberInvite = g.allow_member_invite !== false;
                     // Pozývať môže: zakladateľ vždy (ak nie je uzavretá); člen len ak skupina povoľuje
@@ -265,6 +269,7 @@ export default function Groups() {
                                         <span className={styles.groupName}>{g.name}</span>
                                         <span className={styles.meta}>
                                             {g.member_count} {Number(g.member_count) === 1 ? 'člen' : 'členov'}
+                                            {pendingCnt > 0 && <>{' · '}{pendingCnt} {pendingCnt === 1 ? 'pozvánka' : pendingCnt < 5 ? 'pozvánky' : 'pozvánok'}</>}
                                             {' · '}zakladateľ: {g.creator_username}
                                         </span>
                                         {g.description && (
@@ -273,9 +278,6 @@ export default function Groups() {
                                             </span>
                                         )}
                                     </div>
-                                    {isFounder && pendingCnt > 0 && (
-                                        <span className={styles.badgePending}>{pendingCnt} čaká</span>
-                                    )}
                                 </div>
                                 <div className={styles.cardActions} onClick={e => e.stopPropagation()}>
                                     {isClosed && (

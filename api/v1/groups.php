@@ -20,6 +20,7 @@ if ($method === 'GET') {
                u.username AS creator_username,
                c.name AS competition_name, c.slug AS competition_slug,
                COUNT(gm.user_id) FILTER (WHERE gm.status = 'accepted') AS member_count,
+               COUNT(gm.user_id) FILTER (WHERE gm.status = 'pending')  AS pending_count,
                (SELECT gm2.status FROM admin.group_members gm2
                 WHERE gm2.group_id = fg.id AND gm2.user_id = :uid) AS my_status
         FROM admin.friend_groups fg
