@@ -9,8 +9,11 @@ import UclGroupTips from './UclGroupTips';
 const dayFmtRaw = new Intl.DateTimeFormat('sk-SK', {
     weekday: 'short', day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit',
 });
-// Neplatny datum by vo format() vyhodil vynimku a zhodil stranku.
-const dayFmt = s => { const d = asDate(s); return isValidDate(d) ? dayFmtRaw.format(d) : '—'; };
+// Neplatný dátum by vo format() vyhodil výnimku a zhodil stránku.
+function dayFmt(value) {
+    const d = new Date(String(value).replace(' ', 'T') + 'Z');
+    return Number.isNaN(d.getTime()) ? '—' : dayFmtRaw.format(d);
+}
 
 // Po predĺžení alebo penaltách sa ukáže aj konečný výsledok: 2:1 (4:3 pp).
 function scoreText(g) {
