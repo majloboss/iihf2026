@@ -212,7 +212,22 @@ PROMPT;
 
 // Zavola model. Vracia data, surovu odpoved a pripadnu chybu — bez ukoncenia behu,
 // aby sa dalo testovat viac modelov za sebou.
+// Prechodne chyby poskytovatela sa raz zopakuju.
 function livescore_ask_model(string $input, string $model): array {
+    $res = livescore_call_model($input, $model);
+    $prechodna = $res['error'] !== null && preg_match(
+        '/provider returned error|rate limit|timeout|temporarily|overloaded|503|502|429/i',
+        $res['error']);
+    if ($prechodna) {
+        sleep(2);
+        $druhy = livescore_call_model($input, $model);
+        if ($druhy['error'] === null) return $druhy;
+        $res['error'] .= ' (opakovaný pokus zlyhal tiež)';
+    }
+    return $res;
+}
+
+function livescore_call_model(string $input, string $model): array {
     $payload = json_encode([
         'model'       => $model,
         'messages'    => [['role' => 'user', 'content' => livescore_prompt($input)]],
