@@ -39,7 +39,7 @@ $d = is_array($res['data']) && !isset($res['data'][0]) ? $res['data'] : null;
 if ($d !== null) {
     $num = static fn($v) => is_numeric($v) ? (int)$v : null;
     $txt = static fn($v) => (is_string($v) || is_numeric($v)) ? mb_substr((string)$v, 0, 100) : null;
-    $boo = static fn($v) => is_bool($v) ? $v : null;
+    $boo = static fn($v) => is_bool($v) ? ($v ? 't' : 'f') : null;
     try {
         $pdo = db();
         $pdo->prepare('INSERT INTO admin.livescore_log
@@ -65,7 +65,9 @@ if ($d !== null) {
                 $res['usage']['total_tokens'] ?? null, $took,
             ]);
     } catch (Throwable $e) {
-        // Zaznamnik je pomocny — jeho zlyhanie nesmie zhodit zistovanie stavu.
+        // Zaznamnik je pomocny — jeho zlyhanie nesmie zhodit zistovanie stavu,
+        // ale chyba sa vrati v odpovedi, aby sa nehladala naslepo.
+        $logError = $e->getMessage();
     }
 }
 
@@ -78,4 +80,5 @@ json_ok([
     'raw'        => $res['data'] === null ? $res['content'] : null,
     'page_chars' => $page['chars'],
     'took_ms'    => $took,
+    'log_error'  => $logError ?? null,
 ]);

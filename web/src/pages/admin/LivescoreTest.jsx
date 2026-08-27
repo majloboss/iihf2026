@@ -88,6 +88,11 @@ function Watch({ item, onUpdate, onStop, onRemove, model }) {
             </div>
 
             {item.error && <p className={styles.error} style={{ marginTop: 8 }}>✗ {item.error}</p>}
+            {item.result?.log_error && (
+                <p style={{ marginTop: 6, fontSize: '0.75rem', color: '#e67e22' }}>
+                    Záznamník: {String(item.result.log_error)}
+                </p>
+            )}
 
             {d && (
                 <>
