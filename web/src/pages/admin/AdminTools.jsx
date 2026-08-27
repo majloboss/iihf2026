@@ -177,10 +177,9 @@ export default function AdminTools() {
         setImpBusy(true); setImpMsg('');
         try {
             const r = await impersonate(parseInt(selUserId));
-            const win = window.open('/impersonate#' + r.token, '_blank', 'noopener');
+            const win = window.open('/impersonate#' + r.token, '_blank');
             if (!win) {
-                setImpMsg('✗ Prehliadač zablokoval nové okno. Povoľ vyskakovacie okná pre túto stránku — '
-                        + 'inak by sa impersonácia otvorila tu a odhlásila ťa z admina.');
+                setImpMsg('✗ Prehliadač zablokoval nové okno. Povoľ vyskakovacie okná pre túto stránku a skús znova.');
                 return;
             }
             setImpMsg('✓ Otvorené nové okno ako ' + r.username);
