@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { createUclCountry, deleteUclCountry, getUclCountries, updateUclCountry } from '../../api/uclAdmin';
+import { useSortableTable, SortableTh } from '../../utils/useSortableTable';
 import styles from './Admin.module.css';
 
 // Poradie zodpoveda ciselniku v DB (migracia 055).
@@ -30,13 +31,16 @@ export default function UclCountryCatalog({ onChanged = () => {} }) {
     const [countries, setCountries] = useState([]);
     const [draft, setDraft] = useState(EMPTY);
     const [editing, setEditing] = useState(null);
+    // Stat sa prida vynimocne, preto je formular skryty za tlacidlom — inak
+    // stoji nad filtrom a posobi ako jeho sucast.
+    const [pridavam, setPridavam] = useState(false);
     const [error, setError] = useState('');
     const [message, setMessage] = useState('');
     const [filter, setFilter] = useState('');
 
     const load = () => getUclCountries().then(setCountries).catch(e => setError(e.message));
     useEffect(() => { load(); }, []);
-    const reset = () => { setEditing(null); setDraft(EMPTY); };
+    const reset = () => { setEditing(null); setDraft(EMPTY); setPridavam(false); };
     const save = async e => {
         e.preventDefault(); setError(''); setMessage('');
         try {
@@ -64,6 +68,11 @@ export default function UclCountryCatalog({ onChanged = () => {} }) {
     const shown = needle
         ? countries.filter(c => FIELDS.some(f => String(c[f.key] ?? '').toLowerCase().includes(needle)))
         : countries;
+
+    const { sorted, toggleSort, sortIndicator } = useSortableTable(shown, {
+        team_count: c => Number(c.team_count) || 0,
+        is_active: c => c.is_active !== false,
+    });
 
     const field = (f, extra = {}) => <label key={f.key} style={{ display: 'flex', flexDirection: 'column', gap: 2, ...extra.labelStyle }}>
         <span style={{ fontSize: '0.75rem', color: '#555' }}>{f.label}{f.required && ' *'}</span>
@@ -108,7 +117,20 @@ export default function UclCountryCatalog({ onChanged = () => {} }) {
                 </div>
             </form>
         </div>}
-        {!editing && <form onSubmit={save} style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'flex-end' }}>
+        <div style={{ display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap' }}>
+            <input value={filter} onChange={e => setFilter(e.target.value)}
+                   placeholder="Hľadať štát, kód alebo športový kód…"
+                   style={{ width: 300, padding: '6px 10px' }} />
+            <span style={{ fontSize: '0.8rem', color: '#888', whiteSpace: 'nowrap' }}>
+                zobrazených: {shown.length} z {countries.length}
+            </span>
+            <button className={styles.btn} type="button" style={{ marginLeft: 'auto' }}
+                    onClick={() => { setPridavam(v => !v); setError(''); }}>
+                {pridavam ? 'Zrušiť' : '+ Pridať štát'}
+            </button>
+        </div>
+
+        {!editing && pridavam && <form onSubmit={save} style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'flex-end', marginTop: 12, padding: 12, background: '#f8f9fa', borderRadius: 8 }}>
             {FIELDS.map(f => field(f))}
             <label style={{ display: 'flex', alignItems: 'center', gap: 6, height: 30 }}>
                 <input type="checkbox" checked={draft.is_active !== false} onChange={e => setDraft({ ...draft, is_active: e.target.checked })} />
@@ -116,20 +138,19 @@ export default function UclCountryCatalog({ onChanged = () => {} }) {
             </label>
             <button className={styles.btn} type="submit" style={{ height: 30 }}>Pridať štát</button>
         </form>}
-        <div style={{ marginTop: 12 }}>
-            <input value={filter} onChange={e => setFilter(e.target.value)} placeholder="Hľadať štát, kód alebo športový kód…" style={{ width: '100%', maxWidth: 340, padding: '6px 10px' }} />
-        </div>
         {message && <p className={styles.success}>{message}</p>}
         {error && <p className={styles.error}>✗ {error}</p>}
         <div style={{ overflowX: 'auto' }}><table className={styles.table} style={{ marginTop: 8 }}>
             <thead><tr>
                 <th style={{ width: 60 }}>Vlajka</th>
-                <th>Štát</th>
-                <th style={{ width: 70 }}>Aktívny</th>
-                <th style={{ width: 60 }}>Tímy</th>
+                {/* Stat je v riadku zobrazeny na dvoch riadkoch, triedi sa podla nazvu. */}
+                <SortableTh sortKey="name_sk" onSort={toggleSort} indicator={sortIndicator}>Štát</SortableTh>
+                <SortableTh sortKey="country_code" onSort={toggleSort} indicator={sortIndicator} style={{ width: 90 }}>Kód</SortableTh>
+                <SortableTh sortKey="is_active" onSort={toggleSort} indicator={sortIndicator} style={{ width: 70 }}>Aktívny</SortableTh>
+                <SortableTh sortKey="team_count" onSort={toggleSort} indicator={sortIndicator} style={{ width: 60 }}>Tímy</SortableTh>
                 <th style={{ width: 150 }}>Akcie</th>
             </tr></thead>
-            <tbody>{shown.map(country => <tr key={country.country_code}>
+            <tbody>{sorted.map(country => <tr key={country.country_code}>
                 <td data-label="Vlajka" style={{ verticalAlign: 'middle' }}>
                     {(country.flag_file_big || country.flag_file)
                         ? <img
@@ -158,11 +179,11 @@ export default function UclCountryCatalog({ onChanged = () => {} }) {
                         </span>
                     </div>
                 </td>
+                <td data-label="Kód" className={styles.mono} style={{ verticalAlign: 'middle' }}>{country.country_code}</td>
                 <td data-label="Aktívny" style={{ verticalAlign: 'middle' }}>{country.is_active === false ? '—' : '✓'}</td>
                 <td data-label="Tímy" style={{ verticalAlign: 'middle' }}>{Number(country.team_count) || 0}</td>
                 <td data-label="" style={{ verticalAlign: 'middle' }}><div className={styles.actions}><button className={styles.btnSmall} onClick={() => edit(country)}>Upraviť</button><button className={styles.btnSmallDanger} onClick={() => remove(country)}>Zmazať</button></div></td>
             </tr>)}</tbody>
         </table></div>
-        <p style={{ margin: '10px 0 0', fontSize: '0.78rem', color: '#777' }}>Štátov v číselníku: {countries.length}{needle && ` · zobrazených: ${shown.length}`}</p>
     </div>;
 }

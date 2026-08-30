@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { createUclTeam, deleteUclTeam, getUclCountries, getUclTeams, updateUclTeam } from '../../api/uclAdmin';
+import { useSortableTable, SortableTh } from '../../utils/useSortableTable';
 import styles from './Admin.module.css';
 
 const emptyTeam = { team_code: '', team_name: '', country_code: '', logo_file: '', home_venue: '', is_active: true };
@@ -99,6 +100,12 @@ export default function UclTeamCatalog() {
     });
     const pocetVSezone = teams.filter(vSezone).length;
 
+    // Stlpce, ktore v riadku nie su priamo — pocet zapasov je retazec zo servera.
+    const { sorted, toggleSort, sortIndicator } = useSortableTable(shownTeams, {
+        game_count: t => Number(t.game_count) || 0,
+        is_active: t => t.is_active !== false,
+    });
+
     if (loading) return <p>Načítavam kluby…</p>;
 
     return (
@@ -172,9 +179,19 @@ export default function UclTeamCatalog() {
 
             <div style={{ overflowX: 'auto' }}>
                 <table className={`${styles.table} ${styles.uclTeamsTable}`} style={{ marginTop: 8 }}>
-                    <thead><tr><th>Logo</th><th>Kód</th><th>Klub</th><th>Štát</th><th>Kód štátu</th><th>Domáci štadión</th><th>Zápasy</th><th>Stav</th><th>Akcie</th></tr></thead>
+                    <thead><tr>
+                        <th>Logo</th>
+                        {[['team_code', 'Kód'], ['team_name', 'Klub'], ['country_name', 'Štát'],
+                          ['country_display_code', 'Kód štátu'], ['home_venue', 'Domáci štadión'],
+                          ['game_count', 'Zápasy'], ['is_active', 'Stav']].map(([key, label]) => (
+                            <SortableTh key={key} sortKey={key} onSort={toggleSort} indicator={sortIndicator}>
+                                {label}
+                            </SortableTh>
+                        ))}
+                        <th>Akcie</th>
+                    </tr></thead>
                     <tbody>
-                        {shownTeams.map(team => (
+                        {sorted.map(team => (
                             <tr key={team.team_id} style={team.is_active === false ? { opacity: 0.55 } : undefined}>
                                 <td>{team.logo_file
                                     ? <img src={`/logos/ucl2026/${team.logo_file}`} alt="" style={{ width: 34, height: 34, objectFit: 'contain' }} onError={e => { e.currentTarget.style.display = 'none'; }} />
