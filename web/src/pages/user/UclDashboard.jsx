@@ -5,6 +5,7 @@ import { apiFetch } from '../../api/client';
 import { asDate, canTip, isValidDate, uclScoreText as scoreText } from '../../utils/tipWindow';
 import { useAuth } from '../../context/AuthContext';
 import { useCompetition } from '../../context/CompetitionContext';
+import UclClub, { UclVenue } from '../../components/UclClub';
 import UclGroupTips from './UclGroupTips';
 
 // start_time je naive UTC, preto ho tak treba aj interpretovať.
@@ -18,19 +19,10 @@ function dayFmt(value) {
 }
 
 
-function Club({ name, logo, align }) {
-    if (!name) return <span style={{ color: '#999' }}>neurčený</span>;
-    return (
-        <span style={{ display: 'flex', alignItems: 'center', gap: 6, justifyContent: align === 'right' ? 'flex-end' : 'flex-start' }}>
-            {align === 'right' && <span>{name}</span>}
-            {logo
-                ? <img src={`/logos/ucl2026/${logo}`} alt="" style={{ width: 22, height: 22, objectFit: 'contain' }}
-                       onError={e => { e.currentTarget.style.visibility = 'hidden'; }} />
-                : <span style={{ width: 22 }} />}
-            {align !== 'right' && <span>{name}</span>}
-        </span>
-    );
-}
+
+// Krátke označenie fázy, rovnaké ako v zozname zápasov.
+const shortPhase = g => g.round_no ? `LF${g.round_no}`
+    : ({ PO: 'BAR', R16: 'R16', QF: 'QF', SF: 'SF', F: 'F' }[g.game_type_code] || g.game_type_code);
 
 // Poradie hracov v tipovacej skupine: prve tri miesta a k nim vlastny riadok,
 // ak je hrac nizsie. Rovnaka logika ako vo FIFA.
@@ -208,14 +200,16 @@ export default function UclDashboard() {
                                 {/* Odznak LIVE patrí k dvojici, nie k dátumu — inak visí
                                     mimo zápasu a čitateľ ho k nemu nepriradí. */}
                                 <div style={{ flex: 1, minWidth: 240, display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: 8 }}>
-                                    <Club name={g.home_name} logo={g.home_logo} align="right" />
+                                    <UclClub name={g.home_name} logo={g.home_logo} country={g.home_country}
+                                 countryCode={g.home_country_code} flag={g.home_flag} align="right" size={24} />
                                     <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
                                         <span className="liveBadge">LIVE</span>
                                         <strong style={{ color: '#dc3545' }}>
                                             {scoreText(g) ?? 'vs'}
                                         </strong>
                                     </span>
-                                    <Club name={g.away_name} logo={g.away_logo} />
+                                    <UclClub name={g.away_name} logo={g.away_logo} country={g.away_country}
+                                 countryCode={g.away_country_code} flag={g.away_flag} size={24} />
                                 </div>
                                 <div style={{ fontSize: '0.82rem' }}>
                                     {g.home_score_tip !== null
@@ -240,9 +234,11 @@ export default function UclDashboard() {
                                 <div style={{ fontSize: '0.7rem', color: '#999' }}>{g.game_type_name}</div>
                             </div>
                             <div style={{ flex: 1, minWidth: 240, display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: 8 }}>
-                                <Club name={g.home_name} logo={g.home_logo} align="right" />
+                                <UclClub name={g.home_name} logo={g.home_logo} country={g.home_country}
+                                 countryCode={g.home_country_code} flag={g.home_flag} align="right" size={24} />
                                 <span style={{ color: '#bbb' }}>vs</span>
-                                <Club name={g.away_name} logo={g.away_logo} />
+                                <UclClub name={g.away_name} logo={g.away_logo} country={g.away_country}
+                                 countryCode={g.away_country_code} flag={g.away_flag} size={24} />
                             </div>
                             <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
                                 <input value={draftOf(g, 'home')} onChange={e => setDraft(g.game_id, 'home', e.target.value)}
@@ -268,14 +264,16 @@ export default function UclDashboard() {
             {upcomingRest.map(g => (
                 <div key={g.game_id} style={{ background: '#fff', border: '1px solid #e9ecef', borderRadius: 10,
                                               padding: 12, marginBottom: 8, display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
-                    <div style={{ minWidth: 120, fontSize: '0.78rem', color: '#666' }}>
+                    <div style={{ minWidth: 110, fontSize: '0.78rem', color: '#666' }}>
                         {dayFmt(g.start_time)}
-                        <div style={{ fontSize: '0.7rem', color: '#999' }}>{g.game_type_name}</div>
+                        <div style={{ fontSize: '0.7rem', color: '#999' }}>{shortPhase(g)}</div>
                     </div>
                     <div style={{ flex: 1, minWidth: 240, display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: 8 }}>
-                        <Club name={g.home_name} logo={g.home_logo} align="right" />
+                        <UclClub name={g.home_name} logo={g.home_logo} country={g.home_country}
+                                 countryCode={g.home_country_code} flag={g.home_flag} align="right" size={24} />
                         <span style={{ color: '#bbb' }}>vs</span>
-                        <Club name={g.away_name} logo={g.away_logo} />
+                        <UclClub name={g.away_name} logo={g.away_logo} country={g.away_country}
+                                 countryCode={g.away_country_code} flag={g.away_flag} size={24} />
                     </div>
                     <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
                         <input value={draftOf(g, 'home')} onChange={e => setDraft(g.game_id, 'home', e.target.value)}
@@ -287,6 +285,7 @@ export default function UclDashboard() {
                             {saving === g.game_id ? '…' : 'Uložiť'}
                         </button>
                     </div>
+                    <UclVenue game={g} />
                 </div>
             ))}
 
@@ -295,16 +294,23 @@ export default function UclDashboard() {
                     <h3 style={{ marginTop: 24 }}>Posledné vyhodnotené</h3>
                     {played.map(g => (
                         <div key={g.game_id} style={{ background: '#fff', border: '1px solid #e9ecef', borderRadius: 10,
-                                                      padding: '10px 12px', marginBottom: 6, display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
+                                                      padding: 12, marginBottom: 8, display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
+                            <div style={{ minWidth: 110, fontSize: '0.78rem', color: '#666' }}>
+                                {dayFmt(g.start_time)}
+                                <div style={{ fontSize: '0.7rem', color: '#999' }}>{shortPhase(g)}</div>
+                            </div>
                             <div style={{ flex: 1, minWidth: 240, display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: 8 }}>
-                                <Club name={g.home_name} logo={g.home_logo} align="right" />
-                                <strong>{scoreText(g)}</strong>
-                                <Club name={g.away_name} logo={g.away_logo} />
+                                <UclClub name={g.home_name} logo={g.home_logo} country={g.home_country}
+                                         countryCode={g.home_country_code} flag={g.home_flag} align="right" size={24} />
+                                <strong style={{ color: '#1a3a6b' }}>{scoreText(g)}</strong>
+                                <UclClub name={g.away_name} logo={g.away_logo} country={g.away_country}
+                                         countryCode={g.away_country_code} flag={g.away_flag} size={24} />
                             </div>
                             <div style={{ fontSize: '0.82rem' }}>
                                 Tip: <strong>{g.home_score_tip}:{g.away_score_tip}</strong>
                                 {g.points_earned !== null && <> · <strong style={{ color: '#28a745' }}>{g.points_earned} b.</strong></>}
                             </div>
+                            <UclVenue game={g} />
                         </div>
                     ))}
                 </>

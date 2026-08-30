@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { getUclGames, saveUclTip } from '../../api/ucl';
 import { asDate, canTip, isUntipped as isUntippedGame, isValidDate, uclScoreText as scoreText } from '../../utils/tipWindow';
+import UclClub, { UclVenue } from '../../components/UclClub';
 import UclGroupTips from './UclGroupTips';
 import styles from './Games.module.css';
 
@@ -48,40 +49,6 @@ const phaseBtnClass = (p, on) => {
 };
 
 
-// Klub v karte zápasu: logo, názov a pod ním štát s vlajkou — rovnako ako
-// to má FIFA, len tam je štát reprezentácia a tu krajina klubu.
-function Club({ name, logo, country, countryCode, flag, align }) {
-    if (!name) return <span style={{ color: '#999', fontSize: '0.85rem' }}>zatiaľ neurčený</span>;
-    const right = align === 'right';
-    return (
-        <span style={{ display: 'flex', alignItems: 'center', gap: 8,
-                       justifyContent: right ? 'flex-end' : 'flex-start' }}>
-            {right && <ClubText name={name} country={country} countryCode={countryCode} flag={flag} right />}
-            {logo
-                ? <img src={`/logos/ucl2026/${logo}`} alt="" style={{ width: 28, height: 28, objectFit: 'contain', flexShrink: 0 }}
-                       onError={e => { e.currentTarget.style.visibility = 'hidden'; }} />
-                : <span style={{ width: 28, flexShrink: 0 }} />}
-            {!right && <ClubText name={name} country={country} countryCode={countryCode} flag={flag} />}
-        </span>
-    );
-}
-
-function ClubText({ name, country, countryCode, flag, right }) {
-    return (
-        <span style={{ display: 'flex', flexDirection: 'column', minWidth: 0,
-                       alignItems: right ? 'flex-end' : 'flex-start' }}>
-            <span style={{ fontWeight: 500, lineHeight: 1.2 }}>{name}</span>
-            {(country || countryCode) && (
-                <span style={{ display: 'flex', alignItems: 'center', gap: 4,
-                               fontSize: '0.72rem', color: '#888', lineHeight: 1.3 }}>
-                    {flag && <img src={`/flags/${flag}`} alt="" style={{ width: 14, height: 10, objectFit: 'cover', flexShrink: 0 }}
-                                  onError={e => { e.currentTarget.style.display = 'none'; }} />}
-                    <span>{country || countryCode}</span>
-                </span>
-            )}
-        </span>
-    );
-}
 
 export default function UclGames() {
     const [games, setGames] = useState([]);
@@ -267,7 +234,7 @@ export default function UclGames() {
                                 </div>
 
                                 <div style={{ flex: 1, minWidth: 250, display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: 10 }}>
-                                    <Club name={g.home_name} logo={g.home_logo} country={g.home_country}
+                                    <UclClub name={g.home_name} logo={g.home_logo} country={g.home_country}
                                           countryCode={g.home_country_code} flag={g.home_flag} align="right" />
                                     {/* Rozohraty zapas sa oznaci rovnako ako v prehlade. */}
                                     <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
@@ -276,7 +243,7 @@ export default function UclGames() {
                                             {hasResult ? scoreText(g) : 'vs'}
                                         </strong>
                                     </span>
-                                    <Club name={g.away_name} logo={g.away_logo} country={g.away_country}
+                                    <UclClub name={g.away_name} logo={g.away_logo} country={g.away_country}
                                           countryCode={g.away_country_code} flag={g.away_flag} />
                                 </div>
 
@@ -302,27 +269,7 @@ export default function UclGames() {
                                               </>}
                                 </div>
 
-                                {(g.venue || g.flashscore_url) && (
-                                    <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                  gap: 6, fontSize: '0.75rem', color: '#999', order: 4 }}>
-                                        {g.venue && (
-                                            <span>
-                                                {g.venue}
-                                                {/* Klub nemusi hrat doma na svojom stadione —
-                                                    napriklad ked sa jeho krajina nehra. */}
-                                                {g.home_club_venue && g.venue !== g.home_club_venue && (
-                                                    <span style={{ color: '#c0392b' }}> (iný štadión)</span>
-                                                )}
-                                            </span>
-                                        )}
-                                        {g.flashscore_url && (
-                                            <a href={g.flashscore_url} target="_blank" rel="noopener noreferrer"
-                                               title="Sledovať na FlashScore" style={{ display: 'flex', alignItems: 'center' }}>
-                                                <img src="/flashscore.png" alt="FlashScore" style={{ width: 18, height: 18 }} />
-                                            </a>
-                                        )}
-                                    </div>
-                                )}
+                                <UclVenue game={g} order={4} />
 
                                 {started && <UclGroupTips game={g} />}
                             </div>
