@@ -99,6 +99,10 @@ export default function UclGames() {
 
     useEffect(() => {
         getUclGames().then(setGames).catch(e => setError(e.message)).finally(() => setLoading(false));
+        // Vysledky a priebezne skore sa menia pocas zapasu, rovnako ako v prehlade.
+        // Bez obnovy by hrac videl stary stav, kym stranku sam nenacita.
+        const iv = setInterval(() => { getUclGames().then(setGames).catch(() => {}); }, 30000);
+        return () => clearInterval(iv);
     }, []);
 
     const matchesPhase = (g) => {

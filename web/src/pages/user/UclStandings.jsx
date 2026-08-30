@@ -16,6 +16,9 @@ export default function UclStandings() {
 
     useEffect(() => {
         getUclStandings().then(setRows).catch(e => setError(e.message)).finally(() => setLoading(false));
+        // Po schvaleni vysledku sa meni poradie, preto sa tabulka sama obnovuje.
+        const iv = setInterval(() => { getUclStandings().then(setRows).catch(() => {}); }, 30000);
+        return () => clearInterval(iv);
     }, []);
 
     if (loading) return <p>Načítavam tabuľku…</p>;
