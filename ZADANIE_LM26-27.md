@@ -10,10 +10,12 @@
 - Platforma: webová aplikácia React + Vite PWA
 - Android aplikácia: nebude sa robiť
 
-**Stav:** 🟠 v `develop` funkčné a otestované — ligová fáza je kompletne
+**Stav:** 🟠 v `develop` funkčné a otestované. Ligová fáza je kompletne
 vyžrebovaná (144 zápasov s termínmi, štadiónmi aj odkazmi na FlashScore),
-tipovanie, bodovanie aj ligová tabuľka bežia. Do produkcie sa zatiaľ
-nenasadzovalo. Prvý ostrý zápas: **8. 9. 2026**.
+tipovanie, bodovanie, ligová tabuľka aj livescore bežia. Do produkcie sa
+zatiaľ nenasadzovalo. Prvý ostrý zápas: **8. 9. 2026**.
+
+Posledná spustená migrácia: **067**.
 
 ## Formát súťaže
 
@@ -111,35 +113,46 @@ Hodnotí sa výsledok po 90 minútach. Predĺženie a penalty sa do tipu nezapo�
 
 ### Databáza a číselníky
 
-1. ✅ Migrácia `044_ucl_competition.sql`, spustená spolu s `045`
-2. ✅ Import 81 klubov, štátov a kódov z CSV (`046`)
-3. ✅ Admin číselník klubov s editáciou názvu, štátu, kódu a loga
-4. ✅ Migrácie oprávnení `047`, číselníka štátov `048`, synchronizácie `049`
-5. 🟠 Migrácie `060`, `062`–`066` spustené na DB-DEV-BET
-6. 🟠 Kód klubu je iba informatívny (`065`) — dá sa voľne meniť
+1. ✅ Migrácie `044`–`049`: schéma, kluby, štáty, oprávnenia
+2. 🟠 Migrácie `060`, `062`–`067` spustené na DB-DEV-BET
+3. 🟠 Kód klubu je iba informatívny (`065`) — dá sa voľne meniť
+4. 🟠 Domáci štadión klubu v číselníku (`067`)
+5. 🟠 Číselníky: triedenie stĺpcov, hľadanie bez diakritiky, filter sezóny
 
 ### Zápasy
 
-7. 🟠 Referenčný rozpis zo zdrojového PDF v `games_pdf` (`062`)
-8. 🟠 Ligová fáza kompletná: 144 zápasov, dvojice, kolá, termíny, URL, štadióny
-9. 🟠 Vyraďovacia časť založená (45 zápasov) — zatiaľ len termíny
-10. ⛔ ~~Generátor náhodného rozlosovania~~ — nahradený načítaním z `games_pdf`
+6. 🟠 Referenčný rozpis zo zdrojového PDF v `games_pdf` (`062`)
+7. 🟠 Ligová fáza kompletná: 144 zápasov, dvojice, kolá, termíny, URL, štadióny
+8. 🟠 Vyraďovacia časť založená (45 zápasov) — zatiaľ len termíny
 
-### Aplikácia
+### Aplikácia — používateľ
 
-11. 🟠 UCL API endpointy
-12. 🟠 UCL stránky a routing
-13. 🟠 Karta zápasu: logo, štát s vlajkou, štadión, FlashScore, blikajúci LIVE
-14. 🟠 Prehľad: poradie v skupinách, aktuálny oznam s odkazom na históriu
-15. 🟠 Správy: záložky **Oznamy** (história + hľadanie) a **Správy**
-16. 🟠 Testovacie nástroje: načítanie z PDF, generovanie tipov a výsledkov LF
-17. 🟠 Súťaž aktivovaná pre používateľov (`057`)
+9. 🟠 Karta zápasu: logo, štát s vlajkou, štadión, FlashScore, blikajúci LIVE
+10. 🟠 Priebežné skóre z livescore počas zápasu
+11. 🟠 Prehľad: poradie v skupinách, aktuálny oznam s odkazom na históriu
+12. 🟠 Správy: záložky **Oznamy** (história + hľadanie so zvýraznením) a **Správy**
+13. 🟠 Zápasy aj Tabuľky sa obnovujú samy každých 30 s
+14. 🟠 Farebné filtre fáz, tipy skupín zarovnané
+
+### Aplikácia — admin
+
+15. 🟠 Zápasy: tabuľka s logami, filtre fáz a kôl, editácia zápasu
+16. 🟠 Výsledky: karty s tipmi **všetkých** hráčov a priebežnými bodmi
+17. 🟠 Ručné zadanie živého skóre + prevzatie do výsledku
+18. 🟠 Tabuľky: ručné poradie pri rovnosti bodov, popis formátu súťaže
+19. 🟠 Testovacie nástroje: načítanie z PDF, posun dní, tipy a výsledky LF
+
+### Livescore
+
+20. 🟠 Sťahovanie z Flashscore cez model (`helpers/ucl_livescore_fn.php`)
+21. 🟠 Cron `api/cron/ucl_livescore.php` — pripravený, čaká na zapnutie
 
 ### Overené
 
-18. 🟠 Ligová tabuľka sa prepočítava po zadaní výsledku
-19. 🟠 Bodovanie tipov sedí — maximum 5 bodov v ligovej fáze
-20. 🔲 Otestovať celú ligovú fázu (zatiaľ overené na prvých zápasoch)
+22. 🟠 Ligová tabuľka sa prepočítava po schválení výsledku
+23. 🟠 Bodovanie tipov sedí — maximum 5 bodov v ligovej fáze
+24. 🟠 Ručné poradie prežije prepočet, čísla zápasov sa aktualizujú
+25. 🔲 Otestovať celú ligovú fázu, baráž a play-off
 
 ## Čo zostáva
 
@@ -147,9 +160,21 @@ Hodnotí sa výsledok po 90 minútach. Predĺženie a penalty sa do tipu nezapo�
 
 | Úloha | Poznámka |
 |---|---|
-| 🔲 Kódy klubov podľa UEFA | 14 klubov má dočasné označenie na `X`; po `065` sa dajú meniť voľne |
+| 🔲 Zapnúť livescore cron | volať každých 5 minút s `?token=<CRON_SECRET>` |
 | 🔲 Overiť štadión Vikinga | zápas s PSV 20. 1. 2027 má MHPArena, UEFA uvádza domáci štadión |
 | 🔲 Deploy na `main` | všetko je zatiaľ len v `develop` |
+
+Kluby ligovej fázy už majú oficiálne kódy UEFA. Osem klubov s dočasným `X`
+(`XAAR`, `XARA`, `XKAU`, `XHAP`, `XMJA`, `XNEC`, `XCEL`, `XLEV`) sú kvalifikanti
+bez zápasov — netlačí to.
+
+### Testovanie
+
+| Úloha | Poznámka |
+|---|---|
+| 🔲 Prejsť celú ligovú fázu | posúvať kolá cez **Posunúť hrací deň**, kontrolovať body a tabuľku |
+| 🔲 Overiť baráž a play-off | dvojice sa dopĺňajú ručne, kým nie je nástroj na ich zostavenie |
+| 🔲 Overiť bodovanie play-off | 5 bodov za výsledok, maximum 7 |
 
 ### Po žrebe vyraďovacej časti
 
@@ -159,17 +184,11 @@ Hodnotí sa výsledok po 90 minútach. Predĺženie a penalty sa do tipu nezapo�
 | 🔲 Doplniť štadióny a URL | do `games_pdf`, rovnako ako pri ligovej fáze |
 | 🔲 Overiť postupový kľúč | súčet gólov z oboch zápasov, predĺženie až v odvete |
 
-### Livescore
-
-| Úloha | Poznámka |
-|---|---|
-| 🔲 Zapnúť cron na hostingu | skript je hotový, treba ho zavolať každých 5 minút |
-| 🔲 Otestovať na živom zápase | prvý ostrý zápas je 8. 9. 2026 |
-
 ### Nice to have
 
 | Úloha | Poznámka |
 |---|---|
+| 🔲 Nástroj na zostavenie play-off | dvojice z tabuľky automaticky podľa poradia |
 | 🔲 Zjednotiť históriu oznamov | FIFA a IIHF ju majú stále v prehľade, LM ju má v Správach |
 
 ## Referenčný rozpis zo zdroja (`games_pdf`)
@@ -279,6 +298,21 @@ Vyžaduje `api/config/openrouter.php` (kľúč nie je v repozitári).
 | `tools/test_lm_url_migration.cjs` | overí, že každý UPDATE v `066` trafí správny zápas |
 | `tools/test_ucl_shift_day.cjs` | overí presun hracieho dňa |
 | `tools/test_home_venue.cjs` | overí naplnenie domácich štadiónov |
+| `tools/test_ucl_live.cjs` | overí ručné živé skóre a prevzatie do výsledku |
+| `tools/test_ucl_manual_rank.cjs` | overí, že ručné poradie prežije prepočet |
+
+### Ligová tabuľka
+
+Poradie počíta `ucl_recalc_standings` podľa bodov, rozdielu skóre a strelených
+gólov; pri úplnej rovnosti rozhoduje názov klubu.
+
+Skutočné kritériá UEFA (vzájomné zápasy, disciplinárne body, koeficient)
+aplikácia nepozná, preto **admin môže poradie prestaviť ručne** — v Tabuľkách
+šípkami pri každom klube. Vymeniť sa dajú iba kluby s **rovnakým počtom bodov**;
+poradie medzi rôznymi bodmi určujú výsledky. Stráži to rozhranie aj server.
+
+Uložené poradie dostane príznak `finalized` a prepočet ho zachová — aktualizujú
+sa iba čísla zápasov a gólov.
 
 ### Oprávnenia
 
