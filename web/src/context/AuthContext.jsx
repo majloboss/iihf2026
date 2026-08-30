@@ -1,5 +1,5 @@
 import { createContext, useContext, useState } from 'react';
-import { getToken, isImpersonating } from '../api/token';
+import { getToken, isImpersonating, isImpersonationTab } from '../api/token';
 
 const AuthContext = createContext(null);
 
@@ -18,7 +18,10 @@ export function AuthProvider({ children }) {
     const impersonating = isImpersonating();
 
     const signIn = (newToken) => {
-        localStorage.setItem('token', newToken);
+        // V tabe, ktory vznikol impersonaciou, zostava prihlasenie iba v tomto
+        // tabe — inak by prepisalo adminov token a admin by stratil prava.
+        if (isImpersonationTab()) sessionStorage.setItem('token', newToken);
+        else localStorage.setItem('token', newToken);
         setToken(newToken);
     };
 
@@ -26,6 +29,9 @@ export function AuthProvider({ children }) {
         if (sessionStorage.getItem('imp_token')) {
             // Impersonačný tab — ukonči impersonáciu
             sessionStorage.removeItem('imp_token');
+        } else if (sessionStorage.getItem('token')) {
+            // Prihlásenie v impersonačnom tabe, adminov token sa nedotýka.
+            sessionStorage.removeItem('token');
         } else {
             localStorage.removeItem('token');
         }
