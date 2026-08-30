@@ -21,6 +21,9 @@ export const deleteUclTeam = (team_id) => apiFetch('v1/admin/ucl-teams', {
     method: 'DELETE', body: JSON.stringify({ team_id })
 });
 
+// Vsetky tipy na zapas — admin vidi aj hracov, ktori netipovali.
+export const getUclAdminTips = (game_id) => apiFetch(`v1/admin/ucl-game-tips?game_id=${game_id}`);
+
 // --- Testovacie nástroje ---
 export const getUclPdfStatus = () => apiFetch('v1/admin/ucl-load-pdf');
 export const loadUclGamesFromPdf = (data) => apiFetch('v1/admin/ucl-load-pdf', {

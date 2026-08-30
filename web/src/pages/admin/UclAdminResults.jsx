@@ -1,0 +1,335 @@
+import { useState, useEffect } from 'react';
+import { getUclGames, recalcUcl, updateUclGameResult } from '../../api/ucl';
+import { getUclAdminTips } from '../../api/uclAdmin';
+import gStyles from '../user/Games.module.css';
+import styles from './AdminResults.module.css';
+
+// Fázy v poradí súťaže. LF1–LF8 sú kolá ligovej fázy, zvyšok vyraďovacia časť.
+const KNOCKOUT = ['PO', 'R16', 'QF', 'SF', 'F'];
+const PLAYOFF = new Set(KNOCKOUT);
+const PHASE_LABEL = {
+    LEAGUE: 'Ligová fáza', PO: 'Baráž o play-off', R16: 'Osemfinále',
+    QF: 'Štvrťfinále', SF: 'Semifinále', F: 'Finále',
+};
+
+// start_time chodí ako naive UTC.
+const asDate = s => new Date(String(s).replace(' ', 'T') + 'Z');
+const dayKey = s => {
+    const d = asDate(s);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+
+// Priebežné body počas zápasu — rovnaký vzorec ako serverový prepočet.
+const calcLivePoints = (tip1, tip2, game) => {
+    const s1 = game.home_score_regular != null ? game.home_score_regular : game.ls_home;
+    const s2 = game.away_score_regular != null ? game.away_score_regular : game.ls_away;
+    if (s1 == null || s2 == null || tip1 == null || tip2 == null) return null;
+    const winPts = PLAYOFF.has(game.game_type_code) ? 5 : 3;
+    const sign = (a, b) => (a > b ? 1 : a < b ? -1 : 0);
+    return (sign(tip1, tip2) === sign(s1, s2) ? winPts : 0)
+        + (tip1 === s1 ? 1 : 0) + (tip2 === s2 ? 1 : 0);
+};
+
+function ClubBlock({ name, logo, isLeft }) {
+    return (
+        <div className={`${gStyles.team} ${isLeft ? gStyles.teamLeft : gStyles.teamRight}`}>
+            {name
+                ? <>
+                    {logo && <img className={gStyles.flag} src={`/logos/ucl2026/${logo}`} alt=""
+                                  style={{ objectFit: 'contain' }}
+                                  onError={e => { e.target.style.display = 'none'; }} />}
+                    <span className={gStyles.teamCode} style={{ fontSize: '0.9rem' }}>{name}</span>
+                  </>
+                : <span className={gStyles.teamCode} style={{ color: '#bbb' }}>TBD</span>}
+        </div>
+    );
+}
+
+// Tipy všetkých hráčov vrátane tých, čo netipovali — admin ich potrebuje vidieť.
+function TipsPanel({ gameId, game }) {
+    const [tips, setTips] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [err, setErr] = useState('');
+
+    useEffect(() => {
+        setLoading(true);
+        getUclAdminTips(gameId).then(setTips).catch(e => setErr(e.message)).finally(() => setLoading(false));
+    }, [gameId]);
+
+    if (loading) return <div className={styles.tipsLoading}>Načítavam tipy…</div>;
+    if (err) return <div className={styles.tipsErr}>{err}</div>;
+    if (!tips || tips.length === 0) return <div className={styles.tipsEmpty}>Žiadne tipy</div>;
+
+    const isLive = game && !game.result_approved
+        && (game.ls_home != null || game.home_score_regular != null);
+
+    return (
+        <table className={styles.tipsTable}>
+            <thead><tr><th>Hráč</th><th>Tip</th><th>Body</th><th>Čas tipu</th></tr></thead>
+            <tbody>
+                {tips.map(t => {
+                    const livePts = isLive ? calcLivePoints(t.tip1, t.tip2, game) : null;
+                    return (
+                        <tr key={t.user_id} className={t.tip1 == null ? styles.tipRowUntipped : ''}>
+                            <td className={styles.tipUser}>
+                                {t.avatar
+                                    ? <img src={t.avatar} className={styles.tipAvatar} alt="" />
+                                    : <span className={styles.tipAvatarPh}>{t.username[0].toUpperCase()}</span>}
+                                {t.username}
+                            </td>
+                            <td className={styles.tipScore}>{t.tip1 != null ? `${t.tip1}:${t.tip2}` : '—'}</td>
+                            <td className={livePts != null ? styles.tipPtsLive : styles.tipPts}>
+                                {livePts != null ? `+${livePts}b` : (t.points != null ? `+${t.points}b` : '—')}
+                            </td>
+                            <td className={styles.tipTime}>
+                                {t.updated_at ? new Date(t.updated_at).toLocaleString('sk-SK') : '—'}
+                            </td>
+                        </tr>
+                    );
+                })}
+            </tbody>
+        </table>
+    );
+}
+
+function ResultCard({ game: initGame, onChanged }) {
+    const [game, setGame] = useState(initGame);
+    useEffect(() => { setGame(initGame); }, [initGame]);
+
+    const isPlayoff = PLAYOFF.has(game.game_type_code);
+    const [h90, setH90] = useState(game.home_score_regular != null ? String(game.home_score_regular) : '');
+    const [a90, setA90] = useState(game.away_score_regular != null ? String(game.away_score_regular) : '');
+    const [hFin, setHFin] = useState(game.home_score_final != null ? String(game.home_score_final) : '');
+    const [aFin, setAFin] = useState(game.away_score_final != null ? String(game.away_score_final) : '');
+    const [saving, setSaving] = useState(false);
+    const [saved, setSaved] = useState(false);
+    const [err, setErr] = useState('');
+    const [open, setOpen] = useState(false);
+
+    const finished = game.result_approved;
+    const started = asDate(game.start_time) <= new Date();
+    const teamsSet = game.home_team_id && game.away_team_id;
+
+    // Predĺženie sa hrá len vo finále a v odvete, keď je súčet za dvojicu rovnaký.
+    // V ligovej fáze je remíza platný výsledok.
+    const isDraw90 = h90 !== '' && a90 !== '' && parseInt(h90) === parseInt(a90);
+    const mozeMatPredlzenie = game.game_type_code === 'F' || Number(game.leg) === 2;
+    const needsET = mozeMatPredlzenie && isDraw90;
+
+    const save = async () => {
+        if (h90 === '' || a90 === '') { setErr('Zadaj skóre po 90 min'); return; }
+        setSaving(true); setErr(''); setSaved(false);
+        try {
+            await updateUclGameResult({
+                game_id: game.game_id,
+                home_score_regular: parseInt(h90),
+                away_score_regular: parseInt(a90),
+                home_score_final: needsET && hFin !== '' ? parseInt(hFin) : null,
+                away_score_final: needsET && aFin !== '' ? parseInt(aFin) : null,
+                result_approved: true,
+            });
+            setGame(g => ({ ...g, home_score_regular: parseInt(h90), away_score_regular: parseInt(a90),
+                                  result_approved: true }));
+            setSaved(true);
+            onChanged?.();
+        } catch (e) { setErr(e.message); }
+        finally { setSaving(false); }
+    };
+
+    const kolo = game.round_no ? `LF${game.round_no}` : (PHASE_LABEL[game.game_type_code] || game.game_type_code);
+    const cas = asDate(game.start_time).toLocaleString('sk-SK',
+        { weekday: 'short', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+
+    return (
+        <div className={styles.card}>
+            <div className={styles.cardHead}>
+                <span className={styles.phaseTag}>{kolo} · #{game.game_id}</span>
+                <span className={styles.cardTime}>{cas}</span>
+            </div>
+
+            <div className={gStyles.matchRow}>
+                <ClubBlock name={game.home_name} logo={game.home_logo} isLeft />
+                <div className={gStyles.vs}>
+                    {game.home_score_regular != null
+                        ? <span className={styles.result}>
+                            {game.home_score_regular}:{game.away_score_regular}
+                            {game.home_score_final != null &&
+                                <span className={styles.resultOT}> ({game.home_score_final}:{game.away_score_final} pp)</span>}
+                          </span>
+                        : 'vs'}
+                </div>
+                <ClubBlock name={game.away_name} logo={game.away_logo} />
+            </div>
+            {game.venue && <div className={styles.cardVenue}><span>{game.venue}</span></div>}
+
+            {!teamsSet && (
+                <div className={styles.cardVenue} style={{ color: '#aaa' }}>
+                    Zápas ešte nemá určené tímy — dopĺňajú sa podľa výsledkov.
+                </div>
+            )}
+
+            {teamsSet && !started && !finished && (
+                <div className={styles.cardVenue} style={{ color: '#aaa' }}>Zápas ešte nezačal</div>
+            )}
+
+            {teamsSet && (started || finished) && (
+                <div className={styles.editBlock}>
+                    <div className={styles.editRow}>
+                        <span style={{ fontSize: '0.78rem', color: '#888', minWidth: 60 }}>Po 90 min:</span>
+                        <div className={styles.scoreBox}>
+                            <input type="number" min="0" max="30" value={h90}
+                                   onChange={e => setH90(e.target.value)} className={styles.scoreIn} />
+                            <span className={styles.colon}>:</span>
+                            <input type="number" min="0" max="30" value={a90}
+                                   onChange={e => setA90(e.target.value)} className={styles.scoreIn} />
+                        </div>
+                        <button className={styles.btnSave} onClick={save} disabled={saving}>
+                            {saving ? '…' : saved ? '✓ Uložené' : 'Uložiť výsledok'}
+                        </button>
+                        {!finished && game.ls_home != null && (
+                            <button className={styles.btnTakeLS}
+                                    onClick={() => { setH90(String(game.ls_home)); setA90(String(game.ls_away)); }}>
+                                ↙ Prevziať Livescore
+                            </button>
+                        )}
+                        {finished && <span style={{ fontSize: '0.78rem', color: '#28a745' }}>schválený</span>}
+                        {err && <span className={styles.errMsg}>{err}</span>}
+                    </div>
+
+                    {/* Predĺženie sa hrá len v odvete a vo finále. */}
+                    {needsET && (
+                        <div className={styles.editRow} style={{ marginTop: 8 }}>
+                            <span style={{ fontSize: '0.78rem', color: '#dc3545', minWidth: 60 }}>Po ET/pen:</span>
+                            <div className={styles.scoreBox}>
+                                <input type="number" min="0" max="30" value={hFin}
+                                       onChange={e => setHFin(e.target.value)} className={styles.scoreIn} />
+                                <span className={styles.colon}>:</span>
+                                <input type="number" min="0" max="30" value={aFin}
+                                       onChange={e => setAFin(e.target.value)} className={styles.scoreIn} />
+                            </div>
+                            <span style={{ fontSize: '0.72rem', color: '#bbb' }}>
+                                remíza {game.game_type_code === 'F' ? 'vo finále' : 'v odvete'} → zadaj víťaza
+                            </span>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            <button className={styles.toggleTips} onClick={() => setOpen(o => !o)}>
+                {open ? '▲ Skryť tipy' : '▼ Tipy hráčov'}
+            </button>
+            {open && <TipsPanel gameId={game.game_id} game={game} />}
+        </div>
+    );
+}
+
+export default function UclAdminResults() {
+    const [games, setGames] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+    const [phase, setPhase] = useState('all');
+    const [roundFilter, setRoundFilter] = useState(null);
+    const [selectedDay, setSelectedDay] = useState(null);
+    const [recalcing, setRecalcing] = useState(false);
+    const [recalcMsg, setRecalcMsg] = useState('');
+
+    const load = () => getUclGames()
+        .then(g => { setGames(g); setLoading(false); })
+        .catch(e => { setError(e.message); setLoading(false); });
+
+    useEffect(() => { load(); }, []);
+
+    const handleRecalc = async () => {
+        setRecalcing(true); setRecalcMsg('');
+        try {
+            const r = await recalcUcl();
+            setRecalcMsg(`✓ Prepočítané: ${r.standings_rows} tímov, ${r.tips_updated} tipov`);
+            load();
+        } catch (e) { setRecalcMsg(`Chyba: ${e.message}`); }
+        finally { setRecalcing(false); }
+    };
+
+    const lfActive = phase === 'LF';
+
+    const vyhovuje = g => {
+        if (phase === 'LF') {
+            if (g.game_type_code !== 'LEAGUE') return false;
+            if (roundFilter && Number(g.round_no) !== roundFilter) return false;
+        } else if (phase !== 'all') {
+            if (g.game_type_code !== phase) return false;
+        }
+        return true;
+    };
+
+    const filtered = games
+        .filter(g => vyhovuje(g) && (!selectedDay || dayKey(g.start_time) === selectedDay))
+        .sort((a, b) => a.game_id - b.game_id);
+
+    const allDays = [...new Set(games.filter(vyhovuje).map(g => dayKey(g.start_time)))].sort();
+    const todayK = dayKey(new Date().toISOString().replace('T', ' ').slice(0, 19));
+
+    if (loading) return <p style={{ padding: 20 }}>Načítavam…</p>;
+    if (error) return <p style={{ color: 'red', padding: 20 }}>Chyba: {error}</p>;
+
+    const pBtnClass = (p, on) => {
+        const color = p === 'F' ? [gStyles.pGold, gStyles.pGoldOn]
+                    : p === 'PO' ? [gStyles.pBronze, gStyles.pBronzeOn]
+                    : KNOCKOUT.includes(p) ? [gStyles.pPlayoff, gStyles.pPlayoffOn]
+                    : [gStyles.pGroup, gStyles.pGroupOn];
+        return [gStyles.pBtn, color[0], on ? color[1] : ''].join(' ');
+    };
+
+    return (
+        <div className={gStyles.wrap}>
+            <div className={styles.recalcRow}>
+                <button className={styles.btnRecalc} onClick={handleRecalc} disabled={recalcing}>
+                    {recalcing ? 'Prepočítavam…' : '↻ Prepočítať body'}
+                </button>
+                {recalcMsg && <span className={recalcMsg.startsWith('✓') ? styles.recalcOk : styles.recalcErr}>{recalcMsg}</span>}
+            </div>
+
+            <div className={gStyles.topBar}>
+                <div className={gStyles.filters}>
+                    <button className={[gStyles.pBtn, gStyles.pGroup, phase === 'all' ? gStyles.pGroupOn : ''].join(' ')}
+                            onClick={() => { setPhase('all'); setRoundFilter(null); setSelectedDay(null); }}>ALL</button>
+                    <button className={[gStyles.pBtn, gStyles.pGroup, lfActive ? gStyles.pGroupOn : ''].join(' ')}
+                            onClick={() => { setPhase('LF'); setSelectedDay(null); }}>LF</button>
+                    {KNOCKOUT.map(p => (
+                        <button key={p} className={pBtnClass(p, phase === p)}
+                                onClick={() => { setPhase(p); setRoundFilter(null); setSelectedDay(null); }}>
+                            {p === 'PO' ? 'BAR' : p}
+                        </button>
+                    ))}
+                </div>
+                {lfActive && (
+                    <div className={gStyles.filters} style={{ marginTop: 4 }}>
+                        {[1, 2, 3, 4, 5, 6, 7, 8].map(r => (
+                            <button key={r} className={[gStyles.pBtn, gStyles.pGroup, roundFilter === r ? gStyles.pGroupOn : ''].join(' ')}
+                                    onClick={() => { setRoundFilter(roundFilter === r ? null : r); setSelectedDay(null); }}>
+                                {r}
+                            </button>
+                        ))}
+                    </div>
+                )}
+            </div>
+
+            <div className={gStyles.calRow}>
+                {allDays.map(dk => {
+                    const d = new Date(dk + 'T12:00:00');
+                    return (
+                        <button key={dk}
+                                className={`${gStyles.calDay} ${dk === todayK ? gStyles.calDayToday : ''} ${dk === selectedDay ? gStyles.calDayActive : ''}`}
+                                onClick={() => setSelectedDay(selectedDay === dk ? null : dk)}>
+                            <span className={gStyles.calDayWeekday}>{d.toLocaleDateString('sk-SK', { weekday: 'short' })}</span>
+                            <span className={gStyles.calDayNum}>{d.getDate()}</span>
+                            <span className={gStyles.calDayMonth}>{d.getMonth() + 1}.</span>
+                        </button>
+                    );
+                })}
+            </div>
+
+            {filtered.map(g => <ResultCard key={g.game_id} game={g} onChanged={load} />)}
+            {filtered.length === 0 && <p className={gStyles.empty}>Žiadne zápasy</p>}
+        </div>
+    );
+}
