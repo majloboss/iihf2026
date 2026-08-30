@@ -27,8 +27,17 @@ export default function UclStandings() {
     return (
         <div>
             <h2>Ligová tabuľka — Liga majstrov</h2>
-            <p style={{ fontSize: '0.82rem', color: '#666', margin: '4px 0 14px' }}>
-                Všetkých 36 klubov v jednej spoločnej tabuľke. Každý odohrá 8 zápasov.
+            <p style={{ fontSize: '0.82rem', color: '#666', margin: '4px 0 14px', maxWidth: 760 }}>
+                Všetkých 36 klubov v jednej spoločnej tabuľke. Každý odohrá 8 zápasov
+                (4 doma, 4 vonku) a s každým súperom sa stretne najviac raz.
+                <br />
+                Po ligovej fáze <strong>prvých osem</strong> postupuje priamo do osemfinále.
+                Kluby na <strong>9. až 24. mieste</strong> hrajú baráž o play-off — dvojzápas,
+                z ktorého víťazi doplnia osemfinále. Kluby od 25. miesta končia.
+                <br />
+                Osemfinále, štvrťfinále aj semifinále sa hrajú na dva zápasy so
+                súčtom gólov; predĺženie sa hrá až v odvete pri rovnosti súčtu.
+                <strong> Finále je jediný zápas bez odvety.</strong>
             </p>
 
             <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginBottom: 12, fontSize: '0.78rem' }}>

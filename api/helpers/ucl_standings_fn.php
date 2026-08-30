@@ -55,14 +55,31 @@ function ucl_recalc_standings(PDO $pdo): int {
             ?: strcmp($names[$x] ?? '', $names[$y] ?? '');
     });
 
+    // Admin mohol poradie prestavit rucne — pri rovnosti bodov rozhoduju
+    // kriteria UEFA, ktore aplikacia nepozna. Take poradie sa zachova,
+    // prepocitaju sa iba cisla zapasov a golov.
+    $rucne = [];
+    foreach ($pdo->query('SELECT team_id, rank FROM "lm2026-27".group_standings
+                           WHERE phase = \'LEAGUE\' AND finalized')->fetchAll() as $r) {
+        $rucne[(int)$r['team_id']] = (int)$r['rank'];
+    }
+    $vsetkyRucne = $rucne && count($rucne) === count($tab);
+
     $pdo->exec('DELETE FROM "lm2026-27".group_standings WHERE phase = \'LEAGUE\'');
+    // PDO posiela PHP false ako prazdny retazec, ktory Postgres pre boolean
+    // neprijme — priznak sa preto sklada priamo do dopytu.
+    $finalizedSql = $vsetkyRucne ? 'TRUE' : 'FALSE';
     $ins = $pdo->prepare('
-        INSERT INTO "lm2026-27".group_standings (phase, team_id, rank, gp, w, d, l, gf, ga, pts, updated_at)
-        VALUES (\'LEAGUE\', ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())');
+        INSERT INTO "lm2026-27".group_standings
+            (phase, team_id, rank, gp, w, d, l, gf, ga, pts, finalized, updated_at)
+        VALUES (\'LEAGUE\', ?, ?, ?, ?, ?, ?, ?, ?, ?, ' . $finalizedSql . ', NOW())');
 
     $rank = 0;
     foreach ($tab as $clubId => $t) {
-        $ins->execute([$clubId, ++$rank, $t['gp'], $t['w'], $t['d'], $t['l'], $t['gf'], $t['ga'], $t['pts']]);
+        $vypocitane = ++$rank;
+        $poradie = $vsetkyRucne ? ($rucne[$clubId] ?? $vypocitane) : $vypocitane;
+        $ins->execute([$clubId, $poradie, $t['gp'], $t['w'], $t['d'], $t['l'],
+                       $t['gf'], $t['ga'], $t['pts']]);
     }
     return $rank;
 }

@@ -74,6 +74,7 @@ try {
         $path === 'v1/admin/ucl-shift-day'        => require __DIR__ . '/v1/admin/ucl_shift_day.php',
         $path === 'v1/admin/ucl-game-tips'        => require __DIR__ . '/v1/admin/ucl_game_tips.php',
         $path === 'v1/admin/ucl-game-live'        => require __DIR__ . '/v1/admin/ucl_game_live.php',
+        $path === 'v1/admin/ucl-standings'        => require __DIR__ . '/v1/admin/ucl_standings_edit.php',
         $path === 'v1/ucl/games'                => require __DIR__ . '/v1/ucl/games.php',
         $path === 'v1/ucl/teams'                => require __DIR__ . '/v1/ucl/teams.php',
         $path === 'v1/ucl/tips'                 => require __DIR__ . '/v1/ucl/tips.php',

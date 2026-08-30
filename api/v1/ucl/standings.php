@@ -6,7 +6,8 @@ if ($method !== 'GET') json_error('Method not allowed', 405);
 require_once __DIR__ . '/../../helpers/ucl_standings_fn.php';
 
 $rows = $pdo->query('
-    SELECT s.rank, c.club_code AS team, s.gp, s.w, s.d, s.l, s.gf, s.ga,
+    SELECT s.rank, s.team_id, s.finalized, c.club_code AS team,
+           s.gp, s.w, s.d, s.l, s.gf, s.ga,
            (s.gf - s.ga) AS gd, s.pts,
            c.club_name AS team_name, c.logo_file,
            st.name_sk AS country_name,

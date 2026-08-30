@@ -32,6 +32,11 @@ export const clearUclLive = (game_id) => apiFetch('v1/admin/ucl-game-live', {
     method: 'POST', body: JSON.stringify({ game_id, clear: true })
 });
 
+// Rucne poradie v ligovej tabulke — pri rovnosti bodov rozhoduju kriteria UEFA.
+export const saveUclStandingsOrder = (order) => apiFetch('v1/admin/ucl-standings', {
+    method: 'PUT', body: JSON.stringify({ order })
+});
+
 // --- Testovacie nástroje ---
 export const getUclPdfStatus = () => apiFetch('v1/admin/ucl-load-pdf');
 export const loadUclGamesFromPdf = (data) => apiFetch('v1/admin/ucl-load-pdf', {
