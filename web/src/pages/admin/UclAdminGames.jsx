@@ -72,6 +72,36 @@ export default function UclAdminGames() {
         return live !== null && live !== undefined;
     };
 
+    const saveEdit = async (e) => {
+        e.preventDefault();
+        setBusy(editing.game_id); setError(''); setMessage('');
+        try {
+            await editUclGame({
+                game_id: editing.game_id,
+                home_team_id: editing.home_team_id || null,
+                away_team_id: editing.away_team_id || null,
+                start_time: fromInput(editing.start_time),
+                venue: editing.venue || '',
+                flashscore_url: editing.flashscore_url || '',
+                tips_open: editing.tips_open,
+            });
+            setEditing(null);
+            await load();
+            setMessage('✓ Zápas bol upravený.');
+        } catch (err) { setError(err.message); }
+        finally { setBusy(null); }
+    };
+
+    const recalc = async () => {
+        setBusy('recalc'); setError(''); setMessage('');
+        try {
+            const r = await recalcUcl();
+            setMessage(`✓ Prepočítané: ${r.standings_rows} tímov v tabuľke, ${r.tips_updated} tipov.`);
+            await load();
+        } catch (e) { setError(e.message); }
+        finally { setBusy(null); }
+    };
+
     if (loading) return <p>Načítavam zápasy…</p>;
     const list = (byPhase[phase] || [])
         .filter(g => phase !== 'LEAGUE' || !round || Number(g.round_no) === round);
