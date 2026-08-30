@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getUclGames, recalcUcl, updateUclGameResult } from '../../api/ucl';
-import { getUclAdminTips } from '../../api/uclAdmin';
+import { getUclAdminTips, setUclLive, clearUclLive } from '../../api/uclAdmin';
 import gStyles from '../user/Games.module.css';
 import styles from './AdminResults.module.css';
 
@@ -105,6 +105,32 @@ function ResultCard({ game: initGame, onChanged }) {
     const [err, setErr] = useState('');
     const [open, setOpen] = useState(false);
 
+    // Priebezne skore — bezne ho plni livescore, admin ho vie prepisat.
+    const [ls1, setLs1] = useState(game.ls_home != null ? String(game.ls_home) : '0');
+    const [ls2, setLs2] = useState(game.ls_away != null ? String(game.ls_away) : '0');
+    const [lsSaving, setLsSaving] = useState(false);
+    const [lsErr, setLsErr] = useState('');
+
+    const saveLs = async () => {
+        if (ls1 === '' || ls2 === '') { setLsErr('Zadaj skóre'); return; }
+        setLsSaving(true); setLsErr('');
+        try {
+            await setUclLive(game.game_id, parseInt(ls1), parseInt(ls2));
+            setGame(g => ({ ...g, ls_home: parseInt(ls1), ls_away: parseInt(ls2),
+                                  ls_status: 'ručne', ls_updated_at: new Date().toISOString() }));
+        } catch (e) { setLsErr(e.message); }
+        finally { setLsSaving(false); }
+    };
+
+    const clearLs = async () => {
+        setLsSaving(true); setLsErr('');
+        try {
+            await clearUclLive(game.game_id);
+            setGame(g => ({ ...g, ls_home: null, ls_away: null, ls_status: null, ls_updated_at: null }));
+        } catch (e) { setLsErr(e.message); }
+        finally { setLsSaving(false); }
+    };
+
     const finished = game.result_approved;
     const started = asDate(game.start_time) <= new Date();
     const teamsSet = game.home_team_id && game.away_team_id;
@@ -171,6 +197,37 @@ function ResultCard({ game: initGame, onChanged }) {
 
             {teamsSet && !started && !finished && (
                 <div className={styles.cardVenue} style={{ color: '#aaa' }}>Zápas ešte nezačal</div>
+            )}
+
+            {/* Kým zápas beží, dá sa priebežné skóre opraviť ručne — feed
+                z Flashscore môže vypadnúť alebo hlásiť nezmysel. */}
+            {teamsSet && started && !finished && (
+                <div className={styles.lsManualBlock}>
+                    <span className={styles.lsManualLabel}>
+                        Živé skóre
+                        {game.ls_home != null && (
+                            <span style={{ color: '#dc3545' }}>
+                                {' '}· LIVE {game.ls_home}:{game.ls_away}
+                                {game.ls_status ? ` (${game.ls_status})` : ''}
+                            </span>
+                        )}
+                    </span>
+                    <div className={styles.lsManualRow}>
+                        <input type="number" min="0" max="99" value={ls1}
+                               onChange={e => setLs1(e.target.value)} className={styles.scoreIn} />
+                        <span className={styles.colon}>:</span>
+                        <input type="number" min="0" max="99" value={ls2}
+                               onChange={e => setLs2(e.target.value)} className={styles.scoreIn} />
+                        <button className={styles.btnSaveLs} onClick={saveLs} disabled={lsSaving}>
+                            {lsSaving ? '…' : 'Uložiť live'}
+                        </button>
+                        {game.ls_home != null && (
+                            <button className={styles.btnSave} style={{ background: '#6c757d' }}
+                                    onClick={clearLs} disabled={lsSaving}>Zrušiť live</button>
+                        )}
+                        {lsErr && <span className={styles.errMsg}>{lsErr}</span>}
+                    </div>
+                </div>
             )}
 
             {teamsSet && (started || finished) && (

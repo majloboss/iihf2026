@@ -24,6 +24,14 @@ export const deleteUclTeam = (team_id) => apiFetch('v1/admin/ucl-teams', {
 // Vsetky tipy na zapas — admin vidi aj hracov, ktori netipovali.
 export const getUclAdminTips = (game_id) => apiFetch(`v1/admin/ucl-game-tips?game_id=${game_id}`);
 
+// Rucne nastavenie priebezneho skore — livescore feed vie vypadnut.
+export const setUclLive = (game_id, ls_home, ls_away) => apiFetch('v1/admin/ucl-game-live', {
+    method: 'POST', body: JSON.stringify({ game_id, ls_home, ls_away })
+});
+export const clearUclLive = (game_id) => apiFetch('v1/admin/ucl-game-live', {
+    method: 'POST', body: JSON.stringify({ game_id, clear: true })
+});
+
 // --- Testovacie nástroje ---
 export const getUclPdfStatus = () => apiFetch('v1/admin/ucl-load-pdf');
 export const loadUclGamesFromPdf = (data) => apiFetch('v1/admin/ucl-load-pdf', {

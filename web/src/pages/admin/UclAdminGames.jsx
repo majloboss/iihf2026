@@ -54,7 +54,7 @@ const dayFmt = s => { const d = asDate(s); return isValid(d) ? dayFmtRaw.format(
 export default function UclAdminGames() {
     const [games, setGames] = useState([]);
     const [clubs, setClubs] = useState([]);
-    const [phase, setPhase] = useState('LEAGUE');
+    const [phase, setPhase] = useState('all');
     const [round, setRound] = useState(null);
     const [editing, setEditing] = useState(null);
     const [busy, setBusy] = useState(null);
@@ -114,14 +114,17 @@ export default function UclAdminGames() {
     };
 
     if (loading) return <p>Načítavam zápasy…</p>;
-    const list = (byPhase[phase] || [])
-        .filter(g => phase !== 'LEAGUE' || !round || Number(g.round_no) === round);
+    const list = (phase === 'all' ? games : (byPhase[phase] || []))
+        .filter(g => phase !== 'LEAGUE' || !round || Number(g.round_no) === round)
+        .sort((a, b) => a.game_id - b.game_id);
     const suggested = list.filter(g => isSuggested(g, 'home') || isSuggested(g, 'away')).length;
 
     return (
         <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
                     <div className={gStyles.filters} style={{ alignItems: 'center' }}>
+                        <button className={phaseBtnClass('LEAGUE', phase === 'all')}
+                            onClick={() => { setPhase('all'); setRound(null); }}>ALL</button>
                         {/* Kola ligovej fazy su rovnocenne filtre, preto v jednom riadku. */}
                         {[1, 2, 3, 4, 5, 6, 7, 8].map(r => (
                             <button key={r}
