@@ -14,6 +14,7 @@ export default function UclTeamCatalog() {
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
     const [filter, setFilter] = useState('');
+    const [lenSezona, setLenSezona] = useState(false);
 
     const load = () => Promise.all([getUclTeams(), getUclCountries()])
         .then(([teamRows, countryRows]) => { setTeams(teamRows); setCountries(countryRows); })
@@ -85,10 +86,16 @@ export default function UclTeamCatalog() {
     };
 
     const needle = filter.trim().toLowerCase();
-    const shownTeams = needle
-        ? teams.filter(t => [t.team_name, t.team_code, t.country_name, t.country_display_code, t.country_code, t.home_venue]
-            .some(v => String(v ?? '').toLowerCase().includes(needle)))
-        : teams;
+    // Klub aktuálnej sezóny je ten, ktorý má v tomto ročníku zápasy — číselník
+    // drží aj kvalifikantov z minulých rokov, ktorí žiadne nemajú.
+    const vSezone = t => Number(t.game_count) > 0;
+    const shownTeams = teams.filter(t => {
+        if (lenSezona && !vSezone(t)) return false;
+        if (!needle) return true;
+        return [t.team_name, t.team_code, t.country_name, t.country_display_code, t.country_code, t.home_venue]
+            .some(v => String(v ?? '').toLowerCase().includes(needle));
+    });
+    const pocetVSezone = teams.filter(vSezone).length;
 
     if (loading) return <p>Načítavam kluby…</p>;
 
@@ -136,8 +143,15 @@ export default function UclTeamCatalog() {
                 </div>
             </form>
 
-            <div style={{ marginTop: 12 }}>
-                <input value={filter} onChange={e => setFilter(e.target.value)} placeholder="Hľadať klub, kód alebo štát…" style={{ width: '100%', maxWidth: 340, padding: '6px 10px' }} />
+            <div style={{ marginTop: 12, display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap' }}>
+                <input value={filter} onChange={e => setFilter(e.target.value)} placeholder="Hľadať klub, kód alebo štát…" style={{ flex: '1 1 240px', maxWidth: 340, padding: '6px 10px' }} />
+                <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
+                    <input type="checkbox" checked={lenSezona} onChange={e => setLenSezona(e.target.checked)} />
+                    Len aktuálna sezóna ({pocetVSezone})
+                </label>
+                <span style={{ fontSize: '0.8rem', color: '#888' }}>
+                    zobrazených: {shownTeams.length} z {teams.length}
+                </span>
             </div>
 
             {message && <p className={styles.success}>{message}</p>}
