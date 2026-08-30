@@ -30,6 +30,22 @@ if (array_diff($poradie, $existujuce) || array_diff($existujuce, $poradie)) {
     json_error('Poradie obsahuje klub, ktorý v tabuľke nie je', 400);
 }
 
+// Poradie sa smie menit iba medzi klubmi s rovnakym poctom bodov. Rozhranie
+// to strazi, ale kontrola patri aj sem — poziadavka moze prist aj inak.
+$bodyKlubov = [];
+foreach ($pdo->query('SELECT team_id, pts FROM "lm2026-27".group_standings
+                       WHERE phase = \'LEAGUE\'')->fetchAll() as $r) {
+    $bodyKlubov[(int)$r['team_id']] = (int)$r['pts'];
+}
+$predosle = null;
+foreach ($poradie as $clubId) {
+    $aktualne = $bodyKlubov[$clubId] ?? 0;
+    if ($predosle !== null && $aktualne > $predosle) {
+        json_error('Klub s vyšším počtom bodov nemôže byť nižšie v tabuľke', 400);
+    }
+    $predosle = $aktualne;
+}
+
 try {
     $pdo->beginTransaction();
     $upd = $pdo->prepare('UPDATE "lm2026-27".group_standings

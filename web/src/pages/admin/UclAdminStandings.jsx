@@ -29,10 +29,18 @@ export default function UclAdminStandings() {
     useEffect(() => { load(); }, []);
 
     // Pri rovnosti bodov rozhodujú kritériá UEFA, ktoré aplikácia nepozná —
-    // preto sa poradie musí dať prestaviť ručne.
-    const presun = (idx, smer) => {
+    // preto sa poradie musí dať prestaviť ručne. Vymeniť sa však dajú iba
+    // kluby s rovnakým počtom bodov; poradie medzi rôznymi bodmi určujú
+    // výsledky, nie admin.
+    const daSaPresunut = (idx, smer) => {
         const ciel = idx + smer;
-        if (ciel < 0 || ciel >= rows.length) return;
+        if (ciel < 0 || ciel >= rows.length) return false;
+        return rows[idx].pts === rows[ciel].pts;
+    };
+
+    const presun = (idx, smer) => {
+        if (!daSaPresunut(idx, smer)) return;
+        const ciel = idx + smer;
         const nove = [...rows];
         [nove[idx], nove[ciel]] = [nove[ciel], nove[idx]];
         setRows(nove.map((r, i) => ({ ...r, rank: i + 1, zone: zoneOf(i + 1) })));
@@ -158,14 +166,17 @@ export default function UclAdminStandings() {
                                     <td style={{ fontWeight: 700 }}>{r.pts}</td>
                                     <td>
                                         <span style={{ display: 'flex', gap: 2 }}>
-                                            <button onClick={() => presun(i, -1)} disabled={i === 0} title="O miesto vyššie"
-                                                    style={{ border: '1px solid #dee2e6', background: '#fff', borderRadius: 4,
-                                                             cursor: i === 0 ? 'default' : 'pointer', padding: '0 6px',
-                                                             opacity: i === 0 ? 0.4 : 1 }}>▲</button>
-                                            <button onClick={() => presun(i, 1)} disabled={i === rows.length - 1} title="O miesto nižšie"
-                                                    style={{ border: '1px solid #dee2e6', background: '#fff', borderRadius: 4,
-                                                             cursor: i === rows.length - 1 ? 'default' : 'pointer', padding: '0 6px',
-                                                             opacity: i === rows.length - 1 ? 0.4 : 1 }}>▼</button>
+                                            {[[-1, '▲', 'vyššie'], [1, '▼', 'nižšie']].map(([smer, znak, kam]) => {
+                                                const mozne = daSaPresunut(i, smer);
+                                                return (
+                                                    <button key={smer} onClick={() => presun(i, smer)} disabled={!mozne}
+                                                            title={mozne ? `O miesto ${kam}`
+                                                                         : 'Vymeniť sa dajú len kluby s rovnakým počtom bodov'}
+                                                            style={{ border: '1px solid #dee2e6', background: '#fff', borderRadius: 4,
+                                                                     cursor: mozne ? 'pointer' : 'default', padding: '0 6px',
+                                                                     opacity: mozne ? 1 : 0.3 }}>{znak}</button>
+                                                );
+                                            })}
                                         </span>
                                     </td>
                                 </tr>
