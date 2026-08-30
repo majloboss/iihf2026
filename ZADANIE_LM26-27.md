@@ -163,6 +163,7 @@ Kolo drží stĺpec `round_no` — presne tá hodnota, ktorou filtruje `UclGames
 | `tools/run_migration.cjs` | spustí migráciu na DB podľa `api/config/db.php` |
 | `tools/db_query.cjs` | jednorazový dopyt na DB |
 | `tools/test_ucl_tools.cjs` | overí testovacie nástroje proti DB (v transakcii, vráti späť) |
+| `tools/test_ucl_results_window.cjs` | overí, že výsledky dostanú len dohrané zápasy |
 
 ### Oprávnenia
 
@@ -204,10 +205,20 @@ Play-off sa netipuje — tie zápasy nemajú určené tímy.
 
 ### ⚽ Generuj výsledky LF
 
-Vyplní výsledky všetkých zápasov ligovej fázy a rovno ich schváli, takže sa
+Vyplní výsledky **dohraných** zápasov ligovej fázy a rovno ich schváli, takže sa
 prepočíta ligová tabuľka aj body za tipy (`ucl_recalc_standings`,
 `ucl_recalc_points` — tie isté helpery, aké volá zadanie výsledku adminom).
 Predĺženie sa v ligovej fáze nehrá, remíza je platný výsledok.
+
+Za dohraný sa považuje zápas, ktorému od výkopu ubehli aspoň **3 hodiny**
+(90 minút hry, polčas a rezerva na nadstavený čas) a ktorý ešte nemá zadané
+skóre. Vďaka tomu sa dá počas testovania posúvať termínmi zápasov a nástroj
+vždy doplní presne to, čo už malo byť odohrané — postupne po kolách, tak ako
+súťaž reálne beží.
+
+`start_time` je naive UTC, preto sa porovnáva s `NOW() AT TIME ZONE 'UTC'`
+— databázový server beží v lokálnej zóne, takže samotné `NOW()` by bolo
+o dve hodiny vedľa.
 
 ### Endpointy
 

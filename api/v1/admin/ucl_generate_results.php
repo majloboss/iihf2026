@@ -1,11 +1,17 @@
 <?php
-// GET  /v1/admin/ucl-generate-results — kolko zapasov ligovej fazy uz ma vysledok
-// POST /v1/admin/ucl-generate-results — vygeneruje vysledky vsetkych zapasov ligovej fazy
+// GET  /v1/admin/ucl-generate-results — kolko zapasov ligovej fazy je uz dohranych
+// POST /v1/admin/ucl-generate-results — vygeneruje vysledky dohranych zapasov ligovej fazy
 //
 // Testovaci nastroj: naplni vysledky, aby sa dala overit ligova tabulka,
-// bodovanie tipov a postupove pasma. Realny vysledok sa zadava cez
-// /v1/admin/ucl-game-update, ktore odmietne zapas pred vykopom — tu sa zapisuje
-// priamo, lebo testovacie zapasy este len pridu.
+// bodovanie tipov a postupove pasma.
+//
+// Vysledok dostane iba zapas, ktory je uz dohrany — teda taky, ktoremu od
+// vykopu ubehli aspon tri hodiny — a este nema zadane skore. Vdaka tomu sa
+// da pocas testovania posuvat datumami a casmi zapasov a nastroj vzdy doplni
+// presne to, co uz malo byt odohrane.
+//
+// Realny vysledok sa zadava cez /v1/admin/ucl-game-update, ktore navyse riesi
+// dvojice a predlzenie; tu sa zapisuje priamo, lebo ide o hromadne naplnenie.
 //
 // Predlzenie sa v ligovej faze nehra, remiza je platny vysledok, takze
 // home_score_final zostava prazdne.
@@ -27,34 +33,45 @@ function ucl_random_goals(): int {
     return 1;
 }
 
-$countSql = 'SELECT COUNT(*) FROM ' . UCL_SCHEMA . '.games WHERE game_type_code = \'LEAGUE\'';
+// Zapas sa povazuje za dohrany tri hodiny po vykope — 90 minut hry, polcas
+// a rezerva na nadstaveny cas. start_time je naive UTC, preto sa porovnava
+// s UTC casom, nie s NOW() v zone servera.
+const UCL_MATCH_HOURS = 3;
+
+$leagueSql = 'FROM ' . UCL_SCHEMA . '.games
+               WHERE game_type_code = \'LEAGUE\'
+                 AND home_team_id IS NOT NULL AND away_team_id IS NOT NULL';
+$finishedSql = " AND start_time + INTERVAL '" . UCL_MATCH_HOURS . " hours'
+                       <= (NOW() AT TIME ZONE 'UTC')";
 
 if ($method === 'GET') {
+    $one = fn(string $sql) => (int)$pdo->query('SELECT COUNT(*) ' . $sql)->fetchColumn();
     json_ok([
-        'league_games' => (int)$pdo->query($countSql)->fetchColumn(),
-        'with_result'  => (int)$pdo->query($countSql . ' AND home_score_regular IS NOT NULL')->fetchColumn(),
-        'approved'     => (int)$pdo->query($countSql . ' AND result_approved')->fetchColumn(),
+        'league_games' => $one($leagueSql),
+        'finished'     => $one($leagueSql . $finishedSql),
+        'pending'      => $one($leagueSql . $finishedSql . ' AND home_score_regular IS NULL'),
+        'with_result'  => $one($leagueSql . ' AND home_score_regular IS NOT NULL'),
+        'approved'     => $one($leagueSql . ' AND result_approved'),
+        'match_hours'  => UCL_MATCH_HOURS,
     ]);
 }
 
 if ($method !== 'POST') json_error('Method not allowed', 405);
 
 $body = json_decode(file_get_contents('php://input'), true) ?: [];
-// Bez replace sa doplnia len zapasy bez vysledku, uz zadane zostanu.
+// Prepisat existujuce zoberie aj dohrane zapasy, ktore uz vysledok maju.
 $replace = !empty($body['replace']);
 
-$sql = $countSql;
-$sel = 'SELECT game_id FROM ' . UCL_SCHEMA . '.games
-         WHERE game_type_code = \'LEAGUE\'
-           AND home_team_id IS NOT NULL AND away_team_id IS NOT NULL'
+$sel = 'SELECT game_id ' . $leagueSql . $finishedSql
      . ($replace ? '' : ' AND home_score_regular IS NULL')
-     . ' ORDER BY game_id';
+     . ' ORDER BY start_time, game_id';
 
 $games = $pdo->query($sel)->fetchAll(PDO::FETCH_COLUMN);
 if (!$games) {
-    json_error($replace
-        ? 'V ligovej fáze niet zápasov s určenými tímami — najprv načítaj zápasy z PDF'
-        : 'Všetky zápasy ligovej fázy už majú výsledok. Na prepísanie zapni Prepísať existujúce.', 400);
+    $finished = (int)$pdo->query('SELECT COUNT(*) ' . $leagueSql . $finishedSql)->fetchColumn();
+    json_error($finished === 0
+        ? 'Zatiaľ nie je dohraný ani jeden zápas ligovej fázy — posuň termíny do minulosti.'
+        : 'Všetky dohrané zápasy už majú výsledok. Na prepísanie zapni Prepísať existujúce.', 400);
 }
 
 try {

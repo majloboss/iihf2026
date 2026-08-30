@@ -208,7 +208,7 @@ function GenerateResults({ reloadKey, onChange }) {
     const run = async () => {
         const done = Number(status?.with_result) || 0;
         if (replace && done > 0 && !window.confirm(
-            `Naozaj prepísať ${done} existujúcich výsledkov?`)) return;
+            `Naozaj prepísať výsledky dohraných zápasov? Zadaných je ${done}.`)) return;
 
         setBusy(true); setError(''); setMessage('');
         try {
@@ -222,13 +222,19 @@ function GenerateResults({ reloadKey, onChange }) {
     };
 
     const games = Number(status?.league_games) || 0;
+    // Bez prepisovania ma zmysel spustit len vtedy, ked nieco caka na vysledok.
+    const nothingToDo = games === 0
+        || Number(status?.finished) === 0
+        || (!replace && Number(status?.pending) === 0);
 
     return (
         <Section color="#198754" title="⚽ Generuj výsledky LF">
             <p style={hint}>
-                Vygeneruje výsledky všetkých zápasov ligovej fázy a rovno ich schváli — prepočíta sa
-                ligová tabuľka aj body za tipy. Predĺženie sa v ligovej fáze nehrá, remíza je platný
-                výsledok. Bez prepísania sa doplnia iba zápasy bez výsledku.
+                Vygeneruje výsledky <strong>dohraných</strong> zápasov ligovej fázy a rovno ich schváli
+                — prepočíta sa ligová tabuľka aj body za tipy. Za dohraný sa považuje zápas, ktorému
+                od výkopu ubehli aspoň {status?.match_hours ?? 3} hodiny, takže pri posúvaní termínov
+                sa vždy doplní presne to, čo už malo byť odohrané. Predĺženie sa v ligovej fáze nehrá,
+                remíza je platný výsledok.
             </p>
 
             <div style={row}>
@@ -236,7 +242,7 @@ function GenerateResults({ reloadKey, onChange }) {
                     <input type="checkbox" checked={replace} onChange={e => setReplace(e.target.checked)} />
                     <span style={{ fontSize: '0.8rem' }}>Prepísať existujúce</span>
                 </label>
-                <button className={styles.btn} onClick={run} disabled={busy || games === 0}>
+                <button className={styles.btn} onClick={run} disabled={busy || nothingToDo}>
                     {busy ? 'Generujem…' : 'Vygenerovať výsledky'}
                 </button>
             </div>
@@ -244,9 +250,16 @@ function GenerateResults({ reloadKey, onChange }) {
             {status && (
                 <p style={{ ...note, color: games === 0 ? '#c0392b' : '#666' }}>
                     Zápasov ligovej fázy: <strong>{games}</strong> &nbsp;|&nbsp;
-                    s výsledkom: <strong>{status.with_result}</strong> &nbsp;|&nbsp;
+                    dohraných: <strong>{status.finished}</strong> &nbsp;|&nbsp;
+                    čaká na výsledok: <strong>{status.pending}</strong> &nbsp;|&nbsp;
                     schválených: <strong>{status.approved}</strong>
                     {games === 0 && ' — najprv načítaj zápasy z PDF.'}
+                </p>
+            )}
+
+            {status && games > 0 && Number(status.finished) === 0 && (
+                <p style={note}>
+                    Zatiaľ nie je dohraný ani jeden zápas — v správe zápasov posuň termíny do minulosti.
                 </p>
             )}
 
