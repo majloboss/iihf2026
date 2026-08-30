@@ -3,6 +3,7 @@ import {
     getUclPdfStatus, loadUclGamesFromPdf,
     getUclTipsStatus, generateUclTips,
     getUclResultsStatus, generateUclResults,
+    getUclDays, shiftUclDay,
 } from '../../api/uclAdmin';
 import styles from './Admin.module.css';
 
@@ -269,6 +270,106 @@ function GenerateResults({ reloadKey, onChange }) {
     );
 }
 
+// ────────────────────────────────────────────────────────────
+// 4. Posunúť hrací deň
+// ────────────────────────────────────────────────────────────
+function ShiftDay({ reloadKey, onChange }) {
+    const [days, setDays] = useState([]);
+    const [day, setDay] = useState('');
+    const [newDate, setNewDate] = useState('');
+    const [newTime, setNewTime] = useState('14:00');
+    const [step, setStep] = useState(15);
+    const [busy, setBusy] = useState(false);
+    const [message, setMessage] = useState('');
+    const [error, setError] = useState('');
+
+    const load = () => getUclDays()
+        .then(d => setDays(d.days || []))
+        .catch(e => setError(e.message));
+    useEffect(() => { load(); }, [reloadKey]);
+
+    // Predvolí sa dnešok, aby sa zápasy dali rozohrať hneď.
+    useEffect(() => {
+        if (!newDate) setNewDate(new Date().toISOString().slice(0, 10));
+    }, []);
+
+    const vybrany = days.find(d => d.den === day);
+
+    const run = async () => {
+        if (!day || !newDate || !newTime) {
+            setError('Vyber hrací deň, nový dátum aj čas.');
+            return;
+        }
+        setBusy(true); setError(''); setMessage('');
+        try {
+            const res = await shiftUclDay({ day, new_date: newDate, new_time: newTime, step_minutes: Number(step) });
+            setMessage(`✓ Presunutých ${res.moved} zápasov na ${res.to_day}, od ${res.first.slice(11)} do ${res.last.slice(11)}.`);
+            setDay('');
+            await load();
+            onChange?.();
+        } catch (e) { setError(e.message); }
+        finally { setBusy(false); }
+    };
+
+    return (
+        <Section color="#fd7e14" title="🕒 Posunúť hrací deň">
+            <p style={hint}>
+                Presunie všetky zápasy vybraného dňa na nový dátum. Prvý začne v zadanom čase
+                a každý ďalší o {step} minút neskôr, takže sa dajú odbavovať postupne a sledovať,
+                ako pribúdajú body a mení sa tabuľka. Poradie zápasov zostáva zachované.
+            </p>
+
+            <div style={row}>
+                <label style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <span style={{ fontSize: '0.75rem', color: '#555' }}>Hrací deň</span>
+                    <select value={day} onChange={e => setDay(e.target.value)} style={{ minWidth: 230 }}>
+                        <option value="">— vyber deň —</option>
+                        {days.map(d => (
+                            <option key={d.den} value={d.den}>
+                                {fmt(d.den)} · {d.zapasov} zápasov · {d.fazy}
+                                {Number(d.schvalenych) > 0 ? ` · ${d.schvalenych} so vsl.` : ''}
+                            </option>
+                        ))}
+                    </select>
+                </label>
+                <label style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <span style={{ fontSize: '0.75rem', color: '#555' }}>Nový dátum</span>
+                    <input type="date" value={newDate} onChange={e => setNewDate(e.target.value)} />
+                </label>
+                <label style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <span style={{ fontSize: '0.75rem', color: '#555' }}>Čas prvého</span>
+                    <input type="time" value={newTime} onChange={e => setNewTime(e.target.value)} />
+                </label>
+                <label style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <span style={{ fontSize: '0.75rem', color: '#555' }}>Krok (min)</span>
+                    <input type="number" value={step} min={0} max={720}
+                           onChange={e => setStep(e.target.value)} style={{ width: 80 }} />
+                </label>
+                <button className={styles.btn} onClick={run} disabled={busy || !day} style={{ alignSelf: 'flex-end' }}>
+                    {busy ? 'Presúvam…' : 'Presunúť deň'}
+                </button>
+            </div>
+
+            {vybrany && (
+                <p style={note}>
+                    {fmt(vybrany.den)}: <strong>{vybrany.zapasov}</strong> zápasov
+                    {' '}({vybrany.fazy}) — posledný by začal o{' '}
+                    <strong>
+                        {(() => {
+                            const [h, m] = newTime.split(':').map(Number);
+                            const min = h * 60 + m + (vybrany.zapasov - 1) * Number(step || 0);
+                            return `${String(Math.floor(min / 60) % 24).padStart(2, '0')}:${String(min % 60).padStart(2, '0')}`;
+                        })()}
+                    </strong>.
+                </p>
+            )}
+
+            {message && <p className={styles.success}>{message}</p>}
+            {error && <p className={styles.error}>✗ {error}</p>}
+        </Section>
+    );
+}
+
 export default function UclTestTools() {
     // Načítanie z PDF prepíše zápasy aj tipy, preto si ostatné sekcie
     // po ňom obnovia svoj stav.
@@ -278,6 +379,7 @@ export default function UclTestTools() {
     return (
         <>
             <LoadFromPdf onChange={refresh} />
+            <ShiftDay reloadKey={reloadKey} onChange={refresh} />
             <GenerateTips reloadKey={reloadKey} onChange={refresh} />
             <GenerateResults reloadKey={reloadKey} onChange={refresh} />
         </>

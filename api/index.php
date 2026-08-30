@@ -71,6 +71,7 @@ try {
         $path === 'v1/admin/ucl-load-pdf'         => require __DIR__ . '/v1/admin/ucl_load_pdf.php',
         $path === 'v1/admin/ucl-generate-tips'    => require __DIR__ . '/v1/admin/ucl_generate_tips.php',
         $path === 'v1/admin/ucl-generate-results' => require __DIR__ . '/v1/admin/ucl_generate_results.php',
+        $path === 'v1/admin/ucl-shift-day'        => require __DIR__ . '/v1/admin/ucl_shift_day.php',
         $path === 'v1/ucl/games'                => require __DIR__ . '/v1/ucl/games.php',
         $path === 'v1/ucl/teams'                => require __DIR__ . '/v1/ucl/teams.php',
         $path === 'v1/ucl/tips'                 => require __DIR__ . '/v1/ucl/tips.php',

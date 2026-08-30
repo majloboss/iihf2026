@@ -32,6 +32,11 @@ export const generateUclTips = (data) => apiFetch('v1/admin/ucl-generate-tips', 
     method: 'POST', body: JSON.stringify(data)
 });
 
+export const getUclDays = () => apiFetch('v1/admin/ucl-shift-day');
+export const shiftUclDay = (data) => apiFetch('v1/admin/ucl-shift-day', {
+    method: 'POST', body: JSON.stringify(data)
+});
+
 export const getUclResultsStatus = () => apiFetch('v1/admin/ucl-generate-results');
 export const generateUclResults = (data) => apiFetch('v1/admin/ucl-generate-results', {
     method: 'POST', body: JSON.stringify(data)
