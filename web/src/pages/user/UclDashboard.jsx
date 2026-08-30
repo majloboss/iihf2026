@@ -164,15 +164,6 @@ export default function UclDashboard() {
         .sort((a, b) => asDate(b.start_time) - asDate(a.start_time))
         .slice(0, 5), [games]);
 
-    const stats = useMemo(() => {
-        const scored = games.filter(g => g.points_earned !== null);
-        return {
-            tips: games.filter(g => g.home_score_tip !== null).length,
-            points: scored.reduce((sum, g) => sum + Number(g.points_earned || 0), 0),
-            evaluated: scored.length,
-        };
-    }, [games]);
-
     const draftOf = (g, side) => {
         const d = drafts[g.game_id];
         if (d && d[side] !== undefined) return d[side];
@@ -202,17 +193,6 @@ export default function UclDashboard() {
 
     return (
         <div>
-            <h2>Liga majstrov 2026/27</h2>
-
-            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', margin: '14px 0' }}>
-                {[['Zadaných tipov', stats.tips], ['Vyhodnotených', stats.evaluated], ['Získaných bodov', stats.points]].map(([label, value]) => (
-                    <div key={label} style={{ background: '#fff', borderRadius: 10, padding: '12px 18px', border: '1px solid #e9ecef', minWidth: 120 }}>
-                        <div style={{ fontSize: '0.75rem', color: '#888' }}>{label}</div>
-                        <div style={{ fontSize: '1.4rem', fontWeight: 700, color: '#1a3a6b' }}>{value}</div>
-                    </div>
-                ))}
-            </div>
-
             {announcement?.body && (
                 <div style={{ background: '#fff8e1', border: '1px solid #ffe0a3', borderRadius: 10,
                               padding: '12px 16px', marginBottom: 16 }}>
@@ -367,9 +347,6 @@ export default function UclDashboard() {
                 </div>
             )}
 
-            <p style={{ marginTop: 20 }}>
-                <Link to="/games">Všetky zápasy</Link> · <Link to="/tabulky">Ligová tabuľka</Link>
-            </p>
         </div>
     );
 }
