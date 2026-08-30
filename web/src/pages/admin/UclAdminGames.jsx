@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { editUclGame, getUclGames, recalcUcl } from '../../api/ucl';
 import { getUclTeams } from '../../api/uclAdmin';
 import AdminGamesTable from './AdminGamesTable';
+import gStyles from '../user/Games.module.css';
 import styles from './Admin.module.css';
 
 const PHASES = {
@@ -11,6 +12,16 @@ const PHASES = {
     QF: 'Štvrťfinále',
     SF: 'Semifinále',
     F: 'Finále',
+};
+
+// Farby filtrov podla dolezitosti fazy.
+const phaseBtnClass = (code, on) => {
+    const [zakladna, aktivna] =
+          code === 'F'  ? [gStyles.pGold, gStyles.pGoldOn]
+        : code === 'PO' ? [gStyles.pBronze, gStyles.pBronzeOn]
+        : code === 'LEAGUE' ? [gStyles.pGroup, gStyles.pGroupOn]
+        : [gStyles.pPlayoff, gStyles.pPlayoffOn];
+    return [gStyles.pBtn, zakladna, on ? aktivna : ''].join(' ');
 };
 
 // V stlpci Faza je malo miesta, preto kratke oznacenie: LF1-LF8 podla kola.
@@ -109,45 +120,29 @@ export default function UclAdminGames() {
 
     return (
         <div>
-            <div className={styles.header}>
-                <h2>Zápasy — Liga majstrov</h2>
-                <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', alignItems: 'center' }}>
-                    {Object.entries(PHASES).map(([key, label]) => (
-                        <button key={key} onClick={() => { setPhase(key); setRound(null); }}
-                            style={{
-                                padding: '4px 9px', borderRadius: 6, cursor: 'pointer',
-                                fontSize: '0.8rem', fontWeight: 600, minWidth: 30,
-                                border: '1px solid ' + (phase === key ? '#1a3a6b' : '#dee2e6'),
-                                background: phase === key ? '#1a3a6b' : '#fff',
-                                color: phase === key ? '#fff' : '#555',
-                            }}>
-                            {key === 'LEAGUE' ? 'LF' : key === 'PO' ? 'Baráž' : label}
-                            {byPhase[key]?.length ? ` (${byPhase[key].length})` : ''}
-                        </button>
-                    ))}
-                    <button className={styles.btnSmall} onClick={recalc} disabled={busy === 'recalc'}>
-                        {busy === 'recalc' ? 'Prepočítavam…' : '↻ Prepočítať'}
-                    </button>
-                </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                    <div className={gStyles.filters} style={{ alignItems: 'center' }}>
+                        {/* Kola ligovej fazy su rovnocenne filtre, preto v jednom riadku. */}
+                        {[1, 2, 3, 4, 5, 6, 7, 8].map(r => (
+                            <button key={r}
+                                className={phaseBtnClass('LEAGUE', phase === 'LEAGUE' && round === r)}
+                                onClick={() => { setPhase('LEAGUE'); setRound(r); }}>
+                                LF{r}
+                            </button>
+                        ))}
+                        {Object.entries(PHASES).filter(([key]) => key !== 'LEAGUE').map(([key, label]) => (
+                            <button key={key} title={label}
+                                className={phaseBtnClass(key, phase === key)}
+                                onClick={() => { setPhase(key); setRound(null); }}>
+                                {key === 'PO' ? 'BAR' : key}
+                            </button>
+                        ))}
+                    </div>
+                <button className={styles.btnSmall} onClick={recalc} disabled={busy === 'recalc'}
+                        style={{ flex: '0 0 auto', whiteSpace: 'nowrap' }}>
+                    {busy === 'recalc' ? 'Prepočítavam…' : '↻ Prepočítať'}
+                </button>
             </div>
-
-            {/* Ligova faza ma 144 zapasov, bez filtra kola je zoznam neprehladny. */}
-            {phase === 'LEAGUE' && (
-                <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', margin: '0 0 12px' }}>
-                    {[1, 2, 3, 4, 5, 6, 7, 8].map(r => (
-                        <button key={r} onClick={() => setRound(round === r ? null : r)}
-                            style={{
-                                padding: '4px 10px', borderRadius: 6, cursor: 'pointer',
-                                fontSize: '0.8rem', fontWeight: 600,
-                                border: '1px solid ' + (round === r ? '#1a3a6b' : '#dee2e6'),
-                                background: round === r ? '#1a3a6b' : '#fff',
-                                color: round === r ? '#fff' : '#555',
-                            }}>
-                            LF{r}
-                        </button>
-                    ))}
-                </div>
-            )}
 
             {message && <p className={styles.success}>{message}</p>}
             {error && <p className={styles.error}>✗ {error}</p>}

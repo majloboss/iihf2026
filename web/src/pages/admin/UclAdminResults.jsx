@@ -282,15 +282,9 @@ export default function UclAdminResults() {
 
     return (
         <div className={gStyles.wrap}>
-            <div className={styles.recalcRow}>
-                <button className={styles.btnRecalc} onClick={handleRecalc} disabled={recalcing}>
-                    {recalcing ? 'Prepočítavam…' : '↻ Prepočítať body'}
-                </button>
-                {recalcMsg && <span className={recalcMsg.startsWith('✓') ? styles.recalcOk : styles.recalcErr}>{recalcMsg}</span>}
-            </div>
-
             <div className={gStyles.topBar}>
-                <div className={gStyles.filters}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div className={gStyles.filters} style={{ alignItems: 'center' }}>
                     <button className={[gStyles.pBtn, gStyles.pGroup, phase === 'all' ? gStyles.pGroupOn : ''].join(' ')}
                             onClick={() => { setPhase('all'); setRoundFilter(null); setSelectedDay(null); }}>ALL</button>
                     {/* Kola ligovej fazy su rovnocenne filtre — netreba ich hladat
@@ -310,6 +304,15 @@ export default function UclAdminResults() {
                         </button>
                     ))}
                 </div>
+                <button className={styles.btnRecalc} onClick={handleRecalc} disabled={recalcing}
+                        style={{ flex: '0 0 auto', whiteSpace: 'nowrap' }}>
+                    {recalcing ? 'Prepočítavam…' : '↻ Prepočítať body'}
+                </button>
+              </div>
+                {recalcMsg && (
+                    <div className={recalcMsg.startsWith('✓') ? styles.recalcOk : styles.recalcErr}
+                         style={{ marginTop: 6 }}>{recalcMsg}</div>
+                )}
             </div>
 
             <div className={gStyles.calRow}>
