@@ -36,6 +36,17 @@ const PHASES = [
     { key: 'F',   label: 'F',   code: 'F',   title: 'Finále' },
 ];
 
+// Farby filtrov podľa dôležitosti fázy — rovnaké ako v admine:
+// ligová fáza modrá, vyraďovacia zelená, baráž hnedá, finále zlaté.
+const phaseBtnClass = (p, on) => {
+    const [zakladna, aktivna] =
+          p.code === 'F'  ? [styles.pGold, styles.pGoldOn]
+        : p.code === 'PO' ? [styles.pBronze, styles.pBronzeOn]
+        : p.code === 'LEAGUE' ? [styles.pGroup, styles.pGroupOn]
+        : [styles.pPlayoff, styles.pPlayoffOn];
+    return [styles.pBtn, zakladna, on ? aktivna : ''].join(' ');
+};
+
 // Po predĺžení alebo penaltách sa ukáže aj konečný výsledok: 2:1 (4:3 pp).
 function scoreText(g) {
     if (g.home_score_regular === null || g.away_score_regular === null) return null;
@@ -192,7 +203,7 @@ export default function UclGames() {
                 </button>
                 {PHASES.map(p => (
                     <button key={p.key} title={p.title}
-                        className={phase === p.key ? styles.btnTabulkyActive : styles.btnTabulky}
+                        className={phaseBtnClass(p, phase === p.key)}
                         onClick={() => { setPhase(cur => cur === p.key ? '' : p.key); setDay(''); }}>
                         {p.label}
                     </button>

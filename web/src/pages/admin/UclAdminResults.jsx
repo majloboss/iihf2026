@@ -293,8 +293,16 @@ export default function UclAdminResults() {
                 <div className={gStyles.filters}>
                     <button className={[gStyles.pBtn, gStyles.pGroup, phase === 'all' ? gStyles.pGroupOn : ''].join(' ')}
                             onClick={() => { setPhase('all'); setRoundFilter(null); setSelectedDay(null); }}>ALL</button>
-                    <button className={[gStyles.pBtn, gStyles.pGroup, lfActive ? gStyles.pGroupOn : ''].join(' ')}
-                            onClick={() => { setPhase('LF'); setSelectedDay(null); }}>LF</button>
+                    {/* Kola ligovej fazy su rovnocenne filtre — netreba ich hladat
+                        v druhom riadku pod tlacidlom LF. */}
+                    {[1, 2, 3, 4, 5, 6, 7, 8].map(r => (
+                        <button key={r}
+                                className={[gStyles.pBtn, gStyles.pGroup,
+                                            lfActive && roundFilter === r ? gStyles.pGroupOn : ''].join(' ')}
+                                onClick={() => { setPhase('LF'); setRoundFilter(r); setSelectedDay(null); }}>
+                            LF{r}
+                        </button>
+                    ))}
                     {KNOCKOUT.map(p => (
                         <button key={p} className={pBtnClass(p, phase === p)}
                                 onClick={() => { setPhase(p); setRoundFilter(null); setSelectedDay(null); }}>
@@ -302,16 +310,6 @@ export default function UclAdminResults() {
                         </button>
                     ))}
                 </div>
-                {lfActive && (
-                    <div className={gStyles.filters} style={{ marginTop: 4 }}>
-                        {[1, 2, 3, 4, 5, 6, 7, 8].map(r => (
-                            <button key={r} className={[gStyles.pBtn, gStyles.pGroup, roundFilter === r ? gStyles.pGroupOn : ''].join(' ')}
-                                    onClick={() => { setRoundFilter(roundFilter === r ? null : r); setSelectedDay(null); }}>
-                                {r}
-                            </button>
-                        ))}
-                    </div>
-                )}
             </div>
 
             <div className={gStyles.calRow}>
