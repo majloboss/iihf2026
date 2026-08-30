@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { createUclTeam, deleteUclTeam, getUclCountries, getUclTeams, updateUclTeam } from '../../api/uclAdmin';
 import { useSortableTable, SortableTh } from '../../utils/useSortableTable';
+import { niektoreObsahuje } from '../../utils/hladanie';
 import styles from './Admin.module.css';
 
 const emptyTeam = { team_code: '', team_name: '', country_code: '', logo_file: '', home_venue: '', is_active: true };
@@ -88,15 +89,16 @@ export default function UclTeamCatalog() {
         } catch (e) { setError(e.message); }
     };
 
-    const needle = filter.trim().toLowerCase();
+    const needle = filter.trim();
     // Klub aktuálnej sezóny je ten, ktorý má v tomto ročníku zápasy — číselník
     // drží aj kvalifikantov z minulých rokov, ktorí žiadne nemajú.
     const vSezone = t => Number(t.game_count) > 0;
     const shownTeams = teams.filter(t => {
         if (lenSezona && !vSezone(t)) return false;
         if (!needle) return true;
-        return [t.team_name, t.team_code, t.country_name, t.country_display_code, t.country_code, t.home_venue]
-            .some(v => String(v ?? '').toLowerCase().includes(needle));
+        return niektoreObsahuje(
+            [t.team_name, t.team_code, t.country_name, t.country_display_code, t.country_code, t.home_venue],
+            needle);
     });
     const pocetVSezone = teams.filter(vSezone).length;
 

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { createUclCountry, deleteUclCountry, getUclCountries, updateUclCountry } from '../../api/uclAdmin';
 import { useSortableTable, SortableTh } from '../../utils/useSortableTable';
+import { niektoreObsahuje } from '../../utils/hladanie';
 import styles from './Admin.module.css';
 
 // Poradie zodpoveda ciselniku v DB (migracia 055).
@@ -64,9 +65,9 @@ export default function UclCountryCatalog({ onChanged = () => {} }) {
         catch (err) { setError(err.message); }
     };
 
-    const needle = filter.trim().toLowerCase();
+    const needle = filter.trim();
     const shown = needle
-        ? countries.filter(c => FIELDS.some(f => String(c[f.key] ?? '').toLowerCase().includes(needle)))
+        ? countries.filter(c => niektoreObsahuje(FIELDS.map(f => c[f.key]), needle))
         : countries;
 
     const { sorted, toggleSort, sortIndicator } = useSortableTable(shown, {
