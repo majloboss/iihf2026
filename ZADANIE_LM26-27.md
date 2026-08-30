@@ -118,6 +118,56 @@ Hodnotí sa výsledok po 90 minútach. Predĺženie a penalty sa do tipu nezapo�
 13. 🟠 Pridať UCL stránky a routing vo webovej aplikácii
 14. 🔲 Otestovať ligovú tabuľku, tipovanie a bodovanie
 15. 🟠 Aktivovať súťaž (migrácia 057) pre používateľov
+16. 🟠 Referenčný rozpis zo zdrojového PDF v `games_pdf` (migrácia `062`)
+17. 🔲 Spustiť `063` pod vlastníkom schémy a potom `062` na DB-DEV-BET
+
+## Referenčný rozpis zo zdroja (`games_pdf`)
+
+Rozlosovanie ligovej fázy je oficiálne známe. Zdrojom je
+`sources/lm2026-27/LM2026-27.pdf` (Flashscore, stav k 30.08.2026).
+
+Tabuľka `"lm2026-27".games_pdf` je **báza dát**: počas testovania sa z nej zápasy
+opakovane nahrávajú do `games`, takže sa dá kedykoľvek vrátiť k čistému stavu.
+
+| Fáza | Zápasov | Kolá | Kluby |
+|---|---:|---|---|
+| `LEAGUE` | 144 | `round_no` 1–8, každé kolo 18 zápasov | vyžrebované |
+| `PO` | 16 | 8 dvojíc, zápas + odveta | zatiaľ neznáme |
+| `R16` | 16 | 8 dvojíc, zápas + odveta | zatiaľ neznáme |
+| `QF` | 8 | 4 dvojice, zápas + odveta | zatiaľ neznáme |
+| `SF` | 4 | 2 dvojice, zápas + odveta | zatiaľ neznáme |
+| `F` | 1 | jediný zápas, Estadio Metropolitano, Madrid | zatiaľ neznáme |
+| **Spolu** | **189** | | |
+
+Kolo drží stĺpec `round_no` — presne tá hodnota, ktorou filtruje `UclGames`
+(chipy LF1–LF8). Vo vyraďovacej časti je `NULL`.
+
+### Termíny vyraďovacej časti
+
+| Fáza | Prvé zápasy | Odvety |
+|---|---|---|
+| Baráž o osemfinále | 16. – 17. 2. 2027 | 23. – 24. 2. 2027 |
+| Osemfinále | 9. – 10. 3. 2027 | 16. – 17. 3. 2027 |
+| Štvrťfinále | 6. – 7. 4. 2027 | 13. – 14. 4. 2027 |
+| Semifinále | 27. – 28. 4. 2027 | 4. – 5. 5. 2027 |
+| Finále | 5. 6. 2027 (Estadio Metropolitano, Madrid) | — |
+
+### Nástroje
+
+| Súbor | Účel |
+|---|---|
+| `tools/parse_lm_pdf.cjs` | rozparsuje text PDF do `LM2026-27_games.json` |
+| `tools/gen_lm_games_pdf.cjs` | z JSON vygeneruje migráciu `062` |
+| `tools/load_games_from_pdf.cjs` | naleje `games_pdf` do `games` (`--write`, `--force`) |
+| `tools/run_migration.cjs` | spustí migráciu na DB podľa `api/config/db.php` |
+| `tools/db_query.cjs` | jednorazový dopyt na DB |
+
+### Oprávnenia
+
+Schémy vlastní `dbdevbet-admin`, aplikácia sa pripája ako `dbbet-admin`, ktorý má
+v `"lm2026-27"` len `USAGE` — `CREATE TABLE` mu neprejde. Migráciu `063` preto
+musí spustiť vlastník schémy z databázovej konzoly; potom už `062` aj ďalšie
+migrácie prejdú aj cez `tools/run_migration.cjs`.
 
 ## Pravidlá práce
 
