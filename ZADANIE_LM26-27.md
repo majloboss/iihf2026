@@ -119,7 +119,8 @@ Hodnotí sa výsledok po 90 minútach. Predĺženie a penalty sa do tipu nezapo�
 14. 🔲 Otestovať ligovú tabuľku, tipovanie a bodovanie
 15. 🟠 Aktivovať súťaž (migrácia 057) pre používateľov
 16. 🟠 Referenčný rozpis zo zdrojového PDF v `games_pdf` (migrácia `062`)
-17. 🟠 Migrácie `062` a `063` spustené na DB-DEV-BET
+17. 🟠 Migrácie `060`, `062` a `063` spustené na DB-DEV-BET
+19. 🔲 Spustiť `064` (vlastníctvo tabuliek) pod `dbdevbet-admin`
 18. 🟠 Testovacie nástroje: načítanie z PDF, generovanie tipov a výsledkov LF
 
 ## Referenčný rozpis zo zdroja (`games_pdf`)
@@ -169,8 +170,19 @@ Kolo drží stĺpec `round_no` — presne tá hodnota, ktorou filtruje `UclGames
 
 Schémy vlastní `dbdevbet-admin`, aplikácia sa pripája ako `dbbet-admin`, ktorý mal
 v `"lm2026-27"` len `USAGE` — `CREATE TABLE` mu neprešlo. Migrácia `063` mu právo
-doplnila; spustiť ju musel vlastník schémy z databázovej konzoly. Odvtedy už
-migrácie prejdú aj cez `tools/run_migration.cjs`.
+doplnila; spustiť ju musel vlastník schémy z databázovej konzoly.
+
+`CREATE` v schéme ale nestačí na `ALTER TABLE` — pri existujúcej tabuľke Postgres
+vyžaduje jej vlastníctvo. Práve preto **migrácia `060` (polčasové skóre) ticho
+vypadla** a v `games` chýbali stĺpce, na ktoré sa dopytuje `v1/ucl/games.php` —
+používateľovi to spadlo na `column g.home_score_halftime does not exist`.
+
+Migrácia `064` preto prevádza vlastníctvo tabuliek na `dbbet-admin`. Aj ju musí
+spustiť doterajší vlastník. Potom už prejdú aj `ALTER TABLE` migrácie cez
+`tools/run_migration.cjs`.
+
+> Poučenie: po každej migrácii si over `admin.schema_versions` — chýbajúce
+> číslo v poradí znamená, že sa niektorá nespustila.
 
 ## Pravidlá práce
 
