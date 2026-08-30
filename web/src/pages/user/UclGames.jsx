@@ -278,7 +278,16 @@ export default function UclGames() {
                                 {(g.venue || g.flashscore_url) && (
                                     <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center',
                                                   gap: 6, fontSize: '0.75rem', color: '#999', order: 5 }}>
-                                        {g.venue && <span>{g.venue}</span>}
+                                        {g.venue && (
+                                            <span>
+                                                {g.venue}
+                                                {/* Klub nemusi hrat doma na svojom stadione —
+                                                    napriklad ked sa jeho krajina nehra. */}
+                                                {g.home_club_venue && g.venue !== g.home_club_venue && (
+                                                    <span style={{ color: '#c0392b' }}> (iný štadión)</span>
+                                                )}
+                                            </span>
+                                        )}
                                         {g.flashscore_url && (
                                             <a href={g.flashscore_url} target="_blank" rel="noopener noreferrer"
                                                title="Sledovať na FlashScore" style={{ display: 'flex', alignItems: 'center' }}>

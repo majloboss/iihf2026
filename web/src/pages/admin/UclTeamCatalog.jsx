@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { createUclTeam, deleteUclTeam, getUclCountries, getUclTeams, updateUclTeam } from '../../api/uclAdmin';
 import styles from './Admin.module.css';
 
-const emptyTeam = { team_code: '', team_name: '', country_code: '', logo_file: '', is_active: true };
+const emptyTeam = { team_code: '', team_name: '', country_code: '', logo_file: '', home_venue: '', is_active: true };
 
 export default function UclTeamCatalog() {
     const [teams, setTeams] = useState([]);
@@ -47,6 +47,7 @@ export default function UclTeamCatalog() {
             team_code: team.team_code ?? '', team_name: team.team_name ?? '',
             country_code: team.country_code ?? '',
             logo_file: team.logo_file ?? '',
+            home_venue: team.home_venue ?? '',
             is_active: team.is_active !== false,
         });
         setMessage(''); setError('');
@@ -85,7 +86,7 @@ export default function UclTeamCatalog() {
 
     const needle = filter.trim().toLowerCase();
     const shownTeams = needle
-        ? teams.filter(t => [t.team_name, t.team_code, t.country_name, t.country_display_code, t.country_code]
+        ? teams.filter(t => [t.team_name, t.team_code, t.country_name, t.country_display_code, t.country_code, t.home_venue]
             .some(v => String(v ?? '').toLowerCase().includes(needle)))
         : teams;
 
@@ -108,6 +109,7 @@ export default function UclTeamCatalog() {
                             <label>Názov klubu<input value={draft.team_name} onChange={e => change('team_name', e.target.value)} maxLength={100} required /></label>
                             <label>Štát<select value={draft.country_code} onChange={e => change('country_code', e.target.value)} required><option value="">Vyber štát</option>{countries.map(country => <option key={country.country_code} value={country.country_code}>{country.name_sk} ({country.sport_code_uefa || country.country_code})</option>)}</select></label>
                             <label className={styles.uclEditorFull}>Súbor loga<input value={draft.logo_file} onChange={e => change('logo_file', e.target.value)} placeholder="s_bratislava_logo.png" /></label>
+                            <label className={styles.uclEditorFull}>Domáci štadión<input value={draft.home_venue} onChange={e => change('home_venue', e.target.value)} maxLength={200} placeholder="Tehelné pole" /></label>
                         </div>
                         {error && <p className={styles.error}>✗ {error}</p>}
                         <div className={styles.uclEditorActions}>
@@ -128,6 +130,7 @@ export default function UclTeamCatalog() {
                 <label>Názov klubu<input value={draft.team_name} onChange={e => change('team_name', e.target.value)} maxLength={100} required placeholder="Slovan Bratislava" /></label>
                 <label>Štát<select value={draft.country_code} onChange={e => change('country_code', e.target.value)} required><option value="">Vyber štát</option>{countries.map(country => <option key={country.country_code} value={country.country_code}>{country.name_sk} ({country.sport_code_uefa || country.country_code})</option>)}</select></label>
                 <label>Súbor loga<input value={draft.logo_file} onChange={e => change('logo_file', e.target.value)} placeholder="s_bratislavasvk_logo.png" /></label>
+                <label>Domáci štadión<input value={draft.home_venue} onChange={e => change('home_venue', e.target.value)} maxLength={200} placeholder="Tehelné pole" /></label>
                 <div style={{ display: 'flex', gap: 6 }}>
                     <button className={styles.btn} type="submit" disabled={saving}>{saving ? 'Ukladám…' : 'Pridať klub'}</button>
                 </div>
@@ -142,7 +145,7 @@ export default function UclTeamCatalog() {
 
             <div style={{ overflowX: 'auto' }}>
                 <table className={`${styles.table} ${styles.uclTeamsTable}`} style={{ marginTop: 8 }}>
-                    <thead><tr><th>Logo</th><th>Kód</th><th>Klub</th><th>Štát</th><th>Kód štátu</th><th>Zápasy</th><th>Stav</th><th>Akcie</th></tr></thead>
+                    <thead><tr><th>Logo</th><th>Kód</th><th>Klub</th><th>Štát</th><th>Kód štátu</th><th>Domáci štadión</th><th>Zápasy</th><th>Stav</th><th>Akcie</th></tr></thead>
                     <tbody>
                         {shownTeams.map(team => (
                             <tr key={team.team_id} style={team.is_active === false ? { opacity: 0.55 } : undefined}>
@@ -153,6 +156,7 @@ export default function UclTeamCatalog() {
                                 <td><strong>{team.team_name}</strong></td>
                                 <td>{team.country_name || <span className={styles.unused}>—</span>}</td>
                                 <td className={styles.mono}>{team.country_display_code || <span className={styles.unused}>—</span>}</td>
+                                <td>{team.home_venue || <span className={styles.unused}>—</span>}</td>
                                 <td>{Number(team.game_count) || 0}</td>
                                 <td>{team.is_active === false
                                     ? <span className={styles.unused}>neaktívny</span>
