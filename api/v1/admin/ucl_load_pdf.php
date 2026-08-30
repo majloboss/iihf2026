@@ -33,7 +33,7 @@ if ($method === 'GET') {
                  'total_games' => 0, 'tips' => 0]);
     }
     $phases = $pdo->query('SELECT phase, COUNT(*) AS games,
-                                  COUNT(home_code) AS with_teams,
+                                  COUNT(home_team_id) AS with_teams,
                                   MIN(starts_at) AS first_game,
                                   MAX(starts_at) AS last_game
                              FROM ' . UCL_SCHEMA . '.games_pdf
@@ -61,21 +61,6 @@ if ($tips > 0 && !$confirm) {
 $pdfGames = $pdo->query('SELECT * FROM ' . UCL_SCHEMA . '.games_pdf ORDER BY game_number')->fetchAll();
 if (!$pdfGames) json_error('Tabuľka games_pdf je prázdna', 400);
 
-// Kluby drzi games_pdf kodom, games odkazom na club_id.
-$clubs = [];
-foreach ($pdo->query('SELECT club_id, club_code FROM admin.uefa_clubs')->fetchAll() as $c) {
-    $clubs[$c['club_code']] = (int)$c['club_id'];
-}
-$missing = [];
-foreach ($pdfGames as $g) {
-    foreach ([$g['home_code'], $g['away_code']] as $code) {
-        if ($code !== null && !isset($clubs[$code])) $missing[$code] = true;
-    }
-}
-if ($missing) {
-    json_error('Kluby chýbajú v číselníku: ' . implode(', ', array_keys($missing)), 400);
-}
-
 try {
     $pdo->beginTransaction();
     $pdo->exec('DELETE FROM ' . UCL_SCHEMA . '.tips');
@@ -99,8 +84,8 @@ try {
         }
         $ins->execute([
             (int)$g['game_number'],
-            $g['home_code'] !== null ? $clubs[$g['home_code']] : null,
-            $g['away_code'] !== null ? $clubs[$g['away_code']] : null,
+            $g['home_team_id'] !== null ? (int)$g['home_team_id'] : null,
+            $g['away_team_id'] !== null ? (int)$g['away_team_id'] : null,
             $g['starts_at'],
             $g['venue'] ?? '',
             $phase, $name, $g['tie_id'], $g['leg'], $g['flashscore_url'],

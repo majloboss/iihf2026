@@ -45,14 +45,6 @@ const PHASE_NAME = {
             'SELECT * FROM "lm2026-27".games_pdf ORDER BY game_number');
         if (!pdf.length) throw new Error('games_pdf je prazdna — najprv spusti migraciu 062');
 
-        const { rows: clubs } = await client.query(
-            'SELECT club_id, club_code FROM admin.uefa_clubs');
-        const byCode = Object.fromEntries(clubs.map(c => [c.club_code, c.club_id]));
-
-        const chybne = [...new Set(pdf.flatMap(g => [g.home_code, g.away_code])
-            .filter(c => c && !byCode[c]))];
-        if (chybne.length) throw new Error('Kluby chybaju v ciselniku: ' + chybne.join(', '));
-
         const tipy = Number((await client.query(
             'SELECT COUNT(*) FROM "lm2026-27".tips')).rows[0].count);
 
@@ -81,8 +73,8 @@ const PHASE_NAME = {
                   (g.leg ? (g.leg === 1 ? ' — 1. zápas' : ' — odveta') : '');
             await client.query(ins, [
                 g.game_number,
-                g.home_code ? byCode[g.home_code] : null,
-                g.away_code ? byCode[g.away_code] : null,
+                g.home_team_id,
+                g.away_team_id,
                 g.starts_at, g.venue || '',
                 g.phase, name, g.tie_id, g.leg, g.flashscore_url,
             ]);

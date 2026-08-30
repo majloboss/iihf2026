@@ -33,15 +33,13 @@ const check = (ok, msg) => { console.log((ok ? 'OK    ' : 'CHYBA ') + msg); if (
         await c.query(`INSERT INTO ${S}.games
             (game_id, home_team_id, away_team_id, start_time, venue,
              game_type_code, game_type_name, tie_id, leg)
-            SELECT p.game_number, h.club_id, a.club_id, p.starts_at, COALESCE(p.venue, ''),
-                   p.phase,
+            SELECT p.game_number, p.home_team_id, p.away_team_id, p.starts_at,
+                   COALESCE(p.venue, ''), p.phase,
                    CASE WHEN p.phase = 'LEAGUE'
                         THEN 'Ligová fáza — ' || p.round_no || '. kolo'
                         ELSE p.phase END,
                    p.tie_id, p.leg
-              FROM ${S}.games_pdf p
-              LEFT JOIN admin.uefa_clubs h ON h.club_code = p.home_code
-              LEFT JOIN admin.uefa_clubs a ON a.club_code = p.away_code`);
+              FROM ${S}.games_pdf p`);
 
         check(await count(LEAGUE) === 144, 'nahranych 144 ligovych zapasov');
 

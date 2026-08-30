@@ -37,11 +37,9 @@ const check = (ok, msg) => { console.log((ok ? 'OK    ' : 'CHYBA ') + msg); if (
         const { rows: pdf } = await c.query(`SELECT * FROM ${S}.games_pdf ORDER BY game_number`);
         check(pdf.length === 189, `games_pdf ma ${pdf.length} zapasov (cakam 189)`);
 
-        const { rows: clubs } = await c.query('SELECT club_id, club_code FROM admin.uefa_clubs');
-        const byCode = Object.fromEntries(clubs.map(x => [x.club_code, x.club_id]));
-        const missing = [...new Set(pdf.flatMap(g => [g.home_code, g.away_code])
-            .filter(x => x && !byCode[x]))];
-        check(missing.length === 0, `vsetky kluby su v ciselniku${missing.length ? ': chyba ' + missing : ''}`);
+        const bezKlubu = pdf.filter(g => g.phase === 'LEAGUE'
+            && (g.home_team_id === null || g.away_team_id === null)).length;
+        check(bezKlubu === 0, `vsetky ligove zapasy maju kluby${bezKlubu ? ` (chyba ${bezKlubu})` : ''}`);
 
         await c.query(`DELETE FROM ${S}.tips`);
         await c.query(`DELETE FROM ${S}.games`);
@@ -54,8 +52,7 @@ const check = (ok, msg) => { console.log((ok ? 'OK    ' : 'CHYBA ') + msg); if (
                 `INSERT INTO ${S}.games (game_id, home_team_id, away_team_id, start_time, venue,
                     game_type_code, game_type_name, tie_id, leg, flashscore_url)
                  VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
-                [g.game_number, g.home_code ? byCode[g.home_code] : null,
-                 g.away_code ? byCode[g.away_code] : null, g.starts_at, g.venue || '',
+                [g.game_number, g.home_team_id, g.away_team_id, g.starts_at, g.venue || '',
                  g.phase, name, g.tie_id, g.leg, g.flashscore_url]);
         }
         const loaded = Number((await c.query(`SELECT COUNT(*) FROM ${S}.games`)).rows[0].count);

@@ -120,6 +120,7 @@ Hodnotí sa výsledok po 90 minútach. Predĺženie a penalty sa do tipu nezapo�
 15. 🟠 Aktivovať súťaž (migrácia 057) pre používateľov
 16. 🟠 Referenčný rozpis zo zdrojového PDF v `games_pdf` (migrácia `062`)
 17. 🟠 Migrácie `060`, `062` a `063` spustené na DB-DEV-BET
+19. 🔲 Spustiť `064` z konzoly — `games_pdf` sa naviaže na `club_id`
 18. 🟠 Testovacie nástroje: načítanie z PDF, generovanie tipov a výsledkov LF
 
 ## Referenčný rozpis zo zdroja (`games_pdf`)
@@ -139,6 +140,11 @@ opakovane nahrávajú do `games`, takže sa dá kedykoľvek vrátiť k čistému
 | `SF` | 4 | 2 dvojice, zápas + odveta | zatiaľ neznáme |
 | `F` | 1 | jediný zápas, Estadio Metropolitano, Madrid | zatiaľ neznáme |
 | **Spolu** | **189** | | |
+
+Kluby drží `games_pdf` cez `home_team_id`/`away_team_id` — odkaz na `club_id`,
+rovnako ako `games`. Pôvodná verzia sa viazala na `club_code` a zablokovala tým
+premenovanie klubu v číselníku (`violates foreign key constraint
+games_pdf_home_code_fkey`); migrácia `064` to naprávila.
 
 Kolo drží stĺpec `round_no` — presne tá hodnota, ktorou filtruje `UclGames`
 (chipy LF1–LF8). Vo vyraďovacej časti je `NULL`.

@@ -30,6 +30,10 @@ const utc = (date, time) => {
     return d.toISOString().slice(0, 19).replace('T', ' ');
 };
 
+// Klub sa v zdroji identifikuje kodom, v tabulke ale zije club_id — kod je
+// udaj, ktory admin bezne meni, takze sa na nom neda stavat cudzi kluc.
+const clubId = code => "(SELECT club_id FROM admin.uefa_clubs WHERE club_code = '" + code + "')";
+
 const rows = [];
 let id = 0;
 let lastRound = 0;
@@ -40,8 +44,8 @@ const sorted = games.slice().sort((a, b) =>
 for (const g of sorted) {
     if (g.round !== lastRound) { rows.push('-- ' + g.round + '. kolo'); lastRound = g.round; }
     rows.push('(' + String(++id).padStart(3) + ", 'LEAGUE', " + g.round +
-              ", '" + MAP[g.home] + "', '" + MAP[g.away] + "', '" + utc(g.date, g.time) +
-              "', NULL, NULL),");
+              ', ' + clubId(MAP[g.home]) + ', ' + clubId(MAP[g.away]) +
+              ", '" + utc(g.date, g.time) + "', NULL, NULL),");
 }
 
 // Vyradovacia cast: kluby zatial nezname, poznaju sa iba terminy.
@@ -90,8 +94,9 @@ const sql = `-- Migration 062: "lm2026-27".games_pdf — referencna kopia rozpis
 --      UEFA pre 20.01.2027, preto sa ten isty vzor pouzil aj tu.
 --      Kolo 8 sa hra cele 27.01. v jeden den, vsetky zapasy o 21:00.
 --
--- Kluby sa zapisuju kodom z admin.uefa_clubs, nie club_id: kod je citatelny
--- a nezavisi na poradi importu.
+-- Klub sa v zdroji identifikuje kodom, v tabulke ale zije club_id — rovnako
+-- ako v tabulke games. Kod je udaj, ktory admin bezne meni v ciselniku, takze
+-- cudzi kluc na nom by premenovanie klubu zablokoval.
 --
 -- Tabulka je referencna baza: pocas testovania sa z nej zapasy opakovane
 -- nahravaju do "lm2026-27".games, preto sa pri kazdom spusteni zaklada nanovo.
@@ -104,8 +109,8 @@ CREATE TABLE "lm2026-27".games_pdf (
     game_number    INT          PRIMARY KEY,
     phase          VARCHAR(10)  NOT NULL,
     round_no       SMALLINT,
-    home_code      VARCHAR(20)  REFERENCES admin.uefa_clubs(club_code),
-    away_code      VARCHAR(20)  REFERENCES admin.uefa_clubs(club_code),
+    home_team_id   INT          REFERENCES admin.uefa_clubs(club_id),
+    away_team_id   INT          REFERENCES admin.uefa_clubs(club_id),
     starts_at      TIMESTAMP    NOT NULL,
     tie_id         VARCHAR(20),
     leg            SMALLINT,
@@ -126,11 +131,11 @@ CREATE INDEX games_pdf_phase_idx ON "lm2026-27".games_pdf (phase, round_no);
 CREATE INDEX games_pdf_start_idx ON "lm2026-27".games_pdf (starts_at);
 
 INSERT INTO "lm2026-27".games_pdf
-    (game_number, phase, round_no, home_code, away_code, starts_at, tie_id, leg) VALUES
+    (game_number, phase, round_no, home_team_id, away_team_id, starts_at, tie_id, leg) VALUES
 ${leagueAndKo}
 
 INSERT INTO "lm2026-27".games_pdf
-    (game_number, phase, round_no, home_code, away_code, starts_at, tie_id, leg, venue) VALUES
+    (game_number, phase, round_no, home_team_id, away_team_id, starts_at, tie_id, leg, venue) VALUES
 ${finalRow}
 
 -- Kontrola: 144 ligovych zapasov v 8 kolach a 61 zapasov vyradovacej casti.
@@ -152,23 +157,23 @@ BEGIN
     -- Kazdy klub 8 zapasov.
     SELECT COUNT(*) INTO zle FROM (
         SELECT code FROM (
-            SELECT home_code AS code FROM "lm2026-27".games_pdf WHERE phase = 'LEAGUE'
+            SELECT home_team_id AS code FROM "lm2026-27".games_pdf WHERE phase = 'LEAGUE'
             UNION ALL
-            SELECT away_code FROM "lm2026-27".games_pdf WHERE phase = 'LEAGUE'
+            SELECT away_team_id FROM "lm2026-27".games_pdf WHERE phase = 'LEAGUE'
         ) y GROUP BY code HAVING COUNT(*) <> 8
     ) x;
     IF zle > 0 THEN RAISE EXCEPTION '% klubov nema 8 zapasov', zle; END IF;
 
     -- Z toho 4 doma.
     SELECT COUNT(*) INTO zle FROM (
-        SELECT home_code FROM "lm2026-27".games_pdf WHERE phase = 'LEAGUE'
-         GROUP BY home_code HAVING COUNT(*) <> 4
+        SELECT home_team_id FROM "lm2026-27".games_pdf WHERE phase = 'LEAGUE'
+         GROUP BY home_team_id HAVING COUNT(*) <> 4
     ) x;
     IF zle > 0 THEN RAISE EXCEPTION '% klubov nema 4 domace zapasy', zle; END IF;
 
     -- Ziadna dvojica sa nestretne dvakrat.
     SELECT COUNT(*) INTO zle FROM (
-        SELECT LEAST(home_code, away_code) AS a, GREATEST(home_code, away_code) AS b
+        SELECT LEAST(home_team_id, away_team_id) AS a, GREATEST(home_team_id, away_team_id) AS b
           FROM "lm2026-27".games_pdf WHERE phase = 'LEAGUE'
          GROUP BY 1, 2 HAVING COUNT(*) > 1
     ) x;
