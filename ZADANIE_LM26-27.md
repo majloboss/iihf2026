@@ -338,11 +338,26 @@ Okrem zápasov a tipov obsahuje rovnaké sekcie ako FIFA:
 - **Poradie v skupinách** — prvé tri miesta každej tipovacej skupiny a k nim
   vlastný riadok, keď je hráč nižšie. Dáta z `GET /v1/standings?competition_id=`,
   ktorý bodovanie UCL už pozná (`points_earned`, maximum 7).
-- **História správ organizátora** — archív neaktívnych oznamov
-  z `GET /v1/announcements`; ten aktuálny zostáva hore.
+- **Oznam organizátora** — iba aktuálny, s odkazom `História →` na
+  `/spravy?tab=organizator`. Celý archív by prehľad zahltil.
 
 Skupiny patria ku konkrétnej súťaži, preto sa načítajú až keď je známe
 `activeCompetition.id`.
+
+#### Správy
+
+Obrazovka `/spravy` má dve záložky:
+
+| Záložka | Obsah |
+|---|---|
+| **Správy organizátora** (prvá) | história oznamov s vyhľadávaním v texte |
+| **Správy s adminom** | pôvodné vlákno s otázkami |
+
+Záložka sa dá otvoriť priamo odkazom cez `?tab=` — `organizator` alebo `admin`.
+Hľadanie ignoruje diakritiku, takže „vitaz“ nájde aj „víťaz“. Aktuálny oznam
+je v zozname odlíšený žltým podkladom.
+
+Obrazovka je spoločná pre všetky súťaže, oznamy nie sú viazané na ročník.
 
 ### Bodovanie
 

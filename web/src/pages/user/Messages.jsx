@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { getMessages, sendMessage, deleteMessage, uploadMessageImage } from '../../api/messages';
+import OrganizerMessages from './OrganizerMessages';
 import styles from './Messages.module.css';
 
 const fmtTime = (iso) => {
@@ -11,7 +13,7 @@ const fmtTime = (iso) => {
     return `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')} ${t}`;
 };
 
-export default function Messages() {
+function AdminThread() {
     const [messages, setMessages] = useState([]);
     const [loading, setLoading]   = useState(true);
     const [hasText, setHasText]   = useState(false);
@@ -86,15 +88,7 @@ export default function Messages() {
     };
 
     return (
-        <div className={styles.wrap}>
-            <div className={styles.header}>
-                <img src="/menu_spravy.png" alt="" className={styles.headerIcon} />
-                <div>
-                    <div className={styles.headerTitle}>Správy s adminom</div>
-                    <div className={styles.headerSub}>Otázky, nahlásenie chyby vo výsledku…</div>
-                </div>
-            </div>
-
+        <>
             <div className={styles.thread}>
                 {loading ? (
                     <p className={styles.muted}>Načítavam…</p>
@@ -161,6 +155,52 @@ export default function Messages() {
             {lightbox && (
                 <div className={styles.lightbox} onClick={() => setLightbox(null)}>
                     <img src={lightbox} alt="" className={styles.lightboxImg} />
+                </div>
+            )}
+        </>
+    );
+}
+
+// Zalozka sa da otvorit priamo odkazom, napr. /spravy?tab=organizator.
+const TABS = [
+    { key: 'organizator', label: 'Správy organizátora', sub: 'Oznamy k súťaži a ich história' },
+    { key: 'admin',       label: 'Správy s adminom',    sub: 'Otázky, nahlásenie chyby vo výsledku…' },
+];
+
+export default function Messages() {
+    const [params, setParams] = useSearchParams();
+    const tab = TABS.some(t => t.key === params.get('tab')) ? params.get('tab') : TABS[0].key;
+    const aktivna = TABS.find(t => t.key === tab);
+
+    return (
+        <div className={styles.wrap}>
+            <div className={styles.header}>
+                <img src="/menu_spravy.png" alt="" className={styles.headerIcon} />
+                <div>
+                    <div className={styles.headerTitle}>{aktivna.label}</div>
+                    <div className={styles.headerSub}>{aktivna.sub}</div>
+                </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: 4, marginBottom: 12, borderBottom: '1px solid #e8ecf0' }}>
+                {TABS.map(t => (
+                    <button key={t.key}
+                            onClick={() => setParams(t.key === TABS[0].key ? {} : { tab: t.key })}
+                            style={{ border: 'none', background: 'none', cursor: 'pointer',
+                                     padding: '8px 12px', fontSize: '0.88rem',
+                                     fontWeight: t.key === tab ? 700 : 400,
+                                     color: t.key === tab ? '#1a3a6b' : '#888',
+                                     borderBottom: `2px solid ${t.key === tab ? '#1a3a6b' : 'transparent'}`,
+                                     marginBottom: -1 }}>
+                        {t.label}
+                    </button>
+                ))}
+            </div>
+
+            {/* Vlákno s adminom si drží vlastný stav, preto sa nechá odmontovať. */}
+            {tab === 'admin' ? <AdminThread /> : (
+                <div style={{ flex: 1, overflowY: 'auto', padding: '4px 2px' }}>
+                    <OrganizerMessages />
                 </div>
             )}
         </div>

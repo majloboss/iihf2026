@@ -94,9 +94,6 @@ function StandingsCard({ group, currentUserId }) {
     );
 }
 
-const dateFmt = iso => new Date(iso).toLocaleDateString('sk-SK',
-    { day: '2-digit', month: '2-digit', year: 'numeric' });
-
 export default function UclDashboard() {
     const [games, setGames] = useState([]);
     const [drafts, setDrafts] = useState({});
@@ -106,7 +103,6 @@ export default function UclDashboard() {
     const [loading, setLoading] = useState(true);
 
     const [announcement, setAnnouncement] = useState(null);
-    const [announcementsHistory, setAnnouncementsHistory] = useState([]);
     const [standings, setStandings] = useState([]);
     const { user } = useAuth();
     const { activeCompetition } = useCompetition();
@@ -114,7 +110,6 @@ export default function UclDashboard() {
     useEffect(() => {
         getUclGames().then(setGames).catch(e => setError(e.message)).finally(() => setLoading(false));
         apiFetch('v1/announcement').then(setAnnouncement).catch(() => {});
-        apiFetch('v1/announcements').then(setAnnouncementsHistory).catch(() => {});
         // Priebežné skóre a body sa menia počas zápasu.
         const iv = setInterval(() => { getUclGames().then(setGames).catch(() => {}); }, 30000);
         return () => clearInterval(iv);
@@ -186,9 +181,6 @@ export default function UclDashboard() {
         finally { setSaving(null); }
     };
 
-    // Archív sú oznamy, ktoré už nie sú aktívne — ten aktuálny je hore.
-    const archivneOznamy = announcementsHistory.filter(a => !a.is_active);
-
     if (loading) return <p>Načítavam…</p>;
 
     return (
@@ -196,8 +188,14 @@ export default function UclDashboard() {
             {announcement?.body && (
                 <div style={{ background: '#fff8e1', border: '1px solid #ffe0a3', borderRadius: 10,
                               padding: '12px 16px', marginBottom: 16 }}>
-                    <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#a67c00', marginBottom: 4 }}>
-                        📢 Oznam organizátora
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                                  gap: 10, marginBottom: 4 }}>
+                        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#a67c00' }}>
+                            📢 Oznam organizátora
+                        </span>
+                        <Link to="/spravy?tab=organizator" style={{ fontSize: '0.75rem', color: '#a67c00', whiteSpace: 'nowrap' }}>
+                            História →
+                        </Link>
                     </div>
                     <div style={{ whiteSpace: 'pre-wrap', fontSize: '0.88rem' }}>{announcement.body}</div>
                 </div>
@@ -330,22 +328,6 @@ export default function UclDashboard() {
                         <StandingsCard key={g.id} group={g} currentUserId={user?.user_id} />
                       ))}
             </div>
-
-            {archivneOznamy.length > 0 && (
-                <div style={{ marginTop: 24 }}>
-                    <h3 style={{ marginBottom: 10 }}>História správ organizátora</h3>
-                    {archivneOznamy.map(a => (
-                        <div key={a.id} style={{ background: '#fafafa', border: '1px solid #eee', borderRadius: 10,
-                                                 padding: '12px 16px', marginBottom: 8 }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#999' }}>Archív</span>
-                                <span style={{ fontSize: '0.75rem', color: '#aaa' }}>{dateFmt(a.created_at)}</span>
-                            </div>
-                            <div style={{ whiteSpace: 'pre-wrap', fontSize: '0.88rem', color: '#666' }}>{a.body}</div>
-                        </div>
-                    ))}
-                </div>
-            )}
 
         </div>
     );
