@@ -331,6 +331,19 @@ názov (`name_sk`), pri jeho absencii kód. Vlajku posiela API ako `home_flag` /
 Prehľad (`UclDashboard`) zostáva kompaktný, štáty tam nie sú — je to zoznam
 viacerých sekcií a údaj by ho zahustil.
 
+#### Prehľad
+
+Okrem zápasov a tipov obsahuje rovnaké sekcie ako FIFA:
+
+- **Poradie v skupinách** — prvé tri miesta každej tipovacej skupiny a k nim
+  vlastný riadok, keď je hráč nižšie. Dáta z `GET /v1/standings?competition_id=`,
+  ktorý bodovanie UCL už pozná (`points_earned`, maximum 7).
+- **História správ organizátora** — archív neaktívnych oznamov
+  z `GET /v1/announcements`; ten aktuálny zostáva hore.
+
+Skupiny patria ku konkrétnej súťaži, preto sa načítajú až keď je známe
+`activeCompetition.id`.
+
 ### Bodovanie
 
 Overené: maximum 5 bodov v ligovej fáze, 7 v play-off.
