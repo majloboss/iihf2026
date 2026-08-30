@@ -120,9 +120,9 @@ Hodnotí sa výsledok po 90 minútach. Predĺženie a penalty sa do tipu nezapo�
 15. 🟠 Aktivovať súťaž (migrácia 057) pre používateľov
 16. 🟠 Referenčný rozpis zo zdrojového PDF v `games_pdf` (migrácia `062`)
 17. 🟠 Migrácie `060`, `062` a `063` spustené na DB-DEV-BET
-19. 🔲 Spustiť `064` z konzoly — `games_pdf` sa naviaže na `club_id`
-20. 🔲 Spustiť `065` z konzoly — kód klubu prestáva byť identifikátor
-21. 🔲 Spustiť `066` — URL zápasov a štadióny ligovej fázy
+18. 🟠 Zápasy ligovej fázy kompletné: dvojice, kolá, termíny, URL aj štadióny
+19. 🟠 Migrácie `064`, `065` a `066` spustené na DB-DEV-BET
+20. 🔲 Nahradiť dočasné kódy klubov na `X` oficiálnymi podľa UEFA
 18. 🟠 Testovacie nástroje: načítanie z PDF, generovanie tipov a výsledkov LF
 
 ## Referenčný rozpis zo zdroja (`games_pdf`)
@@ -166,8 +166,11 @@ Zdroj: `sources/lm2026-27/lm_url.csv` — ku každému zápasu ligovej fázy odk
 Flashscore a štadión. Dopĺňa ich migrácia `066`.
 
 Štadión sa ukladá **ku každému zápasu, nie ku klubu**: klub nemusí hrať doma na
-svojom štadióne. Viking hostí PSV 20. 1. 2027 na MHPArena v Stuttgarte, kým
-zvyšné tri domáce zápasy hrá na Lyse Arena.
+svojom štadióne.
+
+> 🔎 **Overiť:** Viking má pri zápase s PSV (20. 1. 2027) uvedenú MHPArena
+> v Stuttgarte, kým zvyšné tri domáce zápasy hrá na Lyse Arena. UEFA pritom
+> uvádza jeho domáci štadión. Zatiaľ ponechané podľa zdroja, treba overiť.
 
 Vyraďovacia časť URL ani štadióny nemá — dozvieme sa ich až po žrebe. Výnimkou
 je finále, ktorého štadión zapísala už `062`.
