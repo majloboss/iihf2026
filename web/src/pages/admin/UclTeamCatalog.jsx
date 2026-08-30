@@ -15,6 +15,8 @@ export default function UclTeamCatalog() {
     const [error, setError] = useState('');
     const [filter, setFilter] = useState('');
     const [lenSezona, setLenSezona] = useState(false);
+    // Klub sa prida vynimocne, preto je formular skryty za tlacidlom.
+    const [pridavam, setPridavam] = useState(false);
 
     const load = () => Promise.all([getUclTeams(), getUclCountries()])
         .then(([teamRows, countryRows]) => { setTeams(teamRows); setCountries(countryRows); })
@@ -25,7 +27,7 @@ export default function UclTeamCatalog() {
 
     const change = (field, value) => setDraft(current => ({ ...current, [field]: value }));
 
-    const reset = () => { setEditingId(null); setDraft(emptyTeam); };
+    const reset = () => { setEditingId(null); setDraft(emptyTeam); setPridavam(false); };
 
     const save = async (event) => {
         event.preventDefault();
@@ -132,31 +134,38 @@ export default function UclTeamCatalog() {
                 Klub, ktorý sa v aktuálnom ročníku nekvalifikoval, v číselníku zostáva.
             </p>
 
-            <form onSubmit={save} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 8, alignItems: 'end', marginBottom: 16 }}>
-                <label>Kód klubu<input value={draft.team_code} onChange={e => change('team_code', e.target.value)} maxLength={20} required placeholder="SLOVAN" /></label>
-                <label>Názov klubu<input value={draft.team_name} onChange={e => change('team_name', e.target.value)} maxLength={100} required placeholder="Slovan Bratislava" /></label>
-                <label>Štát<select value={draft.country_code} onChange={e => change('country_code', e.target.value)} required><option value="">Vyber štát</option>{countries.map(country => <option key={country.country_code} value={country.country_code}>{country.name_sk} ({country.sport_code_uefa || country.country_code})</option>)}</select></label>
-                <label>Súbor loga<input value={draft.logo_file} onChange={e => change('logo_file', e.target.value)} placeholder="s_bratislavasvk_logo.png" /></label>
-                <label>Domáci štadión<input value={draft.home_venue} onChange={e => change('home_venue', e.target.value)} maxLength={200} placeholder="Tehelné pole" /></label>
-                <div style={{ display: 'flex', gap: 6 }}>
-                    <button className={styles.btn} type="submit" disabled={saving}>{saving ? 'Ukladám…' : 'Pridať klub'}</button>
-                </div>
-            </form>
-
-            <div style={{ marginTop: 12, display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap' }}>
-                <input value={filter} onChange={e => setFilter(e.target.value)} placeholder="Hľadať klub, kód alebo štát…" style={{ flex: '1 1 240px', maxWidth: 340, padding: '6px 10px' }} />
-                {/* Sirku checkboxu treba urcit — inak sa roztiahne a text spadne pod neho. */}
+            <div style={{ display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap' }}>
+                <input value={filter} onChange={e => setFilter(e.target.value)}
+                       placeholder="Hľadať klub, kód alebo štát…"
+                       style={{ width: 280, padding: '6px 10px' }} />
                 <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6,
                                 fontSize: '0.85rem', whiteSpace: 'nowrap', cursor: 'pointer' }}>
                     <input type="checkbox" checked={lenSezona}
                            onChange={e => setLenSezona(e.target.checked)}
-                           style={{ width: 'auto', flex: '0 0 auto', margin: 0 }} />
+                           style={{ width: 'auto', margin: 0 }} />
                     <span>Len aktuálna sezóna ({pocetVSezone})</span>
                 </label>
-                <span style={{ fontSize: '0.8rem', color: '#888' }}>
+                <span style={{ fontSize: '0.8rem', color: '#888', whiteSpace: 'nowrap' }}>
                     zobrazených: {shownTeams.length} z {teams.length}
                 </span>
+                <button className={styles.btn} type="button" style={{ marginLeft: 'auto' }}
+                        onClick={() => { setPridavam(v => !v); setError(''); }}>
+                    {pridavam ? 'Zrušiť' : '+ Pridať klub'}
+                </button>
             </div>
+
+            {pridavam && (
+                <form onSubmit={save} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 8, alignItems: 'end', marginTop: 12, padding: 12, background: '#f8f9fa', borderRadius: 8 }}>
+                    <label>Kód klubu<input value={draft.team_code} onChange={e => change('team_code', e.target.value)} maxLength={20} required placeholder="SLOVAN" /></label>
+                    <label>Názov klubu<input value={draft.team_name} onChange={e => change('team_name', e.target.value)} maxLength={100} required placeholder="Slovan Bratislava" /></label>
+                    <label>Štát<select value={draft.country_code} onChange={e => change('country_code', e.target.value)} required><option value="">Vyber štát</option>{countries.map(country => <option key={country.country_code} value={country.country_code}>{country.name_sk} ({country.sport_code_uefa || country.country_code})</option>)}</select></label>
+                    <label>Súbor loga<input value={draft.logo_file} onChange={e => change('logo_file', e.target.value)} placeholder="s_bratislavasvk_logo.png" /></label>
+                    <label>Domáci štadión<input value={draft.home_venue} onChange={e => change('home_venue', e.target.value)} maxLength={200} placeholder="Tehelné pole" /></label>
+                    <div style={{ display: 'flex', gap: 6 }}>
+                        <button className={styles.btn} type="submit" disabled={saving}>{saving ? 'Ukladám…' : 'Pridať klub'}</button>
+                    </div>
+                </form>
+            )}
 
             {message && <p className={styles.success}>{message}</p>}
             {error && <p className={styles.error}>✗ {error}</p>}
