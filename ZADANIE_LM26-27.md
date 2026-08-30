@@ -163,16 +163,14 @@ Hodnotí sa výsledok po 90 minútach. Predĺženie a penalty sa do tipu nezapo�
 
 | Úloha | Poznámka |
 |---|---|
-| 🔲 Cron na automatické sťahovanie | ovládanie je hotové, chýba pravidelné spúšťanie |
+| 🔲 Zapnúť cron na hostingu | skript je hotový, treba ho zavolať každých 5 minút |
 | 🔲 Otestovať na živom zápase | prvý ostrý zápas je 8. 9. 2026 |
 
 ### Nice to have
 
 | Úloha | Poznámka |
 |---|---|
-| 🔲 Zarovnať tipy skupín vo FIFA | má rovnaký problém so šírkami stĺpcov ako mala LM |
 | 🔲 Zjednotiť históriu oznamov | FIFA a IIHF ju majú stále v prehľade, LM ju má v Správach |
-| 🔲 Domáci štadión do číselníka klubov | teraz je štadión len pri zápase |
 
 ## Referenčný rozpis zo zdroja (`games_pdf`)
 
@@ -237,6 +235,34 @@ Kolo drží stĺpec `round_no` — presne tá hodnota, ktorou filtruje `UclGames
 | Semifinále | 27. – 28. 4. 2027 | 4. – 5. 5. 2027 |
 | Finále | 5. 6. 2027 (Estadio Metropolitano, Madrid) | — |
 
+### Domáci štadión klubu
+
+Klub má v číselníku `home_venue` (migrácia `067`, naplnená z rozpisu podľa
+najčastejšieho dejiska). Zápas si drží skutočné dejisko, takže keď sa líšia,
+karta zápasu to označí ako **(iný štadión)**.
+
+V ligovej fáze je taký zápas jediný — Viking hostí PSV 20. 1. 2027 na MHPArena
+v Stuttgarte namiesto Lyse Arena.
+
+### Livescore
+
+Priebežné výsledky ťahá `api/cron/ucl_livescore.php` z Flashscore cez model.
+Volať každých 5 minút:
+
+```
+https://dev_betclub.fellow.sk/api/cron/ucl_livescore.php?token=<CRON_SECRET>
+```
+
+Skript sám rozhodne, či má zmysel volať model — sťahuje iba zápasy, ktoré môžu
+práve bežať (od 5 minút pred výkopom do 3 hodín po ňom). Mimo toho okna skončí
+hneď a nič nestojí, takže cron môže bežať stále.
+
+Zapisujú sa iba `ls_*` stĺpce a polčasové skóre. **Konečný výsledok schvaľuje
+admin ručne** — body sa nepočítajú z neoverených údajov. Rovnakú prácu robí aj
+tlačidlo v admine, logika je spoločná v `helpers/ucl_livescore_fn.php`.
+
+Vyžaduje `api/config/openrouter.php` (kľúč nie je v repozitári).
+
 ### Nástroje
 
 | Súbor | Účel |
@@ -251,6 +277,8 @@ Kolo drží stĺpec `round_no` — presne tá hodnota, ktorou filtruje `UclGames
 | `tools/check_lm_url_csv.cjs` | porovná `lm_url.csv` s rozpisom z PDF |
 | `tools/gen_lm_url_migration.cjs` | z CSV vygeneruje migráciu `066` |
 | `tools/test_lm_url_migration.cjs` | overí, že každý UPDATE v `066` trafí správny zápas |
+| `tools/test_ucl_shift_day.cjs` | overí presun hracieho dňa |
+| `tools/test_home_venue.cjs` | overí naplnenie domácich štadiónov |
 
 ### Oprávnenia
 
@@ -300,6 +328,16 @@ si ho číta filter LF1–LF8.
 
 Keď na zápasoch visia tipy, akcia sa odmietne, kým admin nezapne
 **Zmazať aj tipy**.
+
+### 🕒 Posunúť hrací deň
+
+Presunie všetky zápasy vybraného dňa na nový dátum. Prvý začne v zadanom čase
+a každý ďalší o zvolený krok neskôr (predvolene 15 minút), takže sa dajú
+odbavovať postupne a sledovať, ako pribúdajú body a mení sa tabuľka. Poradie
+zápasov zostáva zachované.
+
+Bez tohto by sa testovať nedalo — súťaž sa hrá od septembra 2026 do júna 2027.
+Presun do budúcnosti zároveň znova otvorí tipovanie.
 
 ### 🎯 Generuj tipy hráčov LF
 
