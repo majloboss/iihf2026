@@ -354,8 +354,12 @@ Obrazovka `/spravy` má dve záložky:
 | **Správy s adminom** | pôvodné vlákno s otázkami |
 
 Záložka sa dá otvoriť priamo odkazom cez `?tab=` — `organizator` alebo `admin`.
-Hľadanie ignoruje diakritiku, takže „vitaz“ nájde aj „víťaz“. Aktuálny oznam
-je v zozname odlíšený žltým podkladom.
+Aktuálny oznam je v zozname odlíšený žltým podkladom.
+
+Hľadanie ignoruje diakritiku, takže „vitaz“ nájde aj „víťaz“ — a nájdený text
+sa v správe **zvýrazní**. Normalizácia mení dĺžku textu (`ť` sa rozloží na dva
+znaky), preto sa pozície prevádzajú znak po znaku a mapujú späť na pôvodný
+reťazec; vďaka tomu zvýraznenie zachová písmená s diakritikou.
 
 Obrazovka je spoločná pre všetky súťaže, oznamy nie sú viazané na ročník.
 

@@ -21,9 +21,9 @@ const GEN_ACTIONS = [
 
 const TABS = [
     { key: 'login',  label: 'Prihlasovanie' },
+    { key: 'ucl',    label: 'LM 2026/27' },
     { key: 'fifa',   label: 'FIFA 2026' },
     { key: 'iihf',   label: 'IIHF 2026' },
-    { key: 'ucl',    label: 'LM 2026/27' },
     { key: 'notif',  label: 'Notifikácie' },
     { key: 'common', label: 'Common' },
 ];
