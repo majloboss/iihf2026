@@ -121,6 +121,8 @@ Hodnotí sa výsledok po 90 minútach. Predĺženie a penalty sa do tipu nezapo�
 16. 🟠 Referenčný rozpis zo zdrojového PDF v `games_pdf` (migrácia `062`)
 17. 🟠 Migrácie `060`, `062` a `063` spustené na DB-DEV-BET
 19. 🔲 Spustiť `064` z konzoly — `games_pdf` sa naviaže na `club_id`
+20. 🔲 Spustiť `065` z konzoly — kód klubu prestáva byť identifikátor
+21. 🔲 Spustiť `066` — URL zápasov a štadióny ligovej fázy
 18. 🟠 Testovacie nástroje: načítanie z PDF, generovanie tipov a výsledkov LF
 
 ## Referenčný rozpis zo zdroja (`games_pdf`)
@@ -146,6 +148,30 @@ rovnako ako `games`. Pôvodná verzia sa viazala na `club_code` a zablokovala t�
 premenovanie klubu v číselníku (`violates foreign key constraint
 games_pdf_home_code_fkey`); migrácia `064` to naprávila.
 
+### Kód klubu je iba informatívny
+
+Kód je údaj, ktorý admin bežne mení — časť klubov má zatiaľ dočasné označenie
+začínajúce `X`, ktoré sa nahradí oficiálnym kódom UEFA. **Identitou klubu je
+`club_id`**, na kóde nesmie stáť nič. Migrácia `065` to dokončuje:
+
+- `group_standings.team` (kód) → `team_id` (odkaz na `club_id`) — inak by po
+  premenovaní klubu jeho riadok v ligovej tabuľke ostal visieť na starom kóde
+- ruší sa `UNIQUE (club_code)`
+
+Poradie pri rovnosti bodov a skóre sa preto láme názvom klubu, nie kódom.
+
+### URL zápasov a štadióny
+
+Zdroj: `sources/lm2026-27/lm_url.csv` — ku každému zápasu ligovej fázy odkaz na
+Flashscore a štadión. Dopĺňa ich migrácia `066`.
+
+Štadión sa ukladá **ku každému zápasu, nie ku klubu**: klub nemusí hrať doma na
+svojom štadióne. Viking hostí PSV 20. 1. 2027 na MHPArena v Stuttgarte, kým
+zvyšné tri domáce zápasy hrá na Lyse Arena.
+
+Vyraďovacia časť URL ani štadióny nemá — dozvieme sa ich až po žrebe. Výnimkou
+je finále, ktorého štadión zapísala už `062`.
+
 Kolo drží stĺpec `round_no` — presne tá hodnota, ktorou filtruje `UclGames`
 (chipy LF1–LF8). Vo vyraďovacej časti je `NULL`.
 
@@ -170,6 +196,9 @@ Kolo drží stĺpec `round_no` — presne tá hodnota, ktorou filtruje `UclGames
 | `tools/db_query.cjs` | jednorazový dopyt na DB |
 | `tools/test_ucl_tools.cjs` | overí testovacie nástroje proti DB (v transakcii, vráti späť) |
 | `tools/test_ucl_results_window.cjs` | overí, že výsledky dostanú len dohrané zápasy |
+| `tools/check_lm_url_csv.cjs` | porovná `lm_url.csv` s rozpisom z PDF |
+| `tools/gen_lm_url_migration.cjs` | z CSV vygeneruje migráciu `066` |
+| `tools/test_lm_url_migration.cjs` | overí, že každý UPDATE v `066` trafí správny zápas |
 
 ### Oprávnenia
 

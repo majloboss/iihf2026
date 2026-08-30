@@ -6,32 +6,36 @@
 // Hodnoti sa vysledok po 90 minutach (home_score_regular), nie po predlzeni.
 
 function ucl_recalc_standings(PDO $pdo): int {
+    // Tabulka sa vedie podla club_id: kod klubu je iba informativny udaj,
+    // ktory admin meni, a identita na nom stat nemoze.
     $rows = $pdo->query('
-        SELECT hc.club_code AS home, ac.club_code AS away,
+        SELECT g.home_team_id AS home, g.away_team_id AS away,
                g.home_score_regular AS hs, g.away_score_regular AS ascore
           FROM "lm2026-27".games g
-          JOIN admin.uefa_clubs hc ON hc.club_id = g.home_team_id
-          JOIN admin.uefa_clubs ac ON ac.club_id = g.away_team_id
          WHERE g.game_type_code = \'LEAGUE\'
            AND g.result_approved
            AND g.home_score_regular IS NOT NULL
            AND g.away_score_regular IS NOT NULL')->fetchAll();
 
     // Vsetky kluby ligovej fazy, aj tie bez odohraneho zapasu.
+    // Nazov sluzi na rozhodnutie rovnosti bodov aj skore.
     $clubs = $pdo->query('
-        SELECT DISTINCT c.club_code
+        SELECT DISTINCT c.club_id, c.club_name
           FROM admin.uefa_clubs c
           JOIN "lm2026-27".games g
             ON (g.home_team_id = c.club_id OR g.away_team_id = c.club_id)
-         WHERE g.game_type_code = \'LEAGUE\'')->fetchAll(PDO::FETCH_COLUMN);
+         WHERE g.game_type_code = \'LEAGUE\'')->fetchAll();
 
     $tab = [];
-    foreach ($clubs as $code) {
-        $tab[$code] = ['gp' => 0, 'w' => 0, 'd' => 0, 'l' => 0, 'gf' => 0, 'ga' => 0, 'pts' => 0];
+    $names = [];
+    foreach ($clubs as $c) {
+        $id = (int)$c['club_id'];
+        $names[$id] = $c['club_name'];
+        $tab[$id] = ['gp' => 0, 'w' => 0, 'd' => 0, 'l' => 0, 'gf' => 0, 'ga' => 0, 'pts' => 0];
     }
 
     foreach ($rows as $r) {
-        $h = $r['home']; $a = $r['away'];
+        $h = (int)$r['home']; $a = (int)$r['away'];
         $hs = (int)$r['hs']; $as = (int)$r['ascore'];
         if (!isset($tab[$h]) || !isset($tab[$a])) continue;
 
@@ -45,20 +49,20 @@ function ucl_recalc_standings(PDO $pdo): int {
     }
 
     // Poradie: body, rozdiel skore, strelene goly, nazov.
-    uksort($tab, function ($x, $y) use ($tab) {
+    uksort($tab, function ($x, $y) use ($tab, $names) {
         $a = $tab[$x]; $b = $tab[$y];
         return [$b['pts'], $b['gf'] - $b['ga'], $b['gf']] <=> [$a['pts'], $a['gf'] - $a['ga'], $a['gf']]
-            ?: strcmp($x, $y);
+            ?: strcmp($names[$x] ?? '', $names[$y] ?? '');
     });
 
     $pdo->exec('DELETE FROM "lm2026-27".group_standings WHERE phase = \'LEAGUE\'');
     $ins = $pdo->prepare('
-        INSERT INTO "lm2026-27".group_standings (phase, team, rank, gp, w, d, l, gf, ga, pts, updated_at)
+        INSERT INTO "lm2026-27".group_standings (phase, team_id, rank, gp, w, d, l, gf, ga, pts, updated_at)
         VALUES (\'LEAGUE\', ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())');
 
     $rank = 0;
-    foreach ($tab as $code => $t) {
-        $ins->execute([$code, ++$rank, $t['gp'], $t['w'], $t['d'], $t['l'], $t['gf'], $t['ga'], $t['pts']]);
+    foreach ($tab as $clubId => $t) {
+        $ins->execute([$clubId, ++$rank, $t['gp'], $t['w'], $t['d'], $t['l'], $t['gf'], $t['ga'], $t['pts']]);
     }
     return $rank;
 }

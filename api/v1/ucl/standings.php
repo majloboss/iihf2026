@@ -6,13 +6,14 @@ if ($method !== 'GET') json_error('Method not allowed', 405);
 require_once __DIR__ . '/../../helpers/ucl_standings_fn.php';
 
 $rows = $pdo->query('
-    SELECT s.rank, s.team, s.gp, s.w, s.d, s.l, s.gf, s.ga, (s.gf - s.ga) AS gd, s.pts,
+    SELECT s.rank, c.club_code AS team, s.gp, s.w, s.d, s.l, s.gf, s.ga,
+           (s.gf - s.ga) AS gd, s.pts,
            c.club_name AS team_name, c.logo_file,
            st.name_sk AS country_name,
            COALESCE(st.sport_code_uefa, st.country_code) AS country_code,
            st.flag_file
       FROM "lm2026-27".group_standings s
-      JOIN admin.uefa_clubs c ON c.club_code = s.team
+      JOIN admin.uefa_clubs c ON c.club_id = s.team_id
       LEFT JOIN admin.countries st ON st.country_code = c.country_code
      WHERE s.phase = \'LEAGUE\'
      ORDER BY s.rank')->fetchAll();
