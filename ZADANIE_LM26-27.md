@@ -120,7 +120,6 @@ Hodnotí sa výsledok po 90 minútach. Predĺženie a penalty sa do tipu nezapo�
 15. 🟠 Aktivovať súťaž (migrácia 057) pre používateľov
 16. 🟠 Referenčný rozpis zo zdrojového PDF v `games_pdf` (migrácia `062`)
 17. 🟠 Migrácie `060`, `062` a `063` spustené na DB-DEV-BET
-19. 🔲 Spustiť `064` (vlastníctvo tabuliek) pod `dbdevbet-admin`
 18. 🟠 Testovacie nástroje: načítanie z PDF, generovanie tipov a výsledkov LF
 
 ## Referenčný rozpis zo zdroja (`games_pdf`)
@@ -177,12 +176,20 @@ vyžaduje jej vlastníctvo. Práve preto **migrácia `060` (polčasové skóre) 
 vypadla** a v `games` chýbali stĺpce, na ktoré sa dopytuje `v1/ucl/games.php` —
 používateľovi to spadlo na `column g.home_score_halftime does not exist`.
 
-Migrácia `064` preto prevádza vlastníctvo tabuliek na `dbbet-admin`. Aj ju musí
-spustiť doterajší vlastník. Potom už prejdú aj `ALTER TABLE` migrácie cez
-`tools/run_migration.cjs`.
+Preniesť vlastníctvo tabuliek na `dbbet-admin` **sa nedá**: `ALTER TABLE … OWNER TO`
+vyžaduje, aby bol odovzdávajúci členom cieľovej role, a `GRANT` toho členstva zase
+`ADMIN OPTION` na tú rolu. Tú má na hostingu iba superuser, ktorého k dispozícii
+nemáme. Pokus skončí na `must have admin option on role "dbbet-admin"`.
+
+**Platí teda toto rozdelenie:**
+
+| Typ migrácie | Kde sa spúšťa |
+|---|---|
+| `INSERT`, `UPDATE`, `DELETE`, `CREATE TABLE` | `tools/run_migration.cjs` |
+| `ALTER TABLE`, `DROP TABLE`, `COMMENT ON` | databázová konzola pod `dbdevbet-admin` |
 
 > Poučenie: po každej migrácii si over `admin.schema_versions` — chýbajúce
-> číslo v poradí znamená, že sa niektorá nespustila.
+> číslo v poradí znamená, že sa niektorá nespustila. Práve tak vypadla `060`.
 
 ## Pravidlá práce
 
