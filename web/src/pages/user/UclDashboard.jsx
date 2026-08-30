@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getUclGames, saveUclTip } from '../../api/ucl';
 import { apiFetch } from '../../api/client';
-import { asDate, canTip, isValidDate } from '../../utils/tipWindow';
+import { asDate, canTip, isValidDate, uclScoreText as scoreText } from '../../utils/tipWindow';
 import { useAuth } from '../../context/AuthContext';
 import { useCompetition } from '../../context/CompetitionContext';
 import UclGroupTips from './UclGroupTips';
@@ -17,17 +17,6 @@ function dayFmt(value) {
     return Number.isNaN(d.getTime()) ? '—' : dayFmtRaw.format(d);
 }
 
-// Po predĺžení alebo penaltách sa ukáže aj konečný výsledok: 2:1 (4:3 pp).
-function scoreText(g) {
-    if (g.home_score_regular === null || g.away_score_regular === null) return null;
-    const base = `${g.home_score_regular} : ${g.away_score_regular}`;
-    const hasFinal = g.home_score_final !== null && g.away_score_final !== null;
-    if (hasFinal) return `${base} (${g.home_score_final}:${g.away_score_final} pp)`;
-    // Polčasové skóre poteší, kým zápas beží.
-    const ht = g.home_score_halftime !== null && g.home_score_halftime !== undefined
-            && g.away_score_halftime !== null && g.away_score_halftime !== undefined;
-    return ht && !g.result_approved ? `${base} (${g.home_score_halftime}:${g.away_score_halftime})` : base;
-}
 
 function Club({ name, logo, align }) {
     if (!name) return <span style={{ color: '#999' }}>neurčený</span>;

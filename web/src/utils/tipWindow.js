@@ -33,3 +33,23 @@ export function calcLiveUclPoints(tip1, tip2, game) {
         + (tip1 === s1 ? 1 : 0)
         + (tip2 === s2 ? 1 : 0);
 }
+
+// Skóre zápasu ako text: "2 : 1", po predĺžení "2 : 1 (4:3 pp)".
+// Kým výsledok nie je zadaný, berie sa priebežné skóre z livescore — inak by
+// hráč počas zápasu videl iba "vs". Vráti null, keď nie je čo zobraziť.
+export function uclScoreText(g) {
+    const h = g.home_score_regular ?? g.ls_home;
+    const a = g.away_score_regular ?? g.ls_away;
+    if (h === null || h === undefined || a === null || a === undefined) return null;
+
+    const base = `${h} : ${a}`;
+    if (g.home_score_final !== null && g.home_score_final !== undefined
+        && g.away_score_final !== null && g.away_score_final !== undefined) {
+        return `${base} (${g.home_score_final}:${g.away_score_final} pp)`;
+    }
+
+    // Polčasové skóre poteší, kým zápas beží.
+    const ht = g.home_score_halftime !== null && g.home_score_halftime !== undefined
+            && g.away_score_halftime !== null && g.away_score_halftime !== undefined;
+    return ht && !g.result_approved ? `${base} (${g.home_score_halftime}:${g.away_score_halftime})` : base;
+}

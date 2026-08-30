@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { getUclGames, saveUclTip } from '../../api/ucl';
-import { asDate, canTip, isUntipped as isUntippedGame, isValidDate } from '../../utils/tipWindow';
+import { asDate, canTip, isUntipped as isUntippedGame, isValidDate, uclScoreText as scoreText } from '../../utils/tipWindow';
 import UclGroupTips from './UclGroupTips';
 import styles from './Games.module.css';
 
@@ -47,17 +47,6 @@ const phaseBtnClass = (p, on) => {
     return [styles.pBtn, zakladna, on ? aktivna : ''].join(' ');
 };
 
-// Po predĺžení alebo penaltách sa ukáže aj konečný výsledok: 2:1 (4:3 pp).
-function scoreText(g) {
-    if (g.home_score_regular === null || g.away_score_regular === null) return null;
-    const base = `${g.home_score_regular} : ${g.away_score_regular}`;
-    const hasFinal = g.home_score_final !== null && g.away_score_final !== null;
-    if (hasFinal) return `${base} (${g.home_score_final}:${g.away_score_final} pp)`;
-    // Polčasové skóre poteší, kým zápas beží.
-    const ht = g.home_score_halftime !== null && g.home_score_halftime !== undefined
-            && g.away_score_halftime !== null && g.away_score_halftime !== undefined;
-    return ht && !g.result_approved ? `${base} (${g.home_score_halftime}:${g.away_score_halftime})` : base;
-}
 
 // Klub v karte zápasu: logo, názov a pod ním štát s vlajkou — rovnako ako
 // to má FIFA, len tam je štát reprezentácia a tu krajina klubu.
@@ -263,7 +252,8 @@ export default function UclGames() {
                         const known = g.home_team_id && g.away_team_id;
                         const closed = !canTip(g);
                         const started = isValidDate(asDate(g.start_time)) && asDate(g.start_time) <= new Date();
-                        const hasResult = g.home_score_regular !== null && g.away_score_regular !== null;
+                        // Skóre je aj priebežné z livescore, nielen zadaný výsledok.
+                        const hasResult = scoreText(g) !== null;
                         // Zapas uz zacal, ale vysledok este nie je schvaleny.
                         const jeLive = started && !g.result_approved;
                         return (
