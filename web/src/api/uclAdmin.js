@@ -21,7 +21,18 @@ export const deleteUclTeam = (team_id) => apiFetch('v1/admin/ucl-teams', {
     method: 'DELETE', body: JSON.stringify({ team_id })
 });
 
-export const getUclGamesStatus = () => apiFetch('v1/admin/ucl-generate-games');
-export const generateUclGames = (data) => apiFetch('v1/admin/ucl-generate-games', {
+// --- Testovacie nástroje ---
+export const getUclPdfStatus = () => apiFetch('v1/admin/ucl-load-pdf');
+export const loadUclGamesFromPdf = (data) => apiFetch('v1/admin/ucl-load-pdf', {
+    method: 'POST', body: JSON.stringify(data)
+});
+
+export const getUclTipsStatus = () => apiFetch('v1/admin/ucl-generate-tips');
+export const generateUclTips = (data) => apiFetch('v1/admin/ucl-generate-tips', {
+    method: 'POST', body: JSON.stringify(data)
+});
+
+export const getUclResultsStatus = () => apiFetch('v1/admin/ucl-generate-results');
+export const generateUclResults = (data) => apiFetch('v1/admin/ucl-generate-results', {
     method: 'POST', body: JSON.stringify(data)
 });

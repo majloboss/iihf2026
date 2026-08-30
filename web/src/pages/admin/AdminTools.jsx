@@ -5,8 +5,7 @@ import { getUsers, impersonate } from '../../api/admin';
 import { useCompetition } from '../../context/CompetitionContext';
 
 const BASE = import.meta.env.VITE_API_URL ?? '/api';
-import UclGameGenerator from './UclGameGenerator';
-import UclLivescore from './UclLivescore';
+import UclTestTools from './UclTestTools';
 import LivescoreTest from './LivescoreTest';
 import LivescoreLog from './LivescoreLog';
 import styles from './Admin.module.css';
@@ -218,10 +217,7 @@ export default function AdminTools() {
             </div>
 
             {/* ════════ LIGA MAJSTROV 2026/27 ════════ */}
-            {tab === 'ucl' && <>
-                <UclLivescore />
-                <UclGameGenerator />
-            </>}
+            {tab === 'ucl' && <UclTestTools />}
 
             {/* ════════ PRIHLASOVANIE (impersonácia) ════════ */}
             {tab === 'login' && (

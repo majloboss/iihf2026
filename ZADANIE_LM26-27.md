@@ -112,14 +112,15 @@ Hodnotí sa výsledok po 90 minútach. Predĺženie a penalty sa do tipu nezapo�
 7. ✅ Spustiť migráciu oprávnení `047` na DB-DEV-BET
 8. ✅ Spustiť migráciu číselníka štátov `048` na DB-DEV-BET
 9. 🔲 Spustiť synchronizáciu starších názvov štátov `049` na DB-DEV-BET
-10. 🟠 Generátor rozlosovania v **Nástroje → LM 2026/27** (kostra súťaže pred žrebom)
-11. 🔲 Po oficiálnom žrebe opraviť dvojice a termíny v správe zápasov
+10. 🟠 ~~Generátor rozlosovania~~ — nahradený načítaním z `games_pdf`
+11. ✅ Rozlosovanie ligovej fázy známe zo zdroja, dvojice a termíny sedia
 12. 🟠 Pridať UCL API endpointy
 13. 🟠 Pridať UCL stránky a routing vo webovej aplikácii
 14. 🔲 Otestovať ligovú tabuľku, tipovanie a bodovanie
 15. 🟠 Aktivovať súťaž (migrácia 057) pre používateľov
 16. 🟠 Referenčný rozpis zo zdrojového PDF v `games_pdf` (migrácia `062`)
-17. 🔲 Spustiť `063` pod vlastníkom schémy a potom `062` na DB-DEV-BET
+17. 🟠 Migrácie `062` a `063` spustené na DB-DEV-BET
+18. 🟠 Testovacie nástroje: načítanie z PDF, generovanie tipov a výsledkov LF
 
 ## Referenčný rozpis zo zdroja (`games_pdf`)
 
@@ -161,12 +162,13 @@ Kolo drží stĺpec `round_no` — presne tá hodnota, ktorou filtruje `UclGames
 | `tools/load_games_from_pdf.cjs` | naleje `games_pdf` do `games` (`--write`, `--force`) |
 | `tools/run_migration.cjs` | spustí migráciu na DB podľa `api/config/db.php` |
 | `tools/db_query.cjs` | jednorazový dopyt na DB |
+| `tools/test_ucl_tools.cjs` | overí testovacie nástroje proti DB (v transakcii, vráti späť) |
 
 ### Oprávnenia
 
-Schémy vlastní `dbdevbet-admin`, aplikácia sa pripája ako `dbbet-admin`, ktorý má
-v `"lm2026-27"` len `USAGE` — `CREATE TABLE` mu neprejde. Migráciu `063` preto
-musí spustiť vlastník schémy z databázovej konzoly; potom už `062` aj ďalšie
+Schémy vlastní `dbdevbet-admin`, aplikácia sa pripája ako `dbbet-admin`, ktorý mal
+v `"lm2026-27"` len `USAGE` — `CREATE TABLE` mu neprešlo. Migrácia `063` mu právo
+doplnila; spustiť ju musel vlastník schémy z databázovej konzoly. Odvtedy už
 migrácie prejdú aj cez `tools/run_migration.cjs`.
 
 ## Pravidlá práce
@@ -176,30 +178,51 @@ migrácie prejdú aj cez `tools/run_migration.cjs`.
 - Súťaž zostáva neaktívna, kým nebude známy oficiálny zoznam tímov a vyžrebované zápasy
 - Oficiálne názvy, termíny, výsledky a postupové kritériá sa overia podľa UEFA po žrebe
 
-## Generátor rozlosovania
+## Testovacie nástroje
 
-**Nástroje → LM 2026/27** vygeneruje kostru súťaže ešte pred oficiálnym žrebom.
-Po žrebe stačí opraviť dvojice a termíny, štruktúra zostáva.
+**Nástroje → LM 2026/27** obsahuje tri sekcie, ktorými sa súťaž naplní dátami
+na testovanie. Sekcie *Priebežné výsledky* a *Rozlosovanie zápasov* boli
+odstránené — rozlosovanie je už známe zo zdroja, takže náhodná kostra netreba.
 
-| Fáza | Zápasov | Poznámka |
-|---|---:|---|
-| `LEAGUE` | 144 | 8 kôl × 18 zápasov, tímy priradené náhodne |
-| `PO` | 16 | 8 dvojíc, zápas + odveta |
-| `R16` | 16 | 8 dvojíc, zápas + odveta |
-| `QF` | 8 | 4 dvojice, zápas + odveta |
-| `SF` | 4 | 2 dvojice, zápas + odveta |
-| `F` | 1 | jediný zápas, o 3. miesto sa nehrá |
-| **Spolu** | **189** | |
+### 📥 Načítať zápasy z PDF
 
-Ligová fáza používa kruhový systém: z 35 možných kôl sa berie 8, čím je zaručené,
-že sa žiadna dvojica nestretne dvakrát. Každý tím má 8 zápasov, z toho 4 doma.
-Kolo sa hrá v utorok (8 zápasov) a stredu (8 zápasov), ďalšie o dva týždne.
+Nahrá zápasy z `games_pdf` do `games` — dvojice, kolá aj termíny presne podľa
+zdrojového rozpisu. Zápasy v súťaži sa nahradia, takže sa dá kedykoľvek vrátiť
+k čistému stavu. Kolo sa prenesie do `game_type_name` v tvare `N. kolo`, odkiaľ
+si ho číta filter LF1–LF8.
 
-Play-off zápasy sa zakladajú s prázdnymi tímami — dopĺňajú sa podľa výsledkov
-ligovej fázy (miesta 9–24 hrajú o postup, víťazi sa pripoja k tímom z miest 1–8).
+Keď na zápasoch visia tipy, akcia sa odmietne, kým admin nezapne
+**Zmazať aj tipy**.
 
-Generovanie je zablokované, keď k zápasom už existujú tipy — kostra sa robí
-pred spustením tipovania.
+### 🎯 Generuj tipy hráčov LF
+
+Vytvorí tipy všetkých aktívnych hráčov na všetky zápasy ligovej fázy.
+Skóre je náhodné s realistickým rozložením gólov (najčastejšie 0–2).
+Bez **Prepísať existujúce** sa doplnia iba chýbajúce tipy.
+
+Play-off sa netipuje — tie zápasy nemajú určené tímy.
+
+### ⚽ Generuj výsledky LF
+
+Vyplní výsledky všetkých zápasov ligovej fázy a rovno ich schváli, takže sa
+prepočíta ligová tabuľka aj body za tipy (`ucl_recalc_standings`,
+`ucl_recalc_points` — tie isté helpery, aké volá zadanie výsledku adminom).
+Predĺženie sa v ligovej fáze nehrá, remíza je platný výsledok.
+
+### Endpointy
+
+| Endpoint | Účel |
+|---|---|
+| `GET,POST /v1/admin/ucl-load-pdf` | stav a načítanie zápasov z `games_pdf` |
+| `GET,POST /v1/admin/ucl-generate-tips` | stav a generovanie tipov ligovej fázy |
+| `GET,POST /v1/admin/ucl-generate-results` | stav a generovanie výsledkov ligovej fázy |
+
+Generátory zapisujú priamo do DB, nie cez `ucl-game-update` a `/v1/ucl/tips` —
+tie kontrolujú uzávierku a odmietli by zápas pred výkopom. Ligová fáza sa hrá
+až od septembra 2026, takže testovanie by inak nebolo možné.
+
+Overené skriptom `tools/test_ucl_tools.cjs`, ktorý celý reťazec prejde
+v transakcii a vráti ju späť.
 
 ## Súťaž v aplikácii
 
