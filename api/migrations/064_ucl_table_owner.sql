@@ -14,8 +14,15 @@
 --
 -- Tuto migraciu musi spustit doterajsi vlastnik (dbdevbet-admin) z databazovej
 -- konzoly — vlastnictvo moze odovzdat iba on.
+--
+-- Postgres navyse vyzaduje, aby ten, kto vlastnictvo odovzdava, bol clenom
+-- cielovej role. Bez toho skonci na "must be member of role dbbet-admin",
+-- preto sa clenstvo najprv udeli.
 
 BEGIN;
+
+-- Bez clenstva v cielovej roli by ALTER TABLE ... OWNER TO neprelo.
+GRANT "dbbet-admin" TO CURRENT_USER;
 
 ALTER TABLE "lm2026-27".games           OWNER TO "dbbet-admin";
 ALTER TABLE "lm2026-27".tips            OWNER TO "dbbet-admin";
