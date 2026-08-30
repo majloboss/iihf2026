@@ -357,8 +357,8 @@ Obrazovka `/spravy` má dve záložky:
 
 | Záložka | Obsah |
 |---|---|
-| **Správy organizátora** (prvá) | história oznamov s vyhľadávaním v texte |
-| **Správy s adminom** | pôvodné vlákno s otázkami |
+| **Oznamy** (prvá) | história oznamov organizátora s vyhľadávaním v texte |
+| **Správy** | pôvodné vlákno s adminom |
 
 Záložka sa dá otvoriť priamo odkazom cez `?tab=` — `organizator` alebo `admin`.
 Aktuálny oznam je v zozname odlíšený žltým podkladom.
