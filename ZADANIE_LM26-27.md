@@ -7,9 +7,13 @@
 - Súťaž: **Liga majstrov UEFA 2026/27**
 - Organizátor: **UEFA**
 - BetClub slug: `ucl2026`
-- Stav: 🟠 databázová štruktúra pripravená v develop
 - Platforma: webová aplikácia React + Vite PWA
 - Android aplikácia: nebude sa robiť
+
+**Stav:** 🟠 v `develop` funkčné a otestované — ligová fáza je kompletne
+vyžrebovaná (144 zápasov s termínmi, štadiónmi aj odkazmi na FlashScore),
+tipovanie, bodovanie aj ligová tabuľka bežia. Do produkcie sa zatiaľ
+nenasadzovalo. Prvý ostrý zápas: **8. 9. 2026**.
 
 ## Formát súťaže
 
@@ -103,27 +107,72 @@ Hodnotí sa výsledok po 90 minútach. Predĺženie a penalty sa do tipu nezapo�
 
 ## Implementačný postup
 
-1. ✅ Pripraviť databázovú migráciu `044_ucl_competition.sql`
-2. ✅ Spustiť migrácie `044` a `045` na DB-DEV-BET
-3. ✅ Pripraviť logo Ligy majstrov UEFA
-4. ✅ Pripraviť logá klubov z `sources/lm2026-27/`
-5. ✅ Importovať 81 klubov, názvov štátov a kódov štátov z CSV (`046`) na DB-DEV-BET
-6. ✅ Pridať admin číselník klubov s editáciou názvu, štátu, kódu a loga
-7. ✅ Spustiť migráciu oprávnení `047` na DB-DEV-BET
-8. ✅ Spustiť migráciu číselníka štátov `048` na DB-DEV-BET
-9. 🔲 Spustiť synchronizáciu starších názvov štátov `049` na DB-DEV-BET
-10. 🟠 ~~Generátor rozlosovania~~ — nahradený načítaním z `games_pdf`
-11. ✅ Rozlosovanie ligovej fázy známe zo zdroja, dvojice a termíny sedia
-12. 🟠 Pridať UCL API endpointy
-13. 🟠 Pridať UCL stránky a routing vo webovej aplikácii
-14. 🔲 Otestovať ligovú tabuľku, tipovanie a bodovanie
-15. 🟠 Aktivovať súťaž (migrácia 057) pre používateľov
-16. 🟠 Referenčný rozpis zo zdrojového PDF v `games_pdf` (migrácia `062`)
-17. 🟠 Migrácie `060`, `062` a `063` spustené na DB-DEV-BET
-18. 🟠 Zápasy ligovej fázy kompletné: dvojice, kolá, termíny, URL aj štadióny
-19. 🟠 Migrácie `064`, `065` a `066` spustené na DB-DEV-BET
-20. 🔲 Nahradiť dočasné kódy klubov na `X` oficiálnymi podľa UEFA
-18. 🟠 Testovacie nástroje: načítanie z PDF, generovanie tipov a výsledkov LF
+> **Legenda:** ✅ = hotovo v `main` (produkcia) &nbsp;|&nbsp; 🟠 = hotovo v `develop`, čaká na deploy &nbsp;|&nbsp; 🔲 = nie je implementované
+
+### Databáza a číselníky
+
+1. ✅ Migrácia `044_ucl_competition.sql`, spustená spolu s `045`
+2. ✅ Import 81 klubov, štátov a kódov z CSV (`046`)
+3. ✅ Admin číselník klubov s editáciou názvu, štátu, kódu a loga
+4. ✅ Migrácie oprávnení `047`, číselníka štátov `048`, synchronizácie `049`
+5. 🟠 Migrácie `060`, `062`–`066` spustené na DB-DEV-BET
+6. 🟠 Kód klubu je iba informatívny (`065`) — dá sa voľne meniť
+
+### Zápasy
+
+7. 🟠 Referenčný rozpis zo zdrojového PDF v `games_pdf` (`062`)
+8. 🟠 Ligová fáza kompletná: 144 zápasov, dvojice, kolá, termíny, URL, štadióny
+9. 🟠 Vyraďovacia časť založená (45 zápasov) — zatiaľ len termíny
+10. ⛔ ~~Generátor náhodného rozlosovania~~ — nahradený načítaním z `games_pdf`
+
+### Aplikácia
+
+11. 🟠 UCL API endpointy
+12. 🟠 UCL stránky a routing
+13. 🟠 Karta zápasu: logo, štát s vlajkou, štadión, FlashScore, blikajúci LIVE
+14. 🟠 Prehľad: poradie v skupinách, aktuálny oznam s odkazom na históriu
+15. 🟠 Správy: záložky **Oznamy** (história + hľadanie) a **Správy**
+16. 🟠 Testovacie nástroje: načítanie z PDF, generovanie tipov a výsledkov LF
+17. 🟠 Súťaž aktivovaná pre používateľov (`057`)
+
+### Overené
+
+18. 🟠 Ligová tabuľka sa prepočítava po zadaní výsledku
+19. 🟠 Bodovanie tipov sedí — maximum 5 bodov v ligovej fáze
+20. 🔲 Otestovať celú ligovú fázu (zatiaľ overené na prvých zápasoch)
+
+## Čo zostáva
+
+### Pred spustením súťaže
+
+| Úloha | Poznámka |
+|---|---|
+| 🔲 Kódy klubov podľa UEFA | 14 klubov má dočasné označenie na `X`; po `065` sa dajú meniť voľne |
+| 🔲 Overiť štadión Vikinga | zápas s PSV 20. 1. 2027 má MHPArena, UEFA uvádza domáci štadión |
+| 🔲 Deploy na `main` | všetko je zatiaľ len v `develop` |
+
+### Po žrebe vyraďovacej časti
+
+| Úloha | Poznámka |
+|---|---|
+| 🔲 Doplniť dvojice play-off | podľa poradia: 1–8 priamo do R16, 9–24 baráž |
+| 🔲 Doplniť štadióny a URL | do `games_pdf`, rovnako ako pri ligovej fáze |
+| 🔲 Overiť postupový kľúč | súčet gólov z oboch zápasov, predĺženie až v odvete |
+
+### Livescore
+
+| Úloha | Poznámka |
+|---|---|
+| 🔲 Cron na automatické sťahovanie | ovládanie je hotové, chýba pravidelné spúšťanie |
+| 🔲 Otestovať na živom zápase | prvý ostrý zápas je 8. 9. 2026 |
+
+### Nice to have
+
+| Úloha | Poznámka |
+|---|---|
+| 🔲 Zarovnať tipy skupín vo FIFA | má rovnaký problém so šírkami stĺpcov ako mala LM |
+| 🔲 Zjednotiť históriu oznamov | FIFA a IIHF ju majú stále v prehľade, LM ju má v Správach |
+| 🔲 Domáci štadión do číselníka klubov | teraz je štadión len pri zápase |
 
 ## Referenčný rozpis zo zdroja (`games_pdf`)
 
