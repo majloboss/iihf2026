@@ -173,14 +173,14 @@ bez zápasov — netlačí to.
 | Úloha | Poznámka |
 |---|---|
 | 🔲 Prejsť celú ligovú fázu | posúvať kolá cez **Posunúť hrací deň**, kontrolovať body a tabuľku |
-| 🔲 Overiť baráž a play-off | dvojice sa dopĺňajú ručne, kým nie je nástroj na ich zostavenie |
+| 🔲 Overiť baráž a play-off | dvojice zostaví nástroj **Zostaviť dvojice play-off** |
 | 🔲 Overiť bodovanie play-off | 5 bodov za výsledok, maximum 7 |
 
 ### Po žrebe vyraďovacej časti
 
 | Úloha | Poznámka |
 |---|---|
-| 🔲 Doplniť dvojice play-off | podľa poradia: 1–8 priamo do R16, 9–24 baráž |
+| 🔲 Doplniť dvojice play-off | nástrojom **Zostaviť dvojice play-off**, po overení losu UEFA |
 | 🔲 Doplniť štadióny a URL | do `games_pdf`, rovnako ako pri ligovej fáze |
 | 🔲 Overiť postupový kľúč | súčet gólov z oboch zápasov, predĺženie až v odvete |
 
@@ -188,7 +188,6 @@ bez zápasov — netlačí to.
 
 | Úloha | Poznámka |
 |---|---|
-| 🔲 Nástroj na zostavenie play-off | dvojice z tabuľky automaticky podľa poradia |
 | 🔲 Zjednotiť históriu oznamov | FIFA a IIHF ju majú stále v prehľade, LM ju má v Správach |
 
 ## Referenčný rozpis zo zdroja (`games_pdf`)
@@ -300,6 +299,7 @@ Vyžaduje `api/config/openrouter.php` (kľúč nie je v repozitári).
 | `tools/test_home_venue.cjs` | overí naplnenie domácich štadiónov |
 | `tools/test_ucl_live.cjs` | overí ručné živé skóre a prevzatie do výsledku |
 | `tools/test_ucl_manual_rank.cjs` | overí, že ručné poradie prežije prepočet |
+| `tools/test_ucl_bracket.cjs` | overí zostavenie dvojíc a určenie víťazov |
 
 ### Ligová tabuľka
 
@@ -372,6 +372,25 @@ zápasov zostáva zachované.
 
 Bez tohto by sa testovať nedalo — súťaž sa hrá od septembra 2026 do júna 2027.
 Presun do budúcnosti zároveň znova otvorí tipovanie.
+
+### 🏆 Zostaviť dvojice play-off
+
+Doplní tímy do zápasov vyraďovacej časti — pri ostrej súťaži aj pri testovaní.
+
+| Fáza | Účastníci | Nasadenie |
+|---|---|---|
+| Baráž | 9.–24. miesto tabuľky | 9. proti 24., 10. proti 23. … |
+| Osemfinále | 1.–8. miesto + víťazi baráže | prvá osmička je nasadená |
+| Štvrťfinále, semifinále, finále | víťazi predchádzajúcej fázy | najlepší proti najhoršiemu |
+
+**Lepšie umiestnený tím hrá odvetu doma**, takže v prvom zápase je hosťom.
+
+Víťaz dvojice sa určí zo **súčtu gólov oboch zápasov**; pri rovnosti rozhoduje
+predĺženie alebo penalty v odvete (`home_score_final`). Kým výsledky nie sú
+schválené, fáza sa tvári ako *čaká na výsledky* a tlačidlo je neaktívne.
+
+Prestavenie fázy, na ktorej už sú tipy, si vyžiada potvrdenie — tipy sa viažu
+na konkrétne dvojice.
 
 ### 🎯 Generuj tipy hráčov LF
 

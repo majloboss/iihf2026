@@ -37,6 +37,12 @@ export const saveUclStandingsOrder = (order) => apiFetch('v1/admin/ucl-standings
     method: 'PUT', body: JSON.stringify({ order })
 });
 
+// Zostavenie dvojic playoff z tabulky a vitazov predchadzajucej fazy.
+export const getUclBracketStatus = () => apiFetch('v1/admin/ucl-build-bracket');
+export const buildUclBracket = (data) => apiFetch('v1/admin/ucl-build-bracket', {
+    method: 'POST', body: JSON.stringify(data)
+});
+
 // --- Testovacie nástroje ---
 export const getUclPdfStatus = () => apiFetch('v1/admin/ucl-load-pdf');
 export const loadUclGamesFromPdf = (data) => apiFetch('v1/admin/ucl-load-pdf', {

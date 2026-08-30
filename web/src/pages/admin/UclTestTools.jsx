@@ -4,6 +4,7 @@ import {
     getUclTipsStatus, generateUclTips,
     getUclResultsStatus, generateUclResults,
     getUclDays, shiftUclDay,
+    getUclBracketStatus, buildUclBracket,
 } from '../../api/uclAdmin';
 import styles from './Admin.module.css';
 
@@ -370,6 +371,77 @@ function ShiftDay({ reloadKey, onChange }) {
     );
 }
 
+// ────────────────────────────────────────────────────────────
+// 5. Zostaviť dvojice play-off
+// ────────────────────────────────────────────────────────────
+function BuildBracket({ reloadKey, onChange }) {
+    const [phases, setPhases] = useState([]);
+    const [busy, setBusy] = useState(null);
+    const [message, setMessage] = useState('');
+    const [error, setError] = useState('');
+
+    const load = () => getUclBracketStatus()
+        .then(d => setPhases(d.phases || []))
+        .catch(e => setError(e.message));
+    useEffect(() => { load(); }, [reloadKey]);
+
+    const run = async (p) => {
+        // Tipy sa viažu na konkrétne dvojice — prestavenie ich znehodnotí.
+        const replace = Number(p.with_teams) > 0;
+        if (replace && !window.confirm(
+            `${p.name} už má nastavené tímy. Prestavením sa zmažú tipy na tieto zápasy. Pokračovať?`)) return;
+
+        setBusy(p.phase); setError(''); setMessage('');
+        try {
+            const res = await buildUclBracket({ phase: p.phase, replace });
+            setMessage(`✓ ${p.name}: zostavených ${res.pairs} ${res.pairs === 1 ? 'dvojica' : 'dvojíc'}.`);
+            await load();
+            onChange?.();
+        } catch (e) { setError(e.message); }
+        finally { setBusy(null); }
+    };
+
+    return (
+        <Section color="#20c997" title="🏆 Zostaviť dvojice play-off">
+            <p style={hint}>
+                Doplní tímy do zápasov vyraďovacej časti. Baráž sa zostaví z ligovej tabuľky
+                (9. proti 24., 10. proti 23. …), osemfinále z prvej osmičky a víťazov baráže,
+                ďalšie fázy z víťazov tej predchádzajúcej. Lepšie umiestnený tím hrá odvetu doma.
+            </p>
+
+            <div style={{ overflowX: 'auto' }}>
+                <table className={styles.table}>
+                    <thead><tr><th>Fáza</th><th>Zápasov</th><th>S tímami</th><th>Stav</th><th></th></tr></thead>
+                    <tbody>
+                        {phases.map(p => (
+                            <tr key={p.phase}>
+                                <td>{p.name}</td>
+                                <td>{p.games}</td>
+                                <td>{Number(p.with_teams) > 0
+                                    ? p.with_teams
+                                    : <span className={styles.unused}>—</span>}</td>
+                                <td>{p.ready
+                                    ? <span style={{ color: '#28a745' }}>pripravená ({p.teams} tímov)</span>
+                                    : <span className={styles.unused}>čaká na výsledky</span>}</td>
+                                <td>
+                                    <button className={styles.btnSmall} disabled={!p.ready || busy === p.phase}
+                                            onClick={() => run(p)}>
+                                        {busy === p.phase ? 'Zostavujem…'
+                                            : Number(p.with_teams) > 0 ? 'Prestaviť' : 'Zostaviť'}
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+
+            {message && <p className={styles.success}>{message}</p>}
+            {error && <p className={styles.error}>✗ {error}</p>}
+        </Section>
+    );
+}
+
 export default function UclTestTools() {
     // Načítanie z PDF prepíše zápasy aj tipy, preto si ostatné sekcie
     // po ňom obnovia svoj stav.
@@ -382,6 +454,7 @@ export default function UclTestTools() {
             <ShiftDay reloadKey={reloadKey} onChange={refresh} />
             <GenerateTips reloadKey={reloadKey} onChange={refresh} />
             <GenerateResults reloadKey={reloadKey} onChange={refresh} />
+            <BuildBracket reloadKey={reloadKey} onChange={refresh} />
         </>
     );
 }
