@@ -96,7 +96,6 @@ function ResultCard({ game: initGame, onChanged }) {
     const [game, setGame] = useState(initGame);
     useEffect(() => { setGame(initGame); }, [initGame]);
 
-    const isPlayoff = PLAYOFF.has(game.game_type_code);
     const [h90, setH90] = useState(game.home_score_regular != null ? String(game.home_score_regular) : '');
     const [a90, setA90] = useState(game.away_score_regular != null ? String(game.away_score_regular) : '');
     const [hFin, setHFin] = useState(game.home_score_final != null ? String(game.home_score_final) : '');
@@ -140,11 +139,13 @@ function ResultCard({ game: initGame, onChanged }) {
     const cas = asDate(game.start_time).toLocaleString('sk-SK',
         { weekday: 'short', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
 
+    const jeLive = started && !finished;
+
     return (
-        <div className={styles.card}>
+        <div className={`${gStyles.card} ${finished ? gStyles.cardFinished : ''} ${jeLive ? gStyles.cardLive : ''}`}>
             <div className={styles.cardHead}>
-                <span className={styles.phaseTag}>{kolo} · #{game.game_id}</span>
-                <span className={styles.cardTime}>{cas}</span>
+                <span className={styles.cardMeta}>{kolo} • #{game.game_id}</span>
+                <span className={styles.cardMeta}>{cas}</span>
             </div>
 
             <div className={gStyles.matchRow}>

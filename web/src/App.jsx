@@ -32,6 +32,7 @@ import UclGames from './pages/user/UclGames';
 import UclStandings from './pages/user/UclStandings';
 import UclDashboard from './pages/user/UclDashboard';
 import UclAdminGames from './pages/admin/UclAdminGames';
+import UclAdminResults from './pages/admin/UclAdminResults';
 import Standings from './pages/user/Standings';
 import Pravidla from './pages/user/Pravidla';
 import Messages from './pages/user/Messages';
@@ -65,7 +66,7 @@ function GamesRouter() {
 
 function AdminResultsRouter() {
     const { activeCompetition } = useCompetition();
-    if (activeCompetition?.slug === 'ucl2026') return <UclAdminGames />;
+    if (activeCompetition?.slug === 'ucl2026') return <UclAdminResults />;
     return activeCompetition?.slug === 'fifa2026' ? <FifaAdminResults /> : <AdminResults />;
 }
 
