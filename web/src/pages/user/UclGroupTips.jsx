@@ -28,7 +28,9 @@ export default function UclGroupTips({ game }) {
     };
 
     return (
-        <div style={{ width: '100%' }}>
+        // Karta zapasu je flex s poradim; tipy patria uplne na koniec,
+        // za stadion aj odkaz na Flashscore.
+        <div style={{ width: '100%', order: 9 }}>
             <button onClick={toggle}
                 style={{ border: 'none', background: 'none', color: '#1a3a6b', cursor: 'pointer',
                          fontSize: '0.78rem', padding: '4px 0' }}>

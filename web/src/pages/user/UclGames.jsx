@@ -280,28 +280,6 @@ export default function UclGames() {
                                           countryCode={g.away_country_code} flag={g.away_flag} />
                                 </div>
 
-                                {(g.venue || g.flashscore_url) && (
-                                    <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                  gap: 6, fontSize: '0.75rem', color: '#999', order: 5 }}>
-                                        {g.venue && (
-                                            <span>
-                                                {g.venue}
-                                                {/* Klub nemusi hrat doma na svojom stadione —
-                                                    napriklad ked sa jeho krajina nehra. */}
-                                                {g.home_club_venue && g.venue !== g.home_club_venue && (
-                                                    <span style={{ color: '#c0392b' }}> (iný štadión)</span>
-                                                )}
-                                            </span>
-                                        )}
-                                        {g.flashscore_url && (
-                                            <a href={g.flashscore_url} target="_blank" rel="noopener noreferrer"
-                                               title="Sledovať na FlashScore" style={{ display: 'flex', alignItems: 'center' }}>
-                                                <img src="/flashscore.png" alt="FlashScore" style={{ width: 14, height: 14 }} />
-                                            </a>
-                                        )}
-                                    </div>
-                                )}
-
                                 <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
                                     {!known
                                         ? <span style={{ fontSize: '0.78rem', color: '#999' }}>čaká na súperov</span>
@@ -323,6 +301,28 @@ export default function UclGames() {
                                                 </button>
                                               </>}
                                 </div>
+
+                                {(g.venue || g.flashscore_url) && (
+                                    <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                  gap: 6, fontSize: '0.75rem', color: '#999', order: 4 }}>
+                                        {g.venue && (
+                                            <span>
+                                                {g.venue}
+                                                {/* Klub nemusi hrat doma na svojom stadione —
+                                                    napriklad ked sa jeho krajina nehra. */}
+                                                {g.home_club_venue && g.venue !== g.home_club_venue && (
+                                                    <span style={{ color: '#c0392b' }}> (iný štadión)</span>
+                                                )}
+                                            </span>
+                                        )}
+                                        {g.flashscore_url && (
+                                            <a href={g.flashscore_url} target="_blank" rel="noopener noreferrer"
+                                               title="Sledovať na FlashScore" style={{ display: 'flex', alignItems: 'center' }}>
+                                                <img src="/flashscore.png" alt="FlashScore" style={{ width: 18, height: 18 }} />
+                                            </a>
+                                        )}
+                                    </div>
+                                )}
 
                                 {started && <UclGroupTips game={g} />}
                             </div>

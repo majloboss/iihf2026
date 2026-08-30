@@ -30,17 +30,37 @@ const calcLivePoints = (tip1, tip2, game) => {
         + (tip1 === s1 ? 1 : 0) + (tip2 === s2 ? 1 : 0);
 };
 
-function ClubBlock({ name, logo, isLeft }) {
+// Logo je vzdy vlavo od nazvu, pod nazvom stat s vlajkou — rovnako ako to
+// vidi pouzivatel na svojej karte zapasu.
+function ClubBlock({ name, logo, country, countryCode, flag, isLeft }) {
+    if (!name) {
+        return (
+            <div className={`${gStyles.team} ${isLeft ? gStyles.teamLeft : gStyles.teamRight}`}>
+                <span className={gStyles.teamCode} style={{ color: '#bbb' }}>TBD</span>
+            </div>
+        );
+    }
     return (
         <div className={`${gStyles.team} ${isLeft ? gStyles.teamLeft : gStyles.teamRight}`}>
-            {name
-                ? <>
-                    {logo && <img className={gStyles.flag} src={`/logos/ucl2026/${logo}`} alt=""
-                                  style={{ objectFit: 'contain' }}
-                                  onError={e => { e.target.style.display = 'none'; }} />}
-                    <span className={gStyles.teamCode} style={{ fontSize: '0.9rem' }}>{name}</span>
-                  </>
-                : <span className={gStyles.teamCode} style={{ color: '#bbb' }}>TBD</span>}
+            <span style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+                {logo
+                    ? <img src={`/logos/ucl2026/${logo}`} alt=""
+                           style={{ width: 26, height: 26, objectFit: 'contain', flexShrink: 0 }}
+                           onError={e => { e.currentTarget.style.visibility = 'hidden'; }} />
+                    : <span style={{ width: 26, flexShrink: 0 }} />}
+                <span style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                    <span style={{ fontWeight: 600, lineHeight: 1.2 }}>{name}</span>
+                    {(country || countryCode) && (
+                        <span style={{ display: 'flex', alignItems: 'center', gap: 4,
+                                       fontSize: '0.72rem', color: '#888', lineHeight: 1.3 }}>
+                            {flag && <img src={`/flags/${flag}`} alt=""
+                                          style={{ width: 14, height: 10, objectFit: 'cover', flexShrink: 0 }}
+                                          onError={e => { e.currentTarget.style.display = 'none'; }} />}
+                            <span>{country || countryCode}</span>
+                        </span>
+                    )}
+                </span>
+            </span>
         </div>
     );
 }
@@ -175,7 +195,8 @@ function ResultCard({ game: initGame, onChanged }) {
             </div>
 
             <div className={gStyles.matchRow}>
-                <ClubBlock name={game.home_name} logo={game.home_logo} isLeft />
+                <ClubBlock name={game.home_name} logo={game.home_logo} country={game.home_country}
+                           countryCode={game.home_country_code} flag={game.home_flag} isLeft />
                 <div className={gStyles.vs}>
                     {game.home_score_regular != null
                         ? <span className={styles.result}>
@@ -185,9 +206,20 @@ function ResultCard({ game: initGame, onChanged }) {
                           </span>
                         : 'vs'}
                 </div>
-                <ClubBlock name={game.away_name} logo={game.away_logo} />
+                <ClubBlock name={game.away_name} logo={game.away_logo} country={game.away_country}
+                           countryCode={game.away_country_code} flag={game.away_flag} />
             </div>
-            {game.venue && <div className={styles.cardVenue}><span>{game.venue}</span></div>}
+            {(game.venue || game.flashscore_url) && (
+                <div className={styles.cardVenue}>
+                    {game.venue && <span>{game.venue}</span>}
+                    {game.flashscore_url && (
+                        <a href={game.flashscore_url} target="_blank" rel="noopener noreferrer"
+                           title="Sledovať na FlashScore" style={{ display: 'flex', alignItems: 'center' }}>
+                            <img src="/flashscore.png" alt="FlashScore" style={{ width: 18, height: 18 }} />
+                        </a>
+                    )}
+                </div>
+            )}
 
             {!teamsSet && (
                 <div className={styles.cardVenue} style={{ color: '#aaa' }}>
