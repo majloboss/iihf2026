@@ -23,3 +23,27 @@ body {
 
 h1, h2, h3 { margin: 0; }
 p { margin: 0; }
+
+/* Blikajúci odznak prebiehajúceho zápasu. Rovnaký v prehľade aj v zápasoch. */
+@keyframes liveBlink {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.35; }
+}
+
+.liveBadge {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 4px;
+    background: #dc3545;
+    color: #fff;
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    line-height: 1.5;
+    animation: liveBlink 1.2s ease-in-out infinite;
+}
+
+/* Kto má zapnuté obmedzenie pohybu, nech mu nič nebliká. */
+@media (prefers-reduced-motion: reduce) {
+    .liveBadge { animation: none; }
+}

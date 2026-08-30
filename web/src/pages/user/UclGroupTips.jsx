@@ -47,21 +47,35 @@ export default function UclGroupTips({ game }) {
                             <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#666', marginBottom: 2 }}>
                                 {grp.group_name}
                             </div>
-                            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem' }}>
+                            {/* Pevne sirky stlpcov: bez nich sa tabulka roztiahne podla
+                                obsahu a skore kazdej skupiny konci inde. */}
+                            <table style={{ width: '100%', borderCollapse: 'collapse',
+                                            fontSize: '0.8rem', tableLayout: 'fixed' }}>
+                                <colgroup>
+                                    <col />
+                                    <col style={{ width: 56 }} />
+                                    <col style={{ width: 48 }} />
+                                </colgroup>
                                 <tbody>
                                     {grp.members.map(m => {
                                         const livePts = isLive ? calcLiveUclPoints(m.tip1, m.tip2, game) : null;
                                         const pts = m.points ?? livePts;
                                         return (
                                             <tr key={m.user_id}
-                                                style={{ background: m.is_me ? '#e8eef8' : 'transparent' }}>
-                                                <td style={{ padding: '3px 6px' }}>{m.username}</td>
-                                                <td style={{ padding: '3px 6px', textAlign: 'center', fontWeight: 600 }}>
+                                                style={{ background: m.is_me ? '#e8eef8' : 'transparent',
+                                                         fontWeight: m.is_me ? 700 : 400 }}>
+                                                <td style={{ padding: '3px 6px', overflow: 'hidden',
+                                                             textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                                    {m.username}{m.is_me ? ' (ty)' : ''}
+                                                </td>
+                                                <td style={{ padding: '3px 6px', textAlign: 'right',
+                                                             fontVariantNumeric: 'tabular-nums' }}>
                                                     {m.tip1 == null
-                                                        ? <span style={{ color: '#bbb' }}>—</span>
+                                                        ? <span style={{ color: '#bbb', fontStyle: 'italic' }}>—</span>
                                                         : `${m.tip1}:${m.tip2}`}
                                                 </td>
-                                                <td style={{ padding: '3px 6px', textAlign: 'right', width: 52,
+                                                <td style={{ padding: '3px 6px', textAlign: 'right',
+                                                             fontVariantNumeric: 'tabular-nums',
                                                              color: livePts != null && m.points == null ? '#e67e22' : '#28a745' }}>
                                                     {pts != null ? `+${pts}b` : ''}
                                                 </td>

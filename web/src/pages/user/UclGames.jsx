@@ -249,6 +249,8 @@ export default function UclGames() {
                         const closed = !canTip(g);
                         const started = isValidDate(asDate(g.start_time)) && asDate(g.start_time) <= new Date();
                         const hasResult = g.home_score_regular !== null && g.away_score_regular !== null;
+                        // Zapas uz zacal, ale vysledok este nie je schvaleny.
+                        const jeLive = started && !g.result_approved;
                         return (
                             <div key={g.game_id} className={styles.card}
                                  style={{ padding: 12, marginBottom: 6, display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
@@ -262,9 +264,13 @@ export default function UclGames() {
                                 <div style={{ flex: 1, minWidth: 250, display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: 10 }}>
                                     <Club name={g.home_name} logo={g.home_logo} country={g.home_country}
                                           countryCode={g.home_country_code} flag={g.home_flag} align="right" />
-                                    <strong style={{ color: hasResult ? '#1a3a6b' : '#bbb' }}>
-                                        {hasResult ? scoreText(g) : 'vs'}
-                                    </strong>
+                                    {/* Rozohraty zapas sa oznaci rovnako ako v prehlade. */}
+                                    <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
+                                        {jeLive && <span className="liveBadge">LIVE</span>}
+                                        <strong style={{ color: jeLive ? '#dc3545' : hasResult ? '#1a3a6b' : '#bbb' }}>
+                                            {hasResult ? scoreText(g) : 'vs'}
+                                        </strong>
+                                    </span>
                                     <Club name={g.away_name} logo={g.away_logo} country={g.away_country}
                                           countryCode={g.away_country_code} flag={g.away_flag} />
                                 </div>

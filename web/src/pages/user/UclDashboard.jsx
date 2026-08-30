@@ -215,13 +215,17 @@ export default function UclDashboard() {
                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
                                 <div style={{ minWidth: 120, fontSize: '0.78rem', color: '#666' }}>
                                     {dayFmt(g.start_time)}
-                                    <div style={{ fontSize: '0.7rem', color: '#dc3545', fontWeight: 700 }}>LIVE</div>
                                 </div>
+                                {/* Odznak LIVE patrí k dvojici, nie k dátumu — inak visí
+                                    mimo zápasu a čitateľ ho k nemu nepriradí. */}
                                 <div style={{ flex: 1, minWidth: 240, display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: 8 }}>
                                     <Club name={g.home_name} logo={g.home_logo} align="right" />
-                                    <strong style={{ color: '#dc3545' }}>
-                                        {scoreText(g) ?? 'vs'}
-                                    </strong>
+                                    <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
+                                        <span className="liveBadge">LIVE</span>
+                                        <strong style={{ color: '#dc3545' }}>
+                                            {scoreText(g) ?? 'vs'}
+                                        </strong>
+                                    </span>
                                     <Club name={g.away_name} logo={g.away_logo} />
                                 </div>
                                 <div style={{ fontSize: '0.82rem' }}>

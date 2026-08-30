@@ -323,6 +323,13 @@ Rovnaká skladba ako vo FIFA, len namiesto reprezentácie je klub:
 - **logo klubu** z `/logos/ucl2026/`
 - **názov klubu** a pod ním **štát s vlajkou** z `/flags/`
 - **štadión** a odkaz na **FlashScore** pod dvojicou
+- **LIVE** — blikajúci odznak nad skóre, kým zápas beží a výsledok nie je
+  schválený; trieda `.liveBadge` je v `index.css`, spoločná pre prehľad
+  aj zápasy. Pri zapnutom `prefers-reduced-motion` nebliká.
+
+Rozklik **Tipy skupín** má pevné šírky stĺpcov (`table-layout: fixed`), inak sa
+tabuľka roztiahne podľa najdlhšieho mena a skóre každej skupiny končí inde.
+Číslice sú `tabular-nums`, takže tipy sedia pod sebou.
 
 Štát prichádza z `admin.countries` cez krajinu klubu — zobrazuje sa slovenský
 názov (`name_sk`), pri jeho absencii kód. Vlajku posiela API ako `home_flag` /
