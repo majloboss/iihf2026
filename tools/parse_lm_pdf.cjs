@@ -20,8 +20,8 @@ for (let i = 1; i < lines.length; i++) {
     games.push({
         home, away,
         date: `${year}-${mm}-${dd}`,
-        // Kola 7 a 8 nemaju v PDF cas -> 21:00 SEC ako predvolena hodnota
-        time: hh ? `${hh}:${mi}` : '21:00',
+        // Kola 7 a 8 nemaju v PDF cas — doplni sa nizsie podla vzoru z kol 1-6.
+        time: hh ? `${hh}:${mi}` : null,
         time_known: Boolean(hh),
     });
 }
@@ -51,6 +51,24 @@ clean.forEach(g => {
     const r = ROUNDS.findIndex(([a, b]) => g.date >= a && g.date <= b);
     g.round = r + 1;
 });
+
+// Kola 7 a 8 nemaju v PDF cas. V kolach 1-6 plati bez vynimky, ze prve dva
+// zapasy hracieho dna zacinaju 18:45 a zvysok 21:00 — a rovnako to ukazuje aj
+// oficialny rozpis UEFA pre 20.01.2027. Ten isty vzor sa preto pouzije aj tu.
+// Kolo 8 sa hra cele v jeden den (27.01.), vsetky zapasy o 21:00.
+const EARLY = '18:45';
+const LATE = '21:00';
+const perDay = {};
+clean.forEach(g => { (perDay[g.date] = perDay[g.date] || []).push(g); });
+for (const [date, dayGames] of Object.entries(perDay)) {
+    if (dayGames.every(g => g.time_known)) continue;
+    // Kolo v jednom dni ma vsetky zapasy vecer, bez skorsieho bloku.
+    const oneDayRound = clean.filter(g => g.round === dayGames[0].round)
+                             .every(g => g.date === date);
+    dayGames.forEach((g, i) => {
+        g.time = !oneDayRound && i < 2 ? EARLY : LATE;
+    });
+}
 
 console.log('zapasov:', clean.length);
 console.log('datumy:', dates.join(' '));

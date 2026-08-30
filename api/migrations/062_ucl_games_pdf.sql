@@ -10,7 +10,10 @@
 --
 -- Cas: PDF uvadza stredoeuropsky cas, starts_at sa uklada ako naive UTC
 --      (rovnako ako v "lm2026-27".games). Kola 7 a 8 nemaju v PDF uvedeny
---      vykop — pouziva sa 21:00 SEC.
+--      vykop. V kolach 1-6 plati bez vynimky, ze prve dva zapasy hracieho dna
+--      zacinaju 18:45 a zvysok 21:00 — a rovnako to ukazuje oficialny rozpis
+--      UEFA pre 20.01.2027, preto sa ten isty vzor pouzil aj tu.
+--      Kolo 8 sa hra cele 27.01. v jeden den, vsetky zapasy o 21:00.
 --
 -- Kluby sa zapisuju kodom z admin.uefa_clubs, nie club_id: kod je citatelny
 -- a nezavisi na poradi importu.
@@ -164,22 +167,22 @@ INSERT INTO "lm2026-27".games_pdf
 (107, 'LEAGUE', 6, 'PSV', 'ATM', '2026-12-09 20:00:00', NULL, NULL),
 (108, 'LEAGUE', 6, 'STU', 'LIL', '2026-12-09 20:00:00', NULL, NULL),
 -- 7. kolo
-(109, 'LEAGUE', 7, 'XAEK', 'ROM', '2027-01-19 20:00:00', NULL, NULL),
-(110, 'LEAGUE', 7, 'AVL', 'BVB', '2027-01-19 20:00:00', NULL, NULL),
-(111, 'LEAGUE', 7, 'BOD', 'ATM', '2027-01-19 20:00:00', NULL, NULL),
-(112, 'LEAGUE', 7, 'POR', 'SLA', '2027-01-19 20:00:00', NULL, NULL),
-(113, 'LEAGUE', 7, 'GAL', 'FEY', '2027-01-19 20:00:00', NULL, NULL),
+(109, 'LEAGUE', 7, 'BOD', 'ATM', '2027-01-19 17:45:00', NULL, NULL),
+(110, 'LEAGUE', 7, 'GAL', 'FEY', '2027-01-19 17:45:00', NULL, NULL),
+(111, 'LEAGUE', 7, 'XAEK', 'ROM', '2027-01-19 20:00:00', NULL, NULL),
+(112, 'LEAGUE', 7, 'AVL', 'BVB', '2027-01-19 20:00:00', NULL, NULL),
+(113, 'LEAGUE', 7, 'POR', 'SLA', '2027-01-19 20:00:00', NULL, NULL),
 (114, 'LEAGUE', 7, 'INT', 'LIV', '2027-01-19 20:00:00', NULL, NULL),
 (115, 'LEAGUE', 7, 'LIL', 'SLB', '2027-01-19 20:00:00', NULL, NULL),
 (116, 'LEAGUE', 7, 'RMA', 'XLAS', '2027-01-19 20:00:00', NULL, NULL),
 (117, 'LEAGUE', 7, 'STU', 'BRU', '2027-01-19 20:00:00', NULL, NULL),
-(118, 'LEAGUE', 7, 'BET', 'ARS', '2027-01-20 20:00:00', NULL, NULL),
-(119, 'LEAGUE', 7, 'XCOM', 'PSG', '2027-01-20 20:00:00', NULL, NULL),
-(120, 'LEAGUE', 7, 'FEN', 'VIL', '2027-01-20 20:00:00', NULL, NULL),
-(121, 'LEAGUE', 7, 'XLEN', 'MCI', '2027-01-20 20:00:00', NULL, NULL),
-(122, 'LEAGUE', 7, 'MUN', 'BAY', '2027-01-20 20:00:00', NULL, NULL),
-(123, 'LEAGUE', 7, 'RBL', 'SHK', '2027-01-20 20:00:00', NULL, NULL),
-(124, 'LEAGUE', 7, 'XSAB', 'NAP', '2027-01-20 20:00:00', NULL, NULL),
+(118, 'LEAGUE', 7, 'FEN', 'VIL', '2027-01-20 17:45:00', NULL, NULL),
+(119, 'LEAGUE', 7, 'XSAB', 'NAP', '2027-01-20 17:45:00', NULL, NULL),
+(120, 'LEAGUE', 7, 'BET', 'ARS', '2027-01-20 20:00:00', NULL, NULL),
+(121, 'LEAGUE', 7, 'XCOM', 'PSG', '2027-01-20 20:00:00', NULL, NULL),
+(122, 'LEAGUE', 7, 'XLEN', 'MCI', '2027-01-20 20:00:00', NULL, NULL),
+(123, 'LEAGUE', 7, 'MUN', 'BAY', '2027-01-20 20:00:00', NULL, NULL),
+(124, 'LEAGUE', 7, 'RBL', 'SHK', '2027-01-20 20:00:00', NULL, NULL),
 (125, 'LEAGUE', 7, 'SPO', 'BAR', '2027-01-20 20:00:00', NULL, NULL),
 (126, 'LEAGUE', 7, 'XVIK', 'PSV', '2027-01-20 20:00:00', NULL, NULL),
 -- 8. kolo

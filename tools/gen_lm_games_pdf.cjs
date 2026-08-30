@@ -85,7 +85,10 @@ const sql = `-- Migration 062: "lm2026-27".games_pdf — referencna kopia rozpis
 --
 -- Cas: PDF uvadza stredoeuropsky cas, starts_at sa uklada ako naive UTC
 --      (rovnako ako v "lm2026-27".games). Kola 7 a 8 nemaju v PDF uvedeny
---      vykop — pouziva sa 21:00 SEC.
+--      vykop. V kolach 1-6 plati bez vynimky, ze prve dva zapasy hracieho dna
+--      zacinaju 18:45 a zvysok 21:00 — a rovnako to ukazuje oficialny rozpis
+--      UEFA pre 20.01.2027, preto sa ten isty vzor pouzil aj tu.
+--      Kolo 8 sa hra cele 27.01. v jeden den, vsetky zapasy o 21:00.
 --
 -- Kluby sa zapisuju kodom z admin.uefa_clubs, nie club_id: kod je citatelny
 -- a nezavisi na poradi importu.
