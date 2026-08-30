@@ -145,9 +145,13 @@ export default function UclTeamCatalog() {
 
             <div style={{ marginTop: 12, display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap' }}>
                 <input value={filter} onChange={e => setFilter(e.target.value)} placeholder="Hľadať klub, kód alebo štát…" style={{ flex: '1 1 240px', maxWidth: 340, padding: '6px 10px' }} />
-                <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
-                    <input type="checkbox" checked={lenSezona} onChange={e => setLenSezona(e.target.checked)} />
-                    Len aktuálna sezóna ({pocetVSezone})
+                {/* Sirku checkboxu treba urcit — inak sa roztiahne a text spadne pod neho. */}
+                <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6,
+                                fontSize: '0.85rem', whiteSpace: 'nowrap', cursor: 'pointer' }}>
+                    <input type="checkbox" checked={lenSezona}
+                           onChange={e => setLenSezona(e.target.checked)}
+                           style={{ width: 'auto', flex: '0 0 auto', margin: 0 }} />
+                    <span>Len aktuálna sezóna ({pocetVSezone})</span>
                 </label>
                 <span style={{ fontSize: '0.8rem', color: '#888' }}>
                     zobrazených: {shownTeams.length} z {teams.length}
