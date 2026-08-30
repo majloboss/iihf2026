@@ -32,9 +32,11 @@ $select = '
            hc.club_code AS home_code, hc.club_name AS home_name,
            hc.logo_file AS home_logo, hs.name_sk AS home_country,
            COALESCE(hs.sport_code_uefa, hs.country_code) AS home_country_code,
+           hs.flag_file AS home_flag,
            ac.club_code AS away_code, ac.club_name AS away_name,
            ac.logo_file AS away_logo, acs.name_sk AS away_country,
            COALESCE(acs.sport_code_uefa, acs.country_code) AS away_country_code,
+           acs.flag_file AS away_flag,
            t.home_score_tip, t.away_score_tip, t.points_earned
       FROM "lm2026-27".games g
       LEFT JOIN admin.uefa_clubs hc ON hc.club_id = g.home_team_id

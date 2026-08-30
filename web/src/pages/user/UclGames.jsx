@@ -48,16 +48,37 @@ function scoreText(g) {
     return ht && !g.result_approved ? `${base} (${g.home_score_halftime}:${g.away_score_halftime})` : base;
 }
 
-function Club({ name, logo, align }) {
+// Klub v karte zápasu: logo, názov a pod ním štát s vlajkou — rovnako ako
+// to má FIFA, len tam je štát reprezentácia a tu krajina klubu.
+function Club({ name, logo, country, countryCode, flag, align }) {
     if (!name) return <span style={{ color: '#999', fontSize: '0.85rem' }}>zatiaľ neurčený</span>;
+    const right = align === 'right';
     return (
-        <span style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: align === 'right' ? 'flex-end' : 'flex-start' }}>
-            {align === 'right' && <span>{name}</span>}
+        <span style={{ display: 'flex', alignItems: 'center', gap: 8,
+                       justifyContent: right ? 'flex-end' : 'flex-start' }}>
+            {right && <ClubText name={name} country={country} countryCode={countryCode} flag={flag} right />}
             {logo
-                ? <img src={`/logos/ucl2026/${logo}`} alt="" style={{ width: 24, height: 24, objectFit: 'contain' }}
+                ? <img src={`/logos/ucl2026/${logo}`} alt="" style={{ width: 28, height: 28, objectFit: 'contain', flexShrink: 0 }}
                        onError={e => { e.currentTarget.style.visibility = 'hidden'; }} />
-                : <span style={{ width: 24 }} />}
-            {align !== 'right' && <span>{name}</span>}
+                : <span style={{ width: 28, flexShrink: 0 }} />}
+            {!right && <ClubText name={name} country={country} countryCode={countryCode} flag={flag} />}
+        </span>
+    );
+}
+
+function ClubText({ name, country, countryCode, flag, right }) {
+    return (
+        <span style={{ display: 'flex', flexDirection: 'column', minWidth: 0,
+                       alignItems: right ? 'flex-end' : 'flex-start' }}>
+            <span style={{ fontWeight: 500, lineHeight: 1.2 }}>{name}</span>
+            {(country || countryCode) && (
+                <span style={{ display: 'flex', alignItems: 'center', gap: 4,
+                               fontSize: '0.72rem', color: '#888', lineHeight: 1.3 }}>
+                    {flag && <img src={`/flags/${flag}`} alt="" style={{ width: 14, height: 10, objectFit: 'cover', flexShrink: 0 }}
+                                  onError={e => { e.currentTarget.style.display = 'none'; }} />}
+                    <span>{country || countryCode}</span>
+                </span>
+            )}
         </span>
     );
 }
@@ -239,12 +260,27 @@ export default function UclGames() {
                                 </div>
 
                                 <div style={{ flex: 1, minWidth: 250, display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: 10 }}>
-                                    <Club name={g.home_name} logo={g.home_logo} align="right" />
+                                    <Club name={g.home_name} logo={g.home_logo} country={g.home_country}
+                                          countryCode={g.home_country_code} flag={g.home_flag} align="right" />
                                     <strong style={{ color: hasResult ? '#1a3a6b' : '#bbb' }}>
                                         {hasResult ? scoreText(g) : 'vs'}
                                     </strong>
-                                    <Club name={g.away_name} logo={g.away_logo} />
+                                    <Club name={g.away_name} logo={g.away_logo} country={g.away_country}
+                                          countryCode={g.away_country_code} flag={g.away_flag} />
                                 </div>
+
+                                {(g.venue || g.flashscore_url) && (
+                                    <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                  gap: 6, fontSize: '0.75rem', color: '#999', order: 5 }}>
+                                        {g.venue && <span>{g.venue}</span>}
+                                        {g.flashscore_url && (
+                                            <a href={g.flashscore_url} target="_blank" rel="noopener noreferrer"
+                                               title="Sledovať na FlashScore" style={{ display: 'flex', alignItems: 'center' }}>
+                                                <img src="/flashscore.png" alt="FlashScore" style={{ width: 14, height: 14 }} />
+                                            </a>
+                                        )}
+                                    </div>
+                                )}
 
                                 <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
                                     {!known

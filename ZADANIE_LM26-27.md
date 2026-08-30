@@ -316,6 +316,21 @@ v prepínači (`is_active = TRUE`) — dovtedy sa v aplikácii neponúka.
 Prepínajú sa podľa slugu `ucl2026` v `App.jsx`:
 Zápasy → `UclGames`, Tabuľky → `UclStandings`, admin Výsledky aj Zápasy → `UclAdminGames`.
 
+#### Karta zápasu
+
+Rovnaká skladba ako vo FIFA, len namiesto reprezentácie je klub:
+
+- **logo klubu** z `/logos/ucl2026/`
+- **názov klubu** a pod ním **štát s vlajkou** z `/flags/`
+- **štadión** a odkaz na **FlashScore** pod dvojicou
+
+Štát prichádza z `admin.countries` cez krajinu klubu — zobrazuje sa slovenský
+názov (`name_sk`), pri jeho absencii kód. Vlajku posiela API ako `home_flag` /
+`away_flag`.
+
+Prehľad (`UclDashboard`) zostáva kompaktný, štáty tam nie sú — je to zoznam
+viacerých sekcií a údaj by ho zahustil.
+
 ### Bodovanie
 
 Overené: maximum 5 bodov v ligovej fáze, 7 v play-off.
