@@ -15,10 +15,19 @@ export default function UclTieSummary({ game, small = false }) {
     const prvyA = Number(game.first_leg_away);
 
     // Do súčtu ide zadaný výsledok, a kým nie je, priebežné skóre z livescore.
-    const terazH = game.home_score_regular ?? game.ls_home;
-    const terazA = game.away_score_regular ?? game.ls_away;
+    const zadanyH = game.home_score_regular;
+    const zadanyA = game.away_score_regular;
+    const maZadany = zadanyH !== null && zadanyH !== undefined
+                  && zadanyA !== null && zadanyA !== undefined;
+
+    const terazH = maZadany ? zadanyH : game.ls_home;
+    const terazA = maZadany ? zadanyA : game.ls_away;
     const maSucet = terazH !== null && terazH !== undefined
                  && terazA !== null && terazA !== undefined;
+
+    // Kým zápas beží, súčet sa ešte mení — o predĺžení ani o postupe sa preto
+    // nedá hovoriť. Rozhoduje až stav po 90 minútach.
+    const jePriebezny = !maZadany;
 
     const sucetH = maSucet ? prvyH + Number(terazH) : null;
     const sucetA = maSucet ? prvyA + Number(terazA) : null;
@@ -49,10 +58,14 @@ export default function UclTieSummary({ game, small = false }) {
                     </strong>
                 </span>
             )}
-            {stav === 'remíza' && !maPredlzenie && (
+            {/* Kým zápas beží, ide iba o priebežný stav. */}
+            {jePriebezny && maSucet && (
+                <span style={{ color: '#999' }}>priebežne</span>
+            )}
+            {!jePriebezny && stav === 'remíza' && !maPredlzenie && (
                 <span style={{ color: '#dc3545' }}>rozhodne predĺženie</span>
             )}
-            {stav && stav !== 'remíza' && (
+            {!jePriebezny && stav && stav !== 'remíza' && (
                 <span style={{ color: '#1a7f37' }}>
                     postupujú {stav}
                     {maPredlzenie && ' po predĺžení'}
