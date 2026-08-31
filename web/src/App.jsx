@@ -35,7 +35,7 @@ import UclAdminGames from './pages/admin/UclAdminGames';
 import UclAdminResults from './pages/admin/UclAdminResults';
 import UclAdminStandings from './pages/admin/UclAdminStandings';
 import Standings from './pages/user/Standings';
-import Pravidla from './pages/user/Pravidla';
+import PravidlaPublic from './pages/PravidlaPublic';
 import Messages from './pages/user/Messages';
 import Dashboard from './pages/user/Dashboard';
 
@@ -114,8 +114,12 @@ export default function App() {
                         <Route path="/standings" element={<Standings />} />
                         <Route path="/profile"   element={<Profile />} />
                         <Route path="/spravy"    element={<Messages />} />
-                        <Route path="/pravidla"  element={<Pravidla />} />
                     </Route>
+
+                    {/* Pravidlá sú verejné — dajú sa poslať odkazom aj neregistrovanému.
+                        Trasa stojí mimo chránenej vetvy, ktorá by neprihláseného
+                        poslala na login. */}
+                    <Route path="/pravidla" element={<PravidlaPublic />} />
 
                     <Route path="/admin" element={
                         <PrivateAdminRoute><CompetitionProvider><AdminLayout /></CompetitionProvider></PrivateAdminRoute>

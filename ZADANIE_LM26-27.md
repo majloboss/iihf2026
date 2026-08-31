@@ -162,7 +162,6 @@ Hodnotí sa výsledok po 90 minútach. Predĺženie a penalty sa do tipu nezapo�
 |---|---|
 | 🔲 Zapnúť livescore cron | volať každých 5 minút s `?token=<CRON_SECRET>` |
 | 🔲 Overiť štadión Vikinga | zápas s PSV 20. 1. 2027 má MHPArena, UEFA uvádza domáci štadión |
-| 🔲 Spustiť migráciu `068` z konzoly | skryté skupiny (`ALTER TABLE`) |
 | 🔲 Deploy na `main` | všetko je zatiaľ len v `develop` |
 
 Kluby ligovej fázy už majú oficiálne kódy UEFA. Osem klubov s dočasným `X`
@@ -364,6 +363,19 @@ Existujúce skupiny zostávajú verejné; migrácia `068` nič neprepína.
 
 Zakladá sa cez zaškrtávacie pole v **Skupiny → Vytvoriť**, neskôr sa dá zmeniť
 v nastaveniach skupiny. Skrytá skupina má v zozname odznak 👁.
+
+## Verejné pravidlá
+
+`/pravidla` je dostupné **bez prihlásenia** — odkaz sa dá poslať komukoľvek,
+napríklad spolu s pozvánkou do skupiny.
+
+Trasa stojí mimo chránenej vetvy; tá by neprihláseného presmerovala na login
+skôr, než by sa k pravidlám dostal. Namiesto bočného menu má stránka vlastnú
+hlavičku s odkazom **Prihlásiť sa**, prihlásenému sa zmení na **← Späť do
+aplikácie**.
+
+Obsah je ten istý komponent, aký sa používa v aplikácii — pravidlá sa píšu
+na jednom mieste.
 
 ## Pravidlá práce
 
