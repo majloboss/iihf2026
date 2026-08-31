@@ -304,6 +304,7 @@ Vyžaduje `api/config/openrouter.php` (kľúč nie je v repozitári).
 | `tools/test_ucl_playoff_gen.cjs` | overí generovanie tipov a výsledkov v play-off |
 | `tools/test_ucl_recalc_bulk.cjs` | overí, že hromadný prepočet dáva rovnaké body |
 | `tools/test_ucl_bracket_view.cjs` | overí súčet gólov a víťazov v pavúku |
+| `tools/test_ucl_freeze90.cjs` | overí zmrazenie 90 min a okno pre nočné zápasy |
 
 ### Odveta: prvý zápas a súčet
 
@@ -317,6 +318,24 @@ a kým nie je, priebežné skóre z livescore.
 
 Pri rovnosti súčtu sa píše *rozhodne predĺženie*; keď je zadané, rovno
 *postupujú domáci/hostia po predĺžení*.
+
+### Predĺženie a penalty
+
+Livescore posiela **jediné skóre**. Keď zápas prejde do predĺženia, začne v ňom
+hlásiť stav po predĺžení a 90-minútový výsledok by sa stratil — pritom práve
+z neho sa počítajú body.
+
+Pri prvom hlásení stavu *predĺženie* alebo *penaltový rozstrel* sa preto
+doterajšie skóre odloží do `home_score_regular`. Zapisuje sa iba raz, takže
+ďalší beh cronu ani ručný zásah admina neprepíše.
+
+Zápasy sa nesledujú podľa dňa, ale v okne **−8 až +12 hodín** od aktuálneho
+času. Večerný zápas s penaltami môže skončiť po polnoci a podľa dátumu by
+z výberu vypadol práve vtedy, keď sa rozhoduje.
+
+**Penalty sa rátajú ako jeden gól** pre víťaza: pri súčte 2:2 končí dvojica
+3:2 alebo 2:3. Konečný výsledok preto nemôže byť remíza a nemôže byť nižší
+ako po 90 minútach — server oboje kontroluje.
 
 ### Pavúk vyraďovacej časti
 

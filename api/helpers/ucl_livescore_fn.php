@@ -22,7 +22,8 @@ function ucl_livescore_games(PDO $pdo): array {
           FROM "lm2026-27".games g
           LEFT JOIN admin.uefa_clubs hc ON hc.club_id = g.home_team_id
           LEFT JOIN admin.uefa_clubs ac ON ac.club_id = g.away_team_id
-         WHERE g.start_time::date = (NOW() AT TIME ZONE \'UTC\')::date
+         WHERE g.start_time BETWEEN (NOW() AT TIME ZONE \'UTC\') - INTERVAL \'8 hours\'
+                                AND (NOW() AT TIME ZONE \'UTC\') + INTERVAL \'12 hours\'
          ORDER BY g.start_time, g.game_id')->fetchAll();
 }
 
@@ -58,6 +59,16 @@ function ucl_livescore_refresh(PDO $pdo, array $games): array {
                updated_at = NOW()
          WHERE game_id = ?');
 
+    // Odlozi doterajsie priebezne skore ako vysledok po 90 minutach.
+    // Beh pred prepisom ls_*, takze zachyti este stav pred predlzenim.
+    $zmraz = $pdo->prepare('
+        UPDATE "lm2026-27".games
+           SET home_score_regular = ls_home, away_score_regular = ls_away,
+               updated_at = NOW()
+         WHERE game_id = ?
+           AND home_score_regular IS NULL
+           AND ls_home IS NOT NULL AND ls_away IS NOT NULL');
+
     $updated = 0;
     $log = [];
     foreach ($res['games'] as $id => $d) {
@@ -80,6 +91,22 @@ function ucl_livescore_refresh(PDO $pdo, array $games): array {
 
         $htHome = is_numeric($d['home_score_halftime'] ?? null) ? (int)$d['home_score_halftime'] : null;
         $htAway = is_numeric($d['away_score_halftime'] ?? null) ? (int)$d['away_score_halftime'] : null;
+
+        // Livescore posiela jedine skore. Ked zapas prejde do predlzenia,
+        // zacne v nom hlasit stav PO predlzeni a 90-minutovy vysledok by sa
+        // stratil — pritom prave z neho sa pocitaju body.
+        //
+        // Pri prvom hlaseni predlzenia sa preto doterajsie skore odlozi do
+        // home_score_regular. Zapisuje sa iba raz (WHERE ... IS NULL), aby
+        // dalsi beh cronu neprepisal to, co uz je ulozene alebo co zadal admin.
+        // Vysledok sa tym neschvaluje, len uchova.
+        $vPredlzeni = $status !== '' && (
+               mb_stripos($status, 'predĺžen') !== false
+            || mb_stripos($status, 'penalt') !== false);
+
+        if ($vPredlzeni) {
+            $zmraz->execute([$gameId]);
+        }
 
         $upd->execute([$home, $away, $status ?: null, $htHome, $htAway, $started, $gameId]);
         $updated++;

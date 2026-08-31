@@ -327,7 +327,9 @@ function ResultCard({ game: initGame, onChanged }) {
                                        onChange={e => setAFin(e.target.value)} className={styles.scoreIn} />
                             </div>
                             <span style={{ fontSize: '0.72rem', color: '#bbb' }}>
-                                {jeFinale ? 'remíza vo finále' : 'rovnaký súčet za dvojicu'} → zadaj víťaza
+                                {jeFinale ? 'remíza vo finále' : 'rovnaký súčet za dvojicu'}
+                                {' → '}
+                                víťaz má o gól viac; penalty sa rátajú ako jeden gól
                             </span>
                         </div>
                     )}

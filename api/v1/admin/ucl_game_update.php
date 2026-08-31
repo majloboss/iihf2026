@@ -69,7 +69,9 @@ if ($game['game_type_code'] === 'F') {
 if ($needsFinal && $approved) {
     if (!$hasFinal) json_error('Rovnaký súčet gólov — zadaj konečný výsledok po predĺžení alebo penaltách', 400);
     if ($hf < $hr || $af < $ar) json_error('Konečný výsledok nemôže byť nižší ako po 90 minútach', 400);
-    if ($hf === $af) json_error('Po predĺžení alebo penaltách musí byť víťaz, nie remíza', 400);
+    // Penalty sa rataju ako jeden gol pre vitaza, takze konecny vysledok
+    // remizou skoncit nemoze — pri sucte 2:2 je to 3:2 alebo 2:3.
+    if ($hf === $af) json_error('Konečný výsledok musí mať víťaza — penalty sa rátajú ako jeden gól', 400);
 } elseif ($hasFinal && !$needsFinal) {
     json_error('Predĺženie sa hrá len vo finále pri remíze alebo v odvete pri rovnakom súčte gólov', 400);
 }
