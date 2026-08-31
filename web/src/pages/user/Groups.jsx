@@ -28,6 +28,8 @@ export default function Groups() {
     // Kto vidí skrytú skupinu: { [groupId]: [ {user_id, username, ...} ] }
     const [viewers, setViewers]      = useState({});
     const [viewerQuery, setViewerQuery] = useState('');
+    // Dvojklik do prázdneho poľa vyroluje celý zoznam, rovnako ako pri pozývaní.
+    const [viewerShowDrop, setViewerShowDrop] = useState(false);
     const [createErr, setCreateErr] = useState('');
     const [busy, setBusy]           = useState('');
     const [editDescId, setEditDescId] = useState(null);
@@ -298,7 +300,12 @@ export default function Groups() {
                     const isClosed   = !!g.is_closed;
                     const allowMemberInvite = g.allow_member_invite !== false;
                     // Pozývať môže: zakladateľ vždy (ak nie je uzavretá); člen len ak skupina povoľuje
-                    const canInvite  = !isClosed && (isFounder || (myStatus === 'accepted' && allowMemberInvite));
+                    // V skrytej skupine sa nepozýva: pozvánka je zároveň vstupenka,
+                    // takže by obišla podmienku vstupu. Tam sa ľudia vymenúvajú
+                    // a o vstup si žiadajú sami.
+                    const jeSkryta   = g.visibility === 'invite';
+                    const canInvite  = !isClosed && !jeSkryta
+                        && (isFounder || (myStatus === 'accepted' && allowMemberInvite));
                     const suggestions = isOpen ? getSuggestions(g.id, inviteQuery) : [];
 
                     return (
@@ -397,7 +404,7 @@ export default function Groups() {
 
                                     {/* Skrytá skupina: kto ju vidí. Vymenovanie nie je pozvánka —
                                         títo ľudia musia o vstup požiadať a splniť podmienku. */}
-                                    {isFounder && g.visibility === 'invite' && (
+                                    {isFounder && jeSkryta && (
                                         <div className={styles.inviteSection}>
                                             <div style={{ fontSize: '0.82rem', fontWeight: 600, marginBottom: 4 }}>
                                                 Kto vidí túto skupinu
@@ -415,18 +422,25 @@ export default function Groups() {
                                                         value={viewerQuery}
                                                         onChange={async e => {
                                                             setViewerQuery(e.target.value);
-                                                            if (e.target.value.length >= 1 && !allUsersRef.current) await ensureUsers();
+                                                            if (!allUsersRef.current) await ensureUsers();
+                                                            setViewerShowDrop(true);
                                                         }}
+                                                        onDoubleClick={async () => {
+                                                            if (!allUsersRef.current) await ensureUsers();
+                                                            setViewerShowDrop(true);
+                                                        }}
+                                                        onFocus={() => { if (allUsersRef.current && viewerQuery) setViewerShowDrop(true); }}
+                                                        onBlur={() => setTimeout(() => setViewerShowDrop(false), 150)}
                                                     />
-                                                    {viewerQuery.length >= 1 && (() => {
+                                                    {viewerShowDrop && (() => {
                                                         const uz = new Set((viewers[g.id] || []).map(v => v.user_id));
                                                         const q = viewerQuery.toLowerCase();
                                                         const navrhy = (allUsersRef.current || [])
                                                             .filter(u => Number(u.id) !== Number(user.user_id) && !uz.has(u.id))
-                                                            .filter(u => u.username.toLowerCase().includes(q)
+                                                            .filter(u => !q
+                                                                || u.username.toLowerCase().includes(q)
                                                                 || (u.first_name || '').toLowerCase().includes(q)
-                                                                || (u.last_name || '').toLowerCase().includes(q))
-                                                            .slice(0, 8);
+                                                                || (u.last_name || '').toLowerCase().includes(q));
                                                         if (!navrhy.length) return null;
                                                         return (
                                                             <div className={styles.dropDown}>
@@ -457,7 +471,10 @@ export default function Groups() {
                                                                   <span style={{ color: '#28a745', fontSize: '0.72rem' }}>člen</span>
                                                               )}
                                                               {v.member_status === 'pending' && (
-                                                                  <span style={{ color: '#e67e22', fontSize: '0.72rem' }}>žiada</span>
+                                                                  <span style={{ color: '#e67e22', fontSize: '0.72rem' }}>žiada o vstup</span>
+                                                              )}
+                                                              {!v.member_status && (
+                                                                  <span style={{ color: '#aaa', fontSize: '0.72rem' }}>vidí</span>
                                                               )}
                                                               <button onClick={() => odoberVidiaceho(g.id, v.user_id)}
                                                                       disabled={busy === `viewer-${g.id}`}

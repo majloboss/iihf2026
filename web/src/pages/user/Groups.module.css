@@ -163,10 +163,12 @@
     border-radius: 20px;
     white-space: nowrap;
 }
+/* Každý prepínač na vlastnom riadku: checkbox vľavo, text hneď vedľa.
+   Vo vodorovnom rade sa texty rôznej dĺžky zalamovali a rozhadzovali sa. */
 .flagsRow {
     display: flex;
-    flex-wrap: wrap;
-    gap: 8px 20px;
+    flex-direction: column;
+    gap: 8px;
     margin-top: 10px;
     padding-top: 10px;
     border-top: 1px dashed #e0e0e0;
@@ -179,7 +181,15 @@
     color: #444;
     cursor: pointer;
 }
-.flagLabel input { width: 16px; height: 16px; cursor: pointer; }
+/* Bez pevnej šírky sa checkbox roztiahne a text spadne pod neho. */
+.flagLabel input {
+    width: 16px;
+    height: 16px;
+    min-width: 16px;
+    flex: 0 0 auto;
+    margin: 0;
+    cursor: pointer;
+}
 .badgeWait {
     font-size: 0.75rem;
     color: #aaa;
@@ -381,7 +391,9 @@
     border-radius: 7px;
     box-shadow: 0 4px 16px rgba(0,0,0,0.12);
     z-index: 100;
-    max-height: 220px;
+    /* Pri dvojkliku sa vyroluje cely zoznam, preto vyssie okno — pri 220px
+       boli vidiet len dve mena a bolo treba rolovat. */
+    max-height: 320px;
     overflow-y: auto;
 }
 
