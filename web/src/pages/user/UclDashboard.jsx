@@ -6,6 +6,7 @@ import { asDate, canTip, isValidDate, uclScoreText as scoreText } from '../../ut
 import { useAuth } from '../../context/AuthContext';
 import { useCompetition } from '../../context/CompetitionContext';
 import UclClub, { UclVenue } from '../../components/UclClub';
+import UclTieSummary from '../../components/UclTieSummary';
 import UclGroupTips from './UclGroupTips';
 
 // start_time je naive UTC, preto ho tak treba aj interpretovať.
@@ -289,6 +290,7 @@ export default function UclDashboard() {
                             {saving === g.game_id ? '…' : 'Uložiť'}
                         </button>
                     </div>
+                    <UclTieSummary game={g} small />
                     <UclVenue game={g} />
                 </div>
             ))}
@@ -314,6 +316,7 @@ export default function UclDashboard() {
                                 Tip: <strong>{g.home_score_tip}:{g.away_score_tip}</strong>
                                 {g.points_earned !== null && <> · <strong style={{ color: '#28a745' }}>{g.points_earned} b.</strong></>}
                             </div>
+                            <UclTieSummary game={g} small />
                             <UclVenue game={g} />
                         </div>
                     ))}

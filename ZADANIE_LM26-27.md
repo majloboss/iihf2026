@@ -305,6 +305,19 @@ Vyžaduje `api/config/openrouter.php` (kľúč nie je v repozitári).
 | `tools/test_ucl_recalc_bulk.cjs` | overí, že hromadný prepočet dáva rovnaké body |
 | `tools/test_ucl_bracket_view.cjs` | overí súčet gólov a víťazov v pavúku |
 
+### Odveta: prvý zápas a súčet
+
+Pri odvete sa nad zápasom zobrazí **výsledok prvého zápasu a priebežný súčet**
+za dvojicu — inak nie je vidieť, o čo sa vlastne hrá. Vidí to admin vo
+Výsledkoch aj používateľ v Zápasoch a Prehľade.
+
+Góly prvého zápasu vracia API už prehodené (`first_leg_home` patrí domácemu
+tímu odvety), takže sa dajú rovno spočítať. Do súčtu ide zadaný výsledok,
+a kým nie je, priebežné skóre z livescore.
+
+Pri rovnosti súčtu sa píše *rozhodne predĺženie*; keď je zadané, rovno
+*postupujú domáci/hostia po predĺžení*.
+
 ### Pavúk vyraďovacej časti
 
 Obrazovka **Tabuľky** má dve záložky: *Ligová tabuľka* a *Vyraďovacia časť*.

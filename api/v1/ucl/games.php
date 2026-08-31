@@ -24,6 +24,11 @@ $select = '
            g.home_score_final,   g.away_score_final,
            g.home_score_halftime, g.away_score_halftime,
            g.result_approved, g.game_type_code, g.game_type_name,
+           g.tie_id, g.leg,
+           -- Pri odvete sa hodi vidiet prvy zapas: rozhoduje sucet za dvojicu.
+           -- Domaci odvety bol v prvom zapase hostom, preto su goly prehodene.
+           prvy.away_score_regular AS first_leg_home,
+           prvy.home_score_regular AS first_leg_away,
            g.home_team_id, g.away_team_id, g.flashscore_url,
            -- Cislo kola ligovej fazy sa da odvodit z nazvu ("Ligová fáza — 3. kolo").
            -- Apostrofy v SQL treba escapovat, cely dopyt je v PHP jednoduchych uvodzovkach.
@@ -44,7 +49,8 @@ $select = '
       LEFT JOIN admin.uefa_clubs ac ON ac.club_id = g.away_team_id
       LEFT JOIN admin.countries  hs ON hs.country_code = hc.country_code
       LEFT JOIN admin.countries acs ON acs.country_code = ac.country_code
-      LEFT JOIN "lm2026-27".tips t ON t.game_id = g.game_id AND t.user_id = :uid';
+      LEFT JOIN "lm2026-27".tips t ON t.game_id = g.game_id AND t.user_id = :uid
+      LEFT JOIN "lm2026-27".games prvy ON g.leg = 2 AND prvy.tie_id = g.tie_id AND prvy.leg = 1';
 
 $id = isset($_GET['id']) ? (int)$_GET['id'] : null;
 

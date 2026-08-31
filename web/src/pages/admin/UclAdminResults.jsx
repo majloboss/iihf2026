@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getUclGames, recalcUcl, updateUclGameResult } from '../../api/ucl';
 import { getUclAdminTips, setUclLive, clearUclLive } from '../../api/uclAdmin';
+import UclTieSummary from '../../components/UclTieSummary';
 import gStyles from '../user/Games.module.css';
 import styles from './AdminResults.module.css';
 
@@ -209,6 +210,9 @@ function ResultCard({ game: initGame, onChanged }) {
                 <ClubBlock name={game.away_name} logo={game.away_logo} country={game.away_country}
                            countryCode={game.away_country_code} flag={game.away_flag} />
             </div>
+            {/* Pri odvete rozhoduje sucet za dvojicu, nie vysledok jedneho zapasu. */}
+            <UclTieSummary game={game} />
+
             {(game.venue || game.flashscore_url) && (
                 <div className={styles.cardVenue}>
                     {game.venue && <span>{game.venue}</span>}

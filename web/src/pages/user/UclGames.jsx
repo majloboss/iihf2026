@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { getUclGames, saveUclTip } from '../../api/ucl';
 import { asDate, canTip, isUntipped as isUntippedGame, isValidDate, uclScoreText as scoreText } from '../../utils/tipWindow';
 import UclClub, { UclVenue } from '../../components/UclClub';
+import UclTieSummary from '../../components/UclTieSummary';
 import UclGroupTips from './UclGroupTips';
 import styles from './Games.module.css';
 
@@ -267,6 +268,11 @@ export default function UclGames() {
                                                     {saving === g.game_id ? '…' : 'Uložiť'}
                                                 </button>
                                               </>}
+                                </div>
+
+                                {/* Pri odvete rozhoduje sucet za dvojicu. */}
+                                <div style={{ width: '100%', order: 3 }}>
+                                    <UclTieSummary game={g} small />
                                 </div>
 
                                 <UclVenue game={g} order={4} />
