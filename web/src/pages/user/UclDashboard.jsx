@@ -27,8 +27,10 @@ const shortPhase = g => g.round_no ? `LF${g.round_no}`
 // Poradie hracov v tipovacej skupine: prve tri miesta a k nim vlastny riadok,
 // ak je hrac nizsie. Rovnaka logika ako vo FIFA.
 function StandingsCard({ group, currentUserId }) {
-    const top3 = group.members.slice(0, 3);
-    const myIdx = group.members.findIndex(m => m.user_id === currentUserId);
+    // Skupina bez členov by inak zhodila celý prehľad do bielej obrazovky.
+    const clenovia = group.members ?? [];
+    const top3 = clenovia.slice(0, 3);
+    const myIdx = clenovia.findIndex(m => m.user_id === currentUserId);
     const showMe = myIdx > 2;
 
     const medal = rank => (rank === 1 ? '#f5a623' : rank === 2 ? '#9b9b9b' : rank === 3 ? '#c47b3a' : '#aaa');
@@ -67,7 +69,7 @@ function StandingsCard({ group, currentUserId }) {
                 {showMe && (
                     <>
                         <div style={{ textAlign: 'center', color: '#ccc', fontSize: '0.78rem', padding: '2px 0' }}>…</div>
-                        <Row m={group.members[myIdx]} rank={myIdx + 1} />
+                        <Row m={clenovia[myIdx]} rank={myIdx + 1} />
                     </>
                 )}
             </div>
