@@ -222,6 +222,8 @@ export default function UclDashboard() {
                                         : <span style={{ color: '#999' }}>netipoval si</span>}
                                 </div>
                             </div>
+                            {/* Pri odvete rozhoduje sucet za dvojicu. */}
+                            <UclTieSummary game={g} small />
                             <UclGroupTips game={g} />
                         </div>
                     ))}
