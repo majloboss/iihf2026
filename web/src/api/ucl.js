@@ -11,6 +11,9 @@ export const saveUclTip = (game_id, home_score_tip, away_score_tip) =>
         body: JSON.stringify({ game_id, home_score_tip, away_score_tip }),
     });
 export const getUclGameTips = (game_id) => apiFetch(`v1/ucl/game-tips?game_id=${game_id}`);
+// Pavuk vyradovacej casti: dvojice so suctom golov a vitazom.
+export const getUclBracket = () => apiFetch('v1/ucl/bracket');
+
 export const getUclStandings = () => apiFetch('v1/ucl/standings');
 
 // Admin

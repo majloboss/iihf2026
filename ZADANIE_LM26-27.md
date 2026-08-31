@@ -301,6 +301,26 @@ Vyžaduje `api/config/openrouter.php` (kľúč nie je v repozitári).
 | `tools/test_ucl_manual_rank.cjs` | overí, že ručné poradie prežije prepočet |
 | `tools/test_ucl_bracket.cjs` | overí zostavenie dvojíc a určenie víťazov |
 | `tools/test_group_visibility.cjs` | overí viditeľnosť skrytých skupín |
+| `tools/test_ucl_playoff_gen.cjs` | overí generovanie tipov a výsledkov v play-off |
+| `tools/test_ucl_recalc_bulk.cjs` | overí, že hromadný prepočet dáva rovnaké body |
+| `tools/test_ucl_bracket_view.cjs` | overí súčet gólov a víťazov v pavúku |
+
+### Pavúk vyraďovacej časti
+
+Obrazovka **Tabuľky** má dve záložky: *Ligová tabuľka* a *Vyraďovacia časť*.
+Kým beží ligová fáza, zaujíma tabuľka; v play-off skôr pavúk.
+
+Pavúk zobrazuje fázy vedľa seba (baráž → osemfinále → … → finále) a v každej
+dvojice so **súčtom gólov** a zvýrazneným víťazom. Pod dvojicou sú výsledky
+jednotlivých zápasov, prípadné predĺženie s poznámkou `pp`.
+
+Súčet sa počíta **krížom** — domáci prvého zápasu je v odvete hosťom. Pri
+rovnosti rozhoduje predĺženie alebo penalty v odvete (`home_score_final`).
+Lepšie umiestnený tím hrá odvetu doma, preto sa v pavúku zobrazuje ako prvý.
+
+Fáza bez zostavených dvojíc sa ukáže ako prázdna kostra, takže je vidieť, čo
+súťaž ešte čaká. Dáta vracia `GET /v1/ucl/bracket`, pavúk sa obnovuje sám
+každých 30 s.
 
 ### Ligová tabuľka
 

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getUclStandings } from '../../api/ucl';
+import UclBracket from './UclBracket';
 import styles from './GroupStandings.module.css';
 
 // Postupové pásma podľa umiestnenia v ligovej fáze.
@@ -13,6 +14,8 @@ export default function UclStandings() {
     const [rows, setRows] = useState([]);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(true);
+    // Kým beží ligová fáza, zaujíma tabuľka; v play-off skôr pavúk.
+    const [pohlad, setPohlad] = useState('tabulka');
 
     useEffect(() => {
         getUclStandings().then(setRows).catch(e => setError(e.message)).finally(() => setLoading(false));
@@ -24,9 +27,30 @@ export default function UclStandings() {
     if (loading) return <p>Načítavam tabuľku…</p>;
     if (error) return <p className={styles.error}>✗ {error}</p>;
 
+    const zalozka = (kluc, popis) => (
+        <button key={kluc} onClick={() => setPohlad(kluc)}
+                style={{ padding: '6px 16px', border: 'none', background: 'none', cursor: 'pointer',
+                         fontSize: '0.9rem', fontWeight: pohlad === kluc ? 700 : 400,
+                         color: pohlad === kluc ? '#1a3a6b' : '#888',
+                         borderBottom: `2px solid ${pohlad === kluc ? '#1a3a6b' : 'transparent'}`,
+                         marginBottom: -1 }}>
+            {popis}
+        </button>
+    );
+
     return (
         <div>
-            <h2>Ligová tabuľka — Liga majstrov</h2>
+            <h2>Liga majstrov 2026/27</h2>
+
+            <div style={{ display: 'flex', gap: 4, margin: '10px 0 14px',
+                          borderBottom: '1px solid #e9ecef' }}>
+                {zalozka('tabulka', 'Ligová tabuľka')}
+                {zalozka('pavuk', 'Vyraďovacia časť')}
+            </div>
+
+            {pohlad === 'pavuk' && <UclBracket />}
+
+            {pohlad === 'tabulka' && <>
             <p style={{ fontSize: '0.82rem', color: '#666', margin: '4px 0 14px', maxWidth: 760 }}>
                 Všetkých 36 klubov v jednej spoločnej tabuľke. Každý odohrá 8 zápasov
                 (4 doma, 4 vonku) a s každým súperom sa stretne najviac raz.
@@ -95,6 +119,7 @@ export default function UclStandings() {
                     </table>
                 </div>
             )}
+            </>}
         </div>
     );
 }
