@@ -174,6 +174,19 @@ function ResultCard({ game: initGame, onChanged }) {
       : jeOdveta ? remizaNaSucet
       : false);
 
+    // Konečný výsledok nemôže byť nižší ako po 90 minútach — góly z riadneho
+    // času v ňom už sú. Polia sa preto predvyplnia a admin len dopíše, čo
+    // padlo v predĺžení alebo na penalty.
+    //
+    // Keď admin zmení skóre po 90 minútach, predvyplnenie sa zopakuje —
+    // inak by v poliach zostal starý, už neplatný základ. Prepíše sa iba
+    // hodnota, ktorú admin sám neupravil nad rámec 90 minút.
+    useEffect(() => {
+        if (!needsET) return;
+        setHFin(cur => (cur === '' || Number(cur) < Number(h90)) ? h90 : cur);
+        setAFin(cur => (cur === '' || Number(cur) < Number(a90)) ? a90 : cur);
+    }, [needsET, h90, a90]);
+
     const save = async () => {
         if (h90 === '' || a90 === '') { setErr('Zadaj skóre po 90 min'); return; }
         setSaving(true); setErr(''); setSaved(false);
