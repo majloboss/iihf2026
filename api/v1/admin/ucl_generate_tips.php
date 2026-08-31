@@ -7,8 +7,8 @@
 // kontroluje uzavierku — tu sa tipy zapisuju priamo, lebo testovacie zapasy
 // mozu byt uz po termine.
 //
-// Tipuje sa iba ligova faza (game_type_code = 'LEAGUE'): zapasy playoff nemaju
-// urcene timy, takze sa tipovat ani nedaju.
+// Tipuju sa vsetky zapasy s urcenymi timami — teda ligova faza a tie fazy
+// playoff, ktorym uz boli zostavene dvojice. Zapas bez timov sa tipovat neda.
 require_auth(true);
 $pdo = db();
 
@@ -31,15 +31,14 @@ function ucl_random_goals(): int {
 // Tipuju vsetci aktivni pouzivatelia vratane admina — v tipovacke tipuje kazdy.
 $usersSql = 'SELECT id FROM admin.users WHERE is_active ORDER BY id';
 $gamesSql = 'SELECT game_id FROM ' . UCL_SCHEMA . '.games
-              WHERE game_type_code = \'LEAGUE\'
-                AND home_team_id IS NOT NULL AND away_team_id IS NOT NULL
+              WHERE home_team_id IS NOT NULL AND away_team_id IS NOT NULL
               ORDER BY game_id';
 
 if ($method === 'GET') {
     $users = (int)$pdo->query('SELECT COUNT(*) FROM admin.users WHERE is_active')->fetchColumn();
     $games = (int)$pdo->query('SELECT COUNT(*) FROM ' . UCL_SCHEMA . '.games
-                                WHERE game_type_code = \'LEAGUE\'
-                                  AND home_team_id IS NOT NULL AND away_team_id IS NOT NULL')->fetchColumn();
+                                WHERE home_team_id IS NOT NULL
+                                  AND away_team_id IS NOT NULL')->fetchColumn();
     json_ok([
         'users'         => $users,
         'league_games'  => $games,
@@ -57,16 +56,17 @@ $replace = !empty($body['replace']);
 $users = $pdo->query($usersSql)->fetchAll(PDO::FETCH_COLUMN);
 $games = $pdo->query($gamesSql)->fetchAll(PDO::FETCH_COLUMN);
 if (!$users) json_error('Niet aktívnych používateľov', 400);
-if (!$games) json_error('V ligovej fáze niet zápasov s určenými tímami — najprv načítaj zápasy z PDF', 400);
+if (!$games) json_error('Niet zápasov s určenými tímami — načítaj zápasy z PDF alebo zostav dvojice play-off', 400);
 
 try {
     $pdo->beginTransaction();
 
     if ($replace) {
-        // Zmazu sa iba tipy ligovej fazy, playoff zostane nedotknute.
+        // Zmazu sa tipy vsetkych zapasov, ktore maju urcene timy.
         $pdo->exec('DELETE FROM ' . UCL_SCHEMA . '.tips t
                      USING ' . UCL_SCHEMA . '.games g
-                     WHERE g.game_id = t.game_id AND g.game_type_code = \'LEAGUE\'');
+                     WHERE g.game_id = t.game_id
+                       AND g.home_team_id IS NOT NULL AND g.away_team_id IS NOT NULL');
     }
 
     // entered_by_admin oznacuje, ze tip nezadal sam hrac.

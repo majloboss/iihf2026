@@ -110,10 +110,10 @@ export default function UclDashboard() {
         .sort((a, b) => asDate(a.start_time) - asDate(b.start_time)), [games]);
 
     // Zápasy, ktoré sa dajú tipovať — rovnaké pravidlo ako na serveri.
+    // Bez orezania — obmedzí sa až `upcomingRest`, keď je známe, čo je hore.
     const upcoming = useMemo(() => games
         .filter(g => canTip(g))
-        .sort((a, b) => asDate(a.start_time) - asDate(b.start_time))
-        .slice(0, 8), [games]);
+        .sort((a, b) => asDate(a.start_time) - asDate(b.start_time)), [games]);
 
 
     // Netipované zápasy, ktoré sa hrajú dnes alebo zajtra — na tie sa dá zabudnúť.
@@ -128,11 +128,13 @@ export default function UclDashboard() {
         }).sort((a, b) => asDate(a.start_time) - asDate(b.start_time));
     }, [games]);
 
-    // Zápasy z hornej sekcie sa v Najbližších neopakujú.
+    // Zápasy z hornej sekcie sa v Najbližších neopakujú. Orezáva sa až tu —
+    // predtým sa bralo prvých osem a horná sekcia z nich ubrala, takže dole
+    // zostávali vzdialené termíny namiesto najbližších.
     // Musí stáť až za `untipped` — inak by sa použilo pred inicializáciou.
     const upcomingRest = useMemo(() => {
         const shown = new Set(untipped.map(g => g.game_id));
-        return upcoming.filter(g => !shown.has(g.game_id));
+        return upcoming.filter(g => !shown.has(g.game_id)).slice(0, 8);
     }, [upcoming, untipped]);
 
     const played = useMemo(() => games

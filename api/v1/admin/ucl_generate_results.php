@@ -1,6 +1,6 @@
 <?php
-// GET  /v1/admin/ucl-generate-results — kolko zapasov ligovej fazy je uz dohranych
-// POST /v1/admin/ucl-generate-results — vygeneruje vysledky dohranych zapasov ligovej fazy
+// GET  /v1/admin/ucl-generate-results — kolko zapasov je uz dohranych
+// POST /v1/admin/ucl-generate-results — vygeneruje vysledky dohranych zapasov
 //
 // Testovaci nastroj: naplni vysledky, aby sa dala overit ligova tabulka,
 // bodovanie tipov a postupove pasma.
@@ -13,8 +13,12 @@
 // Realny vysledok sa zadava cez /v1/admin/ucl-game-update, ktore navyse riesi
 // dvojice a predlzenie; tu sa zapisuje priamo, lebo ide o hromadne naplnenie.
 //
-// Predlzenie sa v ligovej faze nehra, remiza je platny vysledok, takze
-// home_score_final zostava prazdne.
+// Vysledok dostane kazdy zapas s urcenymi timami — ligova faza aj playoff,
+// ktoremu uz boli zostavene dvojice.
+//
+// V ligovej faze je remiza platny vysledok. V odvete a vo finale by vsak
+// nechala dvojicu nerozhodnutu a dalsia faza by sa nedala zostavit, preto sa
+// tam dorieši predlzenim.
 require_auth(true);
 $pdo = db();
 
@@ -38,9 +42,10 @@ function ucl_random_goals(): int {
 // s UTC casom, nie s NOW() v zone servera.
 const UCL_MATCH_HOURS = 3;
 
+// Vysledok dostane kazdy zapas s urcenymi timami — ligova faza aj tie fazy
+// playoff, ktorym uz boli zostavene dvojice.
 $leagueSql = 'FROM ' . UCL_SCHEMA . '.games
-               WHERE game_type_code = \'LEAGUE\'
-                 AND home_team_id IS NOT NULL AND away_team_id IS NOT NULL';
+               WHERE home_team_id IS NOT NULL AND away_team_id IS NOT NULL';
 $finishedSql = " AND start_time + INTERVAL '" . UCL_MATCH_HOURS . " hours'
                        <= (NOW() AT TIME ZONE 'UTC')";
 
@@ -62,15 +67,15 @@ $body = json_decode(file_get_contents('php://input'), true) ?: [];
 // Prepisat existujuce zoberie aj dohrane zapasy, ktore uz vysledok maju.
 $replace = !empty($body['replace']);
 
-$sel = 'SELECT game_id ' . $leagueSql . $finishedSql
+$sel = 'SELECT game_id, game_type_code, tie_id, leg ' . $leagueSql . $finishedSql
      . ($replace ? '' : ' AND home_score_regular IS NULL')
      . ' ORDER BY start_time, game_id';
 
-$games = $pdo->query($sel)->fetchAll(PDO::FETCH_COLUMN);
+$games = $pdo->query($sel)->fetchAll();
 if (!$games) {
     $finished = (int)$pdo->query('SELECT COUNT(*) ' . $leagueSql . $finishedSql)->fetchColumn();
     json_error($finished === 0
-        ? 'Zatiaľ nie je dohraný ani jeden zápas ligovej fázy — posuň termíny do minulosti.'
+        ? 'Zatiaľ nie je dohraný ani jeden zápas — posuň termíny do minulosti.'
         : 'Všetky dohrané zápasy už majú výsledok. Na prepísanie zapni Prepísať existujúce.', 400);
 }
 
@@ -85,8 +90,55 @@ try {
                                  updated_at = NOW()
                            WHERE game_id = ?');
 
-    foreach ($games as $gameId) {
-        $upd->execute([ucl_random_goals(), ucl_random_goals(), (int)$gameId]);
+    // Odveta a finale nesmu skoncit remizou na sucet — dvojica by zostala
+    // nerozhodnuta a dalsia faza by sa nedala zostavit. Preto sa pri nich
+    // pripadna remiza dorieši predlzenim.
+    $updET = $pdo->prepare('UPDATE ' . UCL_SCHEMA . '.games
+                               SET home_score_regular = ?, away_score_regular = ?,
+                                   home_score_final = ?, away_score_final = ?,
+                                   result_approved = TRUE, tips_open = FALSE,
+                                   updated_at = NOW()
+                             WHERE game_id = ?');
+
+    $suctyDvojice = $pdo->prepare('SELECT home_team_id, away_team_id,
+                                          home_score_regular AS hs, away_score_regular AS ag
+                                     FROM ' . UCL_SCHEMA . '.games
+                                    WHERE tie_id = ? AND leg = 1');
+
+    foreach ($games as $g) {
+        $gameId = (int)$g['game_id'];
+        $h = ucl_random_goals();
+        $a = ucl_random_goals();
+
+        // Ci moze zapas skoncit predlzenim: finale alebo odveta dvojice.
+        $mozeET = $g['game_type_code'] === 'F'
+               || ((int)$g['leg'] === 2 && $g['tie_id'] !== null);
+
+        if (!$mozeET) {
+            $upd->execute([$h, $a, $gameId]);
+            continue;
+        }
+
+        // Sucet za dvojicu: domaci odvety bol v prvom zapase hostom.
+        $remiza = $h === $a;
+        if ($g['game_type_code'] !== 'F' && $g['tie_id'] !== null) {
+            $suctyDvojice->execute([$g['tie_id']]);
+            $prvy = $suctyDvojice->fetch();
+            if ($prvy && $prvy['hs'] !== null) {
+                $remiza = ((int)$prvy['ag'] + $h) === ((int)$prvy['hs'] + $a);
+            }
+        }
+
+        if (!$remiza) {
+            $upd->execute([$h, $a, $gameId]);
+            continue;
+        }
+
+        // Pri remize rozhodne predlzenie — vitaza urci nahoda.
+        $hf = $h;
+        $af = $a;
+        if (random_int(0, 1) === 0) $hf++; else $af++;
+        $updET->execute([$h, $a, $hf, $af, $gameId]);
     }
 
     // Rovnaky prepocet, aky robi zadanie vysledku adminom.

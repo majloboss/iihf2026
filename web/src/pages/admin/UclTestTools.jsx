@@ -162,9 +162,10 @@ function GenerateTips({ reloadKey, onChange }) {
     const games = Number(status?.league_games) || 0;
 
     return (
-        <Section color="#6f42c1" title="🎯 Generuj tipy hráčov LF">
+        <Section color="#6f42c1" title="🎯 Generuj tipy hráčov">
             <p style={hint}>
-                Vygeneruje tipy všetkých hráčov na všetky zápasy ligovej fázy. Skóre je náhodné,
+                Vygeneruje tipy všetkých hráčov na všetky zápasy s určenými tímami — ligovú
+                fázu aj tie fázy play-off, ktorým už boli zostavené dvojice. Skóre je náhodné,
                 ale s realistickým rozložením gólov — najčastejšie 0 až 2. Bez prepísania sa
                 doplnia iba chýbajúce tipy.
             </p>
@@ -182,7 +183,7 @@ function GenerateTips({ reloadKey, onChange }) {
             {status && (
                 <p style={{ ...note, color: games === 0 ? '#c0392b' : '#666' }}>
                     Hráčov: <strong>{status.users}</strong> &nbsp;|&nbsp;
-                    zápasov ligovej fázy: <strong>{games}</strong> &nbsp;|&nbsp;
+                    zápasov s tímami: <strong>{games}</strong> &nbsp;|&nbsp;
                     existujúcich tipov: <strong>{status.existing_tips}</strong> z {status.possible_tips}
                     {games === 0 && ' — najprv načítaj zápasy z PDF.'}
                 </p>
@@ -230,13 +231,15 @@ function GenerateResults({ reloadKey, onChange }) {
         || (!replace && Number(status?.pending) === 0);
 
     return (
-        <Section color="#198754" title="⚽ Generuj výsledky LF">
+        <Section color="#198754" title="⚽ Generuj výsledky">
             <p style={hint}>
-                Vygeneruje výsledky <strong>dohraných</strong> zápasov ligovej fázy a rovno ich schváli
-                — prepočíta sa ligová tabuľka aj body za tipy. Za dohraný sa považuje zápas, ktorému
+                Vygeneruje výsledky <strong>dohraných</strong> zápasov a rovno ich schváli —
+                prepočíta sa ligová tabuľka aj body za tipy. Za dohraný sa považuje zápas, ktorému
                 od výkopu ubehli aspoň {status?.match_hours ?? 3} hodiny, takže pri posúvaní termínov
-                sa vždy doplní presne to, čo už malo byť odohrané. Predĺženie sa v ligovej fáze nehrá,
-                remíza je platný výsledok.
+                sa vždy doplní presne to, čo už malo byť odohrané.
+                <br />
+                V ligovej fáze je remíza platný výsledok. V odvete a vo finále by nechala dvojicu
+                nerozhodnutú, preto sa tam dorieši predĺžením.
             </p>
 
             <div style={row}>
@@ -251,7 +254,7 @@ function GenerateResults({ reloadKey, onChange }) {
 
             {status && (
                 <p style={{ ...note, color: games === 0 ? '#c0392b' : '#666' }}>
-                    Zápasov ligovej fázy: <strong>{games}</strong> &nbsp;|&nbsp;
+                    Zápasov s tímami: <strong>{games}</strong> &nbsp;|&nbsp;
                     dohraných: <strong>{status.finished}</strong> &nbsp;|&nbsp;
                     čaká na výsledok: <strong>{status.pending}</strong> &nbsp;|&nbsp;
                     schválených: <strong>{status.approved}</strong>
