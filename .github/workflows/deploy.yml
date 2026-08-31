@@ -53,23 +53,20 @@ jobs:
             sw.js
 
       # Az ked su assety na mieste, nahra sa index.html a service worker.
+      #
+      # Nahravaju sa priamo cez lftp, nie cez FTP-Deploy-Action: ta prechadza
+      # cely strom (747 suborov) aj ked ma nahrat dva, cim sa deploy predlzil
+      # o niekolko minut.
       - name: Deploy web index via FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: fellow.sk
-          username: ftp.fellow.sk
-          password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: web/dist/
-          server-dir: ${{ github.ref_name == 'main' && '/sub/betclub/' || '/sub/dev_betclub/' }}
-          # Vlastny stav, aby sa index.html nahral aj ked ho predchadzajuci
-          # krok vynechal.
-          state-name: ${{ github.ref_name == 'main' && '.ftp-deploy-sync-web-index.json' || '.ftp-deploy-sync-dev-betclub-web-index.json' }}
-          include: |
-            index.html
-            sw.js
-          exclude: |
-            **/.git*
-            **/.git*/**
+        run: |
+          sudo apt-get install -y --no-install-recommends lftp >/dev/null
+          # Heslo berie lftp z premennej prostredia, takze sa neobjavi v zazname.
+          CMD="set ssl:verify-certificate no; cd $SERVER_DIR;"
+          CMD="$CMD put -O . web/dist/index.html; put -O . web/dist/sw.js; bye"
+          lftp -u "ftp.fellow.sk,$FTP_PASSWORD" fellow.sk -e "$CMD"
+        env:
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          SERVER_DIR: ${{ github.ref_name == 'main' && '/sub/betclub/' || '/sub/dev_betclub/' }}
 
       - name: Deploy API via FTP (main)
         if: github.ref_name == 'main'
