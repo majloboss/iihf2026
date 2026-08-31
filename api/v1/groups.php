@@ -10,13 +10,20 @@ if ($method === 'GET') {
     $allComp = ($_GET['all_competitions'] ?? '') === '1';
     $cid     = $allComp ? null : (isset($_GET['competition_id']) ? (int)$_GET['competition_id'] : null);
 
-    $where = $cid ? 'WHERE fg.competition_id = :cid' : '';
+    // Skrytú skupinu vidí iba zakladateľ a ten, kto v nej už nejako figuruje —
+    // prijatý člen, pozvaný aj čakajúci na schválenie. Prepnutie verejnej
+    // skupiny na skrytú tak nikoho z nej nevyhodí.
+    $viditelnost = '(fg.visibility = \'public\'
+                     OR fg.created_by = :uid
+                     OR EXISTS (SELECT 1 FROM admin.group_members gmv
+                                 WHERE gmv.group_id = fg.id AND gmv.user_id = :uid))';
+    $where = ($cid ? 'WHERE fg.competition_id = :cid AND ' : 'WHERE ') . $viditelnost;
     $params = [':uid' => $auth['user_id']];
     if ($cid) $params[':cid'] = $cid;
 
     $stmt = $pdo->prepare("
         SELECT fg.id, fg.name, fg.description, fg.created_by, fg.created_at, fg.competition_id,
-               fg.allow_member_invite, fg.is_closed,
+               fg.allow_member_invite, fg.is_closed, fg.visibility,
                u.username AS creator_username,
                c.name AS competition_name, c.slug AS competition_slug,
                COUNT(gm.user_id) FILTER (WHERE gm.status = 'accepted') AS member_count,
@@ -42,6 +49,7 @@ if ($method === 'POST') {
     if (strlen($name) < 3) json_error('Názov musí mať aspoň 3 znaky', 400);
     $description = isset($body['description']) ? trim($body['description']) : null;
     if ($description === '') $description = null;
+    $visibility = ($body['visibility'] ?? 'public') === 'invite' ? 'invite' : 'public';
 
     $competition_id = (int)($body['competition_id'] ?? 0);
     if (!$competition_id) json_error('Chýba competition_id', 400);
@@ -49,9 +57,10 @@ if ($method === 'POST') {
     try {
         $pdo->beginTransaction();
         $stmt = $pdo->prepare(
-            'INSERT INTO admin.friend_groups (name, description, created_by, competition_id, created_at) VALUES (?, ?, ?, ?, NOW()) RETURNING id'
+            'INSERT INTO admin.friend_groups (name, description, created_by, competition_id, visibility, created_at)
+             VALUES (?, ?, ?, ?, ?, NOW()) RETURNING id'
         );
-        $stmt->execute([$name, $description, $auth['user_id'], $competition_id]);
+        $stmt->execute([$name, $description, $auth['user_id'], $competition_id, $visibility]);
         $id = $stmt->fetchColumn();
 
         // Zakladatel je automaticky clen
@@ -94,6 +103,11 @@ if ($method === 'PATCH') {
             ->execute([$body['allow_member_invite'] ? 'true' : 'false', $group_id]);
     }
     // Príznak: skupina uzavretá
+    if (array_key_exists('visibility', $body)) {
+        $v = $body['visibility'] === 'invite' ? 'invite' : 'public';
+        $pdo->prepare('UPDATE admin.friend_groups SET visibility = ? WHERE id = ?')
+            ->execute([$v, $group_id]);
+    }
     if (array_key_exists('is_closed', $body)) {
         $pdo->prepare('UPDATE admin.friend_groups SET is_closed = ? WHERE id = ?')
             ->execute([$body['is_closed'] ? 'true' : 'false', $group_id]);

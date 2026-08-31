@@ -162,6 +162,7 @@ Hodnotí sa výsledok po 90 minútach. Predĺženie a penalty sa do tipu nezapo�
 |---|---|
 | 🔲 Zapnúť livescore cron | volať každých 5 minút s `?token=<CRON_SECRET>` |
 | 🔲 Overiť štadión Vikinga | zápas s PSV 20. 1. 2027 má MHPArena, UEFA uvádza domáci štadión |
+| 🔲 Spustiť migráciu `068` z konzoly | skryté skupiny (`ALTER TABLE`) |
 | 🔲 Deploy na `main` | všetko je zatiaľ len v `develop` |
 
 Kluby ligovej fázy už majú oficiálne kódy UEFA. Osem klubov s dočasným `X`
@@ -300,6 +301,7 @@ Vyžaduje `api/config/openrouter.php` (kľúč nie je v repozitári).
 | `tools/test_ucl_live.cjs` | overí ručné živé skóre a prevzatie do výsledku |
 | `tools/test_ucl_manual_rank.cjs` | overí, že ručné poradie prežije prepočet |
 | `tools/test_ucl_bracket.cjs` | overí zostavenie dvojíc a určenie víťazov |
+| `tools/test_group_visibility.cjs` | overí viditeľnosť skrytých skupín |
 
 ### Ligová tabuľka
 
@@ -339,6 +341,29 @@ nemáme. Pokus skončí na `must have admin option on role "dbbet-admin"`.
 
 > Poučenie: po každej migrácii si over `admin.schema_versions` — chýbajúce
 > číslo v poradí znamená, že sa niektorá nespustila. Práve tak vypadla `060`.
+
+## Skryté skupiny
+
+Skupiny boli verejné — v zozname ich videl každý a každý mohol požiadať o vstup.
+Pri skupinách, kde sa hrá o peniaze, si zakladateľ nevedel vybrať, kto sa vôbec
+dozvie, že skupina existuje.
+
+| Viditeľnosť | Správanie |
+|---|---|
+| `public` (predvolená) | vidí každý, môže požiadať o vstup |
+| `invite` | v zozname ju vidia **iba pozvaní a členovia** |
+
+Skrytú skupinu vidí zakladateľ a ten, kto v nej už figuruje — prijatý člen,
+pozvaný aj čakajúci na schválenie. **Prepnutie verejnej skupiny na skrytú
+teda nikoho z nej nevyhodí.**
+
+Žiadosť o vstup do skrytej skupiny server odmietne aj pri priamom volaní —
+inak by stačilo uhádnuť `id` a viditeľnosť by nič neriešila.
+
+Existujúce skupiny zostávajú verejné; migrácia `068` nič neprepína.
+
+Zakladá sa cez zaškrtávacie pole v **Skupiny → Vytvoriť**, neskôr sa dá zmeniť
+v nastaveniach skupiny. Skrytá skupina má v zozname odznak 👁.
 
 ## Pravidlá práce
 

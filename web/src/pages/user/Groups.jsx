@@ -22,6 +22,9 @@ export default function Groups() {
     const [creating, setCreating]   = useState(false);
     const [newName, setNewName]     = useState('');
     const [newDesc, setNewDesc]     = useState('');
+    // Skrytá skupina sa v zozname zobrazí len pozvaným — na hranie o peniaze
+    // s vybraným okruhom ľudí.
+    const [newSkryta, setNewSkryta]  = useState(false);
     const [createErr, setCreateErr] = useState('');
     const [busy, setBusy]           = useState('');
     const [editDescId, setEditDescId] = useState(null);
@@ -99,8 +102,8 @@ export default function Groups() {
         if (!compId) { setCreateErr('Najprv vyber súťaž v Profile'); return; }
         setBusy('create'); setCreateErr('');
         try {
-            await createGroup(newName.trim(), compId, newDesc.trim() || null);
-            setNewName(''); setNewDesc(''); setCreating(false); load();
+            await createGroup(newName.trim(), compId, newDesc.trim() || null, newSkryta ? 'invite' : 'public');
+            setNewName(''); setNewDesc(''); setNewSkryta(false); setCreating(false); load();
         } catch (e) { setCreateErr(e.message); }
         finally { setBusy(''); }
     };
@@ -232,6 +235,13 @@ export default function Groups() {
                         rows={2}
                         style={{ width:'100%', boxSizing:'border-box', padding:'8px 10px', border:'1px solid #ddd', borderRadius:6, fontSize:'0.88rem', resize:'vertical', marginTop:8 }}
                     />
+                    <label style={{ display: 'flex', alignItems: 'center', gap: 6, margin: '8px 0',
+                                    fontSize: '0.85rem', cursor: 'pointer' }}>
+                        <input type="checkbox" checked={newSkryta}
+                               onChange={e => setNewSkryta(e.target.checked)}
+                               style={{ width: 'auto', margin: 0 }} />
+                        <span>Skrytá skupina — v zozname ju uvidia len pozvaní</span>
+                    </label>
                     <button className={styles.btn} onClick={doCreate} disabled={busy === 'create'}>
                         {busy === 'create' ? 'Vytváram…' : 'Vytvoriť'}
                     </button>
@@ -284,6 +294,11 @@ export default function Groups() {
                                     </div>
                                 </div>
                                 <div className={styles.cardActions} onClick={e => e.stopPropagation()}>
+                                    {g.visibility === 'invite' && (
+                                        <span className={styles.badgeClosed} title="V zozname ju vidia len pozvaní">
+                                            👁 Skrytá
+                                        </span>
+                                    )}
                                     {isClosed && (
                                         <span className={styles.badgeClosed}>🔒 Uzavretá</span>
                                     )}
@@ -340,6 +355,13 @@ export default function Groups() {
                                                         disabled={busy === `flag-${g.id}`}
                                                         onChange={e => toggleFlag(g.id, 'is_closed', e.target.checked)} />
                                                     Uzavretá skupina (bez pozvánok a žiadostí)
+                                                </label>
+                                                <label className={styles.flagLabel}>
+                                                    <input type="checkbox"
+                                                        checked={g.visibility === 'invite'}
+                                                        disabled={busy === `flag-${g.id}`}
+                                                        onChange={e => toggleFlag(g.id, 'visibility', e.target.checked ? 'invite' : 'public')} />
+                                                    Skrytá skupina (vidia ju len pozvaní)
                                                 </label>
                                             </div>
                                         </div>
