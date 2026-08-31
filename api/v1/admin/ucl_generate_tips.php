@@ -70,18 +70,37 @@ try {
     }
 
     // entered_by_admin oznacuje, ze tip nezadal sam hrac.
-    $ins = $pdo->prepare('INSERT INTO ' . UCL_SCHEMA . '.tips
-        (user_id, game_id, home_score_tip, away_score_tip, entered_by_admin)
-        VALUES (?, ?, ?, ?, TRUE)
-        ON CONFLICT (user_id, game_id) DO NOTHING');
-
+    //
+    // Vklada sa po davkach: pri 29 hracoch a 160 zapasoch je to 4640 riadkov a
+    // jednotlive dopyty cez siet trvali tak dlho, ze poziadavka spadla na
+    // timeout a pouzivatel videl bielu obrazovku.
     $created = 0;
+    $davka = [];
+    $hodnoty = [];
+
+    $zapis = function () use ($pdo, &$davka, &$hodnoty, &$created) {
+        if (!$davka) return;
+        $sql = 'INSERT INTO ' . UCL_SCHEMA . '.tips
+                    (user_id, game_id, home_score_tip, away_score_tip, entered_by_admin)
+                VALUES ' . implode(', ', $davka) . '
+                ON CONFLICT (user_id, game_id) DO NOTHING';
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($hodnoty);
+        $created += $stmt->rowCount();
+        $davka = [];
+        $hodnoty = [];
+    };
+
     foreach ($games as $gameId) {
         foreach ($users as $userId) {
-            $ins->execute([(int)$userId, (int)$gameId, ucl_random_goals(), ucl_random_goals()]);
-            $created += $ins->rowCount();
+            $davka[] = '(?, ?, ?, ?, TRUE)';
+            array_push($hodnoty, (int)$userId, (int)$gameId, ucl_random_goals(), ucl_random_goals());
+            // Postgres znesie najviac 65535 parametrov na dopyt; 500 riadkov
+            // po styroch je bezpecne a dopytov je uz len par.
+            if (count($davka) >= 500) $zapis();
         }
     }
+    $zapis();
 
     $pdo->commit();
 
