@@ -156,11 +156,23 @@ function ResultCard({ game: initGame, onChanged }) {
     const started = asDate(game.start_time) <= new Date();
     const teamsSet = game.home_team_id && game.away_team_id;
 
-    // Predĺženie sa hrá len vo finále a v odvete, keď je súčet za dvojicu rovnaký.
-    // V ligovej fáze je remíza platný výsledok.
-    const isDraw90 = h90 !== '' && a90 !== '' && parseInt(h90) === parseInt(a90);
-    const mozeMatPredlzenie = game.game_type_code === 'F' || Number(game.leg) === 2;
-    const needsET = mozeMatPredlzenie && isDraw90;
+    // Predĺženie sa hrá len vo finále a v odvete. Vo finále rozhoduje remíza
+    // po 90 minútach, v odvete rovnaký SÚČET za dvojicu — jednotlivý zápas
+    // môže skončiť 2:0 a dvojica aj tak visieť.
+    const jeFinale = game.game_type_code === 'F';
+    const jeOdveta = Number(game.leg) === 2;
+
+    const zadane = h90 !== '' && a90 !== '';
+    const maPrvyZapas = game.first_leg_home !== null && game.first_leg_home !== undefined;
+
+    const remizaNaSucet = zadane && maPrvyZapas
+        && (Number(game.first_leg_home) + parseInt(h90))
+        === (Number(game.first_leg_away) + parseInt(a90));
+
+    const needsET = zadane && (
+        jeFinale ? parseInt(h90) === parseInt(a90)
+      : jeOdveta ? remizaNaSucet
+      : false);
 
     const save = async () => {
         if (h90 === '' || a90 === '') { setErr('Zadaj skóre po 90 min'); return; }
@@ -302,7 +314,7 @@ function ResultCard({ game: initGame, onChanged }) {
                                        onChange={e => setAFin(e.target.value)} className={styles.scoreIn} />
                             </div>
                             <span style={{ fontSize: '0.72rem', color: '#bbb' }}>
-                                remíza {game.game_type_code === 'F' ? 'vo finále' : 'v odvete'} → zadaj víťaza
+                                {jeFinale ? 'remíza vo finále' : 'rovnaký súčet za dvojicu'} → zadaj víťaza
                             </span>
                         </div>
                     )}
