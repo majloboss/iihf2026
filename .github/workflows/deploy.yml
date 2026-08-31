@@ -33,7 +33,11 @@ jobs:
           VITE_API_URL: ${{ github.ref_name == 'main' && 'https://betclub.fellow.sk' || 'https://dev_betclub.fellow.sk' }}/api
 
 
-      - name: Deploy web via FTP
+      # Assety maju v nazve hash, ktory sa pri kazdom builde meni. Nahraju sa
+      # preto pred index.html — inak by stranka chvilu ziadala subor, ktory
+      # na serveri este nie je, a spadla by na bielu obrazovku:
+      # "Loading failed for the module with source .../index-XXXX.js".
+      - name: Deploy web assets via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: fellow.sk
@@ -42,6 +46,27 @@ jobs:
           local-dir: web/dist/
           server-dir: ${{ github.ref_name == 'main' && '/sub/betclub/' || '/sub/dev_betclub/' }}
           state-name: ${{ github.ref_name == 'main' && '.ftp-deploy-sync-web.json' || '.ftp-deploy-sync-dev-betclub-web.json' }}
+          exclude: |
+            **/.git*
+            **/.git*/**
+            index.html
+            sw.js
+
+      # Az ked su assety na mieste, nahra sa index.html a service worker.
+      - name: Deploy web index via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: fellow.sk
+          username: ftp.fellow.sk
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: web/dist/
+          server-dir: ${{ github.ref_name == 'main' && '/sub/betclub/' || '/sub/dev_betclub/' }}
+          # Vlastny stav, aby sa index.html nahral aj ked ho predchadzajuci
+          # krok vynechal.
+          state-name: ${{ github.ref_name == 'main' && '.ftp-deploy-sync-web-index.json' || '.ftp-deploy-sync-dev-betclub-web-index.json' }}
+          include: |
+            index.html
+            sw.js
           exclude: |
             **/.git*
             **/.git*/**
