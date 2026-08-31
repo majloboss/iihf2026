@@ -15,7 +15,9 @@ const check = (ok, msg) => { console.log((ok ? 'OK    ' : 'CHYBA ') + msg); if (
 const VIDITELNOST = `(fg.visibility = 'public'
                       OR fg.created_by = $1
                       OR EXISTS (SELECT 1 FROM group_members gmv
-                                  WHERE gmv.group_id = fg.id AND gmv.user_id = $1))`;
+                                  WHERE gmv.group_id = fg.id AND gmv.user_id = $1)
+                      OR EXISTS (SELECT 1 FROM group_viewers gvv
+                                  WHERE gvv.group_id = fg.id AND gvv.user_id = $1))`;
 
 const vidi = async (c, uid) => {
     const { rows } = await c.query(
@@ -40,6 +42,7 @@ const vidi = async (c, uid) => {
               FROM admin.friend_groups WITH NO DATA`);
         await c.query(`CREATE TEMP TABLE group_members AS
             SELECT group_id, user_id, status FROM admin.group_members WITH NO DATA`);
+        await c.query(`CREATE TEMP TABLE group_viewers (group_id INT, user_id INT)`);
 
         // Traja pouzivatelia: zakladatel, pozvany a cudzi.
         const { rows: users } = await c.query(
@@ -67,6 +70,21 @@ const vidi = async (c, uid) => {
 
         const vidiPozvany = await vidi(c, pozvany);
         check(vidiPozvany.has(b), 'pozvany vidi skrytu skupinu');
+
+        // --- Vymenovany: vidi skupinu, ale clenom nie je ---
+        await c.query(`INSERT INTO group_viewers (group_id, user_id) VALUES ($1, $2)`, [b, cudzi]);
+        const vidiVymenovany = await vidi(c, cudzi);
+        check(vidiVymenovany.has(b), 'VYMENOVANY VIDI SKRYTU SKUPINU');
+
+        const { rows: clenstvo } = await c.query(
+            `SELECT 1 FROM group_members WHERE group_id=$1 AND user_id=$2`, [b, cudzi]);
+        check(clenstvo.length === 0, 'VYMENOVANY NIE JE CLENOM — vstup si musi vypytat');
+
+        // Odobratie zo zoznamu skupinu zase skryje.
+        await c.query(`DELETE FROM group_viewers WHERE group_id=$1 AND user_id=$2`, [b, cudzi]);
+        const poOdobrati = await vidi(c, cudzi);
+        check(!poOdobrati.has(b), 'po odobrati zo zoznamu skupinu uz nevidi');
+        await c.query(`INSERT INTO group_viewers (group_id, user_id) VALUES ($1, $2)`, [b, cudzi]);
 
         const vidiZakladatel = await vidi(c, zakladatel);
         check(vidiZakladatel.has(b), 'zakladatel vidi svoju skrytu skupinu');

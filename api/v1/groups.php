@@ -10,13 +10,15 @@ if ($method === 'GET') {
     $allComp = ($_GET['all_competitions'] ?? '') === '1';
     $cid     = $allComp ? null : (isset($_GET['competition_id']) ? (int)$_GET['competition_id'] : null);
 
-    // Skrytú skupinu vidí iba zakladateľ a ten, kto v nej už nejako figuruje —
-    // prijatý člen, pozvaný aj čakajúci na schválenie. Prepnutie verejnej
-    // skupiny na skrytú tak nikoho z nej nevyhodí.
+    // Skrytú skupinu vidí zakladateľ, kto v nej už figuruje (prijatý, pozvaný
+    // aj čakajúci) a kto je vymenovaný v zozname. Vymenovanie nie je členstvo —
+    // vstup si taký človek musí vypýtať žiadosťou ako ktokoľvek iný.
     $viditelnost = '(fg.visibility = \'public\'
                      OR fg.created_by = :uid
                      OR EXISTS (SELECT 1 FROM admin.group_members gmv
-                                 WHERE gmv.group_id = fg.id AND gmv.user_id = :uid))';
+                                 WHERE gmv.group_id = fg.id AND gmv.user_id = :uid)
+                     OR EXISTS (SELECT 1 FROM admin.group_viewers gvv
+                                 WHERE gvv.group_id = fg.id AND gvv.user_id = :uid))';
     $where = ($cid ? 'WHERE fg.competition_id = :cid AND ' : 'WHERE ') . $viditelnost;
     $params = [':uid' => $auth['user_id']];
     if ($cid) $params[':cid'] = $cid;

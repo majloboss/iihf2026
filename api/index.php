@@ -40,6 +40,7 @@ try {
         $path === 'v1/group-join'          => require __DIR__ . '/v1/group-join.php',
         $path === 'v1/group-leave'         => require __DIR__ . '/v1/group-leave.php',
         $path === 'v1/group-members'       => require __DIR__ . '/v1/group-members.php',
+        $path === 'v1/group-viewers'       => require __DIR__ . '/v1/group-viewers.php',
         $path === 'v1/users'               => require __DIR__ . '/v1/users.php',
         $path === 'v1/admin/game-update'     => require __DIR__ . '/v1/admin/game_update.php',
         $path === 'v1/admin/game-tips'       => require __DIR__ . '/v1/admin/game_tips.php',

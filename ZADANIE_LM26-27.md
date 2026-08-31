@@ -350,32 +350,31 @@ dozvie, že skupina existuje.
 | Viditeľnosť | Správanie |
 |---|---|
 | `public` (predvolená) | vidí každý, môže požiadať o vstup |
-| `invite` | v zozname ju vidia **iba pozvaní a členovia** |
+| `invite` | v zozname ju vidia **iba vymenovaní** |
 
-Skrytú skupinu vidí zakladateľ a ten, kto v nej už figuruje — prijatý člen,
-pozvaný aj čakajúci na schválenie. **Prepnutie verejnej skupiny na skrytú
-teda nikoho z nej nevyhodí.**
+**Vymenovanie nie je pozvánka.** Pozvánka je zároveň vstupenka — pozvaný ju len
+prijme a je vnútri bez splnenia podmienky. Vymenovaný sa o skupine iba dozvie:
+vidí ju v zozname aj s podmienkou vstupu, ale vstup si musí vypýtať žiadosťou
+a zakladateľ ho schvaľuje ako doteraz.
 
-Žiadosť o vstup do skrytej skupiny server odmietne aj pri priamom volaní —
-inak by stačilo uhádnuť `id` a viditeľnosť by nič neriešila.
+Zoznam žije v `admin.group_viewers` (migrácia `069`) a spravuje ho zakladateľ
+v detaile skupiny — vyberá zo šepkára používateľov. Pri každom mene vidí, či
+už je členom alebo o vstup požiadal.
 
-Existujúce skupiny zostávajú verejné; migrácia `068` nič neprepína.
+Skrytú skupinu okrem vymenovaných vidí zakladateľ a ten, kto v nej už figuruje
+(prijatý, pozvaný aj čakajúci). **Prepnutie verejnej skupiny na skrytú teda
+nikoho z nej nevyhodí.**
 
-Zakladá sa cez zaškrtávacie pole v **Skupiny → Vytvoriť**, neskôr sa dá zmeniť
-v nastaveniach skupiny. Skrytá skupina má v zozname odznak 👁.
+Žiadosť o vstup server odmietne tomu, kto v zozname nie je — inak by stačilo
+uhádnuť `id` a viditeľnosť by nič neriešila.
 
-## Verejné pravidlá
+### Ostatné prepínače skupiny
 
-`/pravidla` je dostupné **bez prihlásenia** — odkaz sa dá poslať komukoľvek,
-napríklad spolu s pozvánkou do skupiny.
-
-Trasa stojí mimo chránenej vetvy; tá by neprihláseného presmerovala na login
-skôr, než by sa k pravidlám dostal. Namiesto bočného menu má stránka vlastnú
-hlavičku s odkazom **Prihlásiť sa**, prihlásenému sa zmení na **← Späť do
-aplikácie**.
-
-Obsah je ten istý komponent, aký sa používa v aplikácii — pravidlá sa píšu
-na jednom mieste.
+| Prepínač | Význam |
+|---|---|
+| **Členovia môžu pozývať** | člen smie pozvať ďalšieho; pre otvorené skupiny |
+| **Uzavretá skupina** | zamkne zostavu — nikto nemôže požiadať o vstup ani poslať pozvánku, ani zakladateľ. Hodí sa po rozbehnutí súťaže. |
+| **Skrytá skupina** | vidia ju len vymenovaní (vyššie) |
 
 ## Pravidlá práce
 

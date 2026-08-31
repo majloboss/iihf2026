@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useCompetition } from '../../context/CompetitionContext';
-import { getGroups, getAllMyGroups, createGroup, disbandGroup, joinGroup, leaveGroup, getMembers, memberAction, inviteMember, acceptGroupInvite, bulkInvite, updateGroupDescription, updateGroupFlags } from '../../api/groups';
+import { getViewers, addViewer, removeViewer, getGroups, getAllMyGroups, createGroup, disbandGroup, joinGroup, leaveGroup, getMembers, memberAction, inviteMember, acceptGroupInvite, bulkInvite, updateGroupDescription, updateGroupFlags } from '../../api/groups';
 import { getUser, getUsers } from '../../api/users';
 import styles from './Groups.module.css';
 
@@ -22,9 +22,12 @@ export default function Groups() {
     const [creating, setCreating]   = useState(false);
     const [newName, setNewName]     = useState('');
     const [newDesc, setNewDesc]     = useState('');
-    // Skrytá skupina sa v zozname zobrazí len pozvaným — na hranie o peniaze
-    // s vybraným okruhom ľudí.
+    // Skrytú skupinu vidia iba vymenovaní — vstup si však musia vypýtať
+    // žiadosťou ako ktokoľvek iný.
     const [newSkryta, setNewSkryta]  = useState(false);
+    // Kto vidí skrytú skupinu: { [groupId]: [ {user_id, username, ...} ] }
+    const [viewers, setViewers]      = useState({});
+    const [viewerQuery, setViewerQuery] = useState('');
     const [createErr, setCreateErr] = useState('');
     const [busy, setBusy]           = useState('');
     const [editDescId, setEditDescId] = useState(null);
@@ -64,6 +67,9 @@ export default function Groups() {
         if (expanded === id) { setExpanded(null); return; }
         setExpanded(id);
         if (!members[id]) loadMembers(id);
+        // Zoznam vidiacich má zmysel len pri skrytej skupine a vidí ho zakladateľ.
+        const g = groups.find(x => x.id === id);
+        if (g?.visibility === 'invite' && !viewers[id]) loadViewers(id);
     };
 
     const ensureUsers = async () => {
@@ -114,6 +120,28 @@ export default function Groups() {
             await updateGroupDescription(groupId, editDescVal.trim() || null);
             setEditDescId(null); load();
         } catch (e) { alert(e.message); }
+        finally { setBusy(''); }
+    };
+
+    const loadViewers = async (groupId) => {
+        try {
+            const zoznam = await getViewers(groupId);
+            setViewers(v => ({ ...v, [groupId]: zoznam }));
+        }
+        catch { /* zoznam vidí iba zakladateľ — inému ho netreba */ }
+    };
+
+    const pridajVidiaceho = async (groupId, userId) => {
+        setBusy(`viewer-${groupId}`);
+        try { await addViewer(groupId, userId); await loadViewers(groupId); setViewerQuery(''); }
+        catch (e) { alert(e.message); }
+        finally { setBusy(''); }
+    };
+
+    const odoberVidiaceho = async (groupId, userId) => {
+        setBusy(`viewer-${groupId}`);
+        try { await removeViewer(groupId, userId); await loadViewers(groupId); }
+        catch (e) { alert(e.message); }
         finally { setBusy(''); }
     };
 
@@ -240,7 +268,7 @@ export default function Groups() {
                         <input type="checkbox" checked={newSkryta}
                                onChange={e => setNewSkryta(e.target.checked)}
                                style={{ width: 'auto', margin: 0 }} />
-                        <span>Skrytá skupina — v zozname ju uvidia len pozvaní</span>
+                        <span>Skrytá skupina — uvidia ju len ľudia, ktorých vymenuješ</span>
                     </label>
                     <button className={styles.btn} onClick={doCreate} disabled={busy === 'create'}>
                         {busy === 'create' ? 'Vytváram…' : 'Vytvoriť'}
@@ -361,11 +389,89 @@ export default function Groups() {
                                                         checked={g.visibility === 'invite'}
                                                         disabled={busy === `flag-${g.id}`}
                                                         onChange={e => toggleFlag(g.id, 'visibility', e.target.checked ? 'invite' : 'public')} />
-                                                    Skrytá skupina (vidia ju len pozvaní)
+                                                    Skrytá skupina (vidia ju len vymenovaní nižšie)
                                                 </label>
                                             </div>
                                         </div>
                                     )}
+
+                                    {/* Skrytá skupina: kto ju vidí. Vymenovanie nie je pozvánka —
+                                        títo ľudia musia o vstup požiadať a splniť podmienku. */}
+                                    {isFounder && g.visibility === 'invite' && (
+                                        <div className={styles.inviteSection}>
+                                            <div style={{ fontSize: '0.82rem', fontWeight: 600, marginBottom: 4 }}>
+                                                Kto vidí túto skupinu
+                                            </div>
+                                            <div style={{ fontSize: '0.78rem', color: '#888', marginBottom: 8 }}>
+                                                Vymenovaní uvidia skupinu v zozname aj s podmienkou vstupu.
+                                                O vstup si musia požiadať sami — ty ich schvaľuješ ako doteraz.
+                                            </div>
+
+                                            <div className={styles.inviteRow}>
+                                                <div className={styles.inviteInputWrap}>
+                                                    <input
+                                                        className={styles.inviteInput}
+                                                        placeholder="meno používateľa"
+                                                        value={viewerQuery}
+                                                        onChange={async e => {
+                                                            setViewerQuery(e.target.value);
+                                                            if (e.target.value.length >= 1 && !allUsersRef.current) await ensureUsers();
+                                                        }}
+                                                    />
+                                                    {viewerQuery.length >= 1 && (() => {
+                                                        const uz = new Set((viewers[g.id] || []).map(v => v.user_id));
+                                                        const q = viewerQuery.toLowerCase();
+                                                        const navrhy = (allUsersRef.current || [])
+                                                            .filter(u => Number(u.id) !== Number(user.user_id) && !uz.has(u.id))
+                                                            .filter(u => u.username.toLowerCase().includes(q)
+                                                                || (u.first_name || '').toLowerCase().includes(q)
+                                                                || (u.last_name || '').toLowerCase().includes(q))
+                                                            .slice(0, 8);
+                                                        if (!navrhy.length) return null;
+                                                        return (
+                                                            <div className={styles.dropDown}>
+                                                                {navrhy.map(u => (
+                                                                    <div key={u.id} className={styles.dropItem}
+                                                                         onClick={() => pridajVidiaceho(g.id, u.id)}>
+                                                                        {u.username}
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        );
+                                                    })()}
+                                                </div>
+                                            </div>
+
+                                            {(viewers[g.id] || []).length === 0
+                                                ? <div style={{ fontSize: '0.8rem', color: '#aaa', marginTop: 6 }}>
+                                                      Zatiaľ nikto — skupinu vidíš iba ty.
+                                                  </div>
+                                                : <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
+                                                      {viewers[g.id].map(v => (
+                                                          <span key={v.user_id}
+                                                                style={{ display: 'inline-flex', alignItems: 'center', gap: 6,
+                                                                         background: '#eef2f8', borderRadius: 14,
+                                                                         padding: '3px 6px 3px 10px', fontSize: '0.82rem' }}>
+                                                              {v.username}
+                                                              {v.member_status === 'accepted' && (
+                                                                  <span style={{ color: '#28a745', fontSize: '0.72rem' }}>člen</span>
+                                                              )}
+                                                              {v.member_status === 'pending' && (
+                                                                  <span style={{ color: '#e67e22', fontSize: '0.72rem' }}>žiada</span>
+                                                              )}
+                                                              <button onClick={() => odoberVidiaceho(g.id, v.user_id)}
+                                                                      disabled={busy === `viewer-${g.id}`}
+                                                                      title="Odobrať zo zoznamu"
+                                                                      style={{ border: 'none', background: 'none', cursor: 'pointer',
+                                                                               color: '#999', fontSize: '1rem', lineHeight: 1, padding: 0 }}>
+                                                                  ×
+                                                              </button>
+                                                          </span>
+                                                      ))}
+                                                  </div>}
+                                        </div>
+                                    )}
+
                                     {canInvite && (
                                         <div className={styles.inviteSection}>
                                             <div className={styles.inviteRow}>

@@ -14,12 +14,16 @@ $grp = $stmt->fetch();
 if (!$grp) json_error('Skupina neexistuje', 404);
 if ($grp['is_closed']) json_error('Skupina je uzavretá — nedá sa do nej požiadať o vstup', 403);
 
-// Do skrytej skupiny sa neda poziadat o vstup bez pozvanky — inak by stacilo
-// uhadnut id a viditelnost by nic neriesila.
+// O vstup do skrytej skupiny moze poziadat iba ten, kto je v zozname vidiacich
+// alebo v nej uz figuruje — inak by stacilo uhadnut id a viditelnost by nic
+// neriesila. Ziadost sa tym neschvaluje, len povoluje: podmienku vstupu musi
+// splnit rovnako ako ktokolvek iny.
 if ($grp['visibility'] === 'invite' && (int)$grp['created_by'] !== (int)$auth['user_id']) {
-    $poz = $pdo->prepare('SELECT 1 FROM admin.group_members WHERE group_id = ? AND user_id = ?');
-    $poz->execute([$grp['id'], $auth['user_id']]);
-    if (!$poz->fetch()) json_error('Do tejto skupiny sa dá vstúpiť iba na pozvánku', 403);
+    $vidi = $pdo->prepare('SELECT 1 FROM admin.group_viewers WHERE group_id = ? AND user_id = ?
+                            UNION ALL
+                           SELECT 1 FROM admin.group_members WHERE group_id = ? AND user_id = ?');
+    $vidi->execute([$grp['id'], $auth['user_id'], $grp['id'], $auth['user_id']]);
+    if (!$vidi->fetch()) json_error('Táto skupina nie je pre teba prístupná', 403);
 }
 
 try {

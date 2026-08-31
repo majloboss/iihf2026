@@ -5,6 +5,12 @@ export const getAllMyGroups = ()                     => apiFetch('v1/groups?all_
 export const createGroup   = (name, competition_id, description = null, visibility = 'public') => apiFetch('v1/groups', { method: 'POST',   body: JSON.stringify({ name, competition_id, description, visibility }) });
 export const updateGroupDescription = (group_id, description) => apiFetch('v1/groups', { method: 'PATCH', body: JSON.stringify({ group_id, description }) });
 export const updateGroupFlags = (group_id, flags) => apiFetch('v1/groups', { method: 'PATCH', body: JSON.stringify({ group_id, ...flags }) });
+// Zoznam ludi, ktori vidia skrytu skupinu. Vymenovanie nie je pozvanka —
+// vstup si musia vypytat ziadostou.
+export const getViewers    = (group_id)          => apiFetch(`v1/group-viewers?group_id=${group_id}`);
+export const addViewer     = (group_id, user_id) => apiFetch('v1/group-viewers', { method: 'POST',   body: JSON.stringify({ group_id, user_id }) });
+export const removeViewer  = (group_id, user_id) => apiFetch('v1/group-viewers', { method: 'DELETE', body: JSON.stringify({ group_id, user_id }) });
+
 export const disbandGroup  = (group_id)             => apiFetch('v1/groups', { method: 'DELETE', body: JSON.stringify({ group_id }) });
 export const joinGroup     = (group_id)             => apiFetch('v1/group-join',    { method: 'POST', body: JSON.stringify({ group_id }) });
 export const leaveGroup    = (group_id)             => apiFetch('v1/group-leave',   { method: 'POST', body: JSON.stringify({ group_id }) });
