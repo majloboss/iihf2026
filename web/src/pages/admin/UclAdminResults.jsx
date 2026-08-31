@@ -326,7 +326,24 @@ function ResultCard({ game: initGame, onChanged }) {
                                 <input type="number" min="0" max="30" value={aFin}
                                        onChange={e => setAFin(e.target.value)} className={styles.scoreIn} />
                             </div>
-                            <span style={{ fontSize: '0.72rem', color: '#bbb' }}>
+                            {/* Vitaza je jednoduchsie vybrat nez dopocitat — pri
+                                penaltach sa pripise jeden gol tomu, kto postupil. */}
+                            <span style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+                                <span style={{ fontSize: '0.72rem', color: '#888' }}>postupujú:</span>
+                                <button type="button"
+                                        onClick={() => { setHFin(String(parseInt(h90) + 1)); setAFin(a90); }}
+                                        style={{ fontSize: '0.72rem', padding: '2px 8px', cursor: 'pointer',
+                                                 border: '1px solid #dee2e6', borderRadius: 4, background: '#fff' }}>
+                                    {game.home_name || 'domáci'}
+                                </button>
+                                <button type="button"
+                                        onClick={() => { setHFin(h90); setAFin(String(parseInt(a90) + 1)); }}
+                                        style={{ fontSize: '0.72rem', padding: '2px 8px', cursor: 'pointer',
+                                                 border: '1px solid #dee2e6', borderRadius: 4, background: '#fff' }}>
+                                    {game.away_name || 'hostia'}
+                                </button>
+                            </span>
+                            <span style={{ fontSize: '0.72rem', color: '#bbb', width: '100%' }}>
                                 {jeFinale ? 'remíza vo finále' : 'rovnaký súčet za dvojicu'}
                                 {' → '}
                                 víťaz má o gól viac; penalty sa rátajú ako jeden gól
