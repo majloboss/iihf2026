@@ -115,11 +115,16 @@ if ($method === 'GET') {
                                          AND home_team_id IS NOT NULL')->fetchColumn();
         $zapasov = (int)$pdo->query('SELECT COUNT(*) FROM ' . UCL_SCHEMA . '.games
                                       WHERE game_type_code = ' . $pdo->quote($kod))->fetchColumn();
+        // Pocet tipov rozhoduje, ci sa prestavenim naozaj nieco strati.
+        $tipov = (int)$pdo->query('SELECT COUNT(*) FROM ' . UCL_SCHEMA . '.tips t
+                                     JOIN ' . UCL_SCHEMA . '.games g ON g.game_id = t.game_id
+                                    WHERE g.game_type_code = ' . $pdo->quote($kod))->fetchColumn();
         $stav[] = [
             'phase'     => $kod,
             'name'      => $nazov,
             'games'     => $zapasov,
             'with_teams'=> $obsadene,
+            'tips'      => $tipov,
             'ready'     => count($ucastnici) > 0,
             'teams'     => count($ucastnici),
         ];

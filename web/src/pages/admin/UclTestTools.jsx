@@ -390,9 +390,12 @@ function BuildBracket({ reloadKey, onChange }) {
 
     const run = async (p) => {
         // Tipy sa viažu na konkrétne dvojice — prestavenie ich znehodnotí.
+        // Pýtať sa má zmysel len vtedy, keď nejaké sú; inak sa nemá čo stratiť
+        // a potvrdzovacie okno len stojí v ceste.
         const replace = Number(p.with_teams) > 0;
-        if (replace && !window.confirm(
-            `${p.name} už má nastavené tímy. Prestavením sa zmažú tipy na tieto zápasy. Pokračovať?`)) return;
+        const tipov = Number(p.tips || 0);
+        if (tipov > 0 && !window.confirm(
+            `${p.name} už má ${tipov} tipov. Prestavením sa zmažú. Pokračovať?`)) return;
 
         setBusy(p.phase); setError(''); setMessage('');
         try {
@@ -414,7 +417,7 @@ function BuildBracket({ reloadKey, onChange }) {
 
             <div style={{ overflowX: 'auto' }}>
                 <table className={styles.table}>
-                    <thead><tr><th>Fáza</th><th>Zápasov</th><th>S tímami</th><th>Stav</th><th></th></tr></thead>
+                    <thead><tr><th>Fáza</th><th>Zápasov</th><th>S tímami</th><th>Tipov</th><th>Stav</th><th></th></tr></thead>
                     <tbody>
                         {phases.map(p => (
                             <tr key={p.phase}>
@@ -422,6 +425,10 @@ function BuildBracket({ reloadKey, onChange }) {
                                 <td>{p.games}</td>
                                 <td>{Number(p.with_teams) > 0
                                     ? p.with_teams
+                                    : <span className={styles.unused}>—</span>}</td>
+                                {/* Tipy sa prestavením zmažú, preto je ich počet vidieť dopredu. */}
+                                <td>{Number(p.tips) > 0
+                                    ? <span style={{ color: '#dc3545' }}>{p.tips}</span>
                                     : <span className={styles.unused}>—</span>}</td>
                                 <td>{p.ready
                                     ? <span style={{ color: '#28a745' }}>pripravená ({p.teams} tímov)</span>
