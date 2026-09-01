@@ -56,5 +56,21 @@ const SQL = `
     console.log('\n=== navyse na produkcii (' + navyse.length + ') ===');
     for (const [t, cols] of podlaTab(navyse)) console.log('  ' + t + ' -> ' + cols.join(', '));
 
+    // Zhodna schema este neznamena funkcnu aplikaciu: bez riadku v
+    // admin.competitions sa sutaz v prepinaci vobec neobjavi.
+    const sutaze = async (cl) => (await cl.query(
+        'SELECT slug FROM admin.competitions ORDER BY slug')).rows.map(r => r.slug);
+    const sProd = await sutaze(prod);
+    const sDev = await sutaze(dev);
+    const chybaSutaz = sDev.filter(x => !sProd.includes(x));
+
+    console.log('\n=== sutaze ===');
+    console.log('  produkcia: ' + sProd.join(', '));
+    if (chybaSutaz.length) {
+        console.log('  CHYBA na produkcii: ' + chybaSutaz.join(', ') + '  -> spusti migraciu 071');
+    } else {
+        console.log('  vsetky sutaze su na mieste');
+    }
+
     await prod.end(); await dev.end();
 })().catch(e => { console.error('CHYBA:', e.message); process.exit(1); });
