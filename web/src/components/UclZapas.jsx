@@ -20,8 +20,10 @@ export default function UclZapas({ g, termin, stred, akcia, children, size = 24 
                 {termin}
             </div>
 
+            {/* Krajné pásy sú rovnako široké, takže stred mriežky zostáva
+                stredom karty aj s tlačidlom vpravo. */}
             <div style={{ flex: 1, minWidth: 0, display: 'grid',
-                          gridTemplateColumns: '86px 1fr auto 1fr 86px',
+                          gridTemplateColumns: '68px 1fr auto 1fr 68px',
                           alignItems: 'stretch', columnGap: 8, rowGap: 6 }}>
                 <span style={{ gridColumn: 2, display: 'flex', justifyContent: 'flex-end' }}>
                     <UclClub name={g.home_name} logo={g.home_logo} country={g.home_country}
@@ -40,9 +42,12 @@ export default function UclZapas({ g, termin, stred, akcia, children, size = 24 
 
                 {children}
 
-                {/* Tlačidlo v poslednom stĺpci, zvisle na úrovni políčok. */}
+                {/* Tlačidlo v poslednom stĺpci, zvisle na úrovni políčok a
+                    pri jeho ľavom okraji — teda čo najbližšie k tipu. */}
                 {akcia && (
-                    <span style={{ gridColumn: 5, alignSelf: 'center' }}>{akcia}</span>
+                    <span style={{ gridColumn: 5, alignSelf: 'center', justifySelf: 'start' }}>
+                        {akcia}
+                    </span>
                 )}
 
                 <div style={{ gridColumn: '2 / 5' }}>

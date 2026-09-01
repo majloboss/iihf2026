@@ -268,8 +268,7 @@ export default function UclDashboard() {
                                    </>}
                                    stred={<span style={{ color: '#bbb' }}>vs</span>}
                                    akcia={
-                                       <button onClick={() => save(g)} disabled={saving === g.game_id}
-                                               style={{ width: '100%' }}>
+                                       <button onClick={() => save(g)} disabled={saving === g.game_id}>
                                            {saving === g.game_id ? '…' : 'Uložiť'}
                                        </button>}>
                                 <span style={{ gridColumn: 2, justifySelf: 'end' }}>
@@ -306,8 +305,7 @@ export default function UclDashboard() {
                                    </>}
                            stred={<span style={{ color: '#bbb' }}>vs</span>}
                            akcia={canTip(g) && (
-                               <button onClick={() => save(g)} disabled={saving === g.game_id}
-                                       style={{ width: '100%' }}>
+                               <button onClick={() => save(g)} disabled={saving === g.game_id}>
                                    {saving === g.game_id ? '…' : 'Uložiť'}
                                </button>)}>
                         {/* Sekcia ukazuje aj zápasy, ktoré sa ešte tipovať nedajú —
