@@ -67,28 +67,26 @@ foreach ($FAZY as $kod => $nazov) {
 
         $maVysledok = fn($z) => $z && $z['hs'] !== null && $z['ag'] !== null;
 
+        // Do suctu ide konecny vysledok zapasu: ked sa hralo predlzenie alebo
+        // penalty, plati skore po nich, nie po 90 minutach. Inak by dvojica
+        // rozhodnuta v predlzeni vyzerala ako nerozhodna — odveta 2:2 pri
+        // prvom zapase 0:2 dava dvojicu 2:4, nie 2:2.
+        $konecne = fn($z, $pole) => $z[$pole === 'h' ? 'hf' : 'af'] !== null
+            ? (int)$z[$pole === 'h' ? 'hf' : 'af']
+            : (int)$z[$pole === 'h' ? 'hs' : 'ag'];
+
         if ($odveta) {
             if ($maVysledok($prvy) && $maVysledok($odveta)) {
                 // A bol v prvom zapase hostom, v odvete domacim.
-                $golyA = (int)$prvy['ag'] + (int)$odveta['hs'];
-                $golyB = (int)$prvy['hs'] + (int)$odveta['ag'];
+                $golyA = $konecne($prvy, 'a') + $konecne($odveta, 'h');
+                $golyB = $konecne($prvy, 'h') + $konecne($odveta, 'a');
 
-                if ($golyA !== $golyB) {
-                    $vitaz = $golyA > $golyB ? $timA : $timB;
-                } elseif ($odveta['hf'] !== null && $odveta['af'] !== null
-                          && $odveta['hf'] !== $odveta['af']) {
-                    // Predlzenie v odvete: domaci odvety je tim A.
-                    $vitaz = (int)$odveta['hf'] > (int)$odveta['af'] ? $timA : $timB;
-                }
+                if ($golyA !== $golyB) $vitaz = $golyA > $golyB ? $timA : $timB;
             }
         } elseif ($maVysledok($prvy)) {
-            $golyA = (int)$prvy['hs'];
-            $golyB = (int)$prvy['ag'];
-            if ($golyA !== $golyB) {
-                $vitaz = $golyA > $golyB ? $timA : $timB;
-            } elseif ($prvy['hf'] !== null && $prvy['af'] !== null && $prvy['hf'] !== $prvy['af']) {
-                $vitaz = (int)$prvy['hf'] > (int)$prvy['af'] ? $timA : $timB;
-            }
+            $golyA = $konecne($prvy, 'h');
+            $golyB = $konecne($prvy, 'a');
+            if ($golyA !== $golyB) $vitaz = $golyA > $golyB ? $timA : $timB;
         }
 
         $zapasNaVystup = fn($z) => $z === null ? null : [
