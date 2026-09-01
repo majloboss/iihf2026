@@ -34,7 +34,7 @@ $rows = $pdo->query('
 // vitazi predoslej fazy v poradi cisla dvojice.
 $tabulka = [];
 foreach ($pdo->query('SELECT rank, team_id FROM "lm2026-27".group_standings
-                       WHERE phase = 'LEAGUE' AND team_id IS NOT NULL
+                       WHERE phase = \'LEAGUE\' AND team_id IS NOT NULL
                        ORDER BY rank')->fetchAll() as $r) {
     $tabulka[(int)$r['team_id']] = (int)$r['rank'];
 }
@@ -150,7 +150,7 @@ foreach ($FAZY as $kod => $nazov) {
         $klub = $pdo->prepare('SELECT c.club_id, c.club_name, c.logo_file
                                  FROM "lm2026-27".group_standings s
                                  JOIN admin.uefa_clubs c ON c.club_id = s.team_id
-                                WHERE s.phase = 'LEAGUE' AND s.rank BETWEEN 1 AND 8
+                                WHERE s.phase = \'LEAGUE\' AND s.rank BETWEEN 1 AND 8
                                 ORDER BY s.rank');
         $klub->execute();
         foreach ($klub->fetchAll() as $i => $k) {

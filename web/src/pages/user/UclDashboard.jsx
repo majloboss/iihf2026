@@ -177,7 +177,7 @@ export default function UclDashboard() {
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                                   gap: 10, marginBottom: 4 }}>
                         <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#a67c00' }}>
-                            📢 Oznam organizátora
+                            Oznam organizátora
                         </span>
                         <Link to="/spravy?tab=organizator" style={{ fontSize: '0.75rem', color: '#a67c00', whiteSpace: 'nowrap' }}>
                             História →
@@ -193,14 +193,14 @@ export default function UclDashboard() {
             {live.length > 0 && (
                 <>
                     <h3 style={{ marginTop: 20, display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <span style={{ color: '#dc3545' }}>●</span> Prebiehajúce zápasy
+                        Prebiehajúce zápasy
                     </h3>
                     {live.map(g => (
                         <div key={g.game_id} style={{ background: '#fff', border: '1px solid #f2c2c2', borderRadius: 10,
                                                       padding: 12, marginBottom: 8 }}>
                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
-                                <div style={{ minWidth: 120, fontSize: '0.78rem', color: '#666' }}>
-                                    {dayFmt(g.start_time)}
+                                <div style={{ minWidth: 150, fontSize: '0.78rem', color: '#666', whiteSpace: 'nowrap' }}>
+                                    {dayFmt(g.start_time)} <span style={{ color: '#999' }}>{shortPhase(g)}</span>
                                 </div>
                                 {/* Odznak LIVE patrí k dvojici, nie k dátumu — inak visí
                                     mimo zápasu a čitateľ ho k nemu nepriradí. */}
@@ -236,9 +236,8 @@ export default function UclDashboard() {
                     {untipped.map(g => (
                         <div key={g.game_id} style={{ background: '#fffbf0', border: '1px solid #ffe0a3', borderRadius: 10,
                                                       padding: 12, marginBottom: 8, display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
-                            <div style={{ minWidth: 120, fontSize: '0.78rem', color: '#666' }}>
-                                {dayFmt(g.start_time)}
-                                <div style={{ fontSize: '0.7rem', color: '#999' }}>{g.game_type_name}</div>
+                            <div style={{ minWidth: 150, fontSize: '0.78rem', color: '#666', whiteSpace: 'nowrap' }}>
+                                {dayFmt(g.start_time)} <span style={{ color: '#999' }}>{shortPhase(g)}</span>
                             </div>
                             <div style={{ flex: 1, minWidth: 240, display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: 8 }}>
                                 <UclClub name={g.home_name} logo={g.home_logo} country={g.home_country}
@@ -271,9 +270,8 @@ export default function UclDashboard() {
             {upcomingRest.map(g => (
                 <div key={g.game_id} style={{ background: '#fff', border: '1px solid #e9ecef', borderRadius: 10,
                                               padding: 12, marginBottom: 8, display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
-                    <div style={{ minWidth: 110, fontSize: '0.78rem', color: '#666' }}>
-                        {dayFmt(g.start_time)}
-                        <div style={{ fontSize: '0.7rem', color: '#999' }}>{shortPhase(g)}</div>
+                    <div style={{ minWidth: 150, fontSize: '0.78rem', color: '#666', whiteSpace: 'nowrap' }}>
+                        {dayFmt(g.start_time)} <span style={{ color: '#999' }}>{shortPhase(g)}</span>
                     </div>
                     <div style={{ flex: 1, minWidth: 240, display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: 8 }}>
                         <UclClub name={g.home_name} logo={g.home_logo} country={g.home_country}
@@ -303,9 +301,8 @@ export default function UclDashboard() {
                     {played.map(g => (
                         <div key={g.game_id} style={{ background: '#fff', border: '1px solid #e9ecef', borderRadius: 10,
                                                       padding: 12, marginBottom: 8, display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
-                            <div style={{ minWidth: 110, fontSize: '0.78rem', color: '#666' }}>
-                                {dayFmt(g.start_time)}
-                                <div style={{ fontSize: '0.7rem', color: '#999' }}>{shortPhase(g)}</div>
+                            <div style={{ minWidth: 150, fontSize: '0.78rem', color: '#666', whiteSpace: 'nowrap' }}>
+                                {dayFmt(g.start_time)} <span style={{ color: '#999' }}>{shortPhase(g)}</span>
                             </div>
                             <div style={{ flex: 1, minWidth: 240, display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: 8 }}>
                                 <UclClub name={g.home_name} logo={g.home_logo} country={g.home_country}
