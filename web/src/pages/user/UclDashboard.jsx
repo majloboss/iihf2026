@@ -303,9 +303,13 @@ export default function UclDashboard() {
                                            inputMode="numeric" style={{ width: 38, textAlign: 'center' }} aria-label="Tip domáci" />
                                 </span>
                                 <span style={{ gridColumn: 2, textAlign: 'center' }}>:</span>
-                                <span style={{ gridColumn: 3, display: 'flex', gap: 6, alignItems: 'center' }}>
+                                <span style={{ gridColumn: 3, justifySelf: 'start' }}>
                                     <input value={draftOf(g, 'away')} onChange={e => setDraft(g.game_id, 'away', e.target.value)}
                                            inputMode="numeric" style={{ width: 38, textAlign: 'center' }} aria-label="Tip hostia" />
+                                </span>
+                                {/* Tlačidlo má vlastný riadok — v stĺpci by ho
+                                    rozšírilo a dvojbodka by prestala sedieť pod vs. */}
+                                <span style={{ gridColumn: '1 / -1', textAlign: 'center' }}>
                                     <button onClick={() => save(g)} disabled={saving === g.game_id}>
                                         {saving === g.game_id ? '…' : 'Uložiť'}
                                     </button>
@@ -339,9 +343,13 @@ export default function UclDashboard() {
                                            inputMode="numeric" style={{ width: 38, textAlign: 'center' }} aria-label="Tip domáci" />
                                 </span>
                                 <span style={{ gridColumn: 2, textAlign: 'center' }}>:</span>
-                                <span style={{ gridColumn: 3, display: 'flex', gap: 6, alignItems: 'center' }}>
+                                <span style={{ gridColumn: 3, justifySelf: 'start' }}>
                                     <input value={draftOf(g, 'away')} onChange={e => setDraft(g.game_id, 'away', e.target.value)}
                                            inputMode="numeric" style={{ width: 38, textAlign: 'center' }} aria-label="Tip hostia" />
+                                </span>
+                                {/* Tlačidlo má vlastný riadok — v stĺpci by ho
+                                    rozšírilo a dvojbodka by prestala sedieť pod vs. */}
+                                <span style={{ gridColumn: '1 / -1', textAlign: 'center' }}>
                                     <button onClick={() => save(g)} disabled={saving === g.game_id}>
                                         {saving === g.game_id ? '…' : 'Uložiť'}
                                     </button>
