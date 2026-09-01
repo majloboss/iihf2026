@@ -112,10 +112,13 @@ export default function UclBracket() {
                 Čísla vpravo sú súčet za dvojicu, pod nimi výsledky jednotlivých zápasov.
             </p>
 
-            <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start',
+            {/* alignItems: stretch — stĺpce musia byť rovnako vysoké, inak sa
+                dvojice nemajú voči čomu centrovať. */}
+            <div style={{ display: 'flex', gap: 14, alignItems: 'stretch',
                           overflowX: 'auto', paddingBottom: 8 }}>
                 {fazy.map(f => (
-                    <div key={f.phase} style={{ flex: '0 0 230px', minWidth: 230 }}>
+                    <div key={f.phase} style={{ flex: '0 0 230px', minWidth: 230,
+                                                display: 'flex', flexDirection: 'column' }}>
                         <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1a3a6b',
                                       marginBottom: 8, textAlign: 'center' }}>
                             {f.name}
@@ -124,7 +127,16 @@ export default function UclBracket() {
                             ? <div style={{ fontSize: '0.78rem', color: '#bbb', textAlign: 'center' }}>
                                   zatiaľ bez dvojíc
                               </div>
-                            : f.ties.map((t, i) => <Dvojica key={t.tie_id ?? i} tie={t} />)}
+                            : (
+                                /* Každá dvojica sa zvisle vycentruje voči tým, z ktorých
+                                   vzišla: v ďalšom stĺpci je ich polovica, takže na jednu
+                                   pripadá dvojnásobná výška. Vyrieši to rovnomerné
+                                   rozdelenie voľného miesta okolo riadkov. */
+                                <div style={{ flex: 1, display: 'flex', flexDirection: 'column',
+                                              justifyContent: 'space-around' }}>
+                                    {f.ties.map((t, i) => <Dvojica key={t.tie_id ?? i} tie={t} />)}
+                                </div>
+                              )}
                     </div>
                 ))}
             </div>

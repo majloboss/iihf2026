@@ -40,6 +40,9 @@ const check = (ok, msg) => { console.log((ok ? 'OK    ' : 'CHYBA ') + msg); if (
     const dvojice = po.map(r => r.tie_id).sort((a, b) => cislo(a) - cislo(b));
 
     // Zoznam tak, ako ho poskladá API: pred každou dvojicou jej nasadený.
+    // Baráž ide zostupne (PO-8 hore), aby jej nasadený 1. sedel s R16-1.
+    dvojice.reverse();
+
     const zoznam = [];
     dvojice.forEach(t => {
         const rank = 9 - cislo(t);
@@ -60,11 +63,22 @@ const check = (ok, msg) => { console.log((ok ? 'OK    ' : 'CHYBA ') + msg); if (
               (pred && pred.seeded && pred.rank === rank ? '' : ' — ale je tam niečo iné'));
     });
 
-    // Poradie nasadených zhora nadol musí byť 8., 7., ... 1. — víťaz PO-1
-    // (9. vs 24.) hrá proti 8., takže najvyššie nasadený je dole.
+    // Nasadení musia ísť 1., 2., ... 8. — inak by prvý stĺpec začínal 8. miestom,
+    // kým osemfinále začína prvým, a stĺpce by si nesedeli.
     const poradie = zoznam.filter(x => x.seeded).map(x => x.rank);
-    check(poradie.join(',') === [...poradie].sort((a, b) => b - a).join(','),
+    check(poradie.join(',') === [...poradie].sort((a, b) => a - b).join(','),
           `nasadení idú zhora nadol: ${poradie.join(', ')}`);
+
+    // To podstatné: n-tá dvojica osemfinále musí vychádzať z n-tého riadku baráže.
+    const { rows: r16 } = await c.query(`
+        SELECT DISTINCT g.tie_id FROM ${S}.games g
+         WHERE g.game_type_code = 'R16' AND g.tie_id IS NOT NULL
+         ORDER BY g.tie_id`);
+    r16.map(r => r.tie_id).sort((a, b) => cislo(a) - cislo(b)).forEach((t, i) => {
+        const nad = zoznam[i * 2];        // párne indexy sú nasadení
+        check(nad && nad.seeded && nad.rank === cislo(t),
+              `${t} je v rovnakom riadku ako nasadený ${cislo(t)}. ${nasadeny.get(cislo(t)) ?? '?'}`);
+    });
 
     console.log(fail ? '\nNIEKTORE KONTROLY ZLYHALI' : '\nVsetky kontroly presli');
     await c.end();

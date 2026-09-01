@@ -216,14 +216,19 @@ export default function UclDashboard() {
                                     <UclClub name={g.away_name} logo={g.away_logo} country={g.away_country}
                                  countryCode={g.away_country_code} flag={g.away_flag} size={24} />
                                 </div>
-                                <div style={{ fontSize: '0.82rem' }}>
-                                    {g.home_score_tip !== null
-                                        ? <>Tip: <strong>{g.home_score_tip}:{g.away_score_tip}</strong></>
-                                        : <span style={{ color: '#999' }}>netipoval si</span>}
-                                </div>
                             </div>
                             {/* Pri odvete rozhoduje sucet za dvojicu. */}
                             <UclTieSummary game={g} small />
+                            {/* Tip stojí pod zápasom: vedľa neho sa na mobile nezmestí. */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6,
+                                          fontSize: '0.82rem', marginTop: 6 }}>
+                                <span>
+                                    {g.home_score_tip !== null
+                                        ? <>Tip: <strong>{g.home_score_tip}:{g.away_score_tip}</strong></>
+                                        : <span style={{ color: '#999' }}>netipoval si</span>}
+                                </span>
+                                <span style={{ marginLeft: 'auto' }}><UclVenue game={g} inline /></span>
+                            </div>
                             <UclGroupTips game={g} />
                         </div>
                     ))}
@@ -246,7 +251,9 @@ export default function UclDashboard() {
                                 <UclClub name={g.away_name} logo={g.away_logo} country={g.away_country}
                                  countryCode={g.away_country_code} flag={g.away_flag} size={24} />
                             </div>
-                            <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                            <UclTieSummary game={g} small />
+                            {/* Tip stojí pod zápasom: vedľa neho sa na mobile nezmestí. */}
+                            <div style={{ flex: '1 1 100%', display: 'flex', gap: 6, alignItems: 'center' }}>
                                 <input value={draftOf(g, 'home')} onChange={e => setDraft(g.game_id, 'home', e.target.value)}
                                        inputMode="numeric" style={{ width: 38, textAlign: 'center' }} aria-label="Tip domáci" />
                                 <span>:</span>
@@ -255,6 +262,7 @@ export default function UclDashboard() {
                                 <button onClick={() => save(g)} disabled={saving === g.game_id}>
                                     {saving === g.game_id ? '…' : 'Uložiť'}
                                 </button>
+                                <span style={{ marginLeft: 'auto' }}><UclVenue game={g} inline /></span>
                             </div>
                         </div>
                     ))}
@@ -280,7 +288,9 @@ export default function UclDashboard() {
                         <UclClub name={g.away_name} logo={g.away_logo} country={g.away_country}
                                  countryCode={g.away_country_code} flag={g.away_flag} size={24} />
                     </div>
-                    <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                    <UclTieSummary game={g} small />
+                    {/* Tip stojí pod zápasom: vedľa neho sa na mobile nezmestí. */}
+                    <div style={{ flex: '1 1 100%', display: 'flex', gap: 6, alignItems: 'center' }}>
                         <input value={draftOf(g, 'home')} onChange={e => setDraft(g.game_id, 'home', e.target.value)}
                                inputMode="numeric" style={{ width: 38, textAlign: 'center' }} aria-label="Tip domáci" />
                         <span>:</span>
@@ -289,9 +299,8 @@ export default function UclDashboard() {
                         <button onClick={() => save(g)} disabled={saving === g.game_id}>
                             {saving === g.game_id ? '…' : 'Uložiť'}
                         </button>
+                        <span style={{ marginLeft: 'auto' }}><UclVenue game={g} inline /></span>
                     </div>
-                    <UclTieSummary game={g} small />
-                    <UclVenue game={g} />
                 </div>
             ))}
 
@@ -311,12 +320,16 @@ export default function UclDashboard() {
                                 <UclClub name={g.away_name} logo={g.away_logo} country={g.away_country}
                                          countryCode={g.away_country_code} flag={g.away_flag} size={24} />
                             </div>
-                            <div style={{ fontSize: '0.82rem' }}>
-                                Tip: <strong>{g.home_score_tip}:{g.away_score_tip}</strong>
-                                {g.points_earned !== null && <> · <strong style={{ color: '#28a745' }}>{g.points_earned} b.</strong></>}
-                            </div>
                             <UclTieSummary game={g} small />
-                            <UclVenue game={g} />
+                            {/* Tip stojí pod zápasom: vedľa neho sa na mobile nezmestí. */}
+                            <div style={{ flex: '1 1 100%', display: 'flex', alignItems: 'center',
+                                          gap: 6, fontSize: '0.82rem' }}>
+                                <span>
+                                    Tip: <strong>{g.home_score_tip}:{g.away_score_tip}</strong>
+                                    {g.points_earned !== null && <> · <strong style={{ color: '#28a745' }}>{g.points_earned} b.</strong></>}
+                                </span>
+                                <span style={{ marginLeft: 'auto' }}><UclVenue game={g} inline /></span>
+                            </div>
                         </div>
                     ))}
                 </>

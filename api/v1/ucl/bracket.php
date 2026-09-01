@@ -137,9 +137,15 @@ foreach ($FAZY as $kod => $nazov) {
     }
 
     // Poradie dvojic podla cisla v tie_id (PO-1, PO-2, ... PO-10).
-    usort($zoznam, function ($x, $y) {
+    //
+    // Baraz ide OPACNE: vitaz PO-i hra proti nasadenemu (9-i), takze pri
+    // rastucom poradi by prvy stlpec zacinal 8. miestom, kym osemfinale
+    // zacina prvym (R16-1 patri lidrovi tabulky). Stlpce by si nesedeli.
+    $klesajuco = $kod === 'PO';
+    usort($zoznam, function ($x, $y) use ($klesajuco) {
         $n = fn($t) => $t === null ? 0 : (int)substr(strrchr($t, '-'), 1);
-        return $n($x['tie_id']) <=> $n($y['tie_id']);
+        return $klesajuco ? $n($y['tie_id']) <=> $n($x['tie_id'])
+                          : $n($x['tie_id']) <=> $n($y['tie_id']);
     });
 
     // Prvych osem baraz nehra, ale v strome uz svoje miesto ma: caka na vitaza
