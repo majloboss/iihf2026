@@ -10,7 +10,7 @@ const denFmt = s => {
     return Number.isNaN(d.getTime()) ? '' : d.toLocaleDateString('sk-SK', { day: 'numeric', month: 'numeric' });
 };
 
-function Tim({ tim, goly, vitaz, rozhodnute }) {
+function Tim({ tim, skore = [], vitaz, rozhodnute }) {
     const prazdny = !tim.name;
     return (
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 8px',
@@ -36,11 +36,19 @@ function Tim({ tim, goly, vitaz, rozhodnute }) {
                     </span>
                 )}
             </span>
-            <span style={{ fontWeight: 700, fontSize: '0.85rem',
-                           fontVariantNumeric: 'tabular-nums',
-                           color: goly === null ? '#ccc' : vitaz ? '#1a7f37' : '#666' }}>
-                {goly === null ? '–' : goly}
-            </span>
+            {/* Góly za každý zápas zvlášť, ako na FlashScore. Skóre po predĺžení
+                či penaltách ide malým číslom do zátvorky vedľa neho. */}
+            {skore.map((z, i) => (
+                <span key={i} title={z.den} style={{ width: 22, textAlign: 'center', flexShrink: 0,
+                                       fontWeight: vitaz ? 700 : 400, fontSize: '0.82rem',
+                                       fontVariantNumeric: 'tabular-nums',
+                                       color: z.g === null ? '#ccc' : vitaz ? '#1a7f37' : '#666' }}>
+                    {z.g === null ? '–' : z.g}
+                    {z.pen !== null && (
+                        <sup style={{ fontSize: '0.62rem', color: '#dc3545' }}>({z.pen})</sup>
+                    )}
+                </span>
+            ))}
         </div>
     );
 }
@@ -49,28 +57,32 @@ function Dvojica({ tie }) {
     const rozhodnute = tie.winner_id !== null;
     const zapasy = [tie.first_leg, tie.second_leg].filter(Boolean);
 
+    // Nasadený tím baráž nehrá a čaká na súpera — v strome stojí sám.
+    if (tie.seeded) {
+        return (
+            <div style={{ background: '#fff', border: '1px solid #e9ecef', borderRadius: 8,
+                          padding: 6, marginBottom: 10 }}>
+                <Tim tim={tie.team_a} vitaz={false} rozhodnute={false} />
+            </div>
+        );
+    }
+
+    // Skóre po 90 minútach; keď sa hralo predĺženie, ide konečný stav do
+    // zátvorky — inak by nebolo vidieť, ako sa dvojica rozhodla.
+    const skoreTimu = strana => zapasy.map(z => ({
+        g:   strana === 'a' ? z.hs : z.ag,
+        pen: (z.hf !== null && z.af !== null) ? (strana === 'a' ? z.hf : z.af) : null,
+        den: denFmt(z.start_time),
+    }));
+
     return (
         <div style={{ background: '#fff', border: '1px solid #e9ecef', borderRadius: 8,
                       padding: 6, marginBottom: 10 }}>
-            <Tim tim={tie.team_a} goly={tie.goals_a}
+            <Tim tim={tie.team_a} skore={skoreTimu('a')}
                  vitaz={rozhodnute && tie.winner_id === tie.team_a.id} rozhodnute={rozhodnute} />
-            <Tim tim={tie.team_b} goly={tie.goals_b}
+            <Tim tim={tie.team_b} skore={skoreTimu('b')}
                  vitaz={rozhodnute && tie.winner_id === tie.team_b.id} rozhodnute={rozhodnute} />
 
-            {/* Výsledky jednotlivých zápasov — súčet sám osebe nepovie, ako sa hralo. */}
-            {zapasy.some(z => z.hs !== null) && (
-                <div style={{ display: 'flex', gap: 8, justifyContent: 'center',
-                              fontSize: '0.7rem', color: '#999', marginTop: 3 }}>
-                    {zapasy.map(z => (
-                        <span key={z.game_id} title={denFmt(z.start_time)}>
-                            {z.hs === null ? '–' : `${z.hs}:${z.ag}`}
-                            {z.hf !== null && z.af !== null && (
-                                <span style={{ color: '#dc3545' }}> ({z.hf}:{z.af} pp)</span>
-                            )}
-                        </span>
-                    ))}
-                </div>
-            )}
         </div>
     );
 }
@@ -108,20 +120,6 @@ export default function UclBracket() {
                                       marginBottom: 8, textAlign: 'center' }}>
                             {f.name}
                         </div>
-                        {/* Prvá osmička baráž nehrá a čaká na súpera v osemfinále.
-                            V pavúku stojí nad dvojicami, zoradená od 1. miesta. */}
-                        {f.seeded?.length > 0 && (
-                            <div style={{ background: '#f8f9fa', border: '1px dashed #dee2e6',
-                                          borderRadius: 8, padding: 6, marginBottom: 10 }}>
-                                <div style={{ fontSize: '0.68rem', color: '#888', textAlign: 'center',
-                                              marginBottom: 4 }}>
-                                    postupujú priamo do osemfinále
-                                </div>
-                                {f.seeded.map(t => (
-                                    <Tim key={t.id} tim={t} goly={null} vitaz={false} rozhodnute={false} />
-                                ))}
-                            </div>
-                        )}
                         {f.ties.length === 0
                             ? <div style={{ fontSize: '0.78rem', color: '#bbb', textAlign: 'center' }}>
                                   zatiaľ bez dvojíc

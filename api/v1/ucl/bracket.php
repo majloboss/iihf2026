@@ -142,28 +142,46 @@ foreach ($FAZY as $kod => $nazov) {
         return $n($x['tie_id']) <=> $n($y['tie_id']);
     });
 
-    // Prvych osem baraz nehra a caka na supera v osemfinale. V pavuku patria
-    // pred nu, aby bolo vidiet celu cestu — inak sa v osemfinale zjavia
-    // odnikial. Nasadeni su zoradeni od 1. miesta nadol.
-    $priami = [];
+    // Prvych osem baraz nehra, ale v strome uz svoje miesto ma: caka na vitaza
+    // konkretnej dvojice. Vitaz PO-i hra v osemfinale proti nasadenemu (9-i),
+    // takze nasadeny patri do riadku vedla PO-(9-i) — nie do zoznamu nad
+    // barazou, kde by sa nedalo vycitat, na koho caka.
     if ($kod === 'PO') {
-        $klub = $pdo->prepare('SELECT c.club_id, c.club_name, c.logo_file
+        $klub = $pdo->prepare('SELECT s.rank, c.club_id, c.club_name, c.logo_file
                                  FROM "lm2026-27".group_standings s
                                  JOIN admin.uefa_clubs c ON c.club_id = s.team_id
                                 WHERE s.phase = \'LEAGUE\' AND s.rank BETWEEN 1 AND 8
                                 ORDER BY s.rank');
         $klub->execute();
-        foreach ($klub->fetchAll() as $i => $k) {
-            $priami[] = ['id' => (int)$k['club_id'], 'name' => $k['club_name'],
-                         'logo' => $k['logo_file'], 'origin' => ($i + 1) . '. v tabuľke'];
+        $nasadeni = [];
+        foreach ($klub->fetchAll() as $k) {
+            $nasadeni[(int)$k['rank']] = ['id' => (int)$k['club_id'], 'name' => $k['club_name'],
+                                          'logo' => $k['logo_file'],
+                                          'origin' => (int)$k['rank'] . '. v tabuľke'];
         }
+
+        // Nasadeny sa vlozi ako samostatny riadok pred dvojicu, z ktorej mu
+        // pride super — v strome tak stoji presne tam, kde na neho caka.
+        $sPriamymi = [];
+        foreach ($zoznam as $t) {
+            $i = (int)substr(strrchr((string)$t['tie_id'], '-'), 1);
+            $rank = 9 - $i;
+            if (isset($nasadeni[$rank])) {
+                $sPriamymi[] = ['tie_id' => null, 'seeded' => true,
+                                'team_a' => $nasadeni[$rank],
+                                'team_b' => ['id' => null, 'name' => null, 'logo' => null, 'origin' => null],
+                                'goals_a' => null, 'goals_b' => null, 'winner_id' => null,
+                                'first_leg' => null, 'second_leg' => null];
+            }
+            $sPriamymi[] = $t;
+        }
+        $zoznam = $sPriamymi;
     }
 
     $vystup[] = [
         'phase'  => $kod,
         'name'   => $nazov,
         'ties'   => $zoznam,
-        'seeded' => $priami,
         // Faza bez urcenych timov sa v pavuku ukaze ako prazdna kostra.
         'ready'  => (bool)array_filter($zoznam, fn($t) => $t['team_a']['id'] !== null),
     ];
