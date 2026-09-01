@@ -204,10 +204,11 @@ export default function UclDashboard() {
                                 </div>
                                 {/* Odznak LIVE patrí k dvojici, nie k dátumu — inak visí
                                     mimo zápasu a čitateľ ho k nemu nepriradí. */}
-                                <div style={{ flex: 1, minWidth: 240, display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: 8 }}>
+                                <div style={{ flex: 1, minWidth: 240, display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'stretch', gap: 8 }}>
                                     <UclClub name={g.home_name} logo={g.home_logo} country={g.home_country}
                                  countryCode={g.home_country_code} flag={g.home_flag} align="right" size={24} />
-                                    <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
+                                    <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center',
+                                               justifyContent: 'center', gap: 3 }}>
                                         <span className="liveBadge">LIVE</span>
                                         <strong style={{ color: '#dc3545' }}>
                                             {scoreText(g) ?? 'vs'}
@@ -244,10 +245,10 @@ export default function UclDashboard() {
                             <div style={{ minWidth: 150, fontSize: '0.78rem', color: '#666', whiteSpace: 'nowrap' }}>
                                 {dayFmt(g.start_time)} <span style={{ color: '#999' }}>{shortPhase(g)}</span>
                             </div>
-                            <div style={{ flex: 1, minWidth: 240, display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: 8 }}>
+                            <div style={{ flex: 1, minWidth: 240, display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'stretch', gap: 8 }}>
                                 <UclClub name={g.home_name} logo={g.home_logo} country={g.home_country}
                                  countryCode={g.home_country_code} flag={g.home_flag} align="right" size={24} />
-                                <span style={{ color: '#bbb' }}>vs</span>
+                                <span style={{ color: '#bbb', alignSelf: 'center' }}>vs</span>
                                 <UclClub name={g.away_name} logo={g.away_logo} country={g.away_country}
                                  countryCode={g.away_country_code} flag={g.away_flag} size={24} />
                             </div>
@@ -281,10 +282,10 @@ export default function UclDashboard() {
                     <div style={{ minWidth: 150, fontSize: '0.78rem', color: '#666', whiteSpace: 'nowrap' }}>
                         {dayFmt(g.start_time)} <span style={{ color: '#999' }}>{shortPhase(g)}</span>
                     </div>
-                    <div style={{ flex: 1, minWidth: 240, display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: 8 }}>
+                    <div style={{ flex: 1, minWidth: 240, display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'stretch', gap: 8 }}>
                         <UclClub name={g.home_name} logo={g.home_logo} country={g.home_country}
                                  countryCode={g.home_country_code} flag={g.home_flag} align="right" size={24} />
-                        <span style={{ color: '#bbb' }}>vs</span>
+                        <span style={{ color: '#bbb', alignSelf: 'center' }}>vs</span>
                         <UclClub name={g.away_name} logo={g.away_logo} country={g.away_country}
                                  countryCode={g.away_country_code} flag={g.away_flag} size={24} />
                     </div>
@@ -313,10 +314,10 @@ export default function UclDashboard() {
                             <div style={{ minWidth: 150, fontSize: '0.78rem', color: '#666', whiteSpace: 'nowrap' }}>
                                 {dayFmt(g.start_time)} <span style={{ color: '#999' }}>{shortPhase(g)}</span>
                             </div>
-                            <div style={{ flex: 1, minWidth: 240, display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: 8 }}>
+                            <div style={{ flex: 1, minWidth: 240, display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'stretch', gap: 8 }}>
                                 <UclClub name={g.home_name} logo={g.home_logo} country={g.home_country}
                                          countryCode={g.home_country_code} flag={g.home_flag} align="right" size={24} />
-                                <strong style={{ color: '#1a3a6b' }}>{scoreText(g)}</strong>
+                                <strong style={{ color: '#1a3a6b', alignSelf: 'center' }}>{scoreText(g)}</strong>
                                 <UclClub name={g.away_name} logo={g.away_logo} country={g.away_country}
                                          countryCode={g.away_country_code} flag={g.away_flag} size={24} />
                             </div>

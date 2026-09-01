@@ -174,15 +174,7 @@ export default function Messages() {
 
     return (
         <div className={styles.wrap}>
-            <div className={styles.header}>
-                <img src="/menu_spravy.png" alt="" className={styles.headerIcon} />
-                <div>
-                    <div className={styles.headerTitle}>{aktivna.label}</div>
-                    <div className={styles.headerSub}>{aktivna.sub}</div>
-                </div>
-            </div>
-
-            <div style={{ display: 'flex', gap: 4, marginBottom: 12, borderBottom: '1px solid #e8ecf0' }}>
+            <div style={{ display: 'flex', gap: 4, borderBottom: '1px solid #e8ecf0' }}>
                 {TABS.map(t => (
                     <button key={t.key}
                             onClick={() => setParams(t.key === TABS[0].key ? {} : { tab: t.key })}
@@ -195,6 +187,12 @@ export default function Messages() {
                         {t.label}
                     </button>
                 ))}
+            </div>
+
+            {/* Popis sekcie stojí pod záložkami — hlavička nad nimi len opakovala
+                názov aktívnej záložky a brala miesto. */}
+            <div className={styles.headerSub} style={{ margin: '8px 2px 12px' }}>
+                {aktivna.sub}
             </div>
 
             {/* Vlákno s adminom si drží vlastný stav, preto sa nechá odmontovať. */}

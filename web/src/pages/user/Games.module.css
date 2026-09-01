@@ -16,6 +16,15 @@
 }
 .filters::-webkit-scrollbar { display: none; }
 
+/* Riadok vyraďovacích fáz sa nekrolluje — tlačidlo KLUBY sa musí dať odsunúť
+   doprava, čo v scrollovacom kontajneri nefunguje. Fáz je málo, zmestia sa. */
+.filtersWrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    align-items: center;
+}
+
 .btnTabulky, .btnTabulkyActive {
     padding: 5px 10px;
     border-radius: 6px;

@@ -168,7 +168,7 @@ export default function UclGames() {
             </div>
 
             {/* 2. riadok — vyraďovacie fázy; Kluby vpravo, pod posledným kolom */}
-            <div className={styles.filters} style={{ marginTop: 6 }}>
+            <div className={styles.filtersWrap} style={{ marginTop: 6 }}>
                 {PHASES.filter(p => p.code !== 'LEAGUE').map(p => (
                     <button key={p.key} title={p.title}
                         className={phaseBtnClass(p, phase === p.key)}
@@ -256,11 +256,12 @@ export default function UclGames() {
                                     </span>
                                 </div>
 
-                                <div style={{ flex: 1, minWidth: 250, display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: 10 }}>
+                                <div style={{ flex: 1, minWidth: 250, display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'stretch', gap: 10 }}>
                                     <UclClub name={g.home_name} logo={g.home_logo} country={g.home_country}
                                           countryCode={g.home_country_code} flag={g.home_flag} align="right" />
                                     {/* Rozohraty zapas sa oznaci rovnako ako v prehlade. */}
-                                    <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
+                                    <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center',
+                                                   justifyContent: 'center', gap: 3 }}>
                                         {jeLive && <span className="liveBadge">LIVE</span>}
                                         <strong style={{ color: jeLive ? '#dc3545' : hasResult ? '#1a3a6b' : '#bbb' }}>
                                             {hasResult ? scoreText(g) : 'vs'}

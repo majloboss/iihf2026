@@ -92,13 +92,11 @@
 }
 .cardHeader:hover { background: #f8f9fb; }
 
-/* Na úzkej obrazovke sa tlačidlá zalomia pod text: vedľa seba mu nechávali
-   polovicu šírky a názov skupiny sa lámal do niekoľkých riadkov. */
-@media (max-width: 700px) {
-    .cardHeader { flex-wrap: wrap; }
-    .cardLeft   { flex: 1 1 100%; }
-    .cardActions { flex: 1 1 100%; justify-content: flex-start; }
-}
+/* Tlačidlá stoja pod textom, nie vedľa neho: vedľa seba mu nechávali polovicu
+   šírky a názov skupiny sa lámal do niekoľkých riadkov. */
+.cardHeader  { flex-wrap: wrap; }
+.cardLeft    { flex: 1 1 100%; }
+.cardActions { flex: 1 1 100%; justify-content: flex-start; }
 
 .cardLeft {
     display: flex;

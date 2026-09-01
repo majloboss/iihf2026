@@ -5,9 +5,12 @@
 
 function ClubText({ name, country, countryCode, flag, right }) {
     return (
+        // Štát je ukotvený k spodku, aby stál v jednej rovine aj vtedy, keď sa
+        // jeden názov klubu zalomí do dvoch riadkov a druhý nie.
         <span style={{ display: 'flex', flexDirection: 'column', minWidth: 0,
+                       height: '100%', justifyContent: 'flex-end',
                        alignItems: right ? 'flex-end' : 'flex-start' }}>
-            <span style={{ fontWeight: 500, lineHeight: 1.2 }}>{name}</span>
+            <span style={{ flex: 1, fontWeight: 500, lineHeight: 1.2 }}>{name}</span>
             {(country || countryCode) && (
                 <span style={{ display: 'flex', alignItems: 'center', gap: 4,
                                fontSize: '0.72rem', color: '#888', lineHeight: 1.3 }}>
@@ -30,12 +33,13 @@ export default function UclClub({ name, logo, country, countryCode, flag, align,
     if (!name) return <span style={{ color: '#999', fontSize: '0.85rem' }}>zatiaľ neurčený</span>;
     const right = align === 'right';
     return (
-        <span style={{ display: 'flex', alignItems: 'center', gap: 8,
+        <span style={{ display: 'flex', alignItems: 'stretch', gap: 8, height: '100%',
                        justifyContent: right ? 'flex-end' : 'flex-start' }}>
             {right && <ClubText name={name} country={country} countryCode={countryCode} flag={flag} right />}
             {logo
                 ? <img src={`/logos/ucl2026/${logo}`} alt=""
-                       style={{ width: size, height: size, objectFit: 'contain', flexShrink: 0 }}
+                       style={{ width: size, height: size, objectFit: 'contain', flexShrink: 0,
+                                alignSelf: 'center' }}
                        onError={e => { e.currentTarget.style.visibility = 'hidden'; }} />
                 : <span style={{ width: size, flexShrink: 0 }} />}
             {!right && <ClubText name={name} country={country} countryCode={countryCode} flag={flag} />}
