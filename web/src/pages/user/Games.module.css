@@ -400,7 +400,7 @@
 .clubsRow {
     display: grid;
     grid-template-columns: repeat(9, minmax(0, 1fr));
-    gap: 4px;
+    gap: 2px;
     margin: 10px 0 0;
 }
 .clubLogo { width: 26px; height: 26px; object-fit: contain; display: block; }
@@ -417,10 +417,12 @@
 .flagBtnActive .clubCode { color: #1a3a6b; }
 
 @media (max-width: 700px) {
-    .clubsRow { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+    .clubsRow { grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 2px; }
+    .clubsRow .flagBtn { padding: 4px 1px; }
 }
 @media (max-width: 480px) {
-    .clubsRow { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 3px; }
+    .clubsRow { grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 1px; }
+    .clubsRow .flagBtn { padding: 3px 0; border-width: 1px; }
     .clubLogo { width: 22px; height: 22px; }
-    .clubCode { font-size: 0.54rem; }
+    .clubCode { font-size: 0.5rem; letter-spacing: 0; }
 }

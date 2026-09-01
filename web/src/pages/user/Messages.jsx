@@ -164,7 +164,7 @@ function AdminThread() {
 // Zalozka sa da otvorit priamo odkazom, napr. /spravy?tab=organizator.
 const TABS = [
     { key: 'organizator', label: 'Oznamy', sub: 'Oznamy organizátora k súťaži a ich história' },
-    { key: 'admin',       label: 'Správy', sub: 'Otázky pre admina, nahlásenie chyby vo výsledku…' },
+    { key: 'admin',       label: 'Chat s adminom', sub: 'Otázky pre admina, nahlásenie chyby vo výsledku…' },
 ];
 
 export default function Messages() {

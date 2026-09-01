@@ -63,6 +63,8 @@ export default function UclGames() {
     const [phase, setPhase] = useState('');
     const [onlyUntipped, setOnlyUntipped] = useState(false);
     const [club, setClub] = useState('');
+    // Logá klubov zaberajú celý riadok, preto sa ukážu až na vyžiadanie.
+    const [zobrazKluby, setZobrazKluby] = useState(false);
     const [day, setDay] = useState('');
 
     useEffect(() => {
@@ -148,9 +150,7 @@ export default function UclGames() {
 
     return (
         <div>
-            <h2>Zápasy — Liga majstrov</h2>
-
-            {/* 1. riadok — fázy a nenatipované */}
+            {/* 1. riadok — nenatipované a kolá ligovej fázy */}
             <div className={styles.filters} style={{ marginTop: 12 }}>
                 <button
                     className={onlyUntipped ? styles.btnTabulkyActive : styles.btnTabulky}
@@ -158,7 +158,7 @@ export default function UclGames() {
                     title="Zobraz iba zápasy, ktoré si ešte netipoval">
                     1x2{untippedCount > 0 ? ` (${untippedCount})` : ''}
                 </button>
-                {PHASES.map(p => (
+                {PHASES.filter(p => p.code === 'LEAGUE').map(p => (
                     <button key={p.key} title={p.title}
                         className={phaseBtnClass(p, phase === p.key)}
                         onClick={() => { setPhase(cur => cur === p.key ? '' : p.key); setDay(''); }}>
@@ -167,8 +167,29 @@ export default function UclGames() {
                 ))}
             </div>
 
-            {/* 2. riadok — kluby, 9 v riadku */}
-            {clubs.length > 0 && (
+            {/* 2. riadok — vyraďovacie fázy; Kluby vpravo, pod posledným kolom */}
+            <div className={styles.filters} style={{ marginTop: 6 }}>
+                {PHASES.filter(p => p.code !== 'LEAGUE').map(p => (
+                    <button key={p.key} title={p.title}
+                        className={phaseBtnClass(p, phase === p.key)}
+                        onClick={() => { setPhase(cur => cur === p.key ? '' : p.key); setDay(''); }}>
+                        {p.label}
+                    </button>
+                ))}
+                {/* Logá zaberajú celý riadok, preto sa ukážu až na vyžiadanie. */}
+                {clubs.length > 0 && (
+                    <button
+                        className={zobrazKluby ? styles.btnTabulkyActive : styles.btnTabulky}
+                        style={{ marginLeft: 'auto' }}
+                        onClick={() => setZobrazKluby(v => !v)}
+                        title="Filtrovať podľa klubu">
+                        KLUBY{club ? ` (${club})` : ''}
+                    </button>
+                )}
+            </div>
+
+            {/* Logá klubov — až po kliknutí na KLUBY */}
+            {zobrazKluby && clubs.length > 0 && (
                 <div className={styles.clubsRow}>
                     {clubs.map(c => (
                         <button key={c.code} title={c.name}
@@ -227,11 +248,12 @@ export default function UclGames() {
                         return (
                             <div key={g.game_id} className={styles.card}
                                  style={{ padding: 12, marginBottom: 6, display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
-                                <div style={{ minWidth: 92, fontSize: '0.78rem', color: '#666' }}>
-                                    {timeFmt(g.start_time)}
-                                    <div style={{ fontSize: '0.7rem', color: '#999' }}>
+                                <div style={{ minWidth: 92, fontSize: '0.78rem', color: '#666',
+                                              whiteSpace: 'nowrap' }}>
+                                    {timeFmt(g.start_time)}{' '}
+                                    <span style={{ color: '#999' }}>
                                         {g.round_no ? `LF${g.round_no}` : g.game_type_code}
-                                    </div>
+                                    </span>
                                 </div>
 
                                 <div style={{ flex: 1, minWidth: 250, display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: 10 }}>
@@ -248,7 +270,8 @@ export default function UclGames() {
                                           countryCode={g.away_country_code} flag={g.away_flag} />
                                 </div>
 
-                                <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                                <div style={{ display: 'flex', gap: 6, alignItems: 'center',
+                                              flex: '1 1 100%', order: 4 }}>
                                     {!known
                                         ? <span style={{ fontSize: '0.78rem', color: '#999' }}>čaká na súperov</span>
                                         : closed
@@ -268,14 +291,16 @@ export default function UclGames() {
                                                     {saving === g.game_id ? '…' : 'Uložiť'}
                                                 </button>
                                               </>}
+                                    {/* Štadión patrí k tomu istému riadku — vpravo. */}
+                                    <span style={{ marginLeft: 'auto' }}>
+                                        <UclVenue game={g} inline />
+                                    </span>
                                 </div>
 
                                 {/* Pri odvete rozhoduje sucet za dvojicu. */}
                                 <div style={{ width: '100%', order: 3 }}>
                                     <UclTieSummary game={g} small />
                                 </div>
-
-                                <UclVenue game={g} order={4} />
 
                                 {started && <UclGroupTips game={g} />}
                             </div>

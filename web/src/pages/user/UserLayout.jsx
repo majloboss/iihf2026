@@ -6,7 +6,7 @@ import { apiFetch } from '../../api/client';
 import { getUnreadCount } from '../../api/messages';
 import styles from './UserLayout.module.css';
 
-export default function UserLayout() {
+export default function UserLayout({ children }) {
     const { signOut } = useAuth();
     const navigate    = useNavigate();
     const location    = useLocation();
@@ -91,7 +91,9 @@ export default function UserLayout() {
                 <button className={styles.logout} onClick={handleLogout}>Odhlásiť</button>
             </aside>
             <main className={styles.content}>
-                <Outlet />
+                {/* Trasy vnorené cez <Route> prídu cez Outlet; pravidlá sa vkladajú
+                    priamo ako children, lebo ich obsluhuje vlastný router. */}
+                {children ?? <Outlet />}
             </main>
             <nav className={styles.bottomNav}>
                 <NavLink to="/dashboard" className={({ isActive }) => isActive ? styles.active : ''}>

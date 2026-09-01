@@ -36,6 +36,7 @@ import UclAdminResults from './pages/admin/UclAdminResults';
 import UclAdminStandings from './pages/admin/UclAdminStandings';
 import Standings from './pages/user/Standings';
 import PravidlaPublic from './pages/PravidlaPublic';
+import Pravidla from './pages/user/Pravidla';
 import Messages from './pages/user/Messages';
 import Dashboard from './pages/user/Dashboard';
 
@@ -101,6 +102,21 @@ function NacitavamSutaz() {
     return <p style={{ padding: 16, color: '#888' }}>Načítavam…</p>;
 }
 
+// Pravidlá vidí aj neprihlásený, ale prihlásený nesmie prísť o menu: na mobile
+// by sa zo stránky nemal ako vrátiť späť do aplikácie.
+function PravidlaRouter() {
+    // user sa číta synchrónne z úložiska, takže sa naň nečaká.
+    // Admin nemá používateľské menu, takže mu patrí verejná podoba — jej
+    // hlavička ho odkazom vráti do administrácie.
+    const { user } = useAuth();
+    if (!user || user.role === 'admin') return <PravidlaPublic />;
+    return (
+        <CompetitionProvider>
+            <UserLayout><Pravidla /></UserLayout>
+        </CompetitionProvider>
+    );
+}
+
 function HomeRedirect() {
     const { user } = useAuth();
     if (!user) return <Navigate to="/login" replace />;
@@ -129,10 +145,10 @@ export default function App() {
                         <Route path="/spravy"    element={<Messages />} />
                     </Route>
 
-                    {/* Pravidlá sú verejné — dajú sa poslať odkazom aj neregistrovanému.
-                        Trasa stojí mimo chránenej vetvy, ktorá by neprihláseného
-                        poslala na login. */}
-                    <Route path="/pravidla" element={<PravidlaPublic />} />
+                    {/* Jediná adresa pre oboch — už rozposlané odkazy musia fungovať.
+                        Prihlásený ju dostane v bežnom layuote so spodným menu,
+                        neprihlásený s vlastnou hlavičkou. */}
+                    <Route path="/pravidla" element={<PravidlaRouter />} />
 
                     <Route path="/admin" element={
                         <PrivateAdminRoute><CompetitionProvider><AdminLayout /></CompetitionProvider></PrivateAdminRoute>
