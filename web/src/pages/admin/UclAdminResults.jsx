@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { getUclGames, recalcUcl, updateUclGameResult } from '../../api/ucl';
 import { getUclAdminTips, setUclLive, clearUclLive } from '../../api/uclAdmin';
 import UclTieSummary from '../../components/UclTieSummary';
@@ -72,10 +73,15 @@ function TipsPanel({ gameId, game }) {
     const [loading, setLoading] = useState(false);
     const [err, setErr] = useState('');
 
+    // Body sa prepočítajú až pri uložení výsledku. Keď má admin tipy rozbalené
+    // už predtým, zostali by v nich prázdne — preto sa načítajú znovu vždy, keď
+    // sa zmení skóre alebo schválenie zápasu.
+    const skore = `${game?.home_score_regular}:${game?.away_score_regular}:${game?.result_approved}`;
+
     useEffect(() => {
         setLoading(true);
         getUclAdminTips(gameId).then(setTips).catch(e => setErr(e.message)).finally(() => setLoading(false));
-    }, [gameId]);
+    }, [gameId, skore]);
 
     if (loading) return <div className={styles.tipsLoading}>Načítavam tipy…</div>;
     if (err) return <div className={styles.tipsErr}>{err}</div>;
@@ -380,7 +386,9 @@ export default function UclAdminResults() {
     const [error, setError] = useState('');
     const [phase, setPhase] = useState('all');
     const [roundFilter, setRoundFilter] = useState(null);
-    const [selectedDay, setSelectedDay] = useState(null);
+    // Deň sa dá predvoliť odkazom z pavúka: /admin/results?den=2027-02-16.
+    const [searchParams] = useSearchParams();
+    const [selectedDay, setSelectedDay] = useState(() => searchParams.get('den') || null);
     const [recalcing, setRecalcing] = useState(false);
     const [recalcMsg, setRecalcMsg] = useState('');
 

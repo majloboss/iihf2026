@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { getUclGames, saveUclTip } from '../../api/ucl';
 import { asDate, canTip, isUntipped as isUntippedGame, isValidDate, uclScoreText as scoreText } from '../../utils/tipWindow';
 import UclClub, { UclVenue } from '../../components/UclClub';
@@ -65,7 +66,9 @@ export default function UclGames() {
     const [club, setClub] = useState('');
     // Logá klubov zaberajú celý riadok, preto sa ukážu až na vyžiadanie.
     const [zobrazKluby, setZobrazKluby] = useState(false);
-    const [day, setDay] = useState('');
+    // Deň sa dá predvoliť odkazom z pavúka: /games?den=2027-02-16.
+    const [searchParams] = useSearchParams();
+    const [day, setDay] = useState(() => searchParams.get('den') || '');
 
     useEffect(() => {
         getUclGames().then(setGames).catch(e => setError(e.message)).finally(() => setLoading(false));
