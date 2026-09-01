@@ -28,6 +28,17 @@ $rows = $pdo->query('
      ORDER BY g.game_type_code, g.tie_id, g.leg, g.game_id')->fetchAll();
 
 // Zoskupenie na dvojice; finale tvori vlastnu "dvojicu" s jedinym zapasom.
+// Odkial sa tim vzal: miesto v ligovej tabulke alebo dvojica, z ktorej postupil.
+// Kluc je rovnaky, akym sa dvojice zostavuju (ucl_build_bracket.php): do baraze
+// idu miesta 9-24, do osemfinale prvych osem a vitazi baraze PO-1..PO-8, dalej
+// vitazi predoslej fazy v poradi cisla dvojice.
+$tabulka = [];
+foreach ($pdo->query('SELECT rank, team_id FROM "lm2026-27".group_standings
+                       WHERE phase = 'LEAGUE' AND team_id IS NOT NULL
+                       ORDER BY rank')->fetchAll() as $r) {
+    $tabulka[(int)$r['team_id']] = (int)$r['rank'];
+}
+
 $dvojice = [];
 foreach ($rows as $r) {
     $kluc = $r['tie_id'] ?? ($r['game_type_code'] . '-single');
@@ -104,10 +115,19 @@ foreach ($FAZY as $kod => $nazov) {
             'approved'  => (bool)$z['result_approved'],
         ];
 
+        // V barazi a osemfinale sa da povod pomenovat miestom v tabulke; do
+        // dalsich faz sa postupuje z dvojice, ktoru pozna uz sam pavuk.
+        $povod = function ($id) use ($kod, $tabulka) {
+            if ($id === null || $kod !== 'PO' && $kod !== 'R16') return null;
+            return isset($tabulka[$id]) ? $tabulka[$id] . '. v tabuľke' : null;
+        };
+
         $zoznam[] = [
             'tie_id'     => $prvy['tie_id'] ?? null,
-            'team_a'     => ['id' => $timA, 'name' => $menoA, 'logo' => $logoA],
-            'team_b'     => ['id' => $timB, 'name' => $menoB, 'logo' => $logoB],
+            'team_a'     => ['id' => $timA, 'name' => $menoA, 'logo' => $logoA,
+                             'origin' => $povod($timA)],
+            'team_b'     => ['id' => $timB, 'name' => $menoB, 'logo' => $logoB,
+                             'origin' => $povod($timB)],
             'goals_a'    => $golyA,
             'goals_b'    => $golyB,
             'winner_id'  => $vitaz,
@@ -122,10 +142,28 @@ foreach ($FAZY as $kod => $nazov) {
         return $n($x['tie_id']) <=> $n($y['tie_id']);
     });
 
+    // Prvych osem baraz nehra a caka na supera v osemfinale. V pavuku patria
+    // pred nu, aby bolo vidiet celu cestu — inak sa v osemfinale zjavia
+    // odnikial. Nasadeni su zoradeni od 1. miesta nadol.
+    $priami = [];
+    if ($kod === 'PO') {
+        $klub = $pdo->prepare('SELECT c.club_id, c.club_name, c.logo_file
+                                 FROM "lm2026-27".group_standings s
+                                 JOIN admin.uefa_clubs c ON c.club_id = s.team_id
+                                WHERE s.phase = 'LEAGUE' AND s.rank BETWEEN 1 AND 8
+                                ORDER BY s.rank');
+        $klub->execute();
+        foreach ($klub->fetchAll() as $i => $k) {
+            $priami[] = ['id' => (int)$k['club_id'], 'name' => $k['club_name'],
+                         'logo' => $k['logo_file'], 'origin' => ($i + 1) . '. v tabuľke'];
+        }
+    }
+
     $vystup[] = [
         'phase'  => $kod,
         'name'   => $nazov,
         'ties'   => $zoznam,
+        'seeded' => $priami,
         // Faza bez urcenych timov sa v pavuku ukaze ako prazdna kostra.
         'ready'  => (bool)array_filter($zoznam, fn($t) => $t['team_a']['id'] !== null),
     ];

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getUclStandings } from '../../api/ucl';
+import { getUclStandings, getUclBracket } from '../../api/ucl';
 import UclBracket from './UclBracket';
 import styles from './GroupStandings.module.css';
 
@@ -15,7 +15,9 @@ export default function UclStandings() {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(true);
     // Kým beží ligová fáza, zaujíma tabuľka; v play-off skôr pavúk.
-    const [pohlad, setPohlad] = useState('tabulka');
+    const [pohlad, setPohlad] = useState(null);
+    // null = ešte sa nevie, či beží play-off
+    const [jePlayoff, setJePlayoff] = useState(null);
 
     useEffect(() => {
         getUclStandings().then(setRows).catch(e => setError(e.message)).finally(() => setLoading(false));
@@ -24,7 +26,26 @@ export default function UclStandings() {
         return () => clearInterval(iv);
     }, []);
 
-    if (loading) return <p>Načítavam tabuľku…</p>;
+    // Ligová fáza skončila vtedy, keď sú zostavené dvojice baráže — dovtedy
+    // sa nedajú určiť. Pavúk sa načítava aj tak, takže netreba ďalšie volanie.
+    useEffect(() => {
+        getUclBracket()
+            .then(fazy => setJePlayoff(fazy.some(f => f.ready)))
+            // Keď sa pavúka nepodarí načítať, zostane predvolená tabuľka —
+            // obrazovka nesmie ostať visieť na "Načítavam".
+            .catch(() => setJePlayoff(false));
+    }, []);
+
+    // Predvolená záložka sa zvolí až keď sa vie, v ktorej fáze súťaž je;
+    // po prepnutí používateľom sa už nemení.
+    useEffect(() => {
+        if (jePlayoff === null) return;
+        setPohlad(cur => cur ?? (jePlayoff ? 'pavuk' : 'tabulka'));
+    }, [jePlayoff]);
+
+    // Kým sa nevie, ktorá fáza beží, nevykreslí sa ani jedna záložka — inak by
+    // pohľad preblikol z tabuľky na pavúka.
+    if (loading || pohlad === null) return <p>Načítavam tabuľku…</p>;
     if (error) return <p className={styles.error}>✗ {error}</p>;
 
     const zalozka = (kluc, popis) => (
@@ -44,8 +65,10 @@ export default function UclStandings() {
 
             <div style={{ display: 'flex', gap: 4, margin: '10px 0 14px',
                           borderBottom: '1px solid #e9ecef' }}>
-                {zalozka('tabulka', 'Ligová tabuľka')}
-                {zalozka('pavuk', 'Vyraďovacia časť')}
+                {/* Po ligovej fáze je dôležitejší pavúk, preto ide dopredu. */}
+                {jePlayoff === true
+                    ? <>{zalozka('pavuk', 'Play-off')}{zalozka('tabulka', 'Ligová fáza')}</>
+                    : <>{zalozka('tabulka', 'Ligová fáza')}{zalozka('pavuk', 'Play-off')}</>}
             </div>
 
             {pohlad === 'pavuk' && <UclBracket />}

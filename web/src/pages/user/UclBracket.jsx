@@ -21,11 +21,20 @@ function Tim({ tim, goly, vitaz, rozhodnute }) {
                        style={{ width: 20, height: 20, objectFit: 'contain', flexShrink: 0 }}
                        onError={e => { e.currentTarget.style.visibility = 'hidden'; }} />
                 : <span style={{ width: 20, flexShrink: 0 }} />}
-            <span style={{ flex: 1, minWidth: 0, fontSize: '0.82rem',
-                           fontWeight: vitaz ? 700 : 400,
-                           color: prazdny ? '#bbb' : rozhodnute && !vitaz ? '#999' : '#222',
-                           overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {tim.name || 'zatiaľ neurčený'}
+            <span style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
+                <span style={{ display: 'block', fontSize: '0.82rem',
+                               fontWeight: vitaz ? 700 : 400,
+                               color: prazdny ? '#bbb' : rozhodnute && !vitaz ? '#999' : '#222',
+                               overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {tim.name || 'zatiaľ neurčený'}
+                </span>
+                {/* Odkiaľ tím prišiel — inak sa v ďalšej fáze zjaví odnikiaľ. */}
+                {tim.origin && (
+                    <span style={{ display: 'block', fontSize: '0.65rem', color: '#aaa',
+                                   overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {tim.origin}
+                    </span>
+                )}
             </span>
             <span style={{ fontWeight: 700, fontSize: '0.85rem',
                            fontVariantNumeric: 'tabular-nums',
@@ -99,6 +108,20 @@ export default function UclBracket() {
                                       marginBottom: 8, textAlign: 'center' }}>
                             {f.name}
                         </div>
+                        {/* Prvá osmička baráž nehrá a čaká na súpera v osemfinále.
+                            V pavúku stojí nad dvojicami, zoradená od 1. miesta. */}
+                        {f.seeded?.length > 0 && (
+                            <div style={{ background: '#f8f9fa', border: '1px dashed #dee2e6',
+                                          borderRadius: 8, padding: 6, marginBottom: 10 }}>
+                                <div style={{ fontSize: '0.68rem', color: '#888', textAlign: 'center',
+                                              marginBottom: 4 }}>
+                                    postupujú priamo do osemfinále
+                                </div>
+                                {f.seeded.map(t => (
+                                    <Tim key={t.id} tim={t} goly={null} vitaz={false} rozhodnute={false} />
+                                ))}
+                            </div>
+                        )}
                         {f.ties.length === 0
                             ? <div style={{ fontSize: '0.78rem', color: '#bbb', textAlign: 'center' }}>
                                   zatiaľ bez dvojíc
