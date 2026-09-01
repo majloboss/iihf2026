@@ -2,8 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { getUclGames, saveUclTip } from '../../api/ucl';
 import { asDate, canTip, isUntipped as isUntippedGame, isValidDate, uclScoreText as scoreText } from '../../utils/tipWindow';
-import UclClub, { UclVenue } from '../../components/UclClub';
-import UclTieSummary from '../../components/UclTieSummary';
+import UclZapas from '../../components/UclZapas';
 import UclGroupTips from './UclGroupTips';
 import styles from './Games.module.css';
 
@@ -254,60 +253,56 @@ export default function UclGames() {
                         const jeLive = started && !g.result_approved;
                         return (
                             <div key={g.game_id} className={styles.card}
-                                 style={{ padding: 12, marginBottom: 6, display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
-                                <div style={{ minWidth: 92, fontSize: '0.78rem', color: '#666',
-                                              whiteSpace: 'nowrap' }}>
-                                    {timeFmt(g.start_time)}{' '}
-                                    <span style={{ color: '#999' }}>
-                                        {g.round_no ? `LF${g.round_no}` : g.game_type_code}
-                                    </span>
-                                </div>
-
-                                <div style={{ flex: 1, minWidth: 250, display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'stretch', gap: 10 }}>
-                                    <UclClub name={g.home_name} logo={g.home_logo} country={g.home_country}
-                                          countryCode={g.home_country_code} flag={g.home_flag} align="right" />
-                                    {/* Rozohraty zapas sa oznaci rovnako ako v prehlade. */}
-                                    <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center',
-                                                   justifyContent: 'center', gap: 3 }}>
-                                        {jeLive && <span className="liveBadge">LIVE</span>}
-                                        <strong style={{ color: jeLive ? '#dc3545' : hasResult ? '#1a3a6b' : '#bbb' }}>
-                                            {hasResult ? scoreText(g) : 'vs'}
-                                        </strong>
-                                    </span>
-                                    <UclClub name={g.away_name} logo={g.away_logo} country={g.away_country}
-                                          countryCode={g.away_country_code} flag={g.away_flag} />
-                                </div>
-
-                                {/* Štadión má vlastný riadok nad tipom, oboje v strede. */}
-                                <UclVenue game={g} order={4} />
-
-                                <div style={{ display: 'flex', gap: 6, alignItems: 'center',
-                                              justifyContent: 'center', flex: '1 1 100%', order: 5 }}>
+                                 style={{ padding: 12, marginBottom: 6 }}>
+                                {/* Dátum sa opakuje aj v karte: pri skrolovaní hlavička
+                                    dňa zmizne a bez neho sa človek stratí. */}
+                                <UclZapas g={g}
+                                    termin={<>
+                                        <div style={{ whiteSpace: 'nowrap' }}>{dayFmt(g.start_time)}</div>
+                                        <div style={{ whiteSpace: 'nowrap' }}>
+                                            {timeFmt(g.start_time)}{' '}
+                                            <span style={{ color: '#999' }}>
+                                                {g.round_no ? `LF${g.round_no}` : g.game_type_code}
+                                            </span>
+                                        </div>
+                                    </>}
+                                    stred={
+                                        <span style={{ display: 'flex', flexDirection: 'column',
+                                                       alignItems: 'center', gap: 3 }}>
+                                            {jeLive && <span className="liveBadge">LIVE</span>}
+                                            <strong style={{ color: jeLive ? '#dc3545' : hasResult ? '#1a3a6b' : '#bbb' }}>
+                                                {hasResult ? scoreText(g) : 'vs'}
+                                            </strong>
+                                        </span>}
+                                    akcia={known && !closed && (
+                                        <button onClick={() => save(g)} disabled={saving === g.game_id}
+                                                style={{ width: '100%' }}>
+                                            {saving === g.game_id ? '…' : 'Uložiť'}
+                                        </button>)}
+                                    size={28}>
                                     {!known
-                                        ? <span style={{ fontSize: '0.78rem', color: '#999' }}>čaká na súperov</span>
+                                        ? <span style={{ gridColumn: '2 / 5', textAlign: 'center',
+                                                         fontSize: '0.78rem', color: '#999' }}>čaká na súperov</span>
                                         : closed
-                                            ? <span style={{ fontSize: '0.82rem' }}>
+                                            ? <span style={{ gridColumn: '2 / 5', textAlign: 'center',
+                                                             fontSize: '0.82rem' }}>
                                                 {g.home_score_tip !== null
                                                     ? <>Tip: <strong>{g.home_score_tip}:{g.away_score_tip}</strong>
                                                         {g.points_earned !== null && <> · {g.points_earned} b.</>}</>
                                                     : <span style={{ color: '#999' }}>netipoval si</span>}
                                               </span>
                                             : <>
-                                                <input value={draftOf(g, 'home')} onChange={e => setDraft(g.game_id, 'home', e.target.value)}
-                                                       inputMode="numeric" style={{ width: 40, textAlign: 'center' }} aria-label="Tip domáci" />
-                                                <span>:</span>
-                                                <input value={draftOf(g, 'away')} onChange={e => setDraft(g.game_id, 'away', e.target.value)}
-                                                       inputMode="numeric" style={{ width: 40, textAlign: 'center' }} aria-label="Tip hostia" />
-                                                <button onClick={() => save(g)} disabled={saving === g.game_id}>
-                                                    {saving === g.game_id ? '…' : 'Uložiť'}
-                                                </button>
+                                                <span style={{ gridColumn: 2, justifySelf: 'end' }}>
+                                                    <input value={draftOf(g, 'home')} onChange={e => setDraft(g.game_id, 'home', e.target.value)}
+                                                           inputMode="numeric" style={{ width: 40, textAlign: 'center' }} aria-label="Tip domáci" />
+                                                </span>
+                                                <span style={{ gridColumn: 3, textAlign: 'center' }}>:</span>
+                                                <span style={{ gridColumn: 4, justifySelf: 'start' }}>
+                                                    <input value={draftOf(g, 'away')} onChange={e => setDraft(g.game_id, 'away', e.target.value)}
+                                                           inputMode="numeric" style={{ width: 40, textAlign: 'center' }} aria-label="Tip hostia" />
+                                                </span>
                                               </>}
-                                </div>
-
-                                {/* Pri odvete rozhoduje sucet za dvojicu. */}
-                                <div style={{ width: '100%', order: 3 }}>
-                                    <UclTieSummary game={g} small />
-                                </div>
+                                </UclZapas>
 
                                 {started && <UclGroupTips game={g} />}
                             </div>
