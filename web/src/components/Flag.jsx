@@ -28,9 +28,7 @@ export function useTeamNames(compId) {
     return names;
 }
 
-const flagUrl = (code, compId, slug) => {
-    // UCL sú kluby, nie reprezentácie — namiesto vlajky sa zobrazí logo klubu.
-    if (slug === 'ucl2026') return `/logos/ucl2026/${code?.toLowerCase()}_logo.png`;
+const flagUrl = (code, compId) => {
     if (compId === 2) return `/flags/fifa_flag_${code?.toLowerCase()}.png`;
     return `/flags/team_flag_${code?.toLowerCase()}.png`;
 };
@@ -45,13 +43,19 @@ export function Flag({ code, compId, width, height, style, className }) {
     const slug = comp?.competitions?.find(c => c.id === compId)?.slug;
     const fullName = names[code?.toUpperCase()] || code || '';
 
+    // UCL sú kluby, nie reprezentácie — vlajka k nim nepatrí. Logo sa tu kresliť
+    // nedá: názov súboru je v uefa_clubs.logo_file a u väčšiny klubov nesedí s
+    // kódom (GAL → galatasaray_logo.png). Kde náhodou sedel, ukázalo sa logo,
+    // inde rozbitý obrázok. Kluby s logom zobrazuje komponent UclClub.
+    if (slug === 'ucl2026') return null;
+
     const imgStyle = className
         ? style
         : { width: width ?? 14, height: height ?? 10, objectFit: 'cover', verticalAlign: 'middle', ...style };
 
     return (
         <img
-            src={flagUrl(code, compId, slug)}
+            src={flagUrl(code, compId)}
             alt={code}
             title={fullName}
             className={className}
