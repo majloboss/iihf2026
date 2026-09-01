@@ -80,6 +80,10 @@ function StandingsCard({ group, currentUserId }) {
 
 export default function UclDashboard() {
     const [games, setGames] = useState([]);
+    // Hranica medzi sekciami sa mení plynutím času, nie dátami: zápas prejde
+    // z "začínajú o chvíľu" do "prebiehajúce" sám. Čas preto žije v stave a
+    // obnovuje sa spolu so zápasmi — v renderi sa Date.now() volať nesmie.
+    const [teraz, setTeraz] = useState(() => Date.now());
     const [drafts, setDrafts] = useState({});
     const [saving, setSaving] = useState(null);
     const [message, setMessage] = useState('');
@@ -95,7 +99,10 @@ export default function UclDashboard() {
         getUclGames().then(setGames).catch(e => setError(e.message)).finally(() => setLoading(false));
         apiFetch('v1/announcement').then(setAnnouncement).catch(() => {});
         // Priebežné skóre a body sa menia počas zápasu.
-        const iv = setInterval(() => { getUclGames().then(setGames).catch(() => {}); }, 30000);
+        const iv = setInterval(() => {
+            setTeraz(Date.now());
+            getUclGames().then(setGames).catch(() => {});
+        }, 30000);
         return () => clearInterval(iv);
     }, []);
 
@@ -112,10 +119,10 @@ export default function UclDashboard() {
     // už nepatrí medzi tipovateľné, ale ešte sa nehrá — bez tejto sekcie by
     // z prehľadu na pár minút úplne zmizol.
     const live = useMemo(() => games
-        .filter(g => g.home_team_id && g.away_team_id && !g.result_approved
-                     && isValidDate(asDate(g.start_time))
-                     && asDate(g.start_time).getTime() - Date.now() <= TIP_LOCK_MS)
-        .sort((a, b) => asDate(a.start_time) - asDate(b.start_time)), [games]);
+            .filter(g => g.home_team_id && g.away_team_id && !g.result_approved
+                         && isValidDate(asDate(g.start_time))
+                         && asDate(g.start_time).getTime() - teraz <= TIP_LOCK_MS)
+            .sort((a, b) => asDate(a.start_time) - asDate(b.start_time)), [games, teraz]);
 
     // Zápasy, ktoré sa dajú tipovať — rovnaké pravidlo ako na serveri.
     // Bez orezania — obmedzí sa až `upcomingRest`, keď je známe, čo je hore.
@@ -150,10 +157,10 @@ export default function UclDashboard() {
         return games
             .filter(g => !shown.has(g.game_id) && !g.result_approved
                          && isValidDate(asDate(g.start_time))
-                         && asDate(g.start_time).getTime() - Date.now() > TIP_LOCK_MS)
+                         && asDate(g.start_time).getTime() - teraz > TIP_LOCK_MS)
             .sort((a, b) => asDate(a.start_time) - asDate(b.start_time))
             .slice(0, 8);
-    }, [upcoming, untipped, games]);
+    }, [upcoming, untipped, games, teraz]);
 
     const played = useMemo(() => games
         .filter(g => g.result_approved && g.home_score_tip !== null)
@@ -208,7 +215,7 @@ export default function UclDashboard() {
             {live.length > 0 && (
                 <>
                     <h3 style={{ marginTop: 20, display: 'flex', alignItems: 'center', gap: 8 }}>
-                        {live.some(g => asDate(g.start_time) <= new Date())
+                        {live.some(g => asDate(g.start_time).getTime() <= teraz)
                             ? 'Prebiehajúce zápasy' : 'Začínajú o chvíľu'}
                     </h3>
                     {live.map(g => (
@@ -227,7 +234,7 @@ export default function UclDashboard() {
                                                justifyContent: 'center', gap: 3 }}>
                                         {/* Odznak LIVE len keď sa naozaj hrá — v okne
                                             pred výkopom by klamal. */}
-                                        {asDate(g.start_time) <= new Date()
+                                        {asDate(g.start_time).getTime() <= teraz
                                             ? <span className="liveBadge">LIVE</span>
                                             : <span style={{ fontSize: '0.68rem', color: '#999' }}>čoskoro</span>}
                                         <strong style={{ color: '#dc3545' }}>
