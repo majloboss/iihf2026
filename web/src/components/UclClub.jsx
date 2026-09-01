@@ -5,13 +5,15 @@
 
 function ClubText({ name, country, countryCode, flag, right }) {
     return (
-        // Názov so štátom sa zvisle centruje voči logu, nech sa názov zalomí do
-        // jedného či troch riadkov — inak by pri rôzne dlhých názvoch text
-        // voči logu poskakoval.
-        <span style={{ display: 'flex', flexDirection: 'column', minWidth: 0,
-                       height: '100%', justifyContent: 'center',
-                       alignItems: right ? 'flex-end' : 'flex-start' }}>
-            <span style={{ fontWeight: 500, lineHeight: 1.2 }}>{name}</span>
+        // Dve pásma nad sebou: názov sa centruje vo svojom (nech má jeden či tri
+        // riadky), štát stojí v spodnom. Pásma majú v rámci karty rovnakú výšku,
+        // takže štáty oboch klubov vyjdú do jednej roviny a text je zároveň
+        // vycentrovaný voči logu.
+        <span style={{ display: 'grid', gridTemplateRows: '1fr auto', minWidth: 0,
+                       height: '100%',
+                       justifyItems: right ? 'end' : 'start' }}>
+            <span style={{ display: 'flex', alignItems: 'center',
+                           fontWeight: 500, lineHeight: 1.2 }}>{name}</span>
             {(country || countryCode) && (
                 <span style={{ display: 'flex', alignItems: 'center', gap: 4,
                                fontSize: '0.72rem', color: '#888', lineHeight: 1.3 }}>
