@@ -75,8 +75,9 @@ export default function UclStandings() {
 
             {pohlad === 'tabulka' && <>
             <p style={{ fontSize: '0.82rem', color: '#666', margin: '4px 0 14px', maxWidth: 760 }}>
-                Všetkých 36 klubov v jednej spoločnej tabuľke. Každý odohrá 8 zápasov
-                (4 doma, 4 vonku) a s každým súperom sa stretne najviac raz.
+                <strong>Ligová fáza</strong> — 36 klubov v jednej spoločnej tabuľke,
+                pričom každý odohrá 8 zápasov (4 doma, 4 vonku) a s každým súperom
+                sa stretne najviac raz.
                 <br />
                 Po ligovej fáze <strong>prvých osem</strong> postupuje priamo do osemfinále.
                 Kluby na <strong>9. až 24. mieste</strong> hrajú baráž o play-off — dvojzápas,
@@ -84,7 +85,9 @@ export default function UclStandings() {
                 <br />
                 Osemfinále, štvrťfinále aj semifinále sa hrajú na dva zápasy so
                 súčtom gólov; predĺženie sa hrá až v odvete pri rovnosti súčtu.
-                <strong> Finále je jediný zápas bez odvety.</strong>
+                <br />
+                <strong>Finále</strong> sa hrá na neutrálnom ihrisku ako jeden zápas
+                bez odvety.
             </p>
 
             <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginBottom: 12, fontSize: '0.78rem' }}>
