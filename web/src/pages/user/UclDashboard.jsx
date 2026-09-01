@@ -5,8 +5,7 @@ import { apiFetch } from '../../api/client';
 import { asDate, canTip, isValidDate, TIP_LOCK_MS, uclScoreText as scoreText } from '../../utils/tipWindow';
 import { useAuth } from '../../context/AuthContext';
 import { useCompetition } from '../../context/CompetitionContext';
-import UclClub, { UclVenue } from '../../components/UclClub';
-import UclTieSummary from '../../components/UclTieSummary';
+import UclZapas from '../../components/UclZapas';
 import UclGroupTips from './UclGroupTips';
 
 // start_time je naive UTC, preto ho tak treba aj interpretovať.
@@ -30,44 +29,6 @@ const shortPhase = g => g.round_no ? `LF${g.round_no}`
 // Všetko zdieľa jednu mriežku, takže `vs`, dvojbodka medzi tipmi aj štadión
 // stoja presne nad sebou. Kým bol tip centrovaný voči celej karte, dátum ho
 // posúval a stred nesedel.
-function Zapas({ g, stred, children }) {
-    return (
-        // Dve zóny: úzky pás s termínom vľavo a zvyšok karty, ktorý sa centruje
-        // sám v sebe. Kým bol termín súčasťou tej istej mriežky, uberal jej
-        // šírku zľava a stred dvojice sa posúval doprava.
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div style={{ flexShrink: 0, width: 92, fontSize: '0.78rem',
-                          color: '#666', lineHeight: 1.35 }}>
-                <div style={{ whiteSpace: 'nowrap' }}>{dayFmt(g.start_time)}</div>
-                <div style={{ color: '#999' }}>{shortPhase(g)}</div>
-            </div>
-
-            {/* Zápas a všetko pod ním zdieľa mriežku, takže `vs`, dvojbodka
-                medzi tipmi a štadión stoja presne nad sebou. */}
-            <div style={{ flex: 1, minWidth: 0, display: 'grid',
-                          gridTemplateColumns: '1fr auto 1fr',
-                          alignItems: 'stretch', columnGap: 8, rowGap: 6 }}>
-                <UclClub name={g.home_name} logo={g.home_logo} country={g.home_country}
-                         countryCode={g.home_country_code} flag={g.home_flag} align="right" size={24} />
-                <span style={{ alignSelf: 'center', textAlign: 'center' }}>{stred}</span>
-                <UclClub name={g.away_name} logo={g.away_logo} country={g.away_country}
-                         countryCode={g.away_country_code} flag={g.away_flag} size={24} />
-
-                {/* Pri odvete rozhoduje súčet za dvojicu. */}
-                <div style={{ gridColumn: '1 / -1' }}>
-                    <UclTieSummary game={g} small />
-                </div>
-
-                {children}
-
-                <div style={{ gridColumn: '1 / -1' }}>
-                    <UclVenue game={g} />
-                </div>
-            </div>
-        </div>
-    );
-}
-
 // Poradie hracov v tipovacej skupine: prve tri miesta a k nim vlastny riadok,
 // ak je hrac nizsie. Rovnaka logika ako vo FIFA.
 function StandingsCard({ group, currentUserId }) {
@@ -264,7 +225,11 @@ export default function UclDashboard() {
                     {live.map(g => (
                         <div key={g.game_id} style={{ background: '#fff', border: '1px solid #f2c2c2', borderRadius: 10,
                                                       padding: 12, marginBottom: 8 }}>
-                            <Zapas g={g}
+                            <UclZapas g={g}
+                                   termin={<>
+                                       <div style={{ whiteSpace: 'nowrap' }}>{dayFmt(g.start_time)}</div>
+                                       <div style={{ color: '#999' }}>{shortPhase(g)}</div>
+                                   </>}
                                    stred={
                                        <span style={{ display: 'flex', flexDirection: 'column',
                                                       alignItems: 'center', gap: 3 }}>
@@ -277,13 +242,13 @@ export default function UclDashboard() {
                                                {scoreText(g) ?? 'vs'}
                                            </strong>
                                        </span>}>
-                                <span style={{ gridColumn: '1 / -1', textAlign: 'center',
+                                <span style={{ gridColumn: '2 / 5', textAlign: 'center',
                                                fontSize: '0.82rem' }}>
                                     {g.home_score_tip !== null
                                         ? <>Tip: <strong>{g.home_score_tip}:{g.away_score_tip}</strong></>
                                         : <span style={{ color: '#999' }}>netipoval si</span>}
                                 </span>
-                            </Zapas>
+                            </UclZapas>
                             <UclGroupTips game={g} />
                         </div>
                     ))}
@@ -296,25 +261,27 @@ export default function UclDashboard() {
                     {untipped.map(g => (
                         <div key={g.game_id} style={{ background: '#fffbf0', border: '1px solid #ffe0a3', borderRadius: 10,
                                                       padding: 12, marginBottom: 8 }}>
-                            <Zapas g={g}
-                                   stred={<span style={{ color: '#bbb' }}>vs</span>}>
-                                <span style={{ gridColumn: 1, justifySelf: 'end' }}>
+                            <UclZapas g={g}
+                                   termin={<>
+                                       <div style={{ whiteSpace: 'nowrap' }}>{dayFmt(g.start_time)}</div>
+                                       <div style={{ color: '#999' }}>{shortPhase(g)}</div>
+                                   </>}
+                                   stred={<span style={{ color: '#bbb' }}>vs</span>}
+                                   akcia={
+                                       <button onClick={() => save(g)} disabled={saving === g.game_id}
+                                               style={{ width: '100%' }}>
+                                           {saving === g.game_id ? '…' : 'Uložiť'}
+                                       </button>}>
+                                <span style={{ gridColumn: 2, justifySelf: 'end' }}>
                                     <input value={draftOf(g, 'home')} onChange={e => setDraft(g.game_id, 'home', e.target.value)}
                                            inputMode="numeric" style={{ width: 38, textAlign: 'center' }} aria-label="Tip domáci" />
                                 </span>
-                                <span style={{ gridColumn: 2, textAlign: 'center' }}>:</span>
-                                <span style={{ gridColumn: 3, justifySelf: 'start' }}>
+                                <span style={{ gridColumn: 3, textAlign: 'center' }}>:</span>
+                                <span style={{ gridColumn: 4, justifySelf: 'start' }}>
                                     <input value={draftOf(g, 'away')} onChange={e => setDraft(g.game_id, 'away', e.target.value)}
                                            inputMode="numeric" style={{ width: 38, textAlign: 'center' }} aria-label="Tip hostia" />
                                 </span>
-                                {/* Tlačidlo má vlastný riadok — v stĺpci by ho
-                                    rozšírilo a dvojbodka by prestala sedieť pod vs. */}
-                                <span style={{ gridColumn: '1 / -1', textAlign: 'center' }}>
-                                    <button onClick={() => save(g)} disabled={saving === g.game_id}>
-                                        {saving === g.game_id ? '…' : 'Uložiť'}
-                                    </button>
-                                </span>
-                            </Zapas>
+                            </UclZapas>
                         </div>
                     ))}
                 </>
@@ -332,38 +299,40 @@ export default function UclDashboard() {
             {upcomingRest.map(g => (
                 <div key={g.game_id} style={{ background: '#fff', border: '1px solid #e9ecef', borderRadius: 10,
                                               padding: 12, marginBottom: 8 }}>
-                    <Zapas g={g}
-                           stred={<span style={{ color: '#bbb' }}>vs</span>}>
+                    <UclZapas g={g}
+                                   termin={<>
+                                       <div style={{ whiteSpace: 'nowrap' }}>{dayFmt(g.start_time)}</div>
+                                       <div style={{ color: '#999' }}>{shortPhase(g)}</div>
+                                   </>}
+                           stred={<span style={{ color: '#bbb' }}>vs</span>}
+                           akcia={canTip(g) && (
+                               <button onClick={() => save(g)} disabled={saving === g.game_id}
+                                       style={{ width: '100%' }}>
+                                   {saving === g.game_id ? '…' : 'Uložiť'}
+                               </button>)}>
                         {/* Sekcia ukazuje aj zápasy, ktoré sa ešte tipovať nedajú —
                             pri nich nemá zmysel ponúkať polia. */}
                         {canTip(g) ? (
                             <>
-                                <span style={{ gridColumn: 1, justifySelf: 'end' }}>
+                                <span style={{ gridColumn: 2, justifySelf: 'end' }}>
                                     <input value={draftOf(g, 'home')} onChange={e => setDraft(g.game_id, 'home', e.target.value)}
                                            inputMode="numeric" style={{ width: 38, textAlign: 'center' }} aria-label="Tip domáci" />
                                 </span>
-                                <span style={{ gridColumn: 2, textAlign: 'center' }}>:</span>
-                                <span style={{ gridColumn: 3, justifySelf: 'start' }}>
+                                <span style={{ gridColumn: 3, textAlign: 'center' }}>:</span>
+                                <span style={{ gridColumn: 4, justifySelf: 'start' }}>
                                     <input value={draftOf(g, 'away')} onChange={e => setDraft(g.game_id, 'away', e.target.value)}
                                            inputMode="numeric" style={{ width: 38, textAlign: 'center' }} aria-label="Tip hostia" />
                                 </span>
-                                {/* Tlačidlo má vlastný riadok — v stĺpci by ho
-                                    rozšírilo a dvojbodka by prestala sedieť pod vs. */}
-                                <span style={{ gridColumn: '1 / -1', textAlign: 'center' }}>
-                                    <button onClick={() => save(g)} disabled={saving === g.game_id}>
-                                        {saving === g.game_id ? '…' : 'Uložiť'}
-                                    </button>
-                                </span>
                             </>
                         ) : (
-                            <span style={{ gridColumn: '1 / -1', textAlign: 'center',
+                            <span style={{ gridColumn: '2 / 5', textAlign: 'center',
                                            fontSize: '0.8rem', color: '#999' }}>
                                 {g.home_score_tip != null
                                     ? <>Tip: <strong>{g.home_score_tip}:{g.away_score_tip}</strong></>
                                     : 'tipovanie zatiaľ nie je otvorené'}
                             </span>
                         )}
-                    </Zapas>
+                    </UclZapas>
                 </div>
             ))}
 
@@ -373,14 +342,18 @@ export default function UclDashboard() {
                     {played.map(g => (
                         <div key={g.game_id} style={{ background: '#fff', border: '1px solid #e9ecef', borderRadius: 10,
                                                       padding: 12, marginBottom: 8 }}>
-                            <Zapas g={g}
+                            <UclZapas g={g}
+                                   termin={<>
+                                       <div style={{ whiteSpace: 'nowrap' }}>{dayFmt(g.start_time)}</div>
+                                       <div style={{ color: '#999' }}>{shortPhase(g)}</div>
+                                   </>}
                                    stred={<strong style={{ color: '#1a3a6b' }}>{scoreText(g)}</strong>}>
-                                <span style={{ gridColumn: '1 / -1', textAlign: 'center',
+                                <span style={{ gridColumn: '2 / 5', textAlign: 'center',
                                                fontSize: '0.82rem' }}>
                                     Tip: <strong>{g.home_score_tip}:{g.away_score_tip}</strong>
                                     {g.points_earned !== null && <> · <strong style={{ color: '#28a745' }}>{g.points_earned} b.</strong></>}
                                 </span>
-                            </Zapas>
+                            </UclZapas>
                         </div>
                     ))}
                 </>
