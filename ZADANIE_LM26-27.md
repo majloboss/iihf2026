@@ -176,6 +176,12 @@ bez zápasov — netlačí to.
 | 🔲 Overiť baráž a play-off | dvojice zostaví nástroj **Zostaviť dvojice play-off** |
 | 🔲 Overiť bodovanie play-off | 5 bodov za výsledok, maximum 7 |
 
+**Známa odchýlka v testovacích dátach (1. 9. 2026):** v QF-1 je SK Slavia Praha,
+hoci R16-8 vyhral Arsenal (3:2). Štvrťfinále sa zostavovalo pred opravou výpočtu
+víťaza — dvojica preto nezodpovedá postupovému kľúču a `test_ucl_bracket_tree.cjs`
+ju hlási. Ponechané zámerne: prestavenie by zmazalo 232 tipov a ide len o test.
+Po skutočnom žrebe sa stavia načisto.
+
 ### Po žrebe vyraďovacej časti
 
 | Úloha | Poznámka |
