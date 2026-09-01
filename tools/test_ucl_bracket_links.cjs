@@ -38,7 +38,8 @@ const dayKey = s => {
     await c.connect();
 
     const { rows } = await c.query(`
-        SELECT game_id, tie_id, start_time, home_score_regular AS hs
+        SELECT game_id, tie_id, game_type_code AS faza, start_time,
+               home_score_regular AS hs
           FROM ${S}.games
          WHERE tie_id IS NOT NULL AND start_time IS NOT NULL
          ORDER BY start_time`);
@@ -61,10 +62,33 @@ const dayKey = s => {
     rows.forEach(r => { if (!podlaDna.get(dayKey(r.start_time))) prazdne++; });
     check(prazdne === 0, `filter nájde zápasy pre všetky dni (${podlaDna.size} rôznych dní)`);
 
+    // Odkaz nesie fazu aj den — obe podmienky naraz musia najst aspon ten
+    // zapas, z ktoreho sa kliklo. Inak by pouzivatel skoncil na prazdnom
+    // zozname a nevidel, ktory den je vybrany.
+    // Bez tejto kontroly by test presiel aj s undefined — kluce by boli
+    // konzistentne nespravne a odkazy by nefungovali.
+    check(rows.every(r => /^(PO|R16|QF|SF|F)$/.test(r.faza || '')),
+          'každý zápas má známu fázu');
+
+    const podlaFazyDna = new Map();
+    rows.forEach(r => {
+        const k = `${r.faza}|${dayKey(r.start_time)}`;
+        podlaFazyDna.set(k, (podlaFazyDna.get(k) || 0) + 1);
+    });
+
+    let osirele = 0;
+    rows.forEach(r => {
+        if (!podlaFazyDna.get(`${r.faza}|${dayKey(r.start_time)}`)) osirele++;
+    });
+    check(osirele === 0,
+          `kombinácia fázy a dňa nájde zápasy vždy (${podlaFazyDna.size} kombinácií)`);
+
     // Ukazka, ako budu odkazy vyzerat.
     console.log('\nprvé odkazy:');
-    [...podlaDna.entries()].slice(0, 5).forEach(([k, n]) =>
-        console.log(`  /games?den=${k}   → ${n} zápasov`));
+    [...podlaFazyDna.entries()].slice(0, 5).forEach(([k, n]) => {
+        const [faza, den] = k.split('|');
+        console.log(`  /games?faza=${faza}&den=${den}   → ${n} zápasov`);
+    });
 
     console.log(fail ? '\nNIEKTORE KONTROLY ZLYHALI' : '\nVsetky kontroly presli');
     await c.end();

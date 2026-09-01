@@ -384,10 +384,14 @@ export default function UclAdminResults() {
     const [games, setGames] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [phase, setPhase] = useState('all');
-    const [roundFilter, setRoundFilter] = useState(null);
-    // Deň sa dá predvoliť odkazom z pavúka: /admin/results?den=2027-02-16.
     const [searchParams] = useSearchParams();
+    // Odkaz z pavúka predvolí fázu aj deň: /admin/results?faza=SF&den=2027-05-04.
+    // Fázy vyraďovacej časti majú tu rovnaký kľúč ako kód zápasu.
+    const [phase, setPhase] = useState(() => {
+        const kod = searchParams.get('faza');
+        return KNOCKOUT.includes(kod) ? kod : 'all';
+    });
+    const [roundFilter, setRoundFilter] = useState(null);
     const [selectedDay, setSelectedDay] = useState(() => searchParams.get('den') || null);
     const [recalcing, setRecalcing] = useState(false);
     const [recalcMsg, setRecalcMsg] = useState('');

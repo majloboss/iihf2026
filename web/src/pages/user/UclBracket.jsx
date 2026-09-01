@@ -21,7 +21,7 @@ const denFmt = s => {
     return Number.isNaN(d.getTime()) ? '' : d.toLocaleDateString('sk-SK', { day: 'numeric', month: 'numeric' });
 };
 
-function Tim({ tim, skore = [], vitaz, rozhodnute, cielUrl }) {
+function Tim({ tim, skore = [], vitaz, rozhodnute, cielUrl, faza }) {
     const prazdny = !tim.name;
     return (
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 8px',
@@ -65,15 +65,15 @@ function Tim({ tim, skore = [], vitaz, rozhodnute, cielUrl }) {
                 // Kliknutie na výsledok otvorí zápasy toho dňa — admin vo
                 // Výsledkoch, kde ich môže rovno upraviť, hráč v Zápasoch.
                 return z.kluc
-                    ? <Link key={i} to={`${cielUrl}?den=${z.kluc}`} title={`${z.den} — otvoriť zápasy`}
-                            style={styl}>{obsah}</Link>
+                    ? <Link key={i} to={`${cielUrl}?faza=${faza}&den=${z.kluc}`}
+                            title={`${z.den} — otvoriť zápasy`} style={styl}>{obsah}</Link>
                     : <span key={i} title={z.den} style={styl}>{obsah}</span>;
             })}
         </div>
     );
 }
 
-function Dvojica({ tie, cielUrl }) {
+function Dvojica({ tie, cielUrl, faza }) {
     const rozhodnute = tie.winner_id !== null;
     const zapasy = [tie.first_leg, tie.second_leg].filter(Boolean);
 
@@ -99,9 +99,9 @@ function Dvojica({ tie, cielUrl }) {
     return (
         <div style={{ background: '#fff', border: '1px solid #e9ecef', borderRadius: 8,
                       padding: 6, marginBottom: 10 }}>
-            <Tim tim={tie.team_a} skore={skoreTimu('a')} cielUrl={cielUrl}
+            <Tim tim={tie.team_a} skore={skoreTimu('a')} cielUrl={cielUrl} faza={faza}
                  vitaz={rozhodnute && tie.winner_id === tie.team_a.id} rozhodnute={rozhodnute} />
-            <Tim tim={tie.team_b} skore={skoreTimu('b')} cielUrl={cielUrl}
+            <Tim tim={tie.team_b} skore={skoreTimu('b')} cielUrl={cielUrl} faza={faza}
                  vitaz={rozhodnute && tie.winner_id === tie.team_b.id} rozhodnute={rozhodnute} />
 
         </div>
@@ -159,7 +159,7 @@ export default function UclBracket() {
                                    rozdelenie voľného miesta okolo riadkov. */
                                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column',
                                               justifyContent: 'space-around' }}>
-                                    {f.ties.map((t, i) => <Dvojica key={t.tie_id ?? i} tie={t} cielUrl={cielUrl} />)}
+                                    {f.ties.map((t, i) => <Dvojica key={t.tie_id ?? i} tie={t} cielUrl={cielUrl} faza={f.phase} />)}
                                 </div>
                               )}
                     </div>

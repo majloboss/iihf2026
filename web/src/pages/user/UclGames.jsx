@@ -61,13 +61,17 @@ export default function UclGames() {
     const [loading, setLoading] = useState(true);
 
     // Filtre
-    const [phase, setPhase] = useState('');
+    // Odkaz z pavúka predvolí fázu aj deň: /games?faza=SF&den=2027-05-04.
+    // Fáza príde ako kód zápasu (PO, R16…), tu má vlastný kľúč (BAR pre PO).
+    const [searchParams] = useSearchParams();
+    const [phase, setPhase] = useState(() => {
+        const kod = searchParams.get('faza');
+        return PHASES.find(p => p.code === kod && !p.round)?.key || '';
+    });
     const [onlyUntipped, setOnlyUntipped] = useState(false);
     const [club, setClub] = useState('');
     // Logá klubov zaberajú celý riadok, preto sa ukážu až na vyžiadanie.
     const [zobrazKluby, setZobrazKluby] = useState(false);
-    // Deň sa dá predvoliť odkazom z pavúka: /games?den=2027-02-16.
-    const [searchParams] = useSearchParams();
     const [day, setDay] = useState(() => searchParams.get('den') || '');
 
     useEffect(() => {
