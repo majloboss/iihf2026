@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useCompetition } from '../../context/CompetitionContext';
-import { getGroups, getAllMyGroups, createGroup, disbandGroup, joinGroup, leaveGroup, getMembers, memberAction, inviteMember, acceptGroupInvite, bulkInvite, updateGroupDescription, updateGroupFlags } from '../../api/groups';
+import { getViewers, addViewer, removeViewer, getGroups, getAllMyGroups, createGroup, disbandGroup, joinGroup, leaveGroup, getMembers, memberAction, inviteMember, acceptGroupInvite, bulkInvite, updateGroupDescription, updateGroupFlags } from '../../api/groups';
 import { getUser, getUsers } from '../../api/users';
 import styles from './Groups.module.css';
 
@@ -22,6 +22,14 @@ export default function Groups() {
     const [creating, setCreating]   = useState(false);
     const [newName, setNewName]     = useState('');
     const [newDesc, setNewDesc]     = useState('');
+    // Skrytú skupinu vidia iba vymenovaní — vstup si však musia vypýtať
+    // žiadosťou ako ktokoľvek iný.
+    const [newSkryta, setNewSkryta]  = useState(false);
+    // Kto vidí skrytú skupinu: { [groupId]: [ {user_id, username, ...} ] }
+    const [viewers, setViewers]      = useState({});
+    const [viewerQuery, setViewerQuery] = useState('');
+    // Dvojklik do prázdneho poľa vyroluje celý zoznam, rovnako ako pri pozývaní.
+    const [viewerShowDrop, setViewerShowDrop] = useState(false);
     const [createErr, setCreateErr] = useState('');
     const [busy, setBusy]           = useState('');
     const [editDescId, setEditDescId] = useState(null);
@@ -61,6 +69,9 @@ export default function Groups() {
         if (expanded === id) { setExpanded(null); return; }
         setExpanded(id);
         if (!members[id]) loadMembers(id);
+        // Zoznam vidiacich má zmysel len pri skrytej skupine a vidí ho zakladateľ.
+        const g = groups.find(x => x.id === id);
+        if (g?.visibility === 'invite' && !viewers[id]) loadViewers(id);
     };
 
     const ensureUsers = async () => {
@@ -99,8 +110,8 @@ export default function Groups() {
         if (!compId) { setCreateErr('Najprv vyber súťaž v Profile'); return; }
         setBusy('create'); setCreateErr('');
         try {
-            await createGroup(newName.trim(), compId, newDesc.trim() || null);
-            setNewName(''); setNewDesc(''); setCreating(false); load();
+            await createGroup(newName.trim(), compId, newDesc.trim() || null, newSkryta ? 'invite' : 'public');
+            setNewName(''); setNewDesc(''); setNewSkryta(false); setCreating(false); load();
         } catch (e) { setCreateErr(e.message); }
         finally { setBusy(''); }
     };
@@ -111,6 +122,28 @@ export default function Groups() {
             await updateGroupDescription(groupId, editDescVal.trim() || null);
             setEditDescId(null); load();
         } catch (e) { alert(e.message); }
+        finally { setBusy(''); }
+    };
+
+    const loadViewers = async (groupId) => {
+        try {
+            const zoznam = await getViewers(groupId);
+            setViewers(v => ({ ...v, [groupId]: zoznam }));
+        }
+        catch { /* zoznam vidí iba zakladateľ — inému ho netreba */ }
+    };
+
+    const pridajVidiaceho = async (groupId, userId) => {
+        setBusy(`viewer-${groupId}`);
+        try { await addViewer(groupId, userId); await loadViewers(groupId); setViewerQuery(''); }
+        catch (e) { alert(e.message); }
+        finally { setBusy(''); }
+    };
+
+    const odoberVidiaceho = async (groupId, userId) => {
+        setBusy(`viewer-${groupId}`);
+        try { await removeViewer(groupId, userId); await loadViewers(groupId); }
+        catch (e) { alert(e.message); }
         finally { setBusy(''); }
     };
 
@@ -195,6 +228,10 @@ export default function Groups() {
     const fullName = (u) =>
         (u.first_name || u.last_name) ? `${u.first_name || ''} ${u.last_name || ''}`.trim() : u.username;
 
+    // Hráčske meno je hlavný identifikátor, celé meno len upresňuje.
+    const realName = (u) =>
+        (u.first_name || u.last_name) ? `${u.first_name || ''} ${u.last_name || ''}`.trim() : '';
+
     const filtered = myOnly
         ? groups.filter(g => g.my_status === 'accepted' || g.my_status === 'invited' || g.created_by === user.user_id)
         : groups;
@@ -228,6 +265,13 @@ export default function Groups() {
                         rows={2}
                         style={{ width:'100%', boxSizing:'border-box', padding:'8px 10px', border:'1px solid #ddd', borderRadius:6, fontSize:'0.88rem', resize:'vertical', marginTop:8 }}
                     />
+                    <label style={{ display: 'flex', alignItems: 'center', gap: 6, margin: '8px 0',
+                                    fontSize: '0.85rem', cursor: 'pointer' }}>
+                        <input type="checkbox" checked={newSkryta}
+                               onChange={e => setNewSkryta(e.target.checked)}
+                               style={{ width: 'auto', margin: 0 }} />
+                        <span>Skrytá skupina — uvidia ju len ľudia, ktorých vymenuješ</span>
+                    </label>
                     <button className={styles.btn} onClick={doCreate} disabled={busy === 'create'}>
                         {busy === 'create' ? 'Vytváram…' : 'Vytvoriť'}
                     </button>
@@ -245,11 +289,23 @@ export default function Groups() {
                     const myStatus   = g.my_status;
                     const isOpen     = expanded === g.id;
                     const grpMembers = members[g.id];
-                    const pendingCnt = grpMembers?.filter(m => m.status === 'pending').length ?? 0;
+                    // Po rozbalení počítaj z načítaných členov (je čerstvejšie),
+                    // inak použi hodnotu z API — nech je počet vidieť aj zabalený.
+                    const invitedCnt = grpMembers
+                        ? grpMembers.filter(m => m.status === 'invited').length
+                        : Number(g.invited_count) || 0;
+                    const pendingCnt = grpMembers
+                        ? grpMembers.filter(m => m.status === 'pending').length
+                        : Number(g.pending_count) || 0;
                     const isClosed   = !!g.is_closed;
                     const allowMemberInvite = g.allow_member_invite !== false;
                     // Pozývať môže: zakladateľ vždy (ak nie je uzavretá); člen len ak skupina povoľuje
-                    const canInvite  = !isClosed && (isFounder || (myStatus === 'accepted' && allowMemberInvite));
+                    // V skrytej skupine sa nepozýva: pozvánka je zároveň vstupenka,
+                    // takže by obišla podmienku vstupu. Tam sa ľudia vymenúvajú
+                    // a o vstup si žiadajú sami.
+                    const jeSkryta   = g.visibility === 'invite';
+                    const canInvite  = !isClosed && !jeSkryta
+                        && (isFounder || (myStatus === 'accepted' && allowMemberInvite));
                     const suggestions = isOpen ? getSuggestions(g.id, inviteQuery) : [];
 
                     return (
@@ -261,6 +317,8 @@ export default function Groups() {
                                         <span className={styles.groupName}>{g.name}</span>
                                         <span className={styles.meta}>
                                             {g.member_count} {Number(g.member_count) === 1 ? 'člen' : 'členov'}
+                                            {invitedCnt > 0 && <>{' · '}{invitedCnt} {invitedCnt === 1 ? 'pozvánka' : invitedCnt < 5 ? 'pozvánky' : 'pozvánok'}</>}
+                                            {pendingCnt > 0 && <>{' · '}{pendingCnt} {pendingCnt === 1 ? 'žiadosť' : pendingCnt < 5 ? 'žiadosti' : 'žiadostí'}</>}
                                             {' · '}zakladateľ: {g.creator_username}
                                         </span>
                                         {g.description && (
@@ -269,11 +327,13 @@ export default function Groups() {
                                             </span>
                                         )}
                                     </div>
-                                    {isFounder && pendingCnt > 0 && (
-                                        <span className={styles.badgePending}>{pendingCnt} čaká</span>
-                                    )}
                                 </div>
                                 <div className={styles.cardActions} onClick={e => e.stopPropagation()}>
+                                    {g.visibility === 'invite' && (
+                                        <span className={styles.badgeClosed} title="V zozname ju vidia len pozvaní">
+                                            👁 Skrytá
+                                        </span>
+                                    )}
                                     {isClosed && (
                                         <span className={styles.badgeClosed}>🔒 Uzavretá</span>
                                     )}
@@ -331,9 +391,104 @@ export default function Groups() {
                                                         onChange={e => toggleFlag(g.id, 'is_closed', e.target.checked)} />
                                                     Uzavretá skupina (bez pozvánok a žiadostí)
                                                 </label>
+                                                <label className={styles.flagLabel}>
+                                                    <input type="checkbox"
+                                                        checked={g.visibility === 'invite'}
+                                                        disabled={busy === `flag-${g.id}`}
+                                                        onChange={e => toggleFlag(g.id, 'visibility', e.target.checked ? 'invite' : 'public')} />
+                                                    Skrytá skupina (vidia ju len vymenovaní nižšie)
+                                                </label>
                                             </div>
                                         </div>
                                     )}
+
+                                    {/* Skrytá skupina: kto ju vidí. Vymenovanie nie je pozvánka —
+                                        títo ľudia musia o vstup požiadať a splniť podmienku. */}
+                                    {isFounder && jeSkryta && (
+                                        <div className={styles.inviteSection}>
+                                            <div style={{ fontSize: '0.82rem', fontWeight: 600, marginBottom: 4 }}>
+                                                Kto vidí túto skupinu
+                                            </div>
+                                            <div style={{ fontSize: '0.78rem', color: '#888', marginBottom: 8 }}>
+                                                Vymenovaní uvidia skupinu v zozname aj s podmienkou vstupu.
+                                                O vstup si musia požiadať sami — ty ich schvaľuješ ako doteraz.
+                                            </div>
+
+                                            <div className={styles.inviteRow}>
+                                                <div className={styles.inviteInputWrap}>
+                                                    <input
+                                                        className={styles.inviteInput}
+                                                        placeholder="meno používateľa"
+                                                        value={viewerQuery}
+                                                        onChange={async e => {
+                                                            setViewerQuery(e.target.value);
+                                                            if (!allUsersRef.current) await ensureUsers();
+                                                            setViewerShowDrop(true);
+                                                        }}
+                                                        onDoubleClick={async () => {
+                                                            if (!allUsersRef.current) await ensureUsers();
+                                                            setViewerShowDrop(true);
+                                                        }}
+                                                        onFocus={() => { if (allUsersRef.current && viewerQuery) setViewerShowDrop(true); }}
+                                                        onBlur={() => setTimeout(() => setViewerShowDrop(false), 150)}
+                                                    />
+                                                    {viewerShowDrop && (() => {
+                                                        const uz = new Set((viewers[g.id] || []).map(v => v.user_id));
+                                                        const q = viewerQuery.toLowerCase();
+                                                        const navrhy = (allUsersRef.current || [])
+                                                            .filter(u => Number(u.id) !== Number(user.user_id) && !uz.has(u.id))
+                                                            .filter(u => !q
+                                                                || u.username.toLowerCase().includes(q)
+                                                                || (u.first_name || '').toLowerCase().includes(q)
+                                                                || (u.last_name || '').toLowerCase().includes(q));
+                                                        if (!navrhy.length) return null;
+                                                        return (
+                                                            <div className={styles.dropDown}>
+                                                                {navrhy.map(u => (
+                                                                    <div key={u.id} className={styles.dropItem}
+                                                                         onClick={() => pridajVidiaceho(g.id, u.id)}>
+                                                                        {u.username}
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        );
+                                                    })()}
+                                                </div>
+                                            </div>
+
+                                            {(viewers[g.id] || []).length === 0
+                                                ? <div style={{ fontSize: '0.8rem', color: '#aaa', marginTop: 6 }}>
+                                                      Zatiaľ nikto — skupinu vidíš iba ty.
+                                                  </div>
+                                                : <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
+                                                      {viewers[g.id].map(v => (
+                                                          <span key={v.user_id}
+                                                                style={{ display: 'inline-flex', alignItems: 'center', gap: 6,
+                                                                         background: '#eef2f8', borderRadius: 14,
+                                                                         padding: '3px 6px 3px 10px', fontSize: '0.82rem' }}>
+                                                              {v.username}
+                                                              {v.member_status === 'accepted' && (
+                                                                  <span style={{ color: '#28a745', fontSize: '0.72rem' }}>člen</span>
+                                                              )}
+                                                              {v.member_status === 'pending' && (
+                                                                  <span style={{ color: '#e67e22', fontSize: '0.72rem' }}>žiada o vstup</span>
+                                                              )}
+                                                              {!v.member_status && (
+                                                                  <span style={{ color: '#aaa', fontSize: '0.72rem' }}>vidí</span>
+                                                              )}
+                                                              <button onClick={() => odoberVidiaceho(g.id, v.user_id)}
+                                                                      disabled={busy === `viewer-${g.id}`}
+                                                                      title="Odobrať zo zoznamu"
+                                                                      style={{ border: 'none', background: 'none', cursor: 'pointer',
+                                                                               color: '#999', fontSize: '1rem', lineHeight: 1, padding: 0 }}>
+                                                                  ×
+                                                              </button>
+                                                          </span>
+                                                      ))}
+                                                  </div>}
+                                        </div>
+                                    )}
+
                                     {canInvite && (
                                         <div className={styles.inviteSection}>
                                             <div className={styles.inviteRow}>
@@ -369,8 +524,8 @@ export default function Groups() {
                                                                     onMouseDown={() => { setInviteQuery(u.username); setInviteShowDrop(false); }}
                                                                 >
                                                                     <Avatar src={u.avatar} name={fullName(u)} size={24} />
-                                                                    <span className={styles.dropName}>{fullName(u)}</span>
-                                                                    <small className={styles.dropUser}>@{u.username}</small>
+                                                                    <span className={styles.dropName}>{u.username}</span>
+                                                                    {realName(u) && <small className={styles.dropUser}>({realName(u)})</small>}
                                                                 </button>
                                                             ))}
                                                         </div>
@@ -445,8 +600,8 @@ export default function Groups() {
                                         <div key={m.user_id} className={styles.memberRow}>
                                             <button className={styles.memberBtn} onClick={() => openDetail(m.user_id)}>
                                                 <Avatar src={m.avatar} name={fullName(m)} size={32} />
-                                                <span className={styles.memberName}>{fullName(m)}</span>
-                                                <small className={styles.memberUser}>@{m.username}</small>
+                                                <span className={styles.memberName}>{m.username}</span>
+                                                {realName(m) && <small className={styles.memberUser}>({realName(m)})</small>}
                                             </button>
                                             {m.status === 'pending' && isFounder && (
                                                 <div className={styles.approveActions}>
@@ -485,8 +640,8 @@ export default function Groups() {
                                 <div className={styles.modalAvatarWrap}>
                                     <Avatar src={userDetail.data.avatar} name={fullName(userDetail.data)} size={80} />
                                 </div>
-                                <h3 className={styles.modalName}>{fullName(userDetail.data)}</h3>
-                                <p className={styles.modalUsername}>@{userDetail.data.username}</p>
+                                <h3 className={styles.modalName}>{userDetail.data.username}</h3>
+                                {realName(userDetail.data) && <p className={styles.modalUsername}>{realName(userDetail.data)}</p>}
 
                                 <div className={styles.modalFields}>
                                     <div className={styles.modalField}>

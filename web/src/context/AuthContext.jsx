@@ -1,5 +1,5 @@
 import { createContext, useContext, useState } from 'react';
-import { getToken, isImpersonating } from '../api/token';
+import { getToken, isImpersonating, setToken as ulozToken, clearToken } from '../api/token';
 
 const AuthContext = createContext(null);
 
@@ -18,17 +18,13 @@ export function AuthProvider({ children }) {
     const impersonating = isImpersonating();
 
     const signIn = (newToken) => {
-        localStorage.setItem('token', newToken);
+        ulozToken(newToken);
         setToken(newToken);
     };
 
     const signOut = () => {
-        if (sessionStorage.getItem('imp_token')) {
-            // Impersonačný tab — ukonči impersonáciu
-            sessionStorage.removeItem('imp_token');
-        } else {
-            localStorage.removeItem('token');
-        }
+        // Odhlásenie sa týka iba tohto tabu — vedľajší tab zostane prihlásený.
+        clearToken();
         setToken(null);
     };
 

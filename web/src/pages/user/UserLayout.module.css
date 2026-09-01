@@ -71,6 +71,7 @@
 }
 
 .brandName {
+    display: block;
     font-size: 0.72rem;
     font-weight: 600;
     color: rgba(255,255,255,0.85);
@@ -247,3 +248,24 @@
 @media (min-width: 901px) {
     .bottomNav { display: none; }
 }
+
+/* Názov súťaže je tlačidlo — otvorí prepínač súťaží v profile. */
+.brandSwitch {
+    display: block;
+    width: 100%;
+    background: none;
+    border: none;
+    padding: 2px 4px;
+    cursor: pointer;
+    border-radius: 6px;
+    text-align: center;
+}
+.brandSwitch:hover { background: rgba(255, 255, 255, 0.08); }
+.brandSwitch:focus-visible { outline: 2px solid rgba(255, 255, 255, 0.5); }
+.brandSwitchHint {
+    display: block;
+    font-size: 0.62rem;
+    color: rgba(255, 255, 255, 0.55);
+    margin-top: 1px;
+}
+.brandSwitch:hover .brandSwitchHint { color: rgba(255, 255, 255, 0.85); }

@@ -12,7 +12,10 @@ if ($cid) {
     $slug = $cs->fetchColumn() ?: 'iihf2026';
 }
 
-if ($slug === 'fifa2026') {
+if ($slug === 'ucl2026') {
+    $tipsJoin = "LEFT JOIN \"lm2026-27\".tips t ON t.user_id = u.id AND t.points_earned IS NOT NULL";
+    $ptsCol   = "t.points_earned";
+} elseif ($slug === 'fifa2026') {
     $tipsJoin = "LEFT JOIN fifa2026.tips t ON t.user_id = u.id AND t.points_earned IS NOT NULL";
     $ptsCol   = "t.points_earned";
 } else {

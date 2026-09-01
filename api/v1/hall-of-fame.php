@@ -38,7 +38,13 @@ foreach ($comps as $c) {
     $slug = $c['slug'];
 
     // 1) Je turnaj skončený? (všetky zápasy majú výsledok)
-    if ($slug === 'fifa2026') {
+    if ($slug === 'ucl2026') {
+        $row = $pdo->query('
+            SELECT COUNT(*) AS total,
+                   COUNT(CASE WHEN result_approved = TRUE THEN 1 END) AS done
+            FROM "lm2026-27".games
+        ')->fetch();
+    } elseif ($slug === 'fifa2026') {
         $row = $pdo->query("
             SELECT COUNT(*) AS total,
                    COUNT(CASE WHEN result_approved = TRUE THEN 1 END) AS done
@@ -59,7 +65,10 @@ foreach ($comps as $c) {
     $finishedTournaments[] = ['name' => $c['name'], 'slug' => $slug];
 
     // 2) Finálne poradie všetkých tipérov v turnaji
-    if ($slug === 'fifa2026') {
+    if ($slug === 'ucl2026') {
+        $tipsJoin = "LEFT JOIN \"lm2026-27\".tips t ON t.user_id = u.id AND t.points_earned IS NOT NULL";
+        $ptsCol   = "t.points_earned";
+    } elseif ($slug === 'fifa2026') {
         $tipsJoin = "LEFT JOIN fifa2026.tips t ON t.user_id = u.id AND t.points_earned IS NOT NULL";
         $ptsCol   = "t.points_earned";
     } else {

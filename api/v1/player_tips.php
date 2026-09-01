@@ -13,7 +13,29 @@ $cs->execute([$cid]);
 $slug = $cs->fetchColumn();
 if (!$slug) json_error('Súťaž neexistuje', 404);
 
-if ($slug === 'fifa2026') {
+if ($slug === 'ucl2026') {
+    // Kluby su v trvalom ciselniku admin.uefa_clubs, nie v rocnikovej scheme.
+    $stmt = $pdo->prepare('
+        SELECT
+            g.game_id      AS game_id,
+            g.start_time   AS starts_at,
+            g.game_type_code AS phase,
+            hc.club_code   AS team1,
+            ac.club_code   AS team2,
+            g.home_score_regular AS score1,
+            g.away_score_regular AS score2,
+            g.result_approved,
+            t.home_score_tip AS tip1,
+            t.away_score_tip AS tip2,
+            t.points_earned  AS points
+        FROM "lm2026-27".games g
+        JOIN admin.uefa_clubs hc ON hc.club_id = g.home_team_id
+        JOIN admin.uefa_clubs ac ON ac.club_id = g.away_team_id
+        LEFT JOIN "lm2026-27".tips t ON t.game_id = g.game_id AND t.user_id = :uid
+        WHERE g.result_approved = TRUE
+        ORDER BY g.start_time');
+    $stmt->execute([':uid' => $target_uid]);
+} elseif ($slug === 'fifa2026') {
     $stmt = $pdo->prepare("
         SELECT
             g.game_id      AS game_id,

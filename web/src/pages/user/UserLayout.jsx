@@ -6,7 +6,7 @@ import { apiFetch } from '../../api/client';
 import { getUnreadCount } from '../../api/messages';
 import styles from './UserLayout.module.css';
 
-export default function UserLayout() {
+export default function UserLayout({ children }) {
     const { signOut } = useAuth();
     const navigate    = useNavigate();
     const location    = useLocation();
@@ -44,7 +44,14 @@ export default function UserLayout() {
                         )}
                     </div>
                     {activeCompetition && (
-                        <div className={styles.brandName}>{activeCompetition.name}</div>
+                        <button
+                            type="button"
+                            className={styles.brandSwitch}
+                            onClick={() => navigate('/profile?tab=sutaze')}
+                            title="Prepnúť súťaž">
+                            <span className={styles.brandName}>{activeCompetition.name}</span>
+                            <span className={styles.brandSwitchHint}>zmeniť súťaž ▾</span>
+                        </button>
                     )}
                 </div>
                 <nav>
@@ -84,7 +91,9 @@ export default function UserLayout() {
                 <button className={styles.logout} onClick={handleLogout}>Odhlásiť</button>
             </aside>
             <main className={styles.content}>
-                <Outlet />
+                {/* Trasy vnorené cez <Route> prídu cez Outlet; pravidlá sa vkladajú
+                    priamo ako children, lebo ich obsluhuje vlastný router. */}
+                {children ?? <Outlet />}
             </main>
             <nav className={styles.bottomNav}>
                 <NavLink to="/dashboard" className={({ isActive }) => isActive ? styles.active : ''}>

@@ -1,0 +1,255 @@
+﻿id;state_code_2;state_code_3;state_name_origin;state_name_english;state_name_slovak;state_name_slovak_long;state_flag_big;state_flag_small;flag_check
+1;AF;AFG;-;Afghanistan;Afganistan;Afganská islamská republika;flag_af_240.png;flag_af_24.png;OK
+2;AX;ALA;-;-;Alandy;Alandské ostrovy;flag_ax_240.png;flag_ax_24.png;OK
+3;AL;ALB;-;Albania;Albánsko;Albánska republika;flag_al_240.png;flag_al_24.png;OK
+4;DZ;DZA;-;Algeria;Alžírsko;Alžírska demokratická ľudová republika;flag_dz_240.png;flag_dz_24.png;OK
+5;AS;ASM;-;-;Americká Samoa;Americká Samoa;flag_as_240.png;flag_as_24.png;OK
+6;VI;VIR;-;-;Americké Panenské ostrovy;Americké Panenské ostrovy;flag_vi_240.png;flag_vi_24.png;OK
+7;AD;AND;-;-;Andorra;Andorrské kniežatstvo;flag_ad_240.png;flag_ad_24.png;OK
+8;GB-ENG;GB-ENG;-;England;Anglicko;Anglicko;flag_gb-eng_240.png;flag_gb-eng_24.png;OK
+9;AO;AGO;-;Angola;Angola;Angolská republika;flag_ao_240.png;flag_ao_24.png;OK
+10;AI;AIA;-;-;Anguilla;Anguilla;flag_ai_240.png;flag_ai_24.png;OK
+11;AQ;ATA;-;-;Antarktída;Antarktída;flag_aq_240.png;flag_aq_24.png;OK
+12;AG;ATG;-;-;Antigua a Barbuda;Antigua a Barbuda;flag_ag_240.png;flag_ag_24.png;OK
+13;AR;ARG;-;Argentina;Argentína;Argentínska republika;flag_ar_240.png;flag_ar_24.png;OK
+14;AM;ARM;-;-;Arménsko;Arménska republika;flag_am_240.png;flag_am_24.png;OK
+15;AW;ABW;-;-;Aruba;Aruba;flag_aw_240.png;flag_aw_24.png;OK
+16;AU;AUS;-;Australia;Austrália;Austrálsky zväz;flag_au_240.png;flag_au_24.png;OK
+17;AZ;AZE;-;-;Azerbajdžan;Azerbajǆanská republika;flag_az_240.png;flag_az_24.png;OK
+18;BS;BHS;-;-;Bahamy;Bahamské spoločenstvo;flag_bs_240.png;flag_bs_24.png;OK
+19;BH;BHR;-;-;Bahrajn;Bahrajnské kráľovstvo;flag_bh_240.png;flag_bh_24.png;OK
+20;BD;BGD;-;Bangladesh;Bangladéš;Bangladéšska ľudová republika;flag_bd_240.png;flag_bd_24.png;OK
+21;BB;BRB;-;-;Barbados;Barbados;flag_bb_240.png;flag_bb_24.png;OK
+22;BE;BEL;-;Belgium;Belgicko;Belgické kráľovstvo;flag_be_240.png;flag_be_24.png;OK
+23;BZ;BLZ;-;-;Belize;Belize;flag_bz_240.png;flag_bz_24.png;OK
+24;BJ;BEN;-;-;Benin;Beninská republika;flag_bj_240.png;flag_bj_24.png;OK
+25;BM;BMU;-;-;Bermudy;Bermudy;flag_bm_240.png;flag_bm_24.png;OK
+26;BT;BTN;-;-;Bhután;Bhutánske krâľovstvo;flag_bt_240.png;flag_bt_24.png;OK
+27;BY;BLR;-;Belarus;Bielorusko;Bieloruská republika;flag_by_240.png;flag_by_24.png;OK
+28;BO;BOL;-;Bolivia;Bolívia;Bolívijská republika;flag_bo_240.png;flag_bo_24.png;OK
+29;BQ;BES;-;-;Bonaire, Sint Eustatius a Saba;Bonaire, Sint Eustatius a Saba;flag_bq_240.png;flag_bq_24.png;OK
+30;BA;BIH;-;-;Bosna a Hercegovina;Republika Bosny a Hercegoviny;flag_ba_240.png;flag_ba_24.png;OK
+31;BW;BWA;-;Botswana;Botswana;Botswanská republika;flag_bw_240.png;flag_bw_24.png;OK
+32;BV;BVT;-;-;Bouvetov ostrov;Bouvetov ostrov;flag_bv_240.png;flag_bv_24.png;OK
+33;BR;BRA;-;Brazil;Brazília;Brazílska federatívna republika;flag_br_240.png;flag_br_24.png;OK
+34;IO;IOT;-;-;Britské indickooceánske územie;Britské indickooceánske územie;flag_io_240.png;flag_io_24.png;OK
+35;BN;BRN;-;-;Brunej;Brunejský sultanât;flag_bn_240.png;flag_bn_24.png;OK
+36;BG;BGR;-;Bulgaria;Bulharsko;Bulharská republika;flag_bg_240.png;flag_bg_24.png;OK
+37;BF;BFA;-;-;Burkina Faso;Burkina Faso;flag_bf_240.png;flag_bf_24.png;OK
+38;BI;BDI;-;-;Burundi;Burundská republika;flag_bi_240.png;flag_bi_24.png;OK
+39;CK;COK;-;-;Cookove ostrovy;Cookove ostrovy;flag_ck_240.png;flag_ck_24.png;OK
+40;CW;CUW;-;-;Curacao;Curacao;flag_cw_240.png;flag_cw_24.png;OK
+41;CY;CYP;-;Cyprus;Cyprus;Cyperská republika;flag_cy_240.png;flag_cy_24.png;OK
+42;TD;TCD;-;-;Čad;Čadská republika;flag_td_240.png;flag_td_24.png;OK
+43;CZ;CZE;-;Czech Republic;Česko;Česká republika;flag_cz_240.png;flag_cz_24.png;OK
+44;ME;MNE;-;-;Čierna Hora;Čierna Hora;flag_me_240.png;flag_me_24.png;OK
+45;CL;CHL;-;Chile;Čile;Čílska republika;flag_cl_240.png;flag_cl_24.png;OK
+46;CN;CHN;-;China;Čína;Čínska ľudová republika;flag_cn_240.png;flag_cn_24.png;OK
+47;DK;DNK;-;Denmark;Dánsko;Dánske kráľovstvo;flag_dk_240.png;flag_dk_24.png;OK
+48;DM;DMA;-;-;Dominika;Dominické spoločenstvo;flag_dm_240.png;flag_dm_24.png;OK
+49;DO;DOM;-;-;Dominikánska republika;Dominikánska republika;flag_do_240.png;flag_do_24.png;OK
+50;DJ;DJI;-;-;Džibutsko;ǅibutská republika;flag_dj_240.png;flag_dj_24.png;OK
+51;EG;EGY;-;Egypt;Egypt;Egyptská arabská republika;flag_eg_240.png;flag_eg_24.png;OK
+52;EC;ECU;-;Ecuador;Ekvádor;Ekvádorská republika;flag_ec_240.png;flag_ec_24.png;OK
+53;ER;ERI;-;-;Eritrea;Eritrejský štát;flag_er_240.png;flag_er_24.png;OK
+54;EE;EST;-;Estonia;Estónsko;Estónska republika;flag_ee_240.png;flag_ee_24.png;OK
+55;ET;ETH;-;Ethiopia;Etiópia;Etiópska federatívna demokratická republika;flag_et_240.png;flag_et_24.png;OK
+56;FO;FRO;-;-;Faerské ostrovy;Faerské ostrovy;flag_fo_240.png;flag_fo_24.png;OK
+57;FK;FLK;-;-;Falklandy;Falklandské ostrovy;flag_fk_240.png;flag_fk_24.png;OK
+58;FJ;FJI;-;Fiji;Fidži;Fiǆijská republika;flag_fj_240.png;flag_fj_24.png;OK
+59;PH;PHL;-;Philippines;Filipíny;Filipínska republika;flag_ph_240.png;flag_ph_24.png;OK
+60;FI;FIN;-;Finland;Fínsko;Fínska republika;flag_fi_240.png;flag_fi_24.png;OK
+61;PF;PYF;-;-;Francúzska Polynézia;Francúzska Polynézia;flag_pf_240.png;flag_pf_24.png;OK
+62;TF;ATF;-;-;Francúzske južné a antarktické územia;Francúzske južné a antarktické územia;flag_tf_240.png;flag_tf_24.png;OK
+63;FR;FRA;-;France;Francúzsko;Francúzska republika;flag_fr_240.png;flag_fr_24.png;OK
+64;GA;GAB;-;-;Gabon;Gabonská republika;flag_ga_240.png;flag_ga_24.png;OK
+65;GM;GMB;-;-;Gambia;Gambijská republika;flag_gm_240.png;flag_gm_24.png;OK
+66;GH;GHA;-;Ghana;Ghana;Ghanská republika;flag_gh_240.png;flag_gh_24.png;OK
+67;GI;GIB;-;-;Gibraltár;Gibraltár;flag_gi_240.png;flag_gi_24.png;OK
+68;GR;GRC;-;Greece;Grécko;Grécka republika;flag_gr_240.png;flag_gr_24.png;OK
+69;GD;GRD;-;-;Grenada;Grenada;flag_gd_240.png;flag_gd_24.png;OK
+70;GL;GRL;-;-;Grónsko;Grónsko;flag_gl_240.png;flag_gl_24.png;OK
+71;GE;GEO;-;Georgia;Gruzínsko;Gruzínsko;flag_ge_240.png;flag_ge_24.png;OK
+72;GP;GLP;-;-;Guadeloupe;Guadeloupe;flag_gp_240.png;flag_gp_24.png;OK
+73;GU;GUM;-;-;Guam;Guam;flag_gu_240.png;flag_gu_24.png;OK
+74;GT;GTM;-;Guatemala;Guatemala;Guatemalská republika;flag_gt_240.png;flag_gt_24.png;OK
+75;GG;GGY;-;-;Guernsey;Guernsey;flag_gg_240.png;flag_gg_24.png;OK
+76;GN;GIN;-;-;Guinea;Guinejská republika;flag_gn_240.png;flag_gn_24.png;OK
+77;GW;GNB;-;-;Guinea-Bissau;Guinejsko-bissauská republika;flag_gw_240.png;flag_gw_24.png;OK
+78;GF;GUF;-;-;Francúzska Guyana;Francúzska Guyana;flag_gf_240.png;flag_gf_24.png;OK
+79;GY;GUY;-;-;Guyana;Guyanská kooperatívna republika;flag_gy_240.png;flag_gy_24.png;OK
+80;HT;HTI;-;-;Haiti;Haitská republika;flag_ht_240.png;flag_ht_24.png;OK
+81;HM;HMD;-;-;Heardov ostrov;Teritórium Heardovho ostrova a Macdonaldových ostrovov;flag_hm_240.png;flag_hm_24.png;OK
+82;NL;NLD;-;Netherlands;Holandsko;Holandské kráľovstvo;flag_nl_240.png;flag_nl_24.png;OK
+83;HN;HND;-;-;Honduras;Honduraská republika;flag_hn_240.png;flag_hn_24.png;OK
+84;HK;HKG;-;-;Hongkong;Špeciálna administratívna oblasťČínskej ľudovej republiky Hongkong;flag_hk_240.png;flag_hk_24.png;OK
+85;HR;HRV;-;Croatia;Chorvátsko;Chorvátska republika;flag_hr_240.png;flag_hr_24.png;OK
+86;IN;IND;-;India;India;Indická republika;flag_in_240.png;flag_in_24.png;OK
+87;ID;IDN;-;Indonesia;Indonézia;Indonézska republika;flag_id_240.png;flag_id_24.png;OK
+88;IQ;IRQ;-;Iraq;Irak;Iracká republika;flag_iq_240.png;flag_iq_24.png;OK
+89;IR;IRN;-;Iran;Irán;Iránska islamská republika;flag_ir_240.png;flag_ir_24.png;OK
+90;IE;IRL;-;Ireland;Írsko;Írska republika;flag_ie_240.png;flag_ie_24.png;OK
+91;IS;ISL;-;Iceland;Island;Islandská republika;flag_is_240.png;flag_is_24.png;OK
+92;IL;ISR;-;Israel;Izrael;Izraelský štát;flag_il_240.png;flag_il_24.png;OK
+93;JM;JAM;-;Jamaica;Jamajka;Jamajka;flag_jm_240.png;flag_jm_24.png;OK
+94;JP;JPN;-;Japan;Japonsko;Japonsko;flag_jp_240.png;flag_jp_24.png;OK
+95;YE;YEM;-;Yemen;Jemen;Jemenská republika;flag_ye_240.png;flag_ye_24.png;OK
+96;JE;JEY;-;-;Jersey;Bailiwick Jersey;flag_je_240.png;flag_je_24.png;OK
+97;JO;JOR;-;Jordan;Jordánsko;Jordánske hášimovské kráľovstvo;flag_jo_240.png;flag_jo_24.png;OK
+98;ZA;ZAF;-;South Africa;Juhoafrická republika;Juhoafrická republika;flag_za_240.png;flag_za_24.png;OK
+99;GS;SGS;-;-;Južná Georgia a Južné Sandwichove ostrovy;Južná Georgia a Južné Sandwichove ostrovy;flag_gs_240.png;flag_gs_24.png;OK
+100;KR;KOR;-;South Korea;Kórejská republika;Kórejská republika;flag_kr_240.png;flag_kr_24.png;OK
+101;SS;SSD;-;-;Južný Sudán;Juhosudánska republika;flag_ss_240.png;flag_ss_24.png;OK
+102;KY;CYM;-;-;Kajmanie ostrovy;Kajmanie ostrovy;flag_ky_240.png;flag_ky_24.png;OK
+103;KH;KHM;-;Cambodia;Kambodža;Kamboǆské kráľovstvo;flag_kh_240.png;flag_kh_24.png;OK
+104;CM;CMR;-;-;Kamerun;Kamerunská republika;flag_cm_240.png;flag_cm_24.png;OK
+105;CA;CAN;-;Canada;Kanada;Kanada;flag_ca_240.png;flag_ca_24.png;OK
+106;CV;CPV;-;-;Kapverdy;Kapverdská republika;flag_cv_240.png;flag_cv_24.png;OK
+107;QA;QAT;-;-;Katar;Katarský štát;flag_qa_240.png;flag_qa_24.png;OK
+108;KZ;KAZ;-;Kazakhstan;Kazachstan;Kazašská republika;flag_kz_240.png;flag_kz_24.png;OK
+109;KE;KEN;-;Kenya;Keňa;Kenská republika;flag_ke_240.png;flag_ke_24.png;OK
+110;KG;KGZ;-;-;Kirgizsko;Kirgizská republika;flag_kg_240.png;flag_kg_24.png;OK
+111;KI;KIR;-;-;Kiribati;Kiribatská republika;flag_ki_240.png;flag_ki_24.png;OK
+112;CC;CCK;-;-;Kokosové ostrovy;Kokosové ostrovy;flag_cc_240.png;flag_cc_24.png;OK
+113;CO;COL;-;Colombia;Kolumbia;Kolumbijská republika;flag_co_240.png;flag_co_24.png;OK
+114;KM;COM;-;-;Komory;Komorská únia;flag_km_240.png;flag_km_24.png;OK
+115;CD;COD;-;Democratic Republic of the Congo;DR Kongo;Konžská demokratická republika;flag_cd_240.png;flag_cd_24.png;OK
+116;CG;COG;-;-;Kongo;Konžská republika;flag_cg_240.png;flag_cg_24.png;OK
+117;KP;PRK;-;North Korea;Kórejská ľudovodemokratická republika;Kórejská ľudovodemokratická republika;flag_kp_240.png;flag_kp_24.png;OK
+118;XK;UNK;-;-;Kosovo;Republika Kosovo;flag_xk_240.png;flag_xk_24.png;OK
+119;CR;CRI;-;-;Kostarika;Kostarická republika;flag_cr_240.png;flag_cr_24.png;OK
+120;CU;CUB;-;Cuba;Kuba;Kubánska republika;flag_cu_240.png;flag_cu_24.png;OK
+121;KW;KWT;-;Kuwait;Kuvajt;Kuvajtský štát;flag_kw_240.png;flag_kw_24.png;OK
+122;LA;LAO;-;Laos;Laos;Laoská ľudovodemokratická republika;flag_la_240.png;flag_la_24.png;OK
+123;LS;LSO;-;-;Lesotho;Lesothské kráľovstvo;flag_ls_240.png;flag_ls_24.png;OK
+124;LB;LBN;-;Lebanon;Libanon;Libanonská republika;flag_lb_240.png;flag_lb_24.png;OK
+125;LR;LBR;-;-;Libéria;Libérijská republika;flag_lr_240.png;flag_lr_24.png;OK
+126;LY;LBY;-;Libya;Líbya;Líbya;flag_ly_240.png;flag_ly_24.png;OK
+127;LI;LIE;-;-;Lichtenštajnsko;Lichtenštajnské kniežatstvo;flag_li_240.png;flag_li_24.png;OK
+128;LT;LTU;-;Lithuania;Litva;Litovská republika;flag_lt_240.png;flag_lt_24.png;OK
+129;LV;LVA;-;Latvia;Lotyšsko;Lotyšská republika;flag_lv_240.png;flag_lv_24.png;OK
+130;LU;LUX;-;-;Luxembursko;Luxemburské veľkovojvodstvo;flag_lu_240.png;flag_lu_24.png;OK
+131;MO;MAC;-;-;Macao;Macao, Špeciàlna administratívna oblasŦ;flag_mo_240.png;flag_mo_24.png;OK
+132;MG;MDG;-;Madagascar;Madagaskar;Madagaskarská republika;flag_mg_240.png;flag_mg_24.png;OK
+133;HU;HUN;-;Hungary;Maďarsko;Maďarsko;flag_hu_240.png;flag_hu_24.png;OK
+134;MY;MYS;-;Malaysia;Malajzia;Malajzia;flag_my_240.png;flag_my_24.png;OK
+135;MW;MWI;-;-;Malawi;Malawijská republika;flag_mw_240.png;flag_mw_24.png;OK
+136;MV;MDV;-;-;Maldivy;Maldivská republika;flag_mv_240.png;flag_mv_24.png;OK
+137;ML;MLI;-;-;Mali;Malijská republika;flag_ml_240.png;flag_ml_24.png;OK
+138;MT;MLT;-;-;Malta;Maltská republika;flag_mt_240.png;flag_mt_24.png;OK
+139;IM;IMN;-;-;Man;Ostrov Man;flag_im_240.png;flag_im_24.png;OK
+140;MA;MAR;-;Morocco;Maroko;Marocké kniežatstvo;flag_ma_240.png;flag_ma_24.png;OK
+141;MH;MHL;-;-;Marshallove ostrovy;Republika Marshallových ostrovov;flag_mh_240.png;flag_mh_24.png;OK
+142;MQ;MTQ;-;-;Martinik;Martinique;flag_mq_240.png;flag_mq_24.png;OK
+143;MU;MUS;-;-;Maurícius;Maurícijská republika;flag_mu_240.png;flag_mu_24.png;OK
+144;MR;MRT;-;-;Mauritánia;Mauritánska islamská republika;flag_mr_240.png;flag_mr_24.png;OK
+145;YT;MYT;-;-;Mayotte;Department Mayotte;flag_yt_240.png;flag_yt_24.png;OK
+146;UM;UMI;-;-;Menšie odľahlé ostrovy USA;Menšie odľahlé ostrovy Spjoených štátov;flag_um_240.png;flag_um_24.png;OK
+147;MX;MEX;-;Mexico;Mexiko;Spojené štášy mexické;flag_mx_240.png;flag_mx_24.png;OK
+148;FM;FSM;-;-;Mikronézia;Mikronézske federatívne štáty;flag_fm_240.png;flag_fm_24.png;OK
+149;MM;MMR;-;Myanmar;Mjanmarsko;Mjanmarská zväzová republika;flag_mm_240.png;flag_mm_24.png;OK
+150;MD;MDA;-;-;Moldavsko;Moldavská republika;flag_md_240.png;flag_md_24.png;OK
+151;MC;MCO;-;-;Monako;Monacké kniežatstvo;flag_mc_240.png;flag_mc_24.png;OK
+152;MN;MNG;-;Mongolia;Mongolsko;Mongolsko;flag_mn_240.png;flag_mn_24.png;OK
+153;MS;MSR;-;-;Montserrat;Montserrat;flag_ms_240.png;flag_ms_24.png;OK
+154;MZ;MOZ;-;Mozambique;Mozambik;Mozambická republika;flag_mz_240.png;flag_mz_24.png;OK
+155;NA;NAM;-;Namibia;Namíbia;Namíbijská republika;flag_na_240.png;flag_na_24.png;OK
+156;NR;NRU;-;-;Nauru;Naurská republika;flag_nr_240.png;flag_nr_24.png;OK
+157;DE;DEU;-;Germany;Nemecko;Nemecká spolková republika;flag_de_240.png;flag_de_24.png;OK
+158;NP;NPL;-;Nepal;Nepál;Nepálska federatívna demokratická republika;flag_np_240.png;flag_np_24.png;OK
+159;NE;NER;-;-;Niger;Nigérská republika;flag_ne_240.png;flag_ne_24.png;OK
+160;NG;NGA;-;Nigeria;Nigéria;Nigérijská federatívna republika;flag_ng_240.png;flag_ng_24.png;OK
+161;NI;NIC;-;-;Nikaragua;Nikaragujská republika;flag_ni_240.png;flag_ni_24.png;OK
+162;NU;NIU;-;-;Niue;Niue;flag_nu_240.png;flag_nu_24.png;OK
+163;NF;NFK;-;-;Norfolk;Teritórium ostrova Norfolk;flag_nf_240.png;flag_nf_24.png;OK
+164;NO;NOR;-;Norway;Nórsko;Nórske kráľovstvo;flag_no_240.png;flag_no_24.png;OK
+165;NC;NCL;-;-;Nová Kaledónia;Nová Kaledónia;flag_nc_240.png;flag_nc_24.png;OK
+166;NZ;NZL;-;New Zealand;Nový Zéland;Nový Zéland;flag_nz_240.png;flag_nz_24.png;OK
+167;OM;OMN;-;-;Omán;Ománsky sultanát;flag_om_240.png;flag_om_24.png;OK
+168;PK;PAK;-;Pakistan;Pakistan;Pakistanská islamská republika;flag_pk_240.png;flag_pk_24.png;OK
+169;PW;PLW;-;-;Palau;Palauská republika;flag_pw_240.png;flag_pw_24.png;OK
+170;PS;PSE;-;Palestinian Territories;Palestína;Palestínsky štát;flag_ps_240.png;flag_ps_24.png;OK
+171;PA;PAN;-;-;Panama;Panamská republika;flag_pa_240.png;flag_pa_24.png;OK
+172;VG;VGB;-;-;Britské Panenské ostrovy;Panenské ostrovy;flag_vg_240.png;flag_vg_24.png;OK
+173;PG;PNG;-;-;Papua-Nová Guinea;Nezávislý štát Papua-Nová Guinea;flag_pg_240.png;flag_pg_24.png;OK
+174;PY;PRY;-;Paraguay;Paraguaj;Paraguajská republika;flag_py_240.png;flag_py_24.png;OK
+175;PE;PER;-;Peru;Peru;Peruánska republika;flag_pe_240.png;flag_pe_24.png;OK
+176;PN;PCN;-;-;Pitcairnove ostrovy;Pitcairnove ostrovy;flag_pn_240.png;flag_pn_24.png;OK
+177;CI;CIV;-;Ivory Coast;Pobrežie Slonoviny;Republika Pobrežie Slonoviny;flag_ci_240.png;flag_ci_24.png;OK
+178;PL;POL;-;Poland;Poľsko;Poľská republika;flag_pl_240.png;flag_pl_24.png;OK
+179;PR;PRI;-;-;Portoriko;Portorické spoločenstvo;flag_pr_240.png;flag_pr_24.png;OK
+180;PT;PRT;-;Portugal;Portugalsko;Portugalská republika;flag_pt_240.png;flag_pt_24.png;OK
+181;AT;AUT;-;Austria;Rakúsko;Rakúska republika;flag_at_240.png;flag_at_24.png;OK
+182;RE;REU;-;-;Réunion;Réunionský zámorský departmán;flag_re_240.png;flag_re_24.png;OK
+183;GQ;GNQ;-;-;Rovníková Guinea;Republika rovníkovej Guiney;flag_gq_240.png;flag_gq_24.png;OK
+184;RO;ROU;-;Romania;Rumunsko;Rumunsko;flag_ro_240.png;flag_ro_24.png;OK
+185;RU;RUS;-;Russia;Rusko;Ruská federácia;flag_ru_240.png;flag_ru_24.png;OK
+186;RW;RWA;-;-;Rwanda;Rwandská republika;flag_rw_240.png;flag_rw_24.png;OK
+187;PM;SPM;-;-;Saint Pierre a Miquelon;Ostrovy Saint Pierre a Miquelon;flag_pm_240.png;flag_pm_24.png;OK
+188;MF;MAF;-;-;Saint-Martin;Saint-Martin;flag_mf_240.png;flag_mf_24.png;OK
+189;SB;SLB;-;-;Šalamúnove ostrovy;Salomonove ostrovy;flag_sb_240.png;flag_sb_24.png;OK
+190;SV;SLV;-;-;Salvádor;Salvádorská republika;flag_sv_240.png;flag_sv_24.png;OK
+191;WS;WSM;-;-;Samoa;Nezávislý štátSamoa;flag_ws_240.png;flag_ws_24.png;OK
+192;SM;SMR;-;-;San Maríno;Sanmarínska republika;flag_sm_240.png;flag_sm_24.png;OK
+193;SA;SAU;-;Saudi Arabia;Saudská Arábia;Saudskoarabské kráľovstvo;flag_sa_240.png;flag_sa_24.png;OK
+194;SN;SEN;-;-;Senegal;Senegalská republika;flag_sn_240.png;flag_sn_24.png;OK
+195;GB-NIR;GB-NIR;-;Northern Ireland;Severné Írsko;Severné Írsko;flag_gb-nir_240.png;flag_gb-nir_24.png;OK
+196;MK;MKD;-;-;Severné Macedónsko;Severomacedónska republika;flag_mk_240.png;flag_mk_24.png;OK
+197;MP;MNP;-;-;Severné Mariány;Spoločenstvo ostrovov Severné Mariány;flag_mp_240.png;flag_mp_24.png;OK
+198;SC;SYC;-;-;Seychely;Seychelská republika;flag_sc_240.png;flag_sc_24.png;OK
+199;SL;SLE;-;-;Sierra Leone;Sierraleonská republika;flag_sl_240.png;flag_sl_24.png;OK
+200;SG;SGP;-;Singapore;Singapur;Singapurská republika;flag_sg_240.png;flag_sg_24.png;OK
+201;SX;SXM;-;-;Sint Maarten;Sint Maarten;flag_sx_240.png;flag_sx_24.png;OK
+202;SK;SVK;-;Slovakia;Slovensko;Slovenská republika;flag_sk_240.png;flag_sk_24.png;OK
+203;SI;SVN;-;Slovenia;Slovinsko;Slovinská republika;flag_si_240.png;flag_si_24.png;OK
+204;SO;SOM;-;Somalia;Somálsko;Somálska federatívna republika;flag_so_240.png;flag_so_24.png;OK
+205;AE;ARE;-;-;Spojené arabské emiráty;Spojené arabské emiráty;flag_ae_240.png;flag_ae_24.png;OK
+206;US;USA;-;United States;Spojené štáty;Spojené štáty Americké;flag_us_240.png;flag_us_24.png;OK
+207;RS;SRB;-;Serbia;Srbsko;Srbská republika;flag_rs_240.png;flag_rs_24.png;OK
+208;LK;LKA;-;Sri Lanka;Srí Lanka;Srílanská demokratická socialistická republika;flag_lk_240.png;flag_lk_24.png;OK
+209;CF;CAF;-;-;Stredoafrická republika;Stredoafrická republika;flag_cf_240.png;flag_cf_24.png;OK
+210;SD;SDN;-;Sudan;Sudán;Sudánska republika;flag_sd_240.png;flag_sd_24.png;OK
+211;SR;SUR;-;-;Surinam;Surinamská republika;flag_sr_240.png;flag_sr_24.png;OK
+212;SJ;SJM;-;-;Svalbard a Jan Mayen;Svalbard a Jan Mayen;flag_sj_240.png;flag_sj_24.png;OK
+213;SZ;SWZ;-;-;Svazijsko;Svazijské kráľovstvo;flag_sz_240.png;flag_sz_24.png;OK
+214;SH;SHN;-;-;Svätá Helena;Svätá Helena (zámorské územie);flag_sh_240.png;flag_sh_24.png;OK
+215;LC;LCA;-;-;Svätá Lucia;Svätá Lucia;flag_lc_240.png;flag_lc_24.png;OK
+216;BL;BLM;-;-;Svätý Bartolomej;Svätý Bartolomej;flag_bl_240.png;flag_bl_24.png;OK
+217;KN;KNA;-;-;Svätý Krištof a Nevis;Feder໡cia Svätého Krištofa a Nevisu;flag_kn_240.png;flag_kn_24.png;OK
+218;ST;STP;-;-;Svätý Tomáš a Princov ostrov;Demokratická republika Svätého Tomáša A princovho ostrova;flag_st_240.png;flag_st_24.png;OK
+219;VC;VCT;-;-;Svätý Vincent a Grenadíny;Svätý Vincent a Grenadíny;flag_vc_240.png;flag_vc_24.png;OK
+220;SY;SYR;-;Syria;Sýria;Sýrska arabská republika;flag_sy_240.png;flag_sy_24.png;OK
+221;GB-SCT;GB-SCT;-;Scotland;Škótsko;Škótsko;flag_gb-sct_240.png;flag_gb-sct_24.png;OK
+222;ES;ESP;-;Spain;Španielsko;Španielske kráľovstvo;flag_es_240.png;flag_es_24.png;OK
+223;CH;CHE;-;Switzerland;Švajčiarsko;Švajčiarska konfederácia;flag_ch_240.png;flag_ch_24.png;OK
+224;SE;SWE;-;Sweden;Švédsko;Švédske kráľovstvo;flag_se_240.png;flag_se_24.png;OK
+225;TJ;TJK;-;-;Tadžikistan;Taǆická republika;flag_tj_240.png;flag_tj_24.png;OK
+226;TW;TWN;-;Taiwan;Taiwan;Čínska republika;flag_tw_240.png;flag_tw_24.png;OK
+227;IT;ITA;-;Italy;Taliansko;Talianska republika;flag_it_240.png;flag_it_24.png;OK
+228;TZ;TZA;-;Tanzania;Tanzánia;Tanzánijská zjednotená republika;flag_tz_240.png;flag_tz_24.png;OK
+229;TH;THA;-;Thailand;Thajsko;Thajské kráľovstvo;flag_th_240.png;flag_th_24.png;OK
+230;TG;TGO;-;-;Togo;Togská republika;flag_tg_240.png;flag_tg_24.png;OK
+231;TK;TKL;-;-;Tokelau;Tokelauské ostrovy;flag_tk_240.png;flag_tk_24.png;OK
+232;TO;TON;-;-;Tonga;Tongské kráľovstvo;flag_to_240.png;flag_to_24.png;OK
+233;TT;TTO;-;-;Trinidad a Tobago;Republika Trinidad a Tobaga;flag_tt_240.png;flag_tt_24.png;OK
+234;TN;TUN;-;Tunisia;Tunisko;Tuniská republika;flag_tn_240.png;flag_tn_24.png;OK
+235;TR;TUR;-;Turkey;Turecko;Turecká republika;flag_tr_240.png;flag_tr_24.png;OK
+236;TM;TKM;-;-;Turkménsko;Turkménsko;flag_tm_240.png;flag_tm_24.png;OK
+237;TC;TCA;-;-;Turks a Caicos;Ostrovy Turks a Caicos;flag_tc_240.png;flag_tc_24.png;OK
+238;TV;TUV;-;-;Tuvalu;Tuvalu;flag_tv_240.png;flag_tv_24.png;OK
+239;UG;UGA;-;Uganda;Uganda;Ugandská republika;flag_ug_240.png;flag_ug_24.png;OK
+240;UA;UKR;-;Ukraine;Ukrajina;Ukrajina;flag_ua_240.png;flag_ua_24.png;OK
+241;UY;URY;-;Uruguay;Uruguaj;Uruguajská východná republika;flag_uy_240.png;flag_uy_24.png;OK
+242;UZ;UZB;-;-;Uzbekistan;Uzbecká republika;flag_uz_240.png;flag_uz_24.png;OK
+243;VU;VUT;-;-;Vanuatu;Vanuatská republika;flag_vu_240.png;flag_vu_24.png;OK
+244;VA;VAT;-;-;Vatikán;Svätá stolica (Vatikánsky mestský štát;flag_va_240.png;flag_va_24.png;OK
+245;GB;GBR;-;United Kingdom;Spojené kráľovstvo;Spojené kráľovstvo Veľkej Británie a SevernéhoÌrska;flag_gb_240.png;flag_gb_24.png;OK
+246;VE;VEN;-;Venezuela;Venezuela;Venezuelská bolívarovská republika;flag_ve_240.png;flag_ve_24.png;OK
+247;CX;CXR;-;-;Vianočný ostrov;Teritórium Vianočného ostrova;flag_cx_240.png;flag_cx_24.png;OK
+248;VN;VNM;-;Vietnam;Vietnam;Vietnamská socialistická republika;flag_vn_240.png;flag_vn_24.png;OK
+249;TL;TLS;-;-;Východný Timor;Východotimorská demokratická republika;flag_tl_240.png;flag_tl_24.png;OK
+250;GB-WLS;GB-WLS;-;Wales;Wales;Wales;flag_gb-wls_240.png;flag_gb-wls_24.png;OK
+251;WF;WLF;-;-;Wallis a Futuna;Teritórium ostrovov Wallis a Futuna;flag_wf_240.png;flag_wf_24.png;OK
+252;ZM;ZMB;-;Zambia;Zambia;Zambijská republika;flag_zm_240.png;flag_zm_24.png;OK
+253;EH;ESH;-;-;Západná Sahara;Západná Sahara;flag_eh_240.png;flag_eh_24.png;OK
+254;ZW;ZWE;-;Zimbabwe;Zimbabwe;Zimbabwianska republika;flag_zw_240.png;flag_zw_24.png;OK

@@ -3,3 +3,8 @@ web/dist/
 api/config/db.php
 api/config/vapid.php
 api/setup_admin.php
+
+# API kluc pre livescore analyzu
+api/config/openrouter.php
+tools/node_modules/
+tools/package-lock.json

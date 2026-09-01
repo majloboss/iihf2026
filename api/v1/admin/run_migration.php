@@ -1,14 +1,77 @@
 <?php
-// POST /v1/admin/run-migration — run pending DB migrations
+// GET  /v1/admin/run-migration — zoznam migracii a ich stav
+// POST /v1/admin/run-migration — spusti nespustene migracie
+// Telo POST: {"version": 53} spusti iba jednu, {"dry_run": true} iba vypise plan.
+//
+// POZOR: migracie 002-011, 020 a 036 sa do admin.schema_versions nikdy nezapisuju,
+// takze podla tabulky vyzeraju ako nespustene. Preto sa predvolene spustaju iba
+// migracie novsie ako najvyssia zaznamenana verzia. Starsiu treba spustit adresne
+// cez {"version": N}.
 require_auth(true);
 $pdo = db();
 
-$migrations = ['003_group_standings.sql', '004_invites_sent_to.sql', '009_notification_settings.sql', '010_games_final_score.sql', '011_notification_log.sql', 'run_012.sql', 'run_013.sql', 'run_014.sql', 'run_015_flashscore_urls.sql', 'run_016_games_pdf.sql', 'run_017_mail_log_body.sql', 'run_018_login_logs_env.sql', 'run_019_group_standings_ot.sql', 'run_020_announcements.sql', 'run_021_announcement_active.sql', 'run_022_livescore.sql', 'run_023_livescore_next_poll.sql', '024_competitions.sql', '025_fifa_data.sql', '026_fifa_standings_seed.sql', '027_rename_iihf.sql', '028_fifa_scoring_config.sql', '029_fifa_flashscore.sql'];
-$ran = [];
-foreach ($migrations as $file) {
-    $sql = file_get_contents(__DIR__ . '/../../migrations/' . $file);
-    $pdo->exec($sql);
-    $ran[] = $file;
+$dir = __DIR__ . '/../../migrations/';
+
+// Zo suborov <cislo>_<nazov>.sql zosta zoznam [verzia => subor], zoradeny podla verzie.
+$files = [];
+foreach (scandir($dir) ?: [] as $file) {
+    if (!preg_match('/^(\d+)_.+\.sql$/', $file, $m)) continue;
+    $files[(int)$m[1]] = $file;
+}
+ksort($files);
+
+$applied = $pdo->query('SELECT version FROM admin.schema_versions')->fetchAll(PDO::FETCH_COLUMN);
+$applied = array_map('intval', $applied);
+
+$maxApplied = $applied ? max($applied) : 0;
+
+$pending = [];
+foreach ($files as $version => $file) {
+    if (in_array($version, $applied, true)) continue;
+    if ($version <= $maxApplied) continue; // stara migracia bez zaznamu, nespustat automaticky
+    $pending[$version] = $file;
 }
 
-json_ok(['migrations' => $ran, 'done' => true]);
+if ($method === 'GET') {
+    $list = [];
+    foreach ($files as $version => $file) {
+        $isApplied = in_array($version, $applied, true);
+        $list[] = [
+            'version' => $version,
+            'file' => $file,
+            'applied' => $isApplied,
+            'untracked' => !$isApplied && $version <= $maxApplied,
+        ];
+    }
+    json_ok(['migrations' => $list, 'max_applied' => $maxApplied, 'pending' => array_values($pending)]);
+}
+
+if ($method !== 'POST') json_error('Method not allowed', 405);
+
+$body = json_decode(file_get_contents('php://input'), true) ?: [];
+
+if (isset($body['version'])) {
+    $only = (int)$body['version'];
+    if (!isset($files[$only])) json_error("Migrácia $only neexistuje", 404);
+    $pending = [$only => $files[$only]];
+}
+
+if (!empty($body['dry_run'])) json_ok(['would_run' => array_values($pending), 'done' => false]);
+
+// Kazda migracia bezi vo vlastnej transakcii, aby chyba nezrusila uz spustene.
+$ran = [];
+foreach ($pending as $version => $file) {
+    $sql = file_get_contents($dir . $file);
+    if ($sql === false) json_error("Migráciu $file sa nepodarilo načítať", 500);
+    try {
+        $pdo->beginTransaction();
+        $pdo->exec($sql);
+        $pdo->commit();
+        $ran[] = $file;
+    } catch (Throwable $e) {
+        if ($pdo->inTransaction()) $pdo->rollBack();
+        json_error("Migrácia $file zlyhala: " . $e->getMessage() . ' | Úspešne spustené: ' . (implode(', ', $ran) ?: 'žiadne'), 500);
+    }
+}
+
+json_ok(['migrations' => $ran, 'max_applied' => $maxApplied, 'done' => true]);
