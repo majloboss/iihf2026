@@ -188,7 +188,7 @@ bez zápasov — netlačí to.
 
 | Úloha | Poznámka |
 |---|---|
-| 🔲 Zjednotiť históriu oznamov | FIFA a IIHF ju majú stále v prehľade, LM ju má v Správach |
+| 🟠 Zjednotiť históriu oznamov | hotové — všetky tri súťaže majú históriu v Správach → Oznamy |
 
 ## Referenčný rozpis zo zdroja (`games_pdf`)
 
