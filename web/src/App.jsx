@@ -54,38 +54,51 @@ function PrivateAdminRoute({ children }) {
 }
 
 function DashboardRouter() {
-    const { activeCompetition } = useCompetition();
+    const { activeCompetition, loading } = useCompetition();
+    if (loading) return <NacitavamSutaz />;
     if (activeCompetition?.slug === 'ucl2026') return <UclDashboard />;
     return activeCompetition?.slug === 'fifa2026' ? <FifaDashboard /> : <Dashboard />;
 }
 
 function GamesRouter() {
-    const { activeCompetition } = useCompetition();
+    const { activeCompetition, loading } = useCompetition();
+    if (loading) return <NacitavamSutaz />;
     if (activeCompetition?.slug === 'ucl2026') return <UclGames />;
     return activeCompetition?.slug === 'fifa2026' ? <FifaGames /> : <Games />;
 }
 
 function AdminResultsRouter() {
-    const { activeCompetition } = useCompetition();
+    const { activeCompetition, loading } = useCompetition();
+    if (loading) return <NacitavamSutaz />;
     if (activeCompetition?.slug === 'ucl2026') return <UclAdminResults />;
     return activeCompetition?.slug === 'fifa2026' ? <FifaAdminResults /> : <AdminResults />;
 }
 
 function AdminGamesRouter() {
-    const { activeCompetition } = useCompetition();
+    const { activeCompetition, loading } = useCompetition();
+    if (loading) return <NacitavamSutaz />;
     if (activeCompetition?.slug === 'ucl2026') return <UclAdminGames />;
     return activeCompetition?.slug === 'fifa2026' ? <FifaAdminGames /> : <AdminGames />;
 }
 
 function TabulkyRouter() {
-    const { activeCompetition } = useCompetition();
+    const { activeCompetition, loading } = useCompetition();
+    if (loading) return <NacitavamSutaz />;
     return activeCompetition?.slug === 'ucl2026' ? <UclStandings /> : <GroupStandings />;
 }
 
 function AdminGroupStandingsRouter() {
-    const { activeCompetition } = useCompetition();
+    const { activeCompetition, loading } = useCompetition();
+    if (loading) return <NacitavamSutaz />;
     if (activeCompetition?.slug === 'ucl2026') return <UclAdminStandings />;
     return activeCompetition?.slug === 'fifa2026' ? <FifaAdminGroupStandings /> : <AdminGroupStandings />;
+}
+
+// Kým sa nevie, ktorá súťaž je aktívna, nesmie sa vykresliť žiadna z nich:
+// predvolená vetva je IIHF, takže používateľ UCL uvidel na okamih hokej
+// a obrazovka sa mu potom prepla. Na mobile trvá to okno dosť dlho.
+function NacitavamSutaz() {
+    return <p style={{ padding: 16, color: '#888' }}>Načítavam…</p>;
 }
 
 function HomeRedirect() {
