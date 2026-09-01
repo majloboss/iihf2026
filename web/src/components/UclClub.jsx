@@ -5,12 +5,13 @@
 
 function ClubText({ name, country, countryCode, flag, right }) {
     return (
-        // Štát je ukotvený k spodku, aby stál v jednej rovine aj vtedy, keď sa
-        // jeden názov klubu zalomí do dvoch riadkov a druhý nie.
+        // Názov so štátom sa zvisle centruje voči logu, nech sa názov zalomí do
+        // jedného či troch riadkov — inak by pri rôzne dlhých názvoch text
+        // voči logu poskakoval.
         <span style={{ display: 'flex', flexDirection: 'column', minWidth: 0,
-                       height: '100%', justifyContent: 'flex-end',
+                       height: '100%', justifyContent: 'center',
                        alignItems: right ? 'flex-end' : 'flex-start' }}>
-            <span style={{ flex: 1, fontWeight: 500, lineHeight: 1.2 }}>{name}</span>
+            <span style={{ fontWeight: 500, lineHeight: 1.2 }}>{name}</span>
             {(country || countryCode) && (
                 <span style={{ display: 'flex', alignItems: 'center', gap: 4,
                                fontSize: '0.72rem', color: '#888', lineHeight: 1.3 }}>
