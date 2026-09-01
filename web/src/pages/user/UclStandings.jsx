@@ -79,14 +79,15 @@ export default function UclStandings() {
                 pričom každý odohrá 8 zápasov (4 doma, 4 vonku) a s každým súperom
                 sa stretne najviac raz.
                 <br />
-                Po ligovej fáze <strong>prvých osem</strong> postupuje priamo do osemfinále.
-                Kluby na <strong>9. až 24. mieste</strong> hrajú baráž o play-off — dvojzápas,
-                z ktorého víťazi doplnia osemfinále. Kluby od 25. miesta končia.
+                <strong>Baráž</strong> — kluby na 9. až 24. mieste hrajú baráž
+                o play-off, pričom sa hrá dvojzápas, z ktorého víťazi doplnia
+                osemfinále, kam priamo postupujú kluby na 1. až 8. mieste. Kluby
+                od 25. miesta končia.
                 <br />
-                Osemfinále, štvrťfinále aj semifinále sa hrajú na dva zápasy so
-                súčtom gólov; predĺženie sa hrá až v odvete pri rovnosti súčtu.
+                <strong>Play-off</strong> — osemfinále, štvrťfinále aj semifinále
+                sa hrajú na dvojzápas.
                 <br />
-                <strong>Finále</strong> sa hrá na neutrálnom ihrisku ako jeden zápas
+                <strong>Finále</strong> sa hrá na neutrálnom ihrisku na jeden zápas
                 bez odvety.
             </p>
 
