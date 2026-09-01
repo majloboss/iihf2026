@@ -275,8 +275,7 @@ export default function UclGames() {
                                             </strong>
                                         </span>}
                                     akcia={known && !closed && (
-                                        <button onClick={() => save(g)} disabled={saving === g.game_id}
-                                                style={{ width: '100%' }}>
+                                        <button onClick={() => save(g)} disabled={saving === g.game_id}>
                                             {saving === g.game_id ? '…' : 'Uložiť'}
                                         </button>)}
                                     size={28}>
