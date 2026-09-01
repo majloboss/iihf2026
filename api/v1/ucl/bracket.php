@@ -89,15 +89,18 @@ foreach ($FAZY as $kod => $nazov) {
             if ($golyA !== $golyB) $vitaz = $golyA > $golyB ? $timA : $timB;
         }
 
-        $zapasNaVystup = fn($z) => $z === null ? null : [
+        // Skore sa zapisuje v poradi zapasu, pavuk ho ale zobrazuje v poradi
+        // dvojice — tim A je hore. V prvom zapase bol tim A hostom, takze sa
+        // jeho vysledok otoci; inak by dvojica 3:2 vyzerala ako 2:3.
+        $zapasNaVystup = fn($z, $otocit = false) => $z === null ? null : [
             'game_id'   => (int)$z['game_id'],
             'start_time'=> $z['start_time'],
-            'home_name' => $z['home_name'],
-            'away_name' => $z['away_name'],
-            'hs'        => $z['hs'] === null ? null : (int)$z['hs'],
-            'ag'        => $z['ag'] === null ? null : (int)$z['ag'],
-            'hf'        => $z['hf'] === null ? null : (int)$z['hf'],
-            'af'        => $z['af'] === null ? null : (int)$z['af'],
+            'home_name' => $otocit ? $z['away_name'] : $z['home_name'],
+            'away_name' => $otocit ? $z['home_name'] : $z['away_name'],
+            'hs'        => ($otocit ? $z['ag'] : $z['hs']) === null ? null : (int)($otocit ? $z['ag'] : $z['hs']),
+            'ag'        => ($otocit ? $z['hs'] : $z['ag']) === null ? null : (int)($otocit ? $z['hs'] : $z['ag']),
+            'hf'        => ($otocit ? $z['af'] : $z['hf']) === null ? null : (int)($otocit ? $z['af'] : $z['hf']),
+            'af'        => ($otocit ? $z['hf'] : $z['af']) === null ? null : (int)($otocit ? $z['hf'] : $z['af']),
             'approved'  => (bool)$z['result_approved'],
         ];
 
@@ -108,7 +111,7 @@ foreach ($FAZY as $kod => $nazov) {
             'goals_a'    => $golyA,
             'goals_b'    => $golyB,
             'winner_id'  => $vitaz,
-            'first_leg'  => $zapasNaVystup($prvy),
+            'first_leg'  => $zapasNaVystup($prvy, $odveta !== null),
             'second_leg' => $zapasNaVystup($odveta),
         ];
     }
