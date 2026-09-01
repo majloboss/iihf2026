@@ -47,3 +47,13 @@ p { margin: 0; }
 @media (prefers-reduced-motion: reduce) {
     .liveBadge { animation: none; }
 }
+
+/* Karta zápasu (UclZapas) — na úzkej obrazovke sa pás s termínom zúži
+   a medzery sa stiahnu, aby na dvojicu zostalo čo najviac miesta. */
+.uclZapas { gap: 12px; }
+.uclZapasTermin { width: 92px; }
+
+@media (max-width: 560px) {
+    .uclZapas { gap: 6px; }
+    .uclZapasTermin { width: 62px; font-size: 0.7rem; }
+}

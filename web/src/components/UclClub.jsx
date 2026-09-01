@@ -13,7 +13,8 @@ function ClubText({ name, country, countryCode, flag, right }) {
                        height: '100%',
                        justifyItems: right ? 'end' : 'start' }}>
             <span style={{ display: 'flex', alignItems: 'center',
-                           fontWeight: 500, lineHeight: 1.2 }}>{name}</span>
+                           fontWeight: 500, lineHeight: 1.2,
+                           textAlign: right ? 'right' : 'left' }}>{name}</span>
             {(country || countryCode) && (
                 <span style={{ display: 'flex', alignItems: 'center', gap: 4,
                                fontSize: '0.72rem', color: '#888', lineHeight: 1.3 }}>
@@ -39,7 +40,7 @@ export default function UclClub({ name, logo, country, countryCode, flag, align,
         // minWidth: 0 drží klub v šírke stĺpca — bez neho by dlhý názov stĺpec
         // roztiahol a stred mriežky by sa posunul.
         <span style={{ display: 'flex', alignItems: 'stretch', gap: 8, height: '100%',
-                       minWidth: 0, overflow: 'hidden',
+                       minWidth: 0,
                        justifyContent: right ? 'flex-end' : 'flex-start' }}>
             {right && <ClubText name={name} country={country} countryCode={countryCode} flag={flag} right />}
             {logo
