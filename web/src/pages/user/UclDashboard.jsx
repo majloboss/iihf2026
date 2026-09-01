@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getUclGames, saveUclTip } from '../../api/ucl';
 import { apiFetch } from '../../api/client';
-import { asDate, canTip, isValidDate, uclScoreText as scoreText } from '../../utils/tipWindow';
+import { asDate, canTip, isValidDate, TIP_LOCK_MS, uclScoreText as scoreText } from '../../utils/tipWindow';
 import { useAuth } from '../../context/AuthContext';
 import { useCompetition } from '../../context/CompetitionContext';
 import UclClub, { UclVenue } from '../../components/UclClub';
@@ -106,10 +106,15 @@ export default function UclDashboard() {
             .then(setStandings).catch(() => {});
     }, [activeCompetition?.id]);
 
-    // Zápas už začal, ale ešte nie je schválený výsledok.
+    // Zápas už začal alebo sa chystá, a ešte nemá schválený výsledok.
+    //
+    // Tipovanie sa zatvára TIP_LOCK_MS pred výkopom, takže zápas v tomto okne
+    // už nepatrí medzi tipovateľné, ale ešte sa nehrá — bez tejto sekcie by
+    // z prehľadu na pár minút úplne zmizol.
     const live = useMemo(() => games
         .filter(g => g.home_team_id && g.away_team_id && !g.result_approved
-                     && isValidDate(asDate(g.start_time)) && asDate(g.start_time) <= new Date())
+                     && isValidDate(asDate(g.start_time))
+                     && asDate(g.start_time).getTime() - Date.now() <= TIP_LOCK_MS)
         .sort((a, b) => asDate(a.start_time) - asDate(b.start_time)), [games]);
 
     // Zápasy, ktoré sa dajú tipovať — rovnaké pravidlo ako na serveri.
@@ -137,8 +142,18 @@ export default function UclDashboard() {
     // Musí stáť až za `untipped` — inak by sa použilo pred inicializáciou.
     const upcomingRest = useMemo(() => {
         const shown = new Set(untipped.map(g => g.game_id));
-        return upcoming.filter(g => !shown.has(g.game_id)).slice(0, 8);
-    }, [upcoming, untipped]);
+        const zoznam = upcoming.filter(g => !shown.has(g.game_id));
+        if (zoznam.length) return zoznam.slice(0, 8);
+
+        // Nič sa nedá tipovať — ukáž aspoň najbližšie termíny, nech prehľad
+        // nekončí prázdnotou. Tipovacie polia sa pri nich aj tak nezobrazia.
+        return games
+            .filter(g => !shown.has(g.game_id) && !g.result_approved
+                         && isValidDate(asDate(g.start_time))
+                         && asDate(g.start_time).getTime() - Date.now() > TIP_LOCK_MS)
+            .sort((a, b) => asDate(a.start_time) - asDate(b.start_time))
+            .slice(0, 8);
+    }, [upcoming, untipped, games]);
 
     const played = useMemo(() => games
         .filter(g => g.result_approved && g.home_score_tip !== null)
@@ -193,7 +208,8 @@ export default function UclDashboard() {
             {live.length > 0 && (
                 <>
                     <h3 style={{ marginTop: 20, display: 'flex', alignItems: 'center', gap: 8 }}>
-                        Prebiehajúce zápasy
+                        {live.some(g => asDate(g.start_time) <= new Date())
+                            ? 'Prebiehajúce zápasy' : 'Začínajú o chvíľu'}
                     </h3>
                     {live.map(g => (
                         <div key={g.game_id} style={{ background: '#fff', border: '1px solid #f2c2c2', borderRadius: 10,
@@ -209,7 +225,11 @@ export default function UclDashboard() {
                                  countryCode={g.home_country_code} flag={g.home_flag} align="right" size={24} />
                                     <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center',
                                                justifyContent: 'center', gap: 3 }}>
-                                        <span className="liveBadge">LIVE</span>
+                                        {/* Odznak LIVE len keď sa naozaj hrá — v okne
+                                            pred výkopom by klamal. */}
+                                        {asDate(g.start_time) <= new Date()
+                                            ? <span className="liveBadge">LIVE</span>
+                                            : <span style={{ fontSize: '0.68rem', color: '#999' }}>čoskoro</span>}
                                         <strong style={{ color: '#dc3545' }}>
                                             {scoreText(g) ?? 'vs'}
                                         </strong>
@@ -270,7 +290,10 @@ export default function UclDashboard() {
                 </>
             )}
 
-            <h3 style={{ marginTop: 20 }}>Najbližšie zápasy na tipovanie</h3>
+            <h3 style={{ marginTop: 20 }}>
+                {upcomingRest.some(g => canTip(g)) || untipped.length > 0
+                    ? 'Najbližšie zápasy na tipovanie' : 'Najbližšie zápasy'}
+            </h3>
             {upcomingRest.length === 0 && untipped.length === 0 && (
                 <p style={{ color: '#888' }}>
                     Momentálne nie je čo tipovať. Play-off sa odomkne, keď budú známi postupujúci.
@@ -292,14 +315,26 @@ export default function UclDashboard() {
                     <UclTieSummary game={g} small />
                     {/* Tip stojí pod zápasom: vedľa neho sa na mobile nezmestí. */}
                     <div style={{ flex: '1 1 100%', display: 'flex', gap: 6, alignItems: 'center' }}>
-                        <input value={draftOf(g, 'home')} onChange={e => setDraft(g.game_id, 'home', e.target.value)}
-                               inputMode="numeric" style={{ width: 38, textAlign: 'center' }} aria-label="Tip domáci" />
-                        <span>:</span>
-                        <input value={draftOf(g, 'away')} onChange={e => setDraft(g.game_id, 'away', e.target.value)}
-                               inputMode="numeric" style={{ width: 38, textAlign: 'center' }} aria-label="Tip hostia" />
-                        <button onClick={() => save(g)} disabled={saving === g.game_id}>
-                            {saving === g.game_id ? '…' : 'Uložiť'}
-                        </button>
+                        {/* Sekcia ukazuje aj zápasy, ktoré sa ešte tipovať nedajú —
+                            pri nich nemá zmysel ponúkať polia. */}
+                        {canTip(g) ? (
+                            <>
+                                <input value={draftOf(g, 'home')} onChange={e => setDraft(g.game_id, 'home', e.target.value)}
+                                       inputMode="numeric" style={{ width: 38, textAlign: 'center' }} aria-label="Tip domáci" />
+                                <span>:</span>
+                                <input value={draftOf(g, 'away')} onChange={e => setDraft(g.game_id, 'away', e.target.value)}
+                                       inputMode="numeric" style={{ width: 38, textAlign: 'center' }} aria-label="Tip hostia" />
+                                <button onClick={() => save(g)} disabled={saving === g.game_id}>
+                                    {saving === g.game_id ? '…' : 'Uložiť'}
+                                </button>
+                            </>
+                        ) : (
+                            <span style={{ fontSize: '0.8rem', color: '#999' }}>
+                                {g.home_score_tip != null
+                                    ? <>Tip: <strong>{g.home_score_tip}:{g.away_score_tip}</strong></>
+                                    : 'tipovanie zatiaľ nie je otvorené'}
+                            </span>
+                        )}
                         <span style={{ marginLeft: 'auto' }}><UclVenue game={g} inline /></span>
                     </div>
                 </div>
