@@ -36,7 +36,10 @@ export default function UclClub({ name, logo, country, countryCode, flag, align,
     if (!name) return <span style={{ color: '#999', fontSize: '0.85rem' }}>zatiaľ neurčený</span>;
     const right = align === 'right';
     return (
+        // minWidth: 0 drží klub v šírke stĺpca — bez neho by dlhý názov stĺpec
+        // roztiahol a stred mriežky by sa posunul.
         <span style={{ display: 'flex', alignItems: 'stretch', gap: 8, height: '100%',
+                       minWidth: 0, overflow: 'hidden',
                        justifyContent: right ? 'flex-end' : 'flex-start' }}>
             {right && <ClubText name={name} country={country} countryCode={countryCode} flag={flag} right />}
             {logo
