@@ -56,20 +56,20 @@ function ucl_vitazi(PDO $pdo, string $phase): array {
         if ($prvy['hs'] === null || $odveta['hs'] === null) continue;
 
         // Domaci prveho zapasu je v odvete hostom, preto sa goly scitavaju krizom.
+        // Do suctu ide konecny vysledok: ked sa hralo predlzenie alebo penalty,
+        // plati skore po nich. Odveta moze skoncit remizou a dvojica byt
+        // rozhodnuta — pri sucte 2:2 dostane hostujuci tim dva goly v predlzeni
+        // a za dvojicu je to 4:2.
+        $kon = fn($z, $pole) => $z[$pole === 'h' ? 'hf' : 'af'] !== null
+            ? (int)$z[$pole === 'h' ? 'hf' : 'af']
+            : (int)$z[$pole === 'h' ? 'hs' : 'ascore'];
+
         $timA = (int)$prvy['home_team_id'];
         $timB = (int)$prvy['away_team_id'];
-        $golyA = (int)$prvy['hs'] + (int)$odveta['ascore'];
-        $golyB = (int)$prvy['ascore'] + (int)$odveta['hs'];
+        $golyA = $kon($prvy, 'h') + $kon($odveta, 'a');
+        $golyB = $kon($prvy, 'a') + $kon($odveta, 'h');
 
-        if ($golyA !== $golyB) {
-            $vitazi[$tieId] = $golyA > $golyB ? $timA : $timB;
-            continue;
-        }
-        // Rovnaky sucet — rozhoduje predlzenie alebo penalty v odvete.
-        if ($odveta['hf'] !== null && $odveta['af'] !== null && $odveta['hf'] !== $odveta['af']) {
-            $vitazi[$tieId] = (int)$odveta['hf'] > (int)$odveta['af']
-                ? (int)$odveta['home_team_id'] : (int)$odveta['away_team_id'];
-        }
+        if ($golyA !== $golyB) $vitazi[$tieId] = $golyA > $golyB ? $timA : $timB;
         // Inak vitaz zatial nie je znamy.
     }
     ksort($vitazi, SORT_NATURAL);
@@ -150,6 +150,16 @@ if ($tipy > 0 && empty($body['replace'])) {
 // v prvom zapase hostom.
 $pary = [];
 $n = count($ucastnici);
+
+// Neparny pocet znamena, ze niektora dvojica predoslej fazy este nema vitaza
+// — najcastejsie preto, ze jej vysledok neurcuje postupujuceho. Bez tejto
+// poistky by cyklus sparoval prostredny tim so sebou samym.
+if ($n < 2 || $n % 2 !== 0) {
+    json_error("Účastníkov je $n — z predchádzajúcej fázy chýba víťaz. "
+             . 'Skontroluj výsledky dvojíc: pri rovnakom súčte gólov musí byť '
+             . 'zadaný výsledok po predĺžení alebo penaltách.', 409);
+}
+
 for ($i = 0; $i < $n / 2; $i++) {
     $lepsi = $ucastnici[$i];
     $horsi = $ucastnici[$n - 1 - $i];
