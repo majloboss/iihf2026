@@ -36,9 +36,14 @@ export default function UclTieSummary({ game, small = false }) {
     const maPredlzenie = game.home_score_final !== null && game.home_score_final !== undefined
                       && game.away_score_final !== null && game.away_score_final !== undefined;
 
+    // Aj po predĺžení rozhoduje súčet za dvojicu, nie výsledok odvety: tá môže
+    // skončiť remízou (2:2) a dvojica byť rozhodnutá (4:2).
+    const finalH = maPredlzenie ? prvyH + Number(game.home_score_final) : null;
+    const finalA = maPredlzenie ? prvyA + Number(game.away_score_final) : null;
+
     const stav = !maSucet ? null
         : maPredlzenie
-            ? (game.home_score_final > game.away_score_final ? 'domáci' : 'hostia')
+            ? (finalH > finalA ? 'domáci' : 'hostia')
             : sucetH > sucetA ? 'domáci'
             : sucetH < sucetA ? 'hostia'
             : 'remíza';

@@ -44,8 +44,12 @@ if ($hr !== null || $ar !== null) {
 //   finale       — pri remize po 90 minutach (hra sa na jeden zapas)
 $hasFinal = $hf !== null && $af !== null;
 $needsFinal = false;
+$jeFinale = $game['game_type_code'] === 'F';
+// Goly prveho zapasu z pohladu tymov odvety; vo finale ziadne nie su.
+$prevHome = 0;
+$prevAway = 0;
 
-if ($game['game_type_code'] === 'F') {
+if ($jeFinale) {
     $needsFinal = $hr !== null && $ar !== null && $hr === $ar;
 } elseif ((int)$game['leg'] === 2 && $game['tie_id'] !== null && $hr !== null && $ar !== null) {
     // Sucet za dvojicu: domaci tejto odvety bol v prvom zapase hostom.
@@ -60,8 +64,10 @@ if ($game['game_type_code'] === 'F') {
     }
     if ($prev && $prev['home_score_regular'] !== null && $prev['away_score_regular'] !== null) {
         // Domaci odvety = hostia prveho zapasu, preto sa skore prehadzuje.
-        $sumHome = $hr + (int)$prev['away_score_regular'];
-        $sumAway = $ar + (int)$prev['home_score_regular'];
+        $prevHome = (int)$prev['away_score_regular'];
+        $prevAway = (int)$prev['home_score_regular'];
+        $sumHome = $hr + $prevHome;
+        $sumAway = $ar + $prevAway;
         $needsFinal = $sumHome === $sumAway;
     }
 }
@@ -69,9 +75,21 @@ if ($game['game_type_code'] === 'F') {
 if ($needsFinal && $approved) {
     if (!$hasFinal) json_error('Rovnaký súčet gólov — zadaj konečný výsledok po predĺžení alebo penaltách', 400);
     if ($hf < $hr || $af < $ar) json_error('Konečný výsledok nemôže byť nižší ako po 90 minútach', 400);
-    // Penalty sa rataju ako jeden gol pre vitaza, takze konecny vysledok
-    // remizou skoncit nemoze — pri sucte 2:2 je to 3:2 alebo 2:3.
-    if ($hf === $af) json_error('Konečný výsledok musí mať víťaza — penalty sa rátajú ako jeden gól', 400);
+
+    // O postupe rozhoduje sucet za dvojicu, nie vysledok jedneho zapasu.
+    // Odveta moze skoncit remizou a dvojica byt aj tak rozhodnuta: pri
+    // sucte 2:2 po 90 minutach da hostujuci tim v predlzeni dva goly,
+    // odveta konci 2:2 a za dvojicu je to 4:2 — postupujuci je jasny.
+    //
+    // Vo finale sa nic nepripocitava, tam plati vysledok samotneho zapasu.
+    $finalHome = $jeFinale ? $hf : $hf + $prevHome;
+    $finalAway = $jeFinale ? $af : $af + $prevAway;
+
+    // Penalty sa rataju ako jeden gol pre vitaza, takze nerozhodne
+    // skoncit nemoze — vzdy je niekto o gol vpredu.
+    if ($finalHome === $finalAway) {
+        json_error('Po predĺžení musí byť rozhodnuté — penalty sa rátajú ako jeden gól', 400);
+    }
 } elseif ($hasFinal && !$needsFinal) {
     json_error('Predĺženie sa hrá len vo finále pri remíze alebo v odvete pri rovnakom súčte gólov', 400);
 }

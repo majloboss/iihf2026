@@ -174,6 +174,22 @@ function ResultCard({ game: initGame, onChanged }) {
       : jeOdveta ? remizaNaSucet
       : false);
 
+    // Postupujúceho určí súčet za dvojicu, nie výsledok tohto zápasu.
+    // Odveta môže skončiť remízou a dvojica byť rozhodnutá: pri súčte 2:2
+    // dá hosť v predĺžení dva góly, odveta končí 2:2 a dvojica 4:2.
+    // Doplní sa preto toľko gólov, aby bol súčet o jeden v prospech víťaza.
+    // Súčet za dvojicu po predĺžení či penaltách. O postupe rozhoduje on,
+    // nie výsledok odvety: tá môže skončiť remízou a dvojica byť rozhodnutá.
+    // Vo finále sa nič nepripočítava, hrá sa na jeden zápas.
+    const sucetPoET = (() => {
+        if (hFin === '' || aFin === '') return null;
+        const h = parseInt(hFin) + (jeFinale ? 0 : Number(game.first_leg_home));
+        const a = parseInt(aFin) + (jeFinale ? 0 : Number(game.first_leg_away));
+        if (Number.isNaN(h) || Number.isNaN(a)) return null;
+        return { h, a, rozhodnute: h !== a,
+                 kto: h > a ? (game.home_name || 'domáci') : (game.away_name || 'hostia') };
+    })();
+
     // Konečný výsledok nemôže byť nižší ako po 90 minútach — góly z riadneho
     // času v ňom už sú. Polia sa preto predvyplnia a admin len dopíše, čo
     // padlo v predĺžení alebo na penalty.
@@ -326,27 +342,24 @@ function ResultCard({ game: initGame, onChanged }) {
                                 <input type="number" min="0" max="30" value={aFin}
                                        onChange={e => setAFin(e.target.value)} className={styles.scoreIn} />
                             </div>
-                            {/* Vitaza je jednoduchsie vybrat nez dopocitat — pri
-                                penaltach sa pripise jeden gol tomu, kto postupil. */}
-                            <span style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
-                                <span style={{ fontSize: '0.72rem', color: '#888' }}>postupujú:</span>
-                                <button type="button"
-                                        onClick={() => { setHFin(String(parseInt(h90) + 1)); setAFin(a90); }}
-                                        style={{ fontSize: '0.72rem', padding: '2px 8px', cursor: 'pointer',
-                                                 border: '1px solid #dee2e6', borderRadius: 4, background: '#fff' }}>
-                                    {game.home_name || 'domáci'}
-                                </button>
-                                <button type="button"
-                                        onClick={() => { setHFin(h90); setAFin(String(parseInt(a90) + 1)); }}
-                                        style={{ fontSize: '0.72rem', padding: '2px 8px', cursor: 'pointer',
-                                                 border: '1px solid #dee2e6', borderRadius: 4, background: '#fff' }}>
-                                    {game.away_name || 'hostia'}
-                                </button>
-                            </span>
+                            {/* Súčet za dvojicu sa prepočítava pri písaní — admin
+                                vidí hneď, či je postupujúci určený. V predĺžení
+                                môže padnúť aj päť gólov, pri penaltách sa pripíše
+                                jeden; oboje sa zadáva do rovnakých polí. */}
+                            {sucetPoET && (
+                                <span style={{ fontSize: '0.75rem', whiteSpace: 'nowrap',
+                                               color: sucetPoET.rozhodnute ? '#1a7f37' : '#dc3545' }}>
+                                    dvojica {sucetPoET.h}:{sucetPoET.a}
+                                    {sucetPoET.rozhodnute
+                                        ? ' → postupujú ' + sucetPoET.kto
+                                        : ' → nerozhodnuté'}
+                                </span>
+                            )}
                             <span style={{ fontSize: '0.72rem', color: '#bbb', width: '100%' }}>
-                                {jeFinale ? 'remíza vo finále' : 'rovnaký súčet za dvojicu'}
-                                {' → '}
-                                víťaz má o gól viac; penalty sa rátajú ako jeden gól
+                                {jeFinale
+                                    ? 'remíza vo finále → zadaj výsledok po predĺžení alebo penaltách'
+                                    : 'rovnaký súčet za dvojicu → zadaj výsledok odvety po predĺžení alebo penaltách'}
+                                ; penalty sa rátajú ako jeden gól
                             </span>
                         </div>
                     )}
