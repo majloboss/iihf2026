@@ -249,14 +249,15 @@ export default function UclDashboard() {
                             <UclTieSummary game={g} small />
                             {/* Tip stojí pod zápasom: vedľa neho sa na mobile nezmestí. */}
                             <div style={{ display: 'flex', alignItems: 'center', gap: 6,
+                                          justifyContent: 'center',
                                           fontSize: '0.82rem', marginTop: 6 }}>
                                 <span>
                                     {g.home_score_tip !== null
                                         ? <>Tip: <strong>{g.home_score_tip}:{g.away_score_tip}</strong></>
                                         : <span style={{ color: '#999' }}>netipoval si</span>}
                                 </span>
-                                <span style={{ marginLeft: 'auto' }}><UclVenue game={g} inline /></span>
                             </div>
+                            <UclVenue game={g} />
                             <UclGroupTips game={g} />
                         </div>
                     ))}
@@ -281,7 +282,8 @@ export default function UclDashboard() {
                             </div>
                             <UclTieSummary game={g} small />
                             {/* Tip stojí pod zápasom: vedľa neho sa na mobile nezmestí. */}
-                            <div style={{ flex: '1 1 100%', display: 'flex', gap: 6, alignItems: 'center' }}>
+                            <div style={{ flex: '1 1 100%', display: 'flex', gap: 6,
+                                          alignItems: 'center', justifyContent: 'center' }}>
                                 <input value={draftOf(g, 'home')} onChange={e => setDraft(g.game_id, 'home', e.target.value)}
                                        inputMode="numeric" style={{ width: 38, textAlign: 'center' }} aria-label="Tip domáci" />
                                 <span>:</span>
@@ -290,8 +292,8 @@ export default function UclDashboard() {
                                 <button onClick={() => save(g)} disabled={saving === g.game_id}>
                                     {saving === g.game_id ? '…' : 'Uložiť'}
                                 </button>
-                                <span style={{ marginLeft: 'auto' }}><UclVenue game={g} inline /></span>
                             </div>
+                            <UclVenue game={g} />
                         </div>
                     ))}
                 </>
@@ -321,7 +323,8 @@ export default function UclDashboard() {
                     </div>
                     <UclTieSummary game={g} small />
                     {/* Tip stojí pod zápasom: vedľa neho sa na mobile nezmestí. */}
-                    <div style={{ flex: '1 1 100%', display: 'flex', gap: 6, alignItems: 'center' }}>
+                    <div style={{ flex: '1 1 100%', display: 'flex', gap: 6,
+                                  alignItems: 'center', justifyContent: 'center' }}>
                         {/* Sekcia ukazuje aj zápasy, ktoré sa ešte tipovať nedajú —
                             pri nich nemá zmysel ponúkať polia. */}
                         {canTip(g) ? (
@@ -342,8 +345,8 @@ export default function UclDashboard() {
                                     : 'tipovanie zatiaľ nie je otvorené'}
                             </span>
                         )}
-                        <span style={{ marginLeft: 'auto' }}><UclVenue game={g} inline /></span>
                     </div>
+                    <UclVenue game={g} />
                 </div>
             ))}
 
@@ -366,13 +369,13 @@ export default function UclDashboard() {
                             <UclTieSummary game={g} small />
                             {/* Tip stojí pod zápasom: vedľa neho sa na mobile nezmestí. */}
                             <div style={{ flex: '1 1 100%', display: 'flex', alignItems: 'center',
-                                          gap: 6, fontSize: '0.82rem' }}>
+                                          justifyContent: 'center', gap: 6, fontSize: '0.82rem' }}>
                                 <span>
                                     Tip: <strong>{g.home_score_tip}:{g.away_score_tip}</strong>
                                     {g.points_earned !== null && <> · <strong style={{ color: '#28a745' }}>{g.points_earned} b.</strong></>}
                                 </span>
-                                <span style={{ marginLeft: 'auto' }}><UclVenue game={g} inline /></span>
                             </div>
+                            <UclVenue game={g} />
                         </div>
                     ))}
                 </>

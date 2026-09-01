@@ -51,14 +51,14 @@ export default function UclClub({ name, logo, country, countryCode, flag, align,
 }
 
 /** Štadión a odkaz na FlashScore — spoločný riadok pod dvojicou. */
-// `inline` vlozi stadion do uz existujuceho riadku namiesto vlastneho —
-// v zozname zapasov stoji vpravo od tipu, aby karta nerastla o dalsi riadok.
-export function UclVenue({ game, order, inline = false }) {
+export function UclVenue({ game, order }) {
     if (!game.venue && !game.flashscore_url) return null;
     return (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6,
+        // Vlastný riadok v strede karty — vedľa tipu bral šírku a na mobile
+        // sa oboje nezmestilo.
+        <div style={{ width: '100%', display: 'flex', alignItems: 'center',
+                      justifyContent: 'center', gap: 6,
                       fontSize: '0.75rem', color: '#999',
-                      ...(inline ? {} : { width: '100%', justifyContent: 'center' }),
                       ...(order ? { order } : {}) }}>
             {game.venue && (
                 <span>

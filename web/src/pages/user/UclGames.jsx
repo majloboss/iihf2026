@@ -278,8 +278,11 @@ export default function UclGames() {
                                           countryCode={g.away_country_code} flag={g.away_flag} />
                                 </div>
 
+                                {/* Štadión má vlastný riadok nad tipom, oboje v strede. */}
+                                <UclVenue game={g} order={4} />
+
                                 <div style={{ display: 'flex', gap: 6, alignItems: 'center',
-                                              flex: '1 1 100%', order: 4 }}>
+                                              justifyContent: 'center', flex: '1 1 100%', order: 5 }}>
                                     {!known
                                         ? <span style={{ fontSize: '0.78rem', color: '#999' }}>čaká na súperov</span>
                                         : closed
@@ -299,10 +302,6 @@ export default function UclGames() {
                                                     {saving === g.game_id ? '…' : 'Uložiť'}
                                                 </button>
                                               </>}
-                                    {/* Štadión patrí k tomu istému riadku — vpravo. */}
-                                    <span style={{ marginLeft: 'auto' }}>
-                                        <UclVenue game={g} inline />
-                                    </span>
                                 </div>
 
                                 {/* Pri odvete rozhoduje sucet za dvojicu. */}
