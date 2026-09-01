@@ -20,10 +20,12 @@ export default function UclZapas({ g, termin, stred, akcia, children, size = 24 
                 {termin}
             </div>
 
-            {/* Krajné pásy sú rovnako široké, takže stred mriežky zostáva
-                stredom karty aj s tlačidlom vpravo. */}
+            {/* Kluby majú pevnú šírku, krajné stĺpce si vezmú zvyšok. Dvojica
+                sa tým drží pri strede a tlačidlo hneď za ňou — s `1fr` na
+                kluboch by odletelo k okraju karty, s `max-content` by zase
+                stred pri každom zápase skákal podľa dĺžky názvu. */}
             <div style={{ flex: 1, minWidth: 0, display: 'grid',
-                          gridTemplateColumns: '68px 1fr auto 1fr 68px',
+                          gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 210px) auto minmax(0, 210px) minmax(0, 1fr)',
                           alignItems: 'stretch', columnGap: 8, rowGap: 6 }}>
                 <span style={{ gridColumn: 2, display: 'flex', justifyContent: 'flex-end' }}>
                     <UclClub name={g.home_name} logo={g.home_logo} country={g.home_country}
