@@ -14,8 +14,9 @@ import UclTieSummary from './UclTieSummary';
 // tie sa umiestňujú do stĺpcov 2 až 4.
 export default function UclZapas({ g, termin, stred, akcia, children, size = 24 }) {
     return (
-        <div style={{ display: 'flex', alignItems: 'stretch', gap: 12 }}>
-            <div style={{ flexShrink: 0, width: 92, alignSelf: 'center',
+        <div className="uclZapas" style={{ display: 'flex', alignItems: 'stretch' }}>
+            <div className="uclZapasTermin"
+                 style={{ flexShrink: 0, alignSelf: 'center',
                           fontSize: '0.78rem', color: '#666', lineHeight: 1.35 }}>
                 {termin}
             </div>
