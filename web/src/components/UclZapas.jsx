@@ -25,8 +25,9 @@ export default function UclZapas({ g, termin, stred, akcia, children, size = 24 
                 sa tým drží pri strede a tlačidlo hneď za ňou — s `1fr` na
                 kluboch by odletelo k okraju karty, s `max-content` by zase
                 stred pri každom zápase skákal podľa dĺžky názvu. */}
-            <div style={{ flex: 1, minWidth: 0, display: 'grid',
-                          gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 210px) auto minmax(0, 210px) minmax(0, 1fr)',
+            <div className="uclZapasMriezka"
+                 style={{ flex: 1, minWidth: 0, display: 'grid',
+                          gridTemplateColumns: 'var(--ucl-kraj) minmax(0, 210px) auto minmax(0, 210px) var(--ucl-kraj)',
                           alignItems: 'stretch', columnGap: 8, rowGap: 6 }}>
                 <span style={{ gridColumn: 2, display: 'flex', justifyContent: 'flex-end' }}>
                     <UclClub name={g.home_name} logo={g.home_logo} country={g.home_country}
