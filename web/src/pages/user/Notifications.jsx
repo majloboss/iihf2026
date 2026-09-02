@@ -23,13 +23,14 @@ export default function Notifications() {
     const [subLoading,     setSubLoading]     = useState(false);
     const [subMsg,         setSubMsg]         = useState('');
     const [testLoading,    setTestLoading]    = useState(false);
-    const [testMsg,        setTestMsg]        = useState(null);
+    const [testStav,       setTestStav]       = useState(null);
 
     useEffect(() => {
         apiFetch('v1/notifications')
             .then(data => { setItems(data); setLoading(false); })
             .catch(e => { setErr(e.message); setLoading(false); });
         checkPushStatus();
+        apiFetch('v1/notification-test').then(setTestStav).catch(() => {});
     }, []);
 
     const checkPushStatus = async () => {
@@ -91,27 +92,25 @@ export default function Notifications() {
         finally { setSaving(false); }
     };
 
+    // Žiadosť sa iba zaradí — odošle ju až cron pri najbližšom behu. Stav sa
+    // preto po vyžiadaní sám doťahuje, kým správa neodíde.
+    useEffect(() => {
+        if (!testStav?.waiting) return;
+        const t = setInterval(() => {
+            apiFetch('v1/notification-test').then(setTestStav).catch(() => {});
+        }, 15000);
+        return () => clearInterval(t);
+    }, [testStav?.waiting]);
+
     if (loading) return <p style={{ padding: 20 }}>Načítavam…</p>;
 
     const poslatTest = async () => {
-        setTestLoading(true); setTestMsg(null);
+        setTestLoading(true);
         try {
             const r = await apiFetch('v1/notification-test', { method: 'POST' });
-            const spravy = [];
-            spravy.push(r.email?.sent
-                ? { ok: true,  text: `E-mail odoslaný na ${r.email.to}` }
-                : { ok: false, text: r.email?.error || 'E-mail sa neodoslal' });
-            spravy.push(r.push?.sent
-                ? { ok: true,  text: `Push odoslaný na ${r.push.count} ${r.push.count === 1 ? 'zariadenie' : 'zariadenia'}` }
-                : { ok: false, text: r.push?.error || 'Push sa neodoslal' });
-            // Bez zapnutého typu notifikácie by ostré upozornenie neprišlo,
-            // hoci skúšobná správa dorazí — na to treba upozorniť.
-            if (r.settings && Object.keys(r.settings).length === 0) {
-                spravy.push({ ok: false, text: 'Nemáš zapnutý žiadny typ upozornenia — ostré notifikácie ti chodiť nebudú.' });
-            }
-            setTestMsg(spravy);
+            setTestStav(r);
         } catch (e) {
-            setTestMsg([{ ok: false, text: e.message }]);
+            setTestStav({ error: e.message });
         } finally { setTestLoading(false); }
     };
 
@@ -150,20 +149,38 @@ export default function Notifications() {
             <div style={{ marginBottom: 20, paddingBottom: 16, borderBottom: '1px solid #e9ecef' }}>
                 <h3 style={{ margin: '0 0 6px', fontSize: '0.95rem' }}>Vyskúšať doručenie</h3>
                 <p style={{ margin: '0 0 10px', fontSize: '0.82rem', color: '#666' }}>
-                    Pošleme ti skúšobnú správu e-mailom aj ako push, nech vidíš,
-                    či ti upozornenia chodia. Nemusíš čakať na najbližší zápas.
+                    Pošleme ti skúšobnú správu e-mailom aj do telefónu, nech vidíš,
+                    či ti upozornenia chodia. Správa neodíde hneď — systém ich
+                    rozposiela každých pár minút, takže ti príde zvyčajne do piatich
+                    minút. Rovnako to funguje aj pri skutočných upozorneniach.
                 </p>
                 <button className={styles.btn} onClick={poslatTest} disabled={testLoading}>
                     {testLoading ? 'Posielam…' : 'Poslať skúšobnú správu'}
                 </button>
 
-                {testMsg && (
+                {testStav && (
                     <div style={{ marginTop: 10, fontSize: '0.85rem' }}>
-                        {testMsg.map((r, i) => (
-                            <div key={i} style={{ color: r.ok ? '#1a7f37' : '#c0392b' }}>
-                                {r.ok ? '✓' : '✗'} {r.text}
+                        {testStav.error && (
+                            <div style={{ color: '#c0392b' }}>✗ {testStav.error}</div>
+                        )}
+                        {testStav.waiting && (
+                            <div style={{ color: '#a67c00' }}>
+                                ⏳ {testStav.message
+                                    || 'Správa čaká na odoslanie, príde zvyčajne do piatich minút.'}
                             </div>
-                        ))}
+                        )}
+                        {testStav.stale && (
+                            <div style={{ color: '#c0392b' }}>
+                                ✗ Správa sa neodoslala. Odosielanie upozornení zrejme
+                                nefunguje — daj vedieť organizátorovi.
+                            </div>
+                        )}
+                        {!testStav.waiting && !testStav.stale && testStav.sent_at && (
+                            <div style={{ color: '#1a7f37' }}>
+                                ✓ Správa bola odoslaná. Skontroluj si e-mail a upozornenia
+                                v telefóne.
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
