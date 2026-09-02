@@ -64,6 +64,6 @@ json_ok(test_stav($pdo, $uid) + [
     'queued'  => true,
     // Bez zargonu: pouzivatela nezaujima cron, ale ze ma pockat.
     'message' => 'Správa je pripravená na odoslanie. Systém rozposiela '
-               . 'upozornenia každých pár minút, takže ti príde zvyčajne '
-               . 'do piatich minút — netreba nič ďalšie robiť.',
+               . 'upozornenia v pravidelných intervaloch, takže ti príde '
+               . 'zvyčajne do niekoľkých minút — netreba nič ďalšie robiť.',
 ]);
