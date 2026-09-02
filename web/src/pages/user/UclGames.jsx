@@ -278,10 +278,10 @@ export default function UclGames() {
                                         </button>)}
                                     size={28}>
                                     {!known
-                                        ? <span style={{ gridColumn: '2 / 5', textAlign: 'center',
+                                        ? <span style={{ gridColumn: '1 / 4', textAlign: 'center',
                                                          fontSize: '0.78rem', color: '#999' }}>čaká na súperov</span>
                                         : closed
-                                            ? <span style={{ gridColumn: '2 / 5', textAlign: 'center',
+                                            ? <span style={{ gridColumn: '1 / 4', textAlign: 'center',
                                                              fontSize: '0.82rem' }}>
                                                 {g.home_score_tip !== null
                                                     ? <>Tip: <strong>{g.home_score_tip}:{g.away_score_tip}</strong>
@@ -289,12 +289,12 @@ export default function UclGames() {
                                                     : <span style={{ color: '#999' }}>netipoval si</span>}
                                               </span>
                                             : <>
-                                                <span style={{ gridColumn: 2, justifySelf: 'end' }}>
+                                                <span style={{ gridColumn: 1, justifySelf: 'end' }}>
                                                     <input value={draftOf(g, 'home')} onChange={e => setDraft(g.game_id, 'home', e.target.value)}
                                                            inputMode="numeric" style={{ width: 28, textAlign: 'center' }} aria-label="Tip domáci" />
                                                 </span>
-                                                <span style={{ gridColumn: 3, textAlign: 'center' }}>:</span>
-                                                <span style={{ gridColumn: 4, justifySelf: 'start' }}>
+                                                <span style={{ gridColumn: 2, textAlign: 'center' }}>:</span>
+                                                <span style={{ gridColumn: 3, justifySelf: 'start' }}>
                                                     <input value={draftOf(g, 'away')} onChange={e => setDraft(g.game_id, 'away', e.target.value)}
                                                            inputMode="numeric" style={{ width: 28, textAlign: 'center' }} aria-label="Tip hostia" />
                                                 </span>

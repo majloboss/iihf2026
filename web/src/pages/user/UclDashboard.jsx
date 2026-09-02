@@ -247,7 +247,7 @@ export default function UclDashboard() {
                                                {scoreText(g) ?? 'vs'}
                                            </strong>
                                        </span>}>
-                                <span style={{ gridColumn: '2 / 5', textAlign: 'center',
+                                <span style={{ gridColumn: '1 / 4', textAlign: 'center',
                                                fontSize: '0.82rem' }}>
                                     {g.home_score_tip !== null
                                         ? <>Tip: <strong>{g.home_score_tip}:{g.away_score_tip}</strong></>
@@ -277,12 +277,12 @@ export default function UclDashboard() {
                                        <button onClick={() => save(g)} disabled={saving === g.game_id}>
                                            {saving === g.game_id ? '…' : 'OK'}
                                        </button>}>
-                                <span style={{ gridColumn: 2, justifySelf: 'end' }}>
+                                <span style={{ gridColumn: 1, justifySelf: 'end' }}>
                                     <input value={draftOf(g, 'home')} onChange={e => setDraft(g.game_id, 'home', e.target.value)}
                                            inputMode="numeric" style={{ width: 27, textAlign: 'center' }} aria-label="Tip domáci" />
                                 </span>
-                                <span style={{ gridColumn: 3, textAlign: 'center' }}>:</span>
-                                <span style={{ gridColumn: 4, justifySelf: 'start' }}>
+                                <span style={{ gridColumn: 2, textAlign: 'center' }}>:</span>
+                                <span style={{ gridColumn: 3, justifySelf: 'start' }}>
                                     <input value={draftOf(g, 'away')} onChange={e => setDraft(g.game_id, 'away', e.target.value)}
                                            inputMode="numeric" style={{ width: 27, textAlign: 'center' }} aria-label="Tip hostia" />
                                 </span>
@@ -319,18 +319,18 @@ export default function UclDashboard() {
                             pri nich nemá zmysel ponúkať polia. */}
                         {canTip(g) ? (
                             <>
-                                <span style={{ gridColumn: 2, justifySelf: 'end' }}>
+                                <span style={{ gridColumn: 1, justifySelf: 'end' }}>
                                     <input value={draftOf(g, 'home')} onChange={e => setDraft(g.game_id, 'home', e.target.value)}
                                            inputMode="numeric" style={{ width: 27, textAlign: 'center' }} aria-label="Tip domáci" />
                                 </span>
-                                <span style={{ gridColumn: 3, textAlign: 'center' }}>:</span>
-                                <span style={{ gridColumn: 4, justifySelf: 'start' }}>
+                                <span style={{ gridColumn: 2, textAlign: 'center' }}>:</span>
+                                <span style={{ gridColumn: 3, justifySelf: 'start' }}>
                                     <input value={draftOf(g, 'away')} onChange={e => setDraft(g.game_id, 'away', e.target.value)}
                                            inputMode="numeric" style={{ width: 27, textAlign: 'center' }} aria-label="Tip hostia" />
                                 </span>
                             </>
                         ) : (
-                            <span style={{ gridColumn: '2 / 5', textAlign: 'center',
+                            <span style={{ gridColumn: '1 / 4', textAlign: 'center',
                                            fontSize: '0.8rem', color: '#999' }}>
                                 {g.home_score_tip != null
                                     ? <>Tip: <strong>{g.home_score_tip}:{g.away_score_tip}</strong></>
@@ -354,7 +354,7 @@ export default function UclDashboard() {
                                        <div style={{ color: '#999' }}>{shortPhase(g)}</div>
                                    </>}
                                    stred={<strong style={{ color: '#1a3a6b' }}>{scoreText(g)}</strong>}>
-                                <span style={{ gridColumn: '2 / 5', textAlign: 'center',
+                                <span style={{ gridColumn: '1 / 4', textAlign: 'center',
                                                fontSize: '0.82rem' }}>
                                     Tip: <strong>{g.home_score_tip}:{g.away_score_tip}</strong>
                                     {g.points_earned !== null && <> · <strong style={{ color: '#28a745' }}>{g.points_earned} b.</strong></>}
