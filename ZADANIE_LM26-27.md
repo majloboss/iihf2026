@@ -160,9 +160,10 @@ Hodnotí sa výsledok po 90 minútach. Predĺženie a penalty sa do tipu nezapo�
 
 | Úloha | Poznámka |
 |---|---|
-| 🔲 Zapnúť livescore cron | volať každých 5 minút s `?token=<CRON_SECRET>` |
+| ✅ Zapnúť livescore cron | beží každých 5 min; model overený cez Test livescore |
+| ✅ Deploy na `main` | v produkcii vrátane migrácií 070 a 071 |
+| ✅ Notifikačný cron | `run.php` beží; overené skúšobnou správou 2. 9. (29 s) |
 | 🔲 Overiť štadión Vikinga | zápas s PSV 20. 1. 2027 má MHPArena, UEFA uvádza domáci štadión |
-| 🔲 Deploy na `main` | všetko je zatiaľ len v `develop` |
 
 Kluby ligovej fázy už majú oficiálne kódy UEFA. Osem klubov s dočasným `X`
 (`XAAR`, `XARA`, `XKAU`, `XHAP`, `XMJA`, `XNEC`, `XCEL`, `XLEV`) sú kvalifikanti
@@ -174,7 +175,8 @@ bez zápasov — netlačí to.
 |---|---|
 | 🔲 Prejsť celú ligovú fázu | posúvať kolá cez **Posunúť hrací deň**, kontrolovať body a tabuľku |
 | 🔲 Overiť baráž a play-off | dvojice zostaví nástroj **Zostaviť dvojice play-off** |
-| 🔲 Overiť bodovanie play-off | 5 bodov za výsledok, maximum 7 |
+| ✅ Overiť bodovanie play-off | overené na 87 tipoch semifinále, maximum 7 |
+| 🔲 Overiť notifikácie naostro | prvé skutočné upozornenia prídu pri zápase 8. 9. |
 
 **Známa odchýlka v testovacích dátach (1. 9. 2026):** v QF-1 je SK Slavia Praha,
 hoci R16-8 vyhral Arsenal (3:2). Štvrťfinále sa zostavovalo pred opravou výpočtu
