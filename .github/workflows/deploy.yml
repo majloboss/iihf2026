@@ -70,14 +70,20 @@ jobs:
 
           # Overenie, ze index.html a sw.js ukazuju na rovnaky build. Bez neho
           # sa nesulad prejavi az bielou obrazovkou u pouzivatela.
+          #
+          # Skusa sa opakovane: server nemusi novy subor podat okamzite a jediny
+          # pokus po piatich sekundach zhodil cely deploy este pred nahratim API.
           BASE="https://${SERVER_DIR#/sub/}"
           BASE="${BASE%/}.fellow.sk"
-          sleep 5
-          JS_HTML=$(curl -s "$BASE/" | grep -o 'index-[A-Za-z0-9_-]*\.js' | head -1)
-          JS_SW=$(curl -s "$BASE/sw.js" | grep -o 'index-[A-Za-z0-9_-]*\.js' | head -1)
-          echo "index.html -> $JS_HTML"
-          echo "sw.js      -> $JS_SW"
-          if [ "$JS_HTML" != "$JS_SW" ]; then
+          ZHODA=0
+          for i in 1 2 3 4 5 6; do
+            sleep 5
+            JS_HTML=$(curl -s -H 'Cache-Control: no-cache' "$BASE/" | grep -o 'index-[A-Za-z0-9_-]*\.js' | head -1)
+            JS_SW=$(curl -s -H 'Cache-Control: no-cache' "$BASE/sw.js" | grep -o 'index-[A-Za-z0-9_-]*\.js' | head -1)
+            echo "pokus $i: index.html -> ${JS_HTML:-?}, sw.js -> ${JS_SW:-?}"
+            if [ -n "$JS_HTML" ] && [ "$JS_HTML" = "$JS_SW" ]; then ZHODA=1; break; fi
+          done
+          if [ "$ZHODA" != "1" ]; then
             echo "CHYBA: index.html a sw.js ukazuju na rozne buildy."
             exit 1
           fi
