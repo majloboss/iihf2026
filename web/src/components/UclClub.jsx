@@ -12,8 +12,9 @@ function ClubText({ name, country, countryCode, flag, right }) {
         <span style={{ display: 'grid', gridTemplateRows: '1fr auto', minWidth: 0,
                        height: '100%',
                        justifyItems: right ? 'end' : 'start' }}>
-            <span style={{ display: 'flex', alignItems: 'center',
-                           fontWeight: 500, lineHeight: 1.2, fontSize: '0.7em',
+            <span className="uclKlubNazov"
+                  style={{ display: 'flex', alignItems: 'center',
+                           fontWeight: 500, lineHeight: 1.2,
                            minWidth: 0, overflowWrap: 'anywhere',
                            textAlign: right ? 'right' : 'left' }}>{name}</span>
             {(country || countryCode) && (
