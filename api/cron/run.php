@@ -13,6 +13,7 @@ ob_start();
 require __DIR__ . '/send_notifications.php';
 require __DIR__ . '/send_notifications_fifa.php';
 require __DIR__ . '/send_notifications_ucl.php';
+require __DIR__ . '/send_notifications_test.php';
 $out = ob_get_clean();
 
 echo 'OK ' . date('Y-m-d H:i:s');
