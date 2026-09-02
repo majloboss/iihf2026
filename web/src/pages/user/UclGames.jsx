@@ -291,12 +291,12 @@ export default function UclGames() {
                                             : <>
                                                 <span style={{ gridColumn: 1, justifySelf: 'end' }}>
                                                     <input value={draftOf(g, 'home')} onChange={e => setDraft(g.game_id, 'home', e.target.value)}
-                                                           inputMode="numeric" style={{ width: 28, textAlign: 'center' }} aria-label="Tip domáci" />
+                                                           inputMode="numeric" style={{ width: 36, padding: '4px 0', textAlign: 'center' }} aria-label="Tip domáci" />
                                                 </span>
                                                 <span style={{ gridColumn: 2, textAlign: 'center' }}>:</span>
                                                 <span style={{ gridColumn: 3, justifySelf: 'start' }}>
                                                     <input value={draftOf(g, 'away')} onChange={e => setDraft(g.game_id, 'away', e.target.value)}
-                                                           inputMode="numeric" style={{ width: 28, textAlign: 'center' }} aria-label="Tip hostia" />
+                                                           inputMode="numeric" style={{ width: 36, padding: '4px 0', textAlign: 'center' }} aria-label="Tip hostia" />
                                                 </span>
                                               </>}
                                 </UclZapas>
