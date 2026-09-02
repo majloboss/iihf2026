@@ -145,6 +145,29 @@ export default function Notifications() {
                 </div>
             )}
 
+            {/* Skúšobná správa ide rovnakou cestou ako ostré notifikácie, takže
+                overí celý reťazec — nie iba to, že sa niečo odoslalo. */}
+            <div style={{ marginBottom: 20, paddingBottom: 16, borderBottom: '1px solid #e9ecef' }}>
+                <h3 style={{ margin: '0 0 6px', fontSize: '0.95rem' }}>Vyskúšať doručenie</h3>
+                <p style={{ margin: '0 0 10px', fontSize: '0.82rem', color: '#666' }}>
+                    Pošleme ti skúšobnú správu e-mailom aj ako push, nech vidíš,
+                    či ti upozornenia chodia. Nemusíš čakať na najbližší zápas.
+                </p>
+                <button className={styles.btn} onClick={poslatTest} disabled={testLoading}>
+                    {testLoading ? 'Posielam…' : 'Poslať skúšobnú správu'}
+                </button>
+
+                {testMsg && (
+                    <div style={{ marginTop: 10, fontSize: '0.85rem' }}>
+                        {testMsg.map((r, i) => (
+                            <div key={i} style={{ color: r.ok ? '#1a7f37' : '#c0392b' }}>
+                                {r.ok ? '✓' : '✗'} {r.text}
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+
             <p className={styles.hint}>
                 Zvoľ, o čom chceš byť upozornený. Email notifikácie vyžadujú overený email.
             </p>
@@ -204,28 +227,6 @@ export default function Notifications() {
                 {saving ? 'Ukladám…' : 'Uložiť nastavenia'}
             </button>
 
-            {/* Skúšobná správa ide rovnakou cestou ako ostré notifikácie, takže
-                overí celý reťazec — nie iba to, že sa niečo odoslalo. */}
-            <div style={{ marginTop: 24, paddingTop: 16, borderTop: '1px solid #e9ecef' }}>
-                <h3 style={{ margin: '0 0 6px', fontSize: '0.95rem' }}>Vyskúšať doručenie</h3>
-                <p style={{ margin: '0 0 10px', fontSize: '0.82rem', color: '#666' }}>
-                    Pošleme ti skúšobnú správu e-mailom aj ako push, nech vidíš,
-                    či ti upozornenia chodia. Nemusíš čakať na najbližší zápas.
-                </p>
-                <button className={styles.btn} onClick={poslatTest} disabled={testLoading}>
-                    {testLoading ? 'Posielam…' : 'Poslať skúšobnú správu'}
-                </button>
-
-                {testMsg && (
-                    <div style={{ marginTop: 10, fontSize: '0.85rem' }}>
-                        {testMsg.map((r, i) => (
-                            <div key={i} style={{ color: r.ok ? '#1a7f37' : '#c0392b' }}>
-                                {r.ok ? '✓' : '✗'} {r.text}
-                            </div>
-                        ))}
-                    </div>
-                )}
-            </div>
         </div>
     );
 }
