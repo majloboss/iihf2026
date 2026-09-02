@@ -61,9 +61,26 @@ jobs:
         run: |
           sudo apt-get install -y --no-install-recommends lftp >/dev/null
           # Heslo berie lftp z premennej prostredia, takze sa neobjavi v zazname.
+          # sw.js ide PRED index.html: service worker si drzi zoznam suborov a
+          # ked zostane stary, ziada asset, na ktory uz index neukazuje —
+          # vysledkom je biela obrazovka.
           CMD="set ssl:verify-certificate no; cd $SERVER_DIR;"
-          CMD="$CMD put -O . web/dist/index.html; put -O . web/dist/sw.js; bye"
+          CMD="$CMD put -O . web/dist/sw.js; put -O . web/dist/index.html; bye"
           lftp -u "ftp.fellow.sk,$FTP_PASSWORD" fellow.sk -e "$CMD"
+
+          # Overenie, ze index.html a sw.js ukazuju na rovnaky build. Bez neho
+          # sa nesulad prejavi az bielou obrazovkou u pouzivatela.
+          BASE="https://${SERVER_DIR#/sub/}"
+          BASE="${BASE%/}.fellow.sk"
+          sleep 5
+          JS_HTML=$(curl -s "$BASE/" | grep -o 'index-[A-Za-z0-9_-]*\.js' | head -1)
+          JS_SW=$(curl -s "$BASE/sw.js" | grep -o 'index-[A-Za-z0-9_-]*\.js' | head -1)
+          echo "index.html -> $JS_HTML"
+          echo "sw.js      -> $JS_SW"
+          if [ "$JS_HTML" != "$JS_SW" ]; then
+            echo "CHYBA: index.html a sw.js ukazuju na rozne buildy."
+            exit 1
+          fi
         env:
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
           SERVER_DIR: ${{ github.ref_name == 'main' && '/sub/betclub/' || '/sub/dev_betclub/' }}
