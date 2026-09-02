@@ -10,13 +10,17 @@ import UclGroupTips from './UclGroupTips';
 
 // start_time je naive UTC, preto ho tak treba aj interpretovať.
 const dayFmtRaw = new Intl.DateTimeFormat('sk-SK', {
-    weekday: 'short', day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit',
+    weekday: 'short', day: 'numeric', month: 'numeric',
 });
+const timeFmtRaw = new Intl.DateTimeFormat('sk-SK', { hour: '2-digit', minute: '2-digit' });
+
 // Neplatný dátum by vo format() vyhodil výnimku a zhodil stránku.
-function dayFmt(value) {
+const naDatum = value => {
     const d = new Date(String(value).replace(' ', 'T') + 'Z');
-    return Number.isNaN(d.getTime()) ? '—' : dayFmtRaw.format(d);
-}
+    return Number.isNaN(d.getTime()) ? null : d;
+};
+const dayFmt  = value => { const d = naDatum(value); return d ? dayFmtRaw.format(d) : '—'; };
+const timeFmt = value => { const d = naDatum(value); return d ? timeFmtRaw.format(d) : '—'; };
 
 
 
@@ -228,6 +232,7 @@ export default function UclDashboard() {
                             <UclZapas g={g}
                                    termin={<>
                                        <div style={{ whiteSpace: 'nowrap' }}>{dayFmt(g.start_time)}</div>
+                                       <div style={{ whiteSpace: 'nowrap' }}>{timeFmt(g.start_time)}</div>
                                        <div style={{ color: '#999' }}>{shortPhase(g)}</div>
                                    </>}
                                    stred={
@@ -264,21 +269,22 @@ export default function UclDashboard() {
                             <UclZapas g={g}
                                    termin={<>
                                        <div style={{ whiteSpace: 'nowrap' }}>{dayFmt(g.start_time)}</div>
+                                       <div style={{ whiteSpace: 'nowrap' }}>{timeFmt(g.start_time)}</div>
                                        <div style={{ color: '#999' }}>{shortPhase(g)}</div>
                                    </>}
                                    stred={<span style={{ color: '#bbb' }}>vs</span>}
                                    akcia={
                                        <button onClick={() => save(g)} disabled={saving === g.game_id}>
-                                           {saving === g.game_id ? '…' : 'Uložiť'}
+                                           {saving === g.game_id ? '…' : 'OK'}
                                        </button>}>
                                 <span style={{ gridColumn: 2, justifySelf: 'end' }}>
                                     <input value={draftOf(g, 'home')} onChange={e => setDraft(g.game_id, 'home', e.target.value)}
-                                           inputMode="numeric" style={{ width: 38, textAlign: 'center' }} aria-label="Tip domáci" />
+                                           inputMode="numeric" style={{ width: 27, textAlign: 'center' }} aria-label="Tip domáci" />
                                 </span>
                                 <span style={{ gridColumn: 3, textAlign: 'center' }}>:</span>
                                 <span style={{ gridColumn: 4, justifySelf: 'start' }}>
                                     <input value={draftOf(g, 'away')} onChange={e => setDraft(g.game_id, 'away', e.target.value)}
-                                           inputMode="numeric" style={{ width: 38, textAlign: 'center' }} aria-label="Tip hostia" />
+                                           inputMode="numeric" style={{ width: 27, textAlign: 'center' }} aria-label="Tip hostia" />
                                 </span>
                             </UclZapas>
                         </div>
@@ -301,12 +307,13 @@ export default function UclDashboard() {
                     <UclZapas g={g}
                                    termin={<>
                                        <div style={{ whiteSpace: 'nowrap' }}>{dayFmt(g.start_time)}</div>
+                                       <div style={{ whiteSpace: 'nowrap' }}>{timeFmt(g.start_time)}</div>
                                        <div style={{ color: '#999' }}>{shortPhase(g)}</div>
                                    </>}
                            stred={<span style={{ color: '#bbb' }}>vs</span>}
                            akcia={canTip(g) && (
                                <button onClick={() => save(g)} disabled={saving === g.game_id}>
-                                   {saving === g.game_id ? '…' : 'Uložiť'}
+                                   {saving === g.game_id ? '…' : 'OK'}
                                </button>)}>
                         {/* Sekcia ukazuje aj zápasy, ktoré sa ešte tipovať nedajú —
                             pri nich nemá zmysel ponúkať polia. */}
@@ -314,12 +321,12 @@ export default function UclDashboard() {
                             <>
                                 <span style={{ gridColumn: 2, justifySelf: 'end' }}>
                                     <input value={draftOf(g, 'home')} onChange={e => setDraft(g.game_id, 'home', e.target.value)}
-                                           inputMode="numeric" style={{ width: 38, textAlign: 'center' }} aria-label="Tip domáci" />
+                                           inputMode="numeric" style={{ width: 27, textAlign: 'center' }} aria-label="Tip domáci" />
                                 </span>
                                 <span style={{ gridColumn: 3, textAlign: 'center' }}>:</span>
                                 <span style={{ gridColumn: 4, justifySelf: 'start' }}>
                                     <input value={draftOf(g, 'away')} onChange={e => setDraft(g.game_id, 'away', e.target.value)}
-                                           inputMode="numeric" style={{ width: 38, textAlign: 'center' }} aria-label="Tip hostia" />
+                                           inputMode="numeric" style={{ width: 27, textAlign: 'center' }} aria-label="Tip hostia" />
                                 </span>
                             </>
                         ) : (
@@ -343,6 +350,7 @@ export default function UclDashboard() {
                             <UclZapas g={g}
                                    termin={<>
                                        <div style={{ whiteSpace: 'nowrap' }}>{dayFmt(g.start_time)}</div>
+                                       <div style={{ whiteSpace: 'nowrap' }}>{timeFmt(g.start_time)}</div>
                                        <div style={{ color: '#999' }}>{shortPhase(g)}</div>
                                    </>}
                                    stred={<strong style={{ color: '#1a3a6b' }}>{scoreText(g)}</strong>}>

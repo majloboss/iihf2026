@@ -13,7 +13,7 @@ function ClubText({ name, country, countryCode, flag, right }) {
                        height: '100%',
                        justifyItems: right ? 'end' : 'start' }}>
             <span style={{ display: 'flex', alignItems: 'center',
-                           fontWeight: 500, lineHeight: 1.2,
+                           fontWeight: 500, lineHeight: 1.2, fontSize: '0.7em',
                            textAlign: right ? 'right' : 'left' }}>{name}</span>
             {(country || countryCode) && (
                 <span style={{ display: 'flex', alignItems: 'center', gap: 4,

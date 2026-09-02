@@ -259,11 +259,9 @@ export default function UclGames() {
                                 <UclZapas g={g}
                                     termin={<>
                                         <div style={{ whiteSpace: 'nowrap' }}>{dayFmt(g.start_time)}</div>
-                                        <div style={{ whiteSpace: 'nowrap' }}>
-                                            {timeFmt(g.start_time)}{' '}
-                                            <span style={{ color: '#999' }}>
-                                                {g.round_no ? `LF${g.round_no}` : g.game_type_code}
-                                            </span>
+                                        <div style={{ whiteSpace: 'nowrap' }}>{timeFmt(g.start_time)}</div>
+                                        <div style={{ color: '#999' }}>
+                                            {g.round_no ? `LF${g.round_no}` : g.game_type_code}
                                         </div>
                                     </>}
                                     stred={
@@ -276,7 +274,7 @@ export default function UclGames() {
                                         </span>}
                                     akcia={known && !closed && (
                                         <button onClick={() => save(g)} disabled={saving === g.game_id}>
-                                            {saving === g.game_id ? '…' : 'Uložiť'}
+                                            {saving === g.game_id ? '…' : 'OK'}
                                         </button>)}
                                     size={28}>
                                     {!known
@@ -293,12 +291,12 @@ export default function UclGames() {
                                             : <>
                                                 <span style={{ gridColumn: 2, justifySelf: 'end' }}>
                                                     <input value={draftOf(g, 'home')} onChange={e => setDraft(g.game_id, 'home', e.target.value)}
-                                                           inputMode="numeric" style={{ width: 40, textAlign: 'center' }} aria-label="Tip domáci" />
+                                                           inputMode="numeric" style={{ width: 28, textAlign: 'center' }} aria-label="Tip domáci" />
                                                 </span>
                                                 <span style={{ gridColumn: 3, textAlign: 'center' }}>:</span>
                                                 <span style={{ gridColumn: 4, justifySelf: 'start' }}>
                                                     <input value={draftOf(g, 'away')} onChange={e => setDraft(g.game_id, 'away', e.target.value)}
-                                                           inputMode="numeric" style={{ width: 40, textAlign: 'center' }} aria-label="Tip hostia" />
+                                                           inputMode="numeric" style={{ width: 28, textAlign: 'center' }} aria-label="Tip hostia" />
                                                 </span>
                                               </>}
                                 </UclZapas>
