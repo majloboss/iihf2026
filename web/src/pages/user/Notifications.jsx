@@ -151,8 +151,9 @@ export default function Notifications() {
                 <p style={{ margin: '0 0 10px', fontSize: '0.82rem', color: '#666' }}>
                     Pošleme ti skúšobnú správu e-mailom aj do telefónu, nech vidíš,
                     či ti upozornenia chodia. Správa neodíde hneď — systém ich
-                    rozposiela každých pár minút, takže ti príde zvyčajne do piatich
-                    minút. Rovnako to funguje aj pri skutočných upozorneniach.
+                    rozposiela v pravidelných intervaloch, takže ti príde zvyčajne
+                    do niekoľkých minút. Rovnako to funguje aj pri skutočných
+                    upozorneniach.
                 </p>
                 <button className={styles.btn} onClick={poslatTest} disabled={testLoading}>
                     {testLoading ? 'Posielam…' : 'Poslať skúšobnú správu'}
@@ -166,7 +167,7 @@ export default function Notifications() {
                         {testStav.waiting && (
                             <div style={{ color: '#a67c00' }}>
                                 ⏳ {testStav.message
-                                    || 'Správa čaká na odoslanie, príde zvyčajne do piatich minút.'}
+                                    || 'Správa čaká na odoslanie, príde zvyčajne do niekoľkých minút.'}
                             </div>
                         )}
                         {testStav.stale && (
