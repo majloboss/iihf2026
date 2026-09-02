@@ -106,6 +106,7 @@ try {
         $path === 'v1/admin/login-logs'                  => require __DIR__ . '/v1/admin/login_logs.php',
         $path === 'v1/admin/sync-scores'                 => require __DIR__ . '/v1/admin/sync_scores.php',
         $path === 'v1/notifications'                     => require __DIR__ . '/v1/notifications.php',
+        $path === 'v1/notification-test'                 => require __DIR__ . '/v1/notification_test.php',
         $path === 'v1/admin/test-mail'                   => require __DIR__ . '/v1/admin/test_mail.php',
         $path === 'v1/admin/test-push'                   => require __DIR__ . '/v1/admin/test_push.php',
         $path === 'v1/admin/generate-vapid'              => require __DIR__ . '/v1/admin/generate_vapid.php',
