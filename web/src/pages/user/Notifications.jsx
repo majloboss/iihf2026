@@ -22,6 +22,8 @@ export default function Notifications() {
     const [isSubscribed,   setIsSubscribed]   = useState(false);
     const [subLoading,     setSubLoading]     = useState(false);
     const [subMsg,         setSubMsg]         = useState('');
+    const [testLoading,    setTestLoading]    = useState(false);
+    const [testMsg,        setTestMsg]        = useState(null);
 
     useEffect(() => {
         apiFetch('v1/notifications')
@@ -90,6 +92,28 @@ export default function Notifications() {
     };
 
     if (loading) return <p style={{ padding: 20 }}>Načítavam…</p>;
+
+    const poslatTest = async () => {
+        setTestLoading(true); setTestMsg(null);
+        try {
+            const r = await apiFetch('v1/notification-test', { method: 'POST' });
+            const spravy = [];
+            spravy.push(r.email?.sent
+                ? { ok: true,  text: `E-mail odoslaný na ${r.email.to}` }
+                : { ok: false, text: r.email?.error || 'E-mail sa neodoslal' });
+            spravy.push(r.push?.sent
+                ? { ok: true,  text: `Push odoslaný na ${r.push.count} ${r.push.count === 1 ? 'zariadenie' : 'zariadenia'}` }
+                : { ok: false, text: r.push?.error || 'Push sa neodoslal' });
+            // Bez zapnutého typu notifikácie by ostré upozornenie neprišlo,
+            // hoci skúšobná správa dorazí — na to treba upozorniť.
+            if (r.settings && Object.keys(r.settings).length === 0) {
+                spravy.push({ ok: false, text: 'Nemáš zapnutý žiadny typ upozornenia — ostré notifikácie ti chodiť nebudú.' });
+            }
+            setTestMsg(spravy);
+        } catch (e) {
+            setTestMsg([{ ok: false, text: e.message }]);
+        } finally { setTestLoading(false); }
+    };
 
     return (
         <div className={styles.wrap}>
@@ -179,6 +203,29 @@ export default function Notifications() {
             <button className={styles.btn} onClick={save} disabled={saving}>
                 {saving ? 'Ukladám…' : 'Uložiť nastavenia'}
             </button>
+
+            {/* Skúšobná správa ide rovnakou cestou ako ostré notifikácie, takže
+                overí celý reťazec — nie iba to, že sa niečo odoslalo. */}
+            <div style={{ marginTop: 24, paddingTop: 16, borderTop: '1px solid #e9ecef' }}>
+                <h3 style={{ margin: '0 0 6px', fontSize: '0.95rem' }}>Vyskúšať doručenie</h3>
+                <p style={{ margin: '0 0 10px', fontSize: '0.82rem', color: '#666' }}>
+                    Pošleme ti skúšobnú správu e-mailom aj ako push, nech vidíš,
+                    či ti upozornenia chodia. Nemusíš čakať na najbližší zápas.
+                </p>
+                <button className={styles.btn} onClick={poslatTest} disabled={testLoading}>
+                    {testLoading ? 'Posielam…' : 'Poslať skúšobnú správu'}
+                </button>
+
+                {testMsg && (
+                    <div style={{ marginTop: 10, fontSize: '0.85rem' }}>
+                        {testMsg.map((r, i) => (
+                            <div key={i} style={{ color: r.ok ? '#1a7f37' : '#c0392b' }}>
+                                {r.ok ? '✓' : '✗'} {r.text}
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
         </div>
     );
 }
