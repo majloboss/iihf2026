@@ -21,6 +21,9 @@ require_once __DIR__ . '/../helpers/webpush.php';
 $pdo   = db();
 $vapid = wp_load_vapid();
 
+// Na deve sa testuje, takze spravy odtial musia byt na prvy pohlad odlisitelne.
+$UCL_TEST_ENV = defined('DB_NAME') && stripos(DB_NAME, 'DEV') !== false ? ' [TEST]' : '';
+
 // Id sutaze sa medzi prostrediami lisi (dev 3, produkcia 5), preto sa cita
 // z databazy podla slugu — natvrdo zapisane cislo by zaznamy priradilo inej
 // sutazi.
@@ -121,7 +124,7 @@ foreach ($finished as $g) {
     ');
     $rec->execute([$gid, $gid]);
     foreach ($rec->fetchAll() as $u) {
-        $subject  = "Výsledok: {$g['team1']} – {$g['team2']}";
+        $subject  = "Výsledok: {$g['team1']} – {$g['team2']}" . $GLOBALS['UCL_TEST_ENV'];
         $tip_line = $u['home_score_tip'] !== null
             ? "Tvoj tip: {$u['home_score_tip']}:{$u['away_score_tip']} → " . ucl_pts_label((int)($u['points_earned'] ?? 0))
             : 'Na tento zápas si nemal tip.';
@@ -190,9 +193,10 @@ function ucl_send_game_mail(PDO $pdo, int $uid, string $email, string $username,
         $time = (new DateTime($g['start_time'], new DateTimeZone('UTC')))
                     ->setTimezone(new DateTimeZone('Europe/Bratislava'))->format('H:i');
         $faza = ucl_faza($g);
-        $subject = $type === 'game_start'
+        $znacka  = $GLOBALS['UCL_TEST_ENV'];
+        $subject = ($type === 'game_start'
             ? "Začína zápas: {$g['team1']} – {$g['team2']} o $time"
-            : "Netipovaný zápas: {$g['team1']} – {$g['team2']} o $time";
+            : "Netipovaný zápas: {$g['team1']} – {$g['team2']} o $time") . $znacka;
         $body = $type === 'game_start'
             ? "Ahoj $username,\n\nO {$min} minút začína zápas ($faza): {$g['team1']} – {$g['team2']} ($time).\n\nBetClub · UEFA Champions League 2026/27"
             : "Ahoj $username,\n\nEšte nemáš tip na zápas ($faza): {$g['team1']} – {$g['team2']} ($time).\nTipovanie sa uzatvára o $time.\n\nBetClub · UEFA Champions League 2026/27";
