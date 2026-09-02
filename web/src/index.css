@@ -53,12 +53,15 @@ p { margin: 0; }
 .uclZapas { gap: 12px; }
 .uclZapasTermin { width: 92px; }
 
-.uclZapasMriezka { --ucl-kraj: minmax(0, 1fr); }
+.uclZapasMriezka { --ucl-kraj: minmax(0, 1fr); --ucl-klub: minmax(0, 210px); }
 
 @media (max-width: 560px) {
     .uclZapas { gap: 6px; }
-    .uclZapasTermin { width: 52px; font-size: 0.66rem; }
     /* Krajné pásy sa na mobile scvrknú na šírku tlačidla OK — karta sa inak
        nezmestí a tlačidlo vypadne mimo obrazovku. */
-    .uclZapasMriezka { --ucl-kraj: minmax(0, 32px); column-gap: 4px; }
+    /* Kluby si na mobile vezmú celý zvyšok šírky — s pevnými 210 px zostávala
+       vľavo medzera a dvojica začínala zbytočne napravo. */
+    .uclZapasMriezka { --ucl-kraj: minmax(0, 32px); --ucl-klub: minmax(0, 1fr);
+                       column-gap: 4px; }
+    .uclZapasTermin { width: 46px; font-size: 0.6rem; }
 }
