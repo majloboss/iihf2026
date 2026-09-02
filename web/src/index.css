@@ -54,14 +54,20 @@ p { margin: 0; }
 .uclZapasTermin { width: 92px; }
 
 /* Posledný stĺpec má pevnú šírku, aby sa dvojica neposunula pri zápasoch
-   bez tlačidla (odohraté, ešte sa nedajú tipovať). */
-.uclZapasMriezka { --ucl-klub: minmax(0, 210px); --ucl-akcia: 46px; }
+   bez tlačidla (odohraté, ešte sa nedajú tipovať).
+   Na širokej obrazovke majú kluby hornú hranicu 190 px, aby dvojica
+   nebola roztiahnutá cez celú kartu. */
+.uclZapasMriezka { --ucl-klub: minmax(0, 190px); --ucl-akcia: 46px;
+                   justify-content: start; }
+.uclKlubNazov { font-size: 1em; }
 
 @media (max-width: 560px) {
     .uclZapas { gap: 6px; }
     /* Kluby si na mobile vezmú celý zvyšok šírky — s pevnými 210 px zostávala
        vľavo medzera a dvojica začínala zbytočne napravo. */
     .uclZapasMriezka { --ucl-klub: minmax(0, 1fr); --ucl-akcia: 38px;
-                       column-gap: 4px; }
+                       column-gap: 4px; justify-content: stretch; }
     .uclZapasTermin { width: 46px; font-size: 0.6rem; }
+    /* Na mobile menšie písmo, aby sa dlhý názov zmestil na dva riadky. */
+    .uclKlubNazov { font-size: 0.7em; }
 }
