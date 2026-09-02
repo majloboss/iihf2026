@@ -18,6 +18,7 @@ require_once __DIR__ . '/../helpers/webpush.php';
 $auth = require_auth();
 if ($method !== 'POST') json_error('Method not allowed', 405);
 
+$pdo = db();
 $uid = (int)$auth['user_id'];
 
 $u = $pdo->prepare('SELECT username, email FROM admin.users WHERE id = ?');
