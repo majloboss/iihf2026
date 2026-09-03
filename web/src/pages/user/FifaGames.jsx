@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { getFifaGames, saveFifaTip, getFifaGameTips } from '../../api/fifaGames';
 import FifaGroupStandings from './FifaGroupStandings';
@@ -155,6 +156,7 @@ function TipInput({ game, onSaved }) {
 }
 
 export default function FifaGames() {
+    const navigate = useNavigate();
     const [games, setGames]               = useState([]);
     const [loading, setLoading]           = useState(true);
     const [error, setError]               = useState('');
@@ -297,8 +299,8 @@ export default function FifaGames() {
                         </button>
                     ))}
                     <button
-                        className={`${view === 'standings' ? styles.btnTabulkyActive : styles.btnTabulky} ${styles.btnTabulkyInline}`}
-                        onClick={() => setView(v => v === 'standings' ? 'games' : 'standings')}
+                        className={`${styles.btnTabulky} ${styles.btnTabulkyInline}`}
+                        onClick={() => navigate('/tabulky')}
                     >TAB</button>
                 </div>
 

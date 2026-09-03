@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { getUclStandings, recalcUcl } from '../../api/ucl';
 import { saveUclStandingsOrder } from '../../api/uclAdmin';
-import UclBracket from '../user/UclBracket';
+import Bracket from '../../components/Bracket';
+import { useCompetition } from '../../context/CompetitionContext';
 import styles from '../user/GroupStandings.module.css';
 
 // Postupové pásma podľa umiestnenia v ligovej fáze.
@@ -14,6 +15,8 @@ const ZONES = {
 const zoneOf = rank => (rank <= 8 ? 'R16' : rank <= 24 ? 'PO' : 'OUT');
 
 export default function UclAdminStandings() {
+    const { activeCompetition } = useCompetition();
+    const competitionId = activeCompetition?.id;
     const [rows, setRows] = useState([]);
     const [error, setError] = useState('');
     const [message, setMessage] = useState('');
@@ -97,7 +100,7 @@ export default function UclAdminStandings() {
                 {zalozka('pavuk', 'Vyraďovacia časť')}
             </div>
 
-            {pohlad === 'pavuk' && <UclBracket />}
+            {pohlad === 'pavuk' && <Bracket competitionId={competitionId} />}
 
             {pohlad === 'tabulka' && <>
             <p style={{ fontSize: '0.82rem', color: '#666', margin: '4px 0 10px', maxWidth: 760 }}>

@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { getGames } from '../../api/games';
@@ -167,6 +168,7 @@ function GroupTips({ gameId, game }) {
 }
 
 export default function Games() {
+    const navigate = useNavigate();
     const location = useLocation();
     const [games, setGames]               = useState([]);
     const [loading, setLoading]           = useState(true);
@@ -267,8 +269,8 @@ export default function Games() {
                         </button>
                     ))}
                     <button
-                        className={`${view === 'standings' ? styles.btnTabulkyActive : styles.btnTabulky} ${styles.btnTabulkyInline}`}
-                        onClick={() => setView('standings')}
+                        className={`${styles.btnTabulky} ${styles.btnTabulkyInline}`}
+                        onClick={() => navigate('/tabulky')}
                     >
                         TAB
                     </button>
