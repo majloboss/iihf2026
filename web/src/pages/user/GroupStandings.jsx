@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch } from '../../api/client';
+import Bracket from '../../components/Bracket';
 import { useCompetition } from '../../context/CompetitionContext';
 import FifaGroupStandings from './FifaGroupStandings';
 import { Flag } from '../../components/Flag';
@@ -72,6 +73,8 @@ export default function GroupStandings({ onTeamClick }) {
     const [data,    setData]    = useState(null);
     const [loading, setLoading] = useState(true);
     const [error,   setError]   = useState('');
+    // Tabuľky a pavúk sú dva pohľady na tú istú súťaž, ako v UCL.
+    const [pohlad,  setPohlad]  = useState('tabulka');
 
     const handleTeamClick = onTeamClick
         ?? ((team) => navigate('/games', { state: { team } }));
@@ -88,8 +91,24 @@ export default function GroupStandings({ onTeamClick }) {
 
     return (
         <div className={styles.wrap}>
-            <GroupTable phase="A" teams={data.A || []} onTeamClick={handleTeamClick} />
-            <GroupTable phase="B" teams={data.B || []} onTeamClick={handleTeamClick} />
+            <div style={{ display: 'flex', gap: 4, margin: '0 0 14px',
+                          borderBottom: '1px solid #e9ecef' }}>
+                {[['tabulka', 'Skupiny'], ['pavuk', 'Play-off']].map(([k, popis]) => (
+                    <button key={k} onClick={() => setPohlad(k)}
+                        style={{ padding: '8px 18px', border: 'none', background: 'none',
+                                 cursor: 'pointer', fontSize: '0.9rem', fontWeight: 600,
+                                 marginBottom: -2,
+                                 borderBottom: '2px solid ' + (pohlad === k ? '#1a3a6b' : 'transparent'),
+                                 color: pohlad === k ? '#1a3a6b' : '#999' }}>
+                        {popis}
+                    </button>
+                ))}
+            </div>
+
+            {pohlad === 'pavuk' ? <Bracket competitionId={activeCompetition?.id} /> : <>
+                <GroupTable phase="A" teams={data.A || []} onTeamClick={handleTeamClick} />
+                <GroupTable phase="B" teams={data.B || []} onTeamClick={handleTeamClick} />
+            </>}
         </div>
     );
 }

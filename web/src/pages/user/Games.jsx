@@ -1,10 +1,9 @@
+import { useNavigate } from 'react-router-dom';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { getGames } from '../../api/games';
 import { saveTip, getGameTips } from '../../api/tips';
 import GroupStandings from './GroupStandings';
-import Bracket from '../../components/Bracket';
-import { useCompetition } from '../../context/CompetitionContext';
 import { useTeamNames } from '../../components/Flag';
 import styles from './Games.module.css';
 
@@ -169,6 +168,7 @@ function GroupTips({ gameId, game }) {
 }
 
 export default function Games() {
+    const navigate = useNavigate();
     const location = useLocation();
     const [games, setGames]               = useState([]);
     const [loading, setLoading]           = useState(true);
@@ -177,10 +177,6 @@ export default function Games() {
     const [selectedDay, setSelectedDay]   = useState(() => dayKey(new Date().toISOString()));
     const [selectedTeam, setSelectedTeam] = useState(location.state?.team ?? null);
     const [view, setView]                 = useState('games');
-    // Tabuľky a pavúk sú dva pohľady na to isté, prepínajú sa záložkami.
-    const [pohlad, setPohlad]             = useState('tabulka');
-    const { activeCompetition }           = useCompetition();
-    const competitionId                   = activeCompetition?.id;
     const [showUntipped, setShowUntipped] = useState(false);
     const calContainer = useRef(null);
     const todayCalBtn  = useRef(null);
@@ -273,8 +269,8 @@ export default function Games() {
                         </button>
                     ))}
                     <button
-                        className={`${view === 'standings' ? styles.btnTabulkyActive : styles.btnTabulky} ${styles.btnTabulkyInline}`}
-                        onClick={() => setView('standings')}
+                        className={`${styles.btnTabulky} ${styles.btnTabulkyInline}`}
+                        onClick={() => navigate('/tabulky')}
                     >
                         TAB
                     </button>
@@ -282,29 +278,11 @@ export default function Games() {
             </div>
 
             {view === 'standings' ? (
-                <>
-                    <div style={{ display: 'flex', gap: 4, margin: '4px 0 14px',
-                                  borderBottom: '1px solid #e9ecef' }}>
-                        {[['tabulka', 'Tabuľky'], ['pavuk', 'Pavúk']].map(([k, popis]) => (
-                            <button key={k} onClick={() => setPohlad(k)}
-                                style={{ padding: '8px 18px', border: 'none', background: 'none',
-                                         cursor: 'pointer', fontSize: '0.9rem', fontWeight: 600,
-                                         marginBottom: -2,
-                                         borderBottom: '2px solid ' + (pohlad === k ? '#1a3a6b' : 'transparent'),
-                                         color: pohlad === k ? '#1a3a6b' : '#999' }}>
-                                {popis}
-                            </button>
-                        ))}
-                    </div>
-
-                    {pohlad === 'pavuk'
-                        ? <Bracket competitionId={competitionId} />
-                        : <GroupStandings onTeamClick={(team) => {
-                              setSelectedTeam(team);
-                              setPhase('all');
-                              setView('games');
-                          }} />}
-                </>
+                <GroupStandings onTeamClick={(team) => {
+                    setSelectedTeam(team);
+                    setPhase('all');
+                    setView('games');
+                }} />
             ) : (
                 <>
                     {/* Kalendár */}
