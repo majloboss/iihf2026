@@ -39,6 +39,7 @@ export default function PhaseFilter({
     onZmena,
     vsetkyPopis = 'ALL',
     onVsetky = null,   // ALL ruší všetky filtre obrazovky, nielen fázu
+    ineFiltre = false, // je zapnutý filter mimo číselníka (klub, deň, 1x2)?
     extra = null,      // ďalší filter mimo číselníka (napr. KLUBY)
     prefix = null,     // pred prvým tlačidlom (napr. 1x2)
     koniec = null,     // celkom vpravo, mimo filtrov (napr. TAB)
@@ -94,7 +95,7 @@ export default function PhaseFilter({
 
                 <button onClick={() => { (onVsetky ?? onZmena)(''); setRoz(null); }}
                         title="Zrušiť všetky filtre"
-                        className={triedaFazy('NEUTRAL', hodnota === '')}>
+                        className={triedaFazy('NEUTRAL', hodnota === '' && !ineFiltre)}>
                     {vsetkyPopis}
                 </button>
 
