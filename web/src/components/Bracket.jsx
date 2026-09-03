@@ -152,8 +152,12 @@ export default function Bracket({ competitionId }) {
     const fazy = data?.phases ?? [];
     const styl = data?.logo_style ?? 'club';
     const slug = data?.slug ?? '';
-    // Súťaž bez vyraďovacej časti, alebo ešte nerozlosovaná.
-    if (!fazy.length) return null;
+    // Prazdna zalozka vyzera ako chyba — radsej povedat, preco je prazdna.
+    if (!fazy.length) return (
+        <p style={{ color: '#888', fontSize: '0.85rem' }}>
+            Táto súťaž nemá vyraďovaciu časť.
+        </p>
+    );
     const dvojzapasy = slug === 'ucl2026';
 
     return (
