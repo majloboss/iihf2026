@@ -130,8 +130,6 @@ export default function UclGames() {
 
     if (loading) return <p>Načítavam zápasy…</p>;
 
-    const untippedCount = games.filter(isUntipped).length;
-
     return (
         <div>
             {/* Filter kôl — skratky, farby aj zbaľovanie určuje číselník. */}
@@ -146,7 +144,7 @@ export default function UclGames() {
                             className={onlyUntipped ? styles.btnTabulkyActive : styles.btnTabulky}
                             onClick={() => setOnlyUntipped(v => !v)}
                             title="Zobraz iba zápasy, ktoré si ešte netipoval">
-                            1x2{untippedCount > 0 ? ` (${untippedCount})` : ''}
+                            1x2
                         </button>
                     }
                     // Kluby nie sú fáza — filtrujú naprieč kolami.
