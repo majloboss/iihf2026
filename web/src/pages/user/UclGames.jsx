@@ -139,6 +139,7 @@ export default function UclGames() {
                     hodnota={phase}
                     onZmena={kod => { setPhase(kod); setDay(''); }}
                     onVsetky={resetAll}
+                    ineFiltre={Boolean(club || day || onlyUntipped)}
                     prefix={
                         <button
                             className={onlyUntipped ? styles.btnTabulkyActive : styles.btnTabulky}
