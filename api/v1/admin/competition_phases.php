@@ -19,7 +19,7 @@ if ($method === 'GET') {
 
     $q = $pdo->prepare('
         SELECT id, phase_code, phase_name, match_stat_code, match_stat_desc,
-               color_code, sort_order, is_active
+               color_code, group_code, sort_order, is_active
           FROM admin.competition_phases
          WHERE competition_id = ?
          ORDER BY sort_order, match_stat_code');
@@ -34,6 +34,7 @@ if ($method === 'GET') {
             'match_stat_code' => $r['match_stat_code'],
             'match_stat_desc' => $r['match_stat_desc'],
             'color_code'      => $r['color_code'],
+            'group_code'      => $r['group_code'],
             'sort_order'      => (int)$r['sort_order'],
             'is_active'       => (bool)$r['is_active'],
         ], $q->fetchAll()),
@@ -80,6 +81,8 @@ $nazov = trim((string)($body['phase_name'] ?? ''));
 $sKod  = trim((string)($body['match_stat_code'] ?? ''));
 $sPopis= trim((string)($body['match_stat_desc'] ?? ''));
 $farba = trim((string)($body['color_code'] ?? 'NEUTRAL'));
+// Prázdna hodnota znamená, že fáza stojí vo filtri samostatne.
+$grp     = trim((string)($body['group_code'] ?? '')) ?: null;
 $poradie = (int)($body['sort_order'] ?? 0);
 $aktivne = !empty($body['is_active']);
 
@@ -94,20 +97,20 @@ try {
         $pdo->prepare('
             UPDATE admin.competition_phases
                SET phase_code = ?, phase_name = ?, match_stat_code = ?,
-                   match_stat_desc = ?, color_code = ?, sort_order = ?,
-                   is_active = ?, updated_at = NOW()
+                   match_stat_desc = ?, color_code = ?, group_code = ?,
+                   sort_order = ?, is_active = ?, updated_at = NOW()
              WHERE id = ?')
-            ->execute([$kod, $nazov, $sKod, $sPopis, $farba, $poradie, $aktivne, $id]);
+            ->execute([$kod, $nazov, $sKod, $sPopis, $farba, $grp, $poradie, $aktivne, $id]);
         json_ok(['id' => $id, 'updated' => true]);
     }
 
     $ins = $pdo->prepare('
         INSERT INTO admin.competition_phases
             (competition_id, phase_code, phase_name, match_stat_code,
-             match_stat_desc, color_code, sort_order, is_active)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+             match_stat_desc, color_code, group_code, sort_order, is_active)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         RETURNING id');
-    $ins->execute([$cid, $kod, $nazov, $sKod, $sPopis, $farba, $poradie, $aktivne]);
+    $ins->execute([$cid, $kod, $nazov, $sKod, $sPopis, $farba, $grp, $poradie, $aktivne]);
     json_ok(['id' => (int)$ins->fetchColumn(), 'created' => true]);
 
 } catch (Throwable $e) {

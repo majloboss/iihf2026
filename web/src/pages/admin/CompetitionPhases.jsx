@@ -21,7 +21,7 @@ const FARBY = {
 
 const PRAZDNY = {
     id: null, phase_code: '', phase_name: '', match_stat_code: '',
-    match_stat_desc: '', color_code: 'GROUP', sort_order: 0, is_active: true,
+    match_stat_desc: '', color_code: 'GROUP', group_code: '', sort_order: 0, is_active: true,
 };
 
 export default function CompetitionPhases() {
@@ -142,6 +142,10 @@ export default function CompetitionPhases() {
                                 ))}
                             </select>
                         </label>
+                        <label style={{ fontSize: '0.75rem', color: '#666' }}
+                               title="Fázy s rovnakou hodnotou sa vo filtri zbalia za jedno tlačidlo">
+                            Skupina<br />{pole('group_code', 80)}
+                        </label>
                         <label style={{ fontSize: '0.75rem', color: '#666' }}>
                             Poradie<br />
                             <input type="number" value={uprava.sort_order} disabled={uklada}
@@ -171,7 +175,7 @@ export default function CompetitionPhases() {
                     <thead>
                         <tr>
                             <th>Kód</th><th>Fáza</th><th>Kód zápasu</th><th>Popis</th>
-                            <th>Farba</th><th>Poradie</th><th></th>
+                            <th>Farba</th><th>Skupina</th><th>Poradie</th><th></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -189,6 +193,9 @@ export default function CompetitionPhases() {
                                 </td>
                                 <td>{f.match_stat_desc}</td>
                                 <td style={{ fontSize: '0.75rem', color: '#888' }}>{f.color_code}</td>
+                                <td style={{ fontSize: '0.78rem', color: '#888' }}>
+                                    {f.group_code || <span style={{ color: '#ccc' }}>—</span>}
+                                </td>
                                 <td style={{ textAlign: 'right', color: '#888' }}>{f.sort_order}</td>
                                 <td style={{ whiteSpace: 'nowrap' }}>
                                     <button className={styles.btnSmall} disabled={!!uprava}
@@ -200,7 +207,7 @@ export default function CompetitionPhases() {
                             </tr>
                         ))}
                         {fazy.length === 0 && (
-                            <tr><td colSpan={7} style={{ color: '#aaa', padding: 12 }}>
+                            <tr><td colSpan={8} style={{ color: '#aaa', padding: 12 }}>
                                 Táto súťaž zatiaľ nemá fázy.
                             </td></tr>
                         )}
