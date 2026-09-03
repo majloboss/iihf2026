@@ -12,6 +12,8 @@ export default defineConfig({
       srcDir: 'src',
       filename: 'sw.js',
       registerType: 'autoUpdate',
+      // Registraciu si robi main.jsx sam, aby sa dal nastavit updateViaCache.
+      injectRegister: false,
       injectManifest: {
         globPatterns: ['**/*.{js,css,html,png,svg,ico}'],
       },

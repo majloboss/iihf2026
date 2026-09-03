@@ -22,6 +22,15 @@ createRoot(document.getElementById('root')).render(
 //
 // Poistka proti slučke: ak by sa SW menil opakovane, obnoví sa len raz.
 if ('serviceWorker' in navigator) {
+  // Registruje sa tu, nie cez registerSW.js od pluginu: potrebujeme
+  // `updateViaCache: 'none'`. Bez neho si prehliadac cachuje samotny sw.js
+  // podla vlastnej heuristiky — hosting neposiela Cache-Control a mod_headers
+  // tu nie je — takze novy worker vobec nestiahne a stara verzia sa drzi dalej.
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js', { scope: '/', updateViaCache: 'none' })
+      .catch(() => {});
+  });
+
   let obnovujem = false;
 
   const obnovit = () => {
@@ -34,6 +43,18 @@ if ('serviceWorker' in navigator) {
     obnovujem = true;
     window.location.reload();
   };
+
+  // Prehliadac sam kontroluje novy sw.js iba pri navigacii. Na mobile ostava
+  // appka otvorena dlho, takze by o novej verzii nevedela — po navrate k nej
+  // a raz za hodinu sa preto vypyta aktivne.
+  const skontrolovat = () => navigator.serviceWorker.getRegistration()
+      .then(reg => reg && reg.update())
+      .catch(() => {});
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') skontrolovat();
+  });
+  setInterval(skontrolovat, 60 * 60 * 1000);
 
   navigator.serviceWorker.addEventListener('controllerchange', () => {
     // Bez kontrolóra ide o prvú inštaláciu — vtedy sa neobnovuje.
