@@ -134,9 +134,12 @@ foreach ($rozlozenie as $body => $pocet) {
     $rozlozenieOut[] = ['body' => $body, 'pocet' => $pocet];
 }
 
-// Poradie sa pri súčte za všetky súťaže neuvádza: každá má iný počet zápasov
-// aj bodovanie, takže spoločné poradie by nič nehovorilo. Namiesto neho ide
-// rozpis po súťažiach.
+// Poradie sa pri súčte za všetky súťaže neuvádza: každý hráč sa mohol zapojiť
+// do iného počtu súťaží, takže spoločné poradie by porovnávalo neporovnateľné.
+// Namiesto neho ide rozpis po súťažiach.
+//
+// Rozloženie bodov sa naproti tomu sčítať dá — všetky tri súťaže majú rovnakú
+// stupnicu s maximom 7 bodov za presný tip.
 $jedna = (!$vsetky && count($poSutazi) === 1) ? $poSutazi[0] : null;
 
 json_ok([
