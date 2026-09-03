@@ -159,17 +159,20 @@ export default function Bracket({ competitionId }) {
         </p>
     );
     const dvojzapasy = slug === 'ucl2026';
+    // Hokej sa rozhoduje nájazdmi, futbal penaltami.
+    const rozstrel = slug === 'iihf2026' ? 'nájazdy' : 'penalty';
 
     return (
         <div>
             <p style={{ fontSize: '0.82rem', color: '#666', margin: '0 0 12px', maxWidth: 760 }}>
                 {dvojzapasy ? <>
                     Dvojice sa hrajú na dva zápasy, rozhoduje <strong>súčet gólov</strong>.
-                    Pri rovnosti sa v odvete hrá predĺženie. Finále je jediný zápas.
-                    Čísla vpravo sú súčet za dvojicu, pod nimi výsledky jednotlivých zápasov.
+                    Pri rovnosti sa v odvete hrá predĺženie, prípadne {rozstrel}.
+                    Finále je jediný zápas. Čísla vpravo sú súčet za dvojicu, pod
+                    nimi výsledky jednotlivých zápasov.
                 </> : <>
                     Vyraďovacia časť sa hrá na <strong>jeden zápas</strong>. Pri
-                    nerozhodnom výsledku rozhoduje predĺženie, prípadne nájazdy.
+                    nerozhodnom výsledku rozhoduje predĺženie, prípadne {rozstrel}.
                 </>}
             </p>
 
