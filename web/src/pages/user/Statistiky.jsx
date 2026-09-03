@@ -122,11 +122,17 @@ export default function Statistiky() {
                                                      : d.body === 0 ? '#dee2e6' : '#1a3a6b',
                                            minWidth: 2 }} />
                         </span>
-                        {/* Pomer povie viac než samotný počet; nowrap drží
-                            text na jednom riadku aj pri troch čísliciach. */}
-                        <span style={{ width: 92, fontSize: '0.78rem', color: '#888',
-                                       flexShrink: 0, whiteSpace: 'nowrap' }}>
-                            {d.pocet}/{data.tips} · {podiel(d.pocet, data.tips)} %
+                        {/* Počet aj percento majú vlastný stĺpec zarovnaný
+                            doprava, aby čísla pod sebou lícovali bez ohľadu na
+                            počet číslic. */}
+                        <span style={{ fontSize: '0.78rem', color: '#888', flexShrink: 0,
+                                       whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' }}>
+                            <span style={{ display: 'inline-block', width: 62, textAlign: 'right' }}>
+                                {d.pocet}/{data.tips}
+                            </span>
+                            <span style={{ display: 'inline-block', width: 46, textAlign: 'right' }}>
+                                {podiel(d.pocet, data.tips)} %
+                            </span>
                         </span>
                     </div>
                 ))}

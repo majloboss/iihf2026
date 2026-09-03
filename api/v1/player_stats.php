@@ -82,13 +82,18 @@ foreach ($rows as $c) {
     // Rozpis po kolách len pri jednej súťaži — naprieč súťažami by sa kolá
     // pomiešali a stratili význam.
     if (!$vsetky) {
+        // Radí sa podľa čísla kola, nie podľa času: pri testovaní sa hracie
+        // dni posúvajú, takže časy prestanú zodpovedať poradiu kôl. Fázy bez
+        // čísla (baráž, play-off) idú za ligovou fázou v poradí prvého zápasu.
         $fq = $pdo->prepare("
             SELECT {$s['phase']} AS faza, COUNT(*) AS tipov,
                    COALESCE(SUM(t.{$b}), 0) AS body
               FROM {$sch}.tips t
               JOIN {$sch}.games g ON {$s['gameKey']} = t.game_id
              WHERE t.user_id = ? AND t.{$b} IS NOT NULL
-             GROUP BY 1 ORDER BY MIN({$s['time']})");
+             GROUP BY 1
+             ORDER BY COALESCE(NULLIF(substring({$s['phase']} from '([0-9]+)\. kolo'), '')::int, 99),
+                      MIN({$s['time']})");
         $fq->execute([$uid]);
         $fazy = array_map(fn($x) => [
             'faza'  => $x['faza'],
