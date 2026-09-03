@@ -19,17 +19,8 @@ ALTER TABLE admin.competition_phases
 COMMENT ON COLUMN admin.competition_phases.group_code IS
     'Fázy s rovnakou hodnotou sa vo filtri zbalia za jedno tlačidlo; NULL = samostatne';
 
--- FIFA: dvanásť skupín sa do riadku nezmestí, preto sa zbalia.
-UPDATE admin.competition_phases
-   SET group_code = 'GRP', updated_at = NOW()
- WHERE competition_id = 2
-   AND (phase_name ILIKE 'skupina%' OR match_stat_desc ILIKE 'skupina%');
-
--- UCL: osem kôl ligovej fázy sa zbalí rovnako, nech filter zostane v riadku.
-UPDATE admin.competition_phases
-   SET group_code = 'LF', updated_at = NOW()
- WHERE competition_id = 3
-   AND (phase_name ILIKE 'ligová fáza%' OR match_stat_desc ILIKE 'ligová fáza%');
+-- Hodnoty `group_code` sa tu uz nenastavuju — vklada ich 076, kde su aj
+-- rucne opravy z admina. Tu zostava len pridanie stlpca.
 
 INSERT INTO admin.schema_versions (version, description) VALUES
     (74, 'Zoskupovanie faz vo filtroch (group_code)')

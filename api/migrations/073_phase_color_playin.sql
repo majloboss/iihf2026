@@ -17,10 +17,8 @@ ALTER TABLE admin.competition_phases
 
 -- Baráž má dnes BRONZE; presúva sa na novú farbu. Kód fázy sa medzitým mohol
 -- v admine zmeniť (PO → BAR), preto sa hľadá podľa názvu.
-UPDATE admin.competition_phases
-   SET color_code = 'PLAYIN', updated_at = NOW()
- WHERE color_code = 'BRONZE'
-   AND (phase_name ILIKE '%baráž%' OR match_stat_desc ILIKE '%baráž%');
+-- Prefarbenie baráže sa tu uz nerobi — 076 zapisuje farby rovno spravne.
+-- Zostava len rozsirenie povolenych hodnot o PLAYIN.
 
 INSERT INTO admin.schema_versions (version, description) VALUES
     (73, 'Farba PLAYIN pre baraz')

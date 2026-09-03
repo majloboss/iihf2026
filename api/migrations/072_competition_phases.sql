@@ -57,69 +57,14 @@ END $$;
 CREATE INDEX IF NOT EXISTS phases_comp_idx
     ON admin.competition_phases (competition_id, sort_order);
 
--- ── IIHF 2026 (id 1) ─────────────────────────────────────────────────────────
--- Schéma má jediný stĺpec `phase` s hodnotami A, B, QF, SF, BRONZE, GOLD —
--- kód aj názov v jednom. Názvy sa preto dopĺňajú ručne.
-INSERT INTO admin.competition_phases
-    (competition_id, phase_code, phase_name, match_stat_code, match_stat_desc, color_code, sort_order)
-VALUES
-    (1, 'A',      'Skupina A',      'A',      'Skupina A',            'GROUP',   10),
-    (1, 'B',      'Skupina B',      'B',      'Skupina B',            'GROUP',   20),
-    (1, 'QF',     'Štvrťfinále',    'QF',     'Štvrťfinále',          'PLAYOFF', 30),
-    (1, 'SF',     'Semifinále',     'SF',     'Semifinále',           'PLAYOFF', 40),
-    (1, 'BRONZE', 'O 3. miesto',    'BRO',    'Zápas o bronz',        'BRONZE',  50),
-    (1, 'GOLD',   'Finále',         'F',      'Finále',               'GOLD',    60)
-ON CONFLICT ON CONSTRAINT phases_stat_uniq DO NOTHING;
-
--- ── FIFA 2026 (id 2) ─────────────────────────────────────────────────────────
--- Vyraďovacie fázy majú v dátach anglické názvy, tu sa uvádzajú po slovensky.
-INSERT INTO admin.competition_phases
-    (competition_id, phase_code, phase_name, match_stat_code, match_stat_desc, color_code, sort_order)
-VALUES
-    (2, 'A',  'Skupina A', 'SKA', 'Skupina A',      'GROUP',    10),
-    (2, 'B',  'Skupina B', 'SKB', 'Skupina B',      'GROUP',    20),
-    (2, 'C',  'Skupina C', 'SKC', 'Skupina C',      'GROUP',    30),
-    (2, 'D',  'Skupina D', 'SKD', 'Skupina D',      'GROUP',    40),
-    (2, 'E',  'Skupina E', 'SKE', 'Skupina E',      'GROUP',    50),
-    (2, 'F',  'Skupina F', 'SKF', 'Skupina F',      'GROUP',    60),
-    (2, 'G',  'Skupina G', 'SKG', 'Skupina G',      'GROUP',    70),
-    (2, 'H',  'Skupina H', 'SKH', 'Skupina H',      'GROUP',    80),
-    (2, 'I',  'Skupina I', 'SKI', 'Skupina I',      'GROUP',    90),
-    (2, 'J',  'Skupina J', 'SKJ', 'Skupina J',      'GROUP',   100),
-    (2, 'K',  'Skupina K', 'SKK', 'Skupina K',      'GROUP',   110),
-    (2, 'L',  'Skupina L', 'SKL', 'Skupina L',      'GROUP',   120),
-    (2, 'R32','Šestnásťfinále', 'R32', 'Šestnásťfinále', 'PLAYOFF', 130),
-    (2, 'R16','Osemfinále',     'R16', 'Osemfinále',     'PLAYOFF', 140),
-    (2, 'QF', 'Štvrťfinále',    'QF',  'Štvrťfinále',    'PLAYOFF', 150),
-    (2, 'SF', 'Semifinále',     'SF',  'Semifinále',     'PLAYOFF', 160),
-    (2, 'BM', 'O 3. miesto',    'BRO', 'Zápas o bronz',  'BRONZE',  170),
-    (2, 'F',  'Finále',         'F',   'Finále',         'GOLD',    180)
-ON CONFLICT ON CONSTRAINT phases_stat_uniq DO NOTHING;
-
--- ── UCL 2026/27 (id 3) ───────────────────────────────────────────────────────
--- Ligová fáza má jeden kód (LEAGUE) pre všetkých osem kôl; číslo je len
--- v názve. V číselníku dostane každé kolo vlastný riadok.
-INSERT INTO admin.competition_phases
-    (competition_id, phase_code, phase_name, match_stat_code, match_stat_desc, color_code, sort_order)
-VALUES
-    (3, 'LF',  'Ligová fáza',      'LF1',  'Ligová fáza — 1. kolo',  'GROUP',    10),
-    (3, 'LF',  'Ligová fáza',      'LF2',  'Ligová fáza — 2. kolo',  'GROUP',    20),
-    (3, 'LF',  'Ligová fáza',      'LF3',  'Ligová fáza — 3. kolo',  'GROUP',    30),
-    (3, 'LF',  'Ligová fáza',      'LF4',  'Ligová fáza — 4. kolo',  'GROUP',    40),
-    (3, 'LF',  'Ligová fáza',      'LF5',  'Ligová fáza — 5. kolo',  'GROUP',    50),
-    (3, 'LF',  'Ligová fáza',      'LF6',  'Ligová fáza — 6. kolo',  'GROUP',    60),
-    (3, 'LF',  'Ligová fáza',      'LF7',  'Ligová fáza — 7. kolo',  'GROUP',    70),
-    (3, 'LF',  'Ligová fáza',      'LF8',  'Ligová fáza — 8. kolo',  'GROUP',    80),
-    (3, 'PO',  'Baráž o play-off', 'BAR1', 'Baráž — 1. zápas',       'BRONZE',   90),
-    (3, 'PO',  'Baráž o play-off', 'BAR2', 'Baráž — odveta',         'BRONZE',  100),
-    (3, 'R16', 'Osemfinále',       'R161', 'Osemfinále — 1. zápas',  'PLAYOFF', 110),
-    (3, 'R16', 'Osemfinále',       'R162', 'Osemfinále — odveta',    'PLAYOFF', 120),
-    (3, 'QF',  'Štvrťfinále',      'QF1',  'Štvrťfinále — 1. zápas', 'PLAYOFF', 130),
-    (3, 'QF',  'Štvrťfinále',      'QF2',  'Štvrťfinále — odveta',   'PLAYOFF', 140),
-    (3, 'SF',  'Semifinále',       'SF1',  'Semifinále — 1. zápas',  'PLAYOFF', 150),
-    (3, 'SF',  'Semifinále',       'SF2',  'Semifinále — odveta',    'PLAYOFF', 160),
-    (3, 'F',   'Finále',           'F',    'Finále',                 'GOLD',    170)
-ON CONFLICT ON CONSTRAINT phases_stat_uniq DO NOTHING;
+-- Obsah číselníka sa nevkladá tu, ale v migrácii 076.
+--
+-- Pôvodne tu bolo 41 riadkov s `competition_id` napísaným natvrdo (1, 2, 3).
+-- V produkcii má ale UCL id 5, takže vloženie padlo na cudzí kľúč. Kódy sa
+-- navyše medzičasom menili v admine (BAR1 -> BAR-1, BRO -> BR), takže by tu
+-- vznikli neplatné riadky popri tých správnych.
+--
+-- 076 preto zapisuje stav, ktorý reálne platí, a súťaž dohladáva podľa slugu.
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON admin.competition_phases TO "dbbet-admin";
 GRANT USAGE, SELECT ON SEQUENCE admin.competition_phases_id_seq TO "dbbet-admin";
