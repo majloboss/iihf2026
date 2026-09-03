@@ -149,25 +149,24 @@ export default function UclGames() {
                             1x2{untippedCount > 0 ? ` (${untippedCount})` : ''}
                         </button>
                     }
-                    extra={<>
-                        {/* Kluby nie sú fáza — filtrujú naprieč kolami, preto stoja bokom. */}
-                        {clubs.length > 0 && (
-                            <button
-                                className={zobrazKluby ? styles.btnTabulkyActive : styles.btnTabulky}
-                                style={{ marginLeft: 'auto' }}
-                                onClick={() => setZobrazKluby(v => !v)}
-                                title="Filtrovať podľa klubu">
-                                KLUBY{club ? ` (${club})` : ''}
-                            </button>
-                        )}
-                        {/* TAB nefiltruje — prepne na tabuľky, ako vo FIFA a IIHF. */}
+                    // Kluby nie sú fáza — filtrujú naprieč kolami.
+                    extra={clubs.length > 0 && (
                         <button
-                            className={`${styles.btnTabulky} ${clubs.length ? '' : styles.btnTabulkyInline}`}
+                            className={zobrazKluby ? styles.btnTabulkyActive : styles.btnTabulky}
+                            onClick={() => setZobrazKluby(v => !v)}
+                            title="Filtrovať podľa klubu">
+                            KLUBY{club ? ` (${club})` : ''}
+                        </button>
+                    )}
+                    // TAB nefiltruje — prepne na tabuľky, ako vo FIFA a IIHF.
+                    koniec={
+                        <button
+                            className={`${styles.btnTabulky} ${styles.btnTabulkyInline}`}
                             onClick={() => navigate('/tabulky')}
                             title="Tabuľky">
                             TAB
                         </button>
-                    </>}
+                    }
                 />
             </div>
 

@@ -11,8 +11,13 @@ import styles from '../pages/user/Games.module.css';
 // Fázy s rovnakým `group` sa zbalia za jedno tlačidlo a rozbalia až po
 // kliknutí: dvanásť skupín FIFA by sa inak do riadku nezmestilo.
 //
-// `extra` slúži pre tlačidlá mimo číselníka — v UCL je to KLUBY, ktoré
-// filtruje podľa klubu, nie podľa fázy.
+// Poradie je vo všetkých súťažiach rovnaké:
+//
+//     prefix (1x2) · ALL · extra · číselník · koniec (TAB)
+//
+// `extra` je ďalší filter mimo číselníka — v UCL sú to KLUBY, ktoré filtrujú
+// podľa klubu, nie podľa fázy. `koniec` stojí celkom vpravo a filter to už
+// nie je: TAB prepína na tabuľky.
 
 const TRIEDY = {
     GROUP:   ['pGroup', 'pGroupOn'],
@@ -34,8 +39,9 @@ export default function PhaseFilter({
     onZmena,
     vsetkyPopis = 'ALL',
     onVsetky = null,   // ALL ruší všetky filtre obrazovky, nielen fázu
-    extra = null,      // tlačidlá mimo číselníka (napr. KLUBY, TAB)
+    extra = null,      // ďalší filter mimo číselníka (napr. KLUBY)
     prefix = null,     // pred prvým tlačidlom (napr. 1x2)
+    koniec = null,     // celkom vpravo, mimo filtrov (napr. TAB)
 }) {
     const [fazy, setFazy]     = useState([]);
     const [rozbalene, setRoz] = useState(null);   // otvorená zbalená skupina
@@ -60,7 +66,7 @@ export default function PhaseFilter({
     for (const f of fazy) {
         if (!f.group) continue;
         let s = skupiny.find(x => x.kod === f.group);
-        if (!s) skupiny.push({ kod: f.group, farba: f.color, polozky: [f] });
+        if (!s) skupiny.push({ kod: f.group, farba: f.color, nazov: f.phase_name, polozky: [f] });
         else s.polozky.push(f);
     }
 
@@ -92,6 +98,8 @@ export default function PhaseFilter({
                     {vsetkyPopis}
                 </button>
 
+                {extra}
+
                 {riadok.map((p, i) => p.typ === 'faza' ? (
                     <button key={p.f.code} title={p.f.title}
                             onClick={() => { onZmena(hodnota === p.f.code ? '' : p.f.code); setRoz(null); }}
@@ -100,14 +108,14 @@ export default function PhaseFilter({
                     </button>
                 ) : (
                     <button key={`g-${p.s.kod}-${i}`}
-                            title={`${p.s.polozky.length} kôl`}
+                            title={p.s.nazov || `${p.s.polozky.length} kôl`}
                             onClick={() => setRoz(otvorena === p.s.kod ? null : p.s.kod)}
                             className={triedaFazy(p.s.farba, otvorena === p.s.kod)}>
                         {p.s.kod}
                     </button>
                 ))}
 
-                {extra}
+                {koniec}
             </div>
 
             {/* Rozbalená skupina — vlastný riadok pod filtrom. */}
