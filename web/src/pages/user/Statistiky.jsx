@@ -27,32 +27,52 @@ function Dlazdica({ popis, hodnota, poznamka, farba = '#1a3a6b' }) {
 const podiel = (cast, celok) => (celok ? Math.round((cast / celok) * 100) : 0);
 
 export default function Statistiky() {
-    const { activeCompetition } = useCompetition();
+    const { activeCompetition, competitions } = useCompetition();
+    // Predvolí sa aktuálna súťaž; 'all' sčíta všetky, kde hráč tipoval.
+    // Vlastná voľba má prednosť, preto sa drží zvlášť od aktívnej súťaže.
+    const [zvolene, setZvolene]  = useState(null);
+    const vyber = zvolene ?? (activeCompetition?.id ? String(activeCompetition.id) : null);
+    const setVyber = setZvolene;
+
     const [data, setData]       = useState(null);
     const [error, setError]     = useState('');
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const cid = activeCompetition?.id;
-        if (!cid) return;
+        if (!vyber) return;
         let zive = true;
-        apiFetch(`v1/player-stats?competition_id=${cid}`)
+        apiFetch(`v1/player-stats?competition_id=${vyber}`)
             .then(d => { if (zive) { setData(d); setError(''); } })
             .catch(e => { if (zive) setError(e.message); })
             .finally(() => { if (zive) setLoading(false); });
         return () => { zive = false; };
-    }, [activeCompetition?.id]);
+    }, [vyber]);
 
-    if (loading) return <p style={{ color: '#888' }}>Načítavam…</p>;
-    if (error)   return <p style={{ color: '#c0392b' }}>✗ {error}</p>;
-    if (!data)   return null;
+    const combo = (
+        <div style={{ marginBottom: 14 }}>
+            <select value={vyber ?? ''} onChange={e => setVyber(e.target.value)}
+                    style={{ padding: '6px 10px', fontSize: '0.88rem', maxWidth: 320 }}>
+                {(competitions ?? []).map(c => (
+                    <option key={c.id} value={String(c.id)}>{c.name}</option>
+                ))}
+                <option value="all">Všetky súťaže</option>
+            </select>
+        </div>
+    );
+
+    if (loading) return <>{combo}<p style={{ color: '#888' }}>Načítavam…</p></>;
+    if (error)   return <>{combo}<p style={{ color: '#c0392b' }}>✗ {error}</p></>;
+    if (!data)   return combo;
 
     if (!data.tips) {
         return (
-            <p style={{ color: '#888', fontSize: '0.9rem' }}>
-                Zatiaľ nemáš vyhodnotený žiadny tip. Štatistiky sa ukážu po prvom
-                zápase so schváleným výsledkom.
-            </p>
+            <>
+                {combo}
+                <p style={{ color: '#888', fontSize: '0.9rem' }}>
+                    Zatiaľ nemáš vyhodnotený žiadny tip. Štatistiky sa ukážu po prvom
+                    zápase so schváleným výsledkom.
+                </p>
+            </>
         );
     }
 
@@ -61,6 +81,8 @@ export default function Statistiky() {
 
     return (
         <div>
+            {combo}
+
             {/* ── Súhrn ─────────────────────────────────────────── */}
             <div style={{ display: 'grid', gap: 10, marginBottom: 20,
                           gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))' }}>
@@ -100,13 +122,51 @@ export default function Statistiky() {
                                                      : d.body === 0 ? '#dee2e6' : '#1a3a6b',
                                            minWidth: 2 }} />
                         </span>
-                        <span style={{ width: 58, fontSize: '0.78rem', color: '#888',
-                                       flexShrink: 0 }}>
-                            {d.pocet}× · {podiel(d.pocet, data.tips)} %
+                        {/* Pomer povie viac než samotný počet; nowrap drží
+                            text na jednom riadku aj pri troch čísliciach. */}
+                        <span style={{ width: 92, fontSize: '0.78rem', color: '#888',
+                                       flexShrink: 0, whiteSpace: 'nowrap' }}>
+                            {d.pocet}/{data.tips} · {podiel(d.pocet, data.tips)} %
                         </span>
                     </div>
                 ))}
             </div>
+
+            {/* ── Po súťažiach ──────────────────────────────────── */}
+            {data.all && data.competitions.length > 0 && (
+                <>
+                    <h3 style={{ fontSize: '0.95rem', margin: '0 0 8px' }}>Podľa súťaže</h3>
+                    <div style={{ overflowX: 'auto', marginBottom: 20 }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse',
+                                        fontSize: '0.82rem' }}>
+                            <thead>
+                                <tr style={{ color: '#666', textAlign: 'left' }}>
+                                    <th style={{ padding: '4px 8px 4px 0', fontWeight: 500 }}>Súťaž</th>
+                                    <th style={{ padding: '4px 8px', fontWeight: 500, textAlign: 'right' }}>Tipov</th>
+                                    <th style={{ padding: '4px 8px', fontWeight: 500, textAlign: 'right' }}>Bodov</th>
+                                    <th style={{ padding: '4px 8px', fontWeight: 500, textAlign: 'right' }}>Priemer</th>
+                                    <th style={{ padding: '4px 0 4px 8px', fontWeight: 500, textAlign: 'right' }}>Miesto</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {data.competitions.map(c => (
+                                    <tr key={c.id} style={{ borderTop: '1px solid #f1f3f5' }}>
+                                        <td style={{ padding: '5px 8px 5px 0' }}>{c.name}</td>
+                                        <td style={{ padding: '5px 8px', textAlign: 'right', color: '#888' }}>{c.tips}</td>
+                                        <td style={{ padding: '5px 8px', textAlign: 'right', fontWeight: 600 }}>{c.points}</td>
+                                        <td style={{ padding: '5px 8px', textAlign: 'right', color: '#888' }}>{c.avg}</td>
+                                        <td style={{ padding: '5px 0 5px 8px', textAlign: 'right',
+                                                     color: c.rank <= 3 ? '#1a7f37' : '#888',
+                                                     fontWeight: c.rank <= 3 ? 600 : 400 }}>
+                                            {c.rank}. z {c.players}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </>
+            )}
 
             {/* ── Po kolách ─────────────────────────────────────── */}
             {data.phases.length > 1 && (
