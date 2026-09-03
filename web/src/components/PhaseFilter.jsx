@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { apiFetch } from '../api/client';
+import { useState } from 'react';
+import usePhases from '../hooks/usePhases';
 import styles from '../pages/user/Games.module.css';
 
 // Filter fáz a kôl nad zápasmi.
@@ -44,17 +44,8 @@ export default function PhaseFilter({
     prefix = null,     // pred prvým tlačidlom (napr. 1x2)
     koniec = null,     // celkom vpravo, mimo filtrov (napr. TAB)
 }) {
-    const [fazy, setFazy]     = useState([]);
+    const { fazy } = usePhases(competitionId);
     const [rozbalene, setRoz] = useState(null);   // otvorená zbalená skupina
-
-    useEffect(() => {
-        if (!competitionId) return;
-        let zive = true;
-        apiFetch(`v1/phases?competition_id=${competitionId}`)
-            .then(d => { if (zive) setFazy(d); })
-            .catch(() => { if (zive) setFazy([]); });
-        return () => { zive = false; };
-    }, [competitionId]);
 
     if (!fazy.length) return null;
 
@@ -112,9 +103,19 @@ export default function PhaseFilter({
                 ) : (
                     <span key={`g-${p.s.kod}-${i}`} className={styles.tipWrap}
                           data-tip={p.s.nazov || `${p.s.polozky.length} kôl`}>
+                        {/* Skupina filtruje na vsetky svoje kola naraz a zaroven
+                            sa rozbali — inak by kliknutie na BAR nechalo zoznam
+                            aj hracie dni nezmenene, kym clovek nezvoli BAR-1. */}
                         <button title={p.s.nazov || `${p.s.polozky.length} kôl`}
-                                onClick={() => setRoz(otvorena === p.s.kod ? null : p.s.kod)}
-                                className={triedaFazy(p.s.farba, otvorena === p.s.kod)}>
+                                onClick={() => {
+                                    const vybrata = hodnota === p.s.kod;
+                                    onZmena(vybrata ? '' : p.s.kod);
+                                    setRoz(vybrata ? null : p.s.kod);
+                                }}
+                                className={triedaFazy(p.s.farba,
+                                    hodnota === p.s.kod
+                                    || p.s.polozky.some(f => f.code === hodnota)
+                                    || otvorena === p.s.kod)}>
                             {p.s.kod}
                         </button>
                     </span>

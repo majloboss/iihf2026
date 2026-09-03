@@ -4,6 +4,7 @@ import { getUclGames, saveUclTip } from '../../api/ucl';
 import { asDate, canTip, isUntipped as isUntippedGame, isValidDate, uclScoreText as scoreText } from '../../utils/tipWindow';
 import UclZapas from '../../components/UclZapas';
 import PhaseFilter from '../../components/PhaseFilter';
+import usePhases from '../../hooks/usePhases';
 import { useCompetition } from '../../context/CompetitionContext';
 import UclGroupTips from './UclGroupTips';
 import styles from './Games.module.css';
@@ -42,6 +43,7 @@ export default function UclGames() {
     const navigate = useNavigate();
     const { activeCompetition } = useCompetition();
     const competitionId = activeCompetition?.id;
+    const { sediFaze } = usePhases(competitionId);
 
     const [searchParams] = useSearchParams();
     const [phase, setPhase] = useState(() => searchParams.get('faza') || '');
@@ -65,7 +67,7 @@ export default function UclGames() {
         || (g.game_type_code === 'LEAGUE' ? `LF${g.round_no}`
             : g.leg ? `${g.game_type_code === 'PO' ? 'BAR' : g.game_type_code}-${g.leg}`
             : g.game_type_code);
-    const matchesPhase = (g) => !phase || statKod(g) === phase;
+    const matchesPhase = (g) => sediFaze(statKod(g), phase);
     const matchesClub = (g) => !club || g.home_code === club || g.away_code === club;
     const isUntipped = (g) => isUntippedGame(g);
 
