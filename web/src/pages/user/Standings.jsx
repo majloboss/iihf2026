@@ -5,6 +5,7 @@ import { useCompetition } from '../../context/CompetitionContext';
 import { LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Flag } from '../../components/Flag';
 import styles from './Standings.module.css';
+import gStyles from './Games.module.css';
 
 const BUCKETS = ['pts7','pts6','pts5','pts4','pts3','pts2','pts1','pts0'];
 const BUCKET_LABELS = ['7','6','5','4','3','2','1','0'];
@@ -243,18 +244,25 @@ function GroupTable({ group, currentUserId, compId }) {
 }
 
 // Záložka Skupiny — súčasná funkcionalita (skupiny pre zvolený turnaj)
-// Krátky štítok fázy pre filter — celý názov („Ligová fáza — 3. kolo") by bol
-// ako tlačidlo priširoký.
-function kratkaFaza(nazov) {
-    const kolo = nazov.match(/(\d+)\. kolo/);
-    if (kolo) return `${kolo[1]}. kolo`;
-    const odveta = /odveta/i.test(nazov);
-    const mapa = [['Baráž', 'BAR'], ['Osemfinále', 'R16'], ['Štvrťfinále', 'QF'],
-                  ['Semifinále', 'SF'], ['Finále', 'F']];
-    for (const [dlhy, kratky] of mapa) {
-        if (nazov.startsWith(dlhy)) return odveta ? `${kratky} odv.` : kratky;
-    }
-    return nazov;
+// Štítok fázy pre filter — rovnaké označenia ako v Zápasoch (LF1, BAR, R16…).
+// Odveta sa odlíši dvojkou, aby sa tlačidlá nezdvojili.
+function kratkaFaza(f) {
+    const kolo = f.phase.match(/(\d+)\. kolo/);
+    if (kolo) return `LF${kolo[1]}`;
+    const odveta = /odveta/i.test(f.phase) ? '.2' : '';
+    const mapa = { PO: 'BAR', R16: 'R16', QF: 'QF', SF: 'SF', F: 'F' };
+    return (mapa[f.code] ?? f.phase) + odveta;
+}
+
+// Farby tlačidiel podľa dôležitosti fázy — rovnaké ako v Zápasoch.
+function farbaFazy(f, on) {
+    const kolo = /\d+\. kolo/.test(f.phase);
+    const [zakl, akt] =
+          f.code === 'F'  ? [gStyles.pGold, gStyles.pGoldOn]
+        : f.code === 'PO' ? [gStyles.pBronze, gStyles.pBronzeOn]
+        : kolo            ? [gStyles.pGroup, gStyles.pGroupOn]
+        : [gStyles.pPlayoff, gStyles.pPlayoffOn];
+    return [gStyles.pBtn, zakl, on ? akt : ''].join(' ');
 }
 
 function GroupsView({ currentUserId, compId }) {
@@ -294,17 +302,16 @@ function GroupsView({ currentUserId, compId }) {
     // Filter kôl stojí nad tabuľkami a platí pre všetky skupiny naraz.
     const filter = fazy.length > 1 && (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 12 }}>
-            <button onClick={() => setFaza('')}
-                    className={aktivnaFaza === '' ? styles.tabActive : styles.tab}
-                    style={{ padding: '4px 10px', fontSize: '0.78rem' }}>
-                Celá súťaž
+            <button onClick={() => setFaza('')} title="Celá súťaž"
+                    className={[gStyles.pBtn, gStyles.pGroup,
+                                aktivnaFaza === '' ? gStyles.pGroupOn : ''].join(' ')}>
+                ALL
             </button>
             {fazy.map(f => (
                 <button key={f.phase} onClick={() => setFaza(f.phase)}
                         title={`${f.phase} · ${f.games} zápasov`}
-                        className={aktivnaFaza === f.phase ? styles.tabActive : styles.tab}
-                        style={{ padding: '4px 10px', fontSize: '0.78rem' }}>
-                    {kratkaFaza(f.phase)}
+                        className={farbaFazy(f, aktivnaFaza === f.phase)}>
+                    {kratkaFaza(f)}
                 </button>
             ))}
         </div>

@@ -32,15 +32,20 @@ if ($slug === 'iihf2026') {
     $body    = 'points_earned';
 }
 
+// Kód fázy určuje farbu tlačidla vo filtri; IIHF vlastný kód nemá, tam sa
+// použije priamo názov fázy.
+$kodCol = $slug === 'iihf2026' ? 'g.phase' : 'g.game_type_code';
+
 $q = $pdo->query("
-    SELECT {$phase} AS phase, COUNT(DISTINCT t.game_id) AS games
+    SELECT {$phase} AS phase, {$kodCol} AS code, COUNT(DISTINCT t.game_id) AS games
       FROM {$schema}.games g
       JOIN {$schema}.tips t ON {$gameKey} = t.game_id AND t.{$body} IS NOT NULL
-     GROUP BY 1
+     GROUP BY 1, 2
      ORDER BY COALESCE(NULLIF(substring({$phase} from '([0-9]+)\\. kolo'), '')::int, 99),
               MIN(" . ($slug === 'iihf2026' ? 'g.starts_at' : 'g.start_time') . ")");
 
 json_ok(array_map(fn($r) => [
     'phase' => $r['phase'],
+    'code'  => $r['code'],
     'games' => (int)$r['games'],
 ], $q->fetchAll()));
