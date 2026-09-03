@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getUclGames, saveUclTip } from '../../api/ucl';
 import { asDate, canTip, isUntipped as isUntippedGame, isValidDate, uclScoreText as scoreText } from '../../utils/tipWindow';
 import UclZapas from '../../components/UclZapas';
@@ -39,6 +39,7 @@ export default function UclGames() {
     // Filtre
     // Odkaz z pavúka predvolí fázu aj deň: /games?faza=SF&den=2027-05-04.
     // Fáza je skratka kola z číselníka (LF3, BAR-1, R16-2, F).
+    const navigate = useNavigate();
     const { activeCompetition } = useCompetition();
     const competitionId = activeCompetition?.id;
 
@@ -139,6 +140,7 @@ export default function UclGames() {
                     competitionId={competitionId}
                     hodnota={phase}
                     onZmena={kod => { setPhase(kod); setDay(''); }}
+                    onVsetky={resetAll}
                     prefix={
                         <button
                             className={onlyUntipped ? styles.btnTabulkyActive : styles.btnTabulky}
@@ -147,16 +149,25 @@ export default function UclGames() {
                             1x2{untippedCount > 0 ? ` (${untippedCount})` : ''}
                         </button>
                     }
-                    extra={clubs.length > 0 && (
-                        /* Kluby nie sú fáza — filtrujú naprieč kolami, preto stoja bokom. */
+                    extra={<>
+                        {/* Kluby nie sú fáza — filtrujú naprieč kolami, preto stoja bokom. */}
+                        {clubs.length > 0 && (
+                            <button
+                                className={zobrazKluby ? styles.btnTabulkyActive : styles.btnTabulky}
+                                style={{ marginLeft: 'auto' }}
+                                onClick={() => setZobrazKluby(v => !v)}
+                                title="Filtrovať podľa klubu">
+                                KLUBY{club ? ` (${club})` : ''}
+                            </button>
+                        )}
+                        {/* TAB nefiltruje — prepne na tabuľky, ako vo FIFA a IIHF. */}
                         <button
-                            className={zobrazKluby ? styles.btnTabulkyActive : styles.btnTabulky}
-                            style={{ marginLeft: 'auto' }}
-                            onClick={() => setZobrazKluby(v => !v)}
-                            title="Filtrovať podľa klubu">
-                            KLUBY{club ? ` (${club})` : ''}
+                            className={`${styles.btnTabulky} ${clubs.length ? '' : styles.btnTabulkyInline}`}
+                            onClick={() => navigate('/tabulky')}
+                            title="Tabuľky">
+                            TAB
                         </button>
-                    )}
+                    </>}
                 />
             </div>
 

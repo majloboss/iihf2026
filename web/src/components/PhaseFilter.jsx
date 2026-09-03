@@ -33,7 +33,8 @@ export default function PhaseFilter({
     hodnota,           // vybraný kód zápasu; '' = všetko
     onZmena,
     vsetkyPopis = 'ALL',
-    extra = null,      // tlačidlá mimo číselníka (napr. KLUBY)
+    onVsetky = null,   // ALL ruší všetky filtre obrazovky, nielen fázu
+    extra = null,      // tlačidlá mimo číselníka (napr. KLUBY, TAB)
     prefix = null,     // pred prvým tlačidlom (napr. 1x2)
 }) {
     const [fazy, setFazy]     = useState([]);
@@ -85,8 +86,8 @@ export default function PhaseFilter({
             <div className={styles.filtersWrap}>
                 {prefix}
 
-                <button onClick={() => { onZmena(''); setRoz(null); }}
-                        title="Všetky zápasy"
+                <button onClick={() => { (onVsetky ?? onZmena)(''); setRoz(null); }}
+                        title="Zrušiť všetky filtre"
                         className={triedaFazy('NEUTRAL', hodnota === '')}>
                     {vsetkyPopis}
                 </button>
