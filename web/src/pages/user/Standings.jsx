@@ -243,25 +243,85 @@ function GroupTable({ group, currentUserId, compId }) {
 }
 
 // Záložka Skupiny — súčasná funkcionalita (skupiny pre zvolený turnaj)
+// Krátky štítok fázy pre filter — celý názov („Ligová fáza — 3. kolo") by bol
+// ako tlačidlo priširoký.
+function kratkaFaza(nazov) {
+    const kolo = nazov.match(/(\d+)\. kolo/);
+    if (kolo) return `${kolo[1]}. kolo`;
+    const odveta = /odveta/i.test(nazov);
+    const mapa = [['Baráž', 'BAR'], ['Osemfinále', 'R16'], ['Štvrťfinále', 'QF'],
+                  ['Semifinále', 'SF'], ['Finále', 'F']];
+    for (const [dlhy, kratky] of mapa) {
+        if (nazov.startsWith(dlhy)) return odveta ? `${kratky} odv.` : kratky;
+    }
+    return nazov;
+}
+
 function GroupsView({ currentUserId, compId }) {
     const [groups,  setGroups]  = useState([]);
     const [loading, setLoading] = useState(true);
     const [error,   setError]   = useState('');
+    const [fazy,    setFazy]    = useState([]);
+    const [faza,    setFaza]    = useState('');   // '' = celá súťaž
 
     useEffect(() => {
         setLoading(true);
-        const url = compId ? `v1/standings?competition_id=${compId}` : 'v1/standings';
+        const q = new URLSearchParams();
+        if (compId) q.set('competition_id', compId);
+        if (faza)   q.set('phase', faza);
+        const url = q.toString() ? `v1/standings?${q}` : 'v1/standings';
         apiFetch(url)
             .then(data => { setGroups(data); setLoading(false); })
             .catch(e   => { setError(e.message); setLoading(false); });
+    }, [compId, faza]);
+
+    // Zoznam kôl sa načíta raz pre súťaž. Bez súťaže (Global) sa nenačítava
+    // nič — zoznam sa vtedy nechá prázdny a filter sa nezobrazí.
+    useEffect(() => {
+        if (!compId) return;
+        let zive = true;
+        apiFetch(`v1/standings-phases?competition_id=${compId}`)
+            .then(d => { if (zive) setFazy(d); })
+            .catch(() => { if (zive) setFazy([]); });
+        return () => { zive = false; };
     }, [compId]);
 
-    if (loading) return <p>Načítavam…</p>;
-    if (error)   return <p style={{color:'red'}}>Chyba: {error}</p>;
+    // Pri zmene súťaže sa výber zruší — kolá inej súťaže by tam nesedeli.
+    // Rieši sa odvodením, nie efektom, aby nevznikol render navyše.
+    const zoznamFaz = fazy.map(f => f.phase);
+    const aktivnaFaza = zoznamFaz.includes(faza) ? faza : '';
 
-    return groups.length === 0
-        ? <p className={styles.empty}>Nie si v žiadnej skupine.</p>
-        : groups.map(g => <GroupTable key={g.id} group={g} currentUserId={currentUserId} compId={compId} />);
+    // Filter kôl stojí nad tabuľkami a platí pre všetky skupiny naraz.
+    const filter = fazy.length > 1 && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 12 }}>
+            <button onClick={() => setFaza('')}
+                    className={aktivnaFaza === '' ? styles.tabActive : styles.tab}
+                    style={{ padding: '4px 10px', fontSize: '0.78rem' }}>
+                Celá súťaž
+            </button>
+            {fazy.map(f => (
+                <button key={f.phase} onClick={() => setFaza(f.phase)}
+                        title={`${f.phase} · ${f.games} zápasov`}
+                        className={aktivnaFaza === f.phase ? styles.tabActive : styles.tab}
+                        style={{ padding: '4px 10px', fontSize: '0.78rem' }}>
+                    {kratkaFaza(f.phase)}
+                </button>
+            ))}
+        </div>
+    );
+
+    if (loading) return <>{filter}<p>Načítavam…</p></>;
+    if (error)   return <>{filter}<p style={{color:'red'}}>Chyba: {error}</p></>;
+
+    return (
+        <>
+            {filter}
+            {groups.length === 0
+                ? <p className={styles.empty}>Nie si v žiadnej skupine.</p>
+                : groups.map(g => <GroupTable key={g.id} group={g}
+                                              currentUserId={currentUserId} compId={compId} />)}
+        </>
+    );
 }
 
 // Záložka Global — všetci tipéri po turnajoch (zoradené podľa dátumu turnaja)

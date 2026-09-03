@@ -13,18 +13,35 @@ if ($cid) {
     $slug = $cs->fetchColumn() ?: 'iihf2026';
 }
 
-// Dynamický join + stĺpec podľa súťaže
+// Voliteľný filter na jedno kolo/fázu. Hodnota je názov fázy, ktorý vracia
+// /v1/standings-phases — porovnáva sa presne, preto ide ako parameter.
+$phase = trim((string)($_GET['phase'] ?? ''));
+
+// Dynamický join + stĺpec podľa súťaže. Pri filtri na fázu treba pripojiť aj
+// zápasy — bez nich sa nedá zistiť, do ktorého kola tip patrí.
 if ($slug === 'ucl2026') {
     // Kluby LM: maximum je 5 bodov v ligovej faze a 7 v playoff.
     $tipsJoin  = "LEFT JOIN \"lm2026-27\".tips t ON t.user_id = u.id AND t.points_earned IS NOT NULL";
+    if ($phase !== '') {
+        $tipsJoin .= " AND EXISTS (SELECT 1 FROM \"lm2026-27\".games g
+                                    WHERE g.game_id = t.game_id AND g.game_type_name = :phase)";
+    }
     $ptsCol    = "t.points_earned";
     $maxPts    = 7;
 } elseif ($slug === 'fifa2026') {
     $tipsJoin  = "LEFT JOIN fifa2026.tips t ON t.user_id = u.id AND t.points_earned IS NOT NULL";
+    if ($phase !== '') {
+        $tipsJoin .= " AND EXISTS (SELECT 1 FROM fifa2026.games g
+                                    WHERE g.game_id = t.game_id AND g.game_type_name = :phase)";
+    }
     $ptsCol    = "t.points_earned";
     $maxPts    = 3;
 } else {
     $tipsJoin  = "LEFT JOIN iihf2026.tips t ON t.user_id = u.id AND t.points IS NOT NULL";
+    if ($phase !== '') {
+        $tipsJoin .= " AND EXISTS (SELECT 1 FROM iihf2026.games g
+                                    WHERE g.id = t.game_id AND g.phase = :phase)";
+    }
     $ptsCol    = "t.points";
     $maxPts    = 7;
 }
@@ -33,6 +50,7 @@ $compFilter = $cid ? "AND fg.competition_id = :cid" : "";
 
 $params = [':uid' => $auth['user_id']];
 if ($cid) $params[':cid'] = $cid;
+if ($phase !== '') $params[':phase'] = $phase;
 
 $sql = "
     SELECT fg.id AS group_id, fg.name AS group_name,
