@@ -43,7 +43,7 @@ const PHASES = [
 const phaseBtnClass = (p, on) => {
     const [zakladna, aktivna] =
           p.code === 'F'  ? [styles.pGold, styles.pGoldOn]
-        : p.code === 'PO' ? [styles.pBronze, styles.pBronzeOn]
+        : p.code === 'PO' ? [styles.pPlayin, styles.pPlayinOn]
         : p.code === 'LEAGUE' ? [styles.pGroup, styles.pGroupOn]
         : [styles.pPlayoff, styles.pPlayoffOn];
     return [styles.pBtn, zakladna, on ? aktivna : ''].join(' ');

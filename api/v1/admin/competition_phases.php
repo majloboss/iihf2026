@@ -10,7 +10,7 @@
 require_auth(true);
 $pdo = db();
 
-const PHASE_COLORS = ['GROUP', 'PLAYOFF', 'BRONZE', 'GOLD', 'NEUTRAL'];
+const PHASE_COLORS = ['GROUP', 'PLAYOFF', 'PLAYIN', 'BRONZE', 'GOLD', 'NEUTRAL'];
 
 // ── Čítanie ──────────────────────────────────────────────────────────────────
 if ($method === 'GET') {

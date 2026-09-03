@@ -13,7 +13,8 @@ import styles from './Admin.module.css';
 const FARBY = {
     GROUP:   { bg: '#dbeafe', fg: '#1e40af', popis: 'skupiny, ligová fáza' },
     PLAYOFF: { bg: '#dcfce7', fg: '#15803d', popis: 'osemfinále až semifinále' },
-    BRONZE:  { bg: '#fde8c8', fg: '#92400e', popis: 'baráž, o 3. miesto' },
+    PLAYIN:  { bg: '#ede9fe', fg: '#6d28d9', popis: 'baráž o postup' },
+    BRONZE:  { bg: '#fde8c8', fg: '#92400e', popis: 'zápas o 3. miesto' },
     GOLD:    { bg: '#fef9c3', fg: '#a16207', popis: 'finále' },
     NEUTRAL: { bg: '#f1f3f5', fg: '#495057', popis: 'ostatné' },
 };

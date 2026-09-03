@@ -294,7 +294,7 @@ function farbaFazy(f, on) {
     const baraz  = f.code === 'PO' || /^baráž/i.test(f.phase);
     const [zakl, akt] =
           finale ? [gStyles.pGold, gStyles.pGoldOn]
-        : baraz  ? [gStyles.pBronze, gStyles.pBronzeOn]
+        : baraz  ? [gStyles.pPlayin, gStyles.pPlayinOn]
         : kolo   ? [gStyles.pGroup, gStyles.pGroupOn]
         : [gStyles.pPlayoff, gStyles.pPlayoffOn];
     return [gStyles.pBtn, zakl, on ? akt : ''].join(' ');
