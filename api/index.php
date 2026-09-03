@@ -82,7 +82,7 @@ try {
         $path === 'v1/ucl/tips'                 => require __DIR__ . '/v1/ucl/tips.php',
         $path === 'v1/ucl/game-tips'            => require __DIR__ . '/v1/ucl/game_tips.php',
         $path === 'v1/ucl/standings'            => require __DIR__ . '/v1/ucl/standings.php',
-        $path === 'v1/ucl/bracket'              => require __DIR__ . '/v1/ucl/bracket.php',
+        $path === 'v1/bracket'                  => require __DIR__ . '/v1/bracket.php',
         $path === 'v1/admin/impersonate'      => require __DIR__ . '/v1/admin/impersonate.php',
         $path === 'v1/fifa/teams'          => require __DIR__ . '/v1/fifa/teams.php',
         $path === 'v1/fifa/games'          => require __DIR__ . '/v1/fifa/games.php',

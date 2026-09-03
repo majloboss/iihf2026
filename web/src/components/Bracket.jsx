@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getUclBracket } from '../../api/ucl';
-import { useAuth } from '../../context/AuthContext';
+import { getBracket } from '../api/bracket';
+import { useAuth } from '../context/AuthContext';
 
-// Pavúk vyraďovacej časti. Fázy idú vedľa seba zľava doprava, dvojice pod sebou.
-// Pri užšej obrazovke sa fázy zalomia pod seba.
+// Pavúk vyraďovacej časti — spoločný pre všetky súťaže.
+//
+// Fázy idú vedľa seba zľava doprava, dvojice pod sebou; pri užšej obrazovke
+// sa zalomia. Rozdiely medzi súťažami rieši API: UCL hrá dvojzápasy a má
+// logá klubov, FIFA a IIHF jednozápasové kolá a vlajky reprezentácií.
 
 const asDate = s => new Date(String(s).replace(' ', 'T') + 'Z');
 // Deň zápasu pre filter cieľovej obrazovky; rovnaký tvar používajú Zápasy
@@ -21,14 +24,23 @@ const denFmt = s => {
     return Number.isNaN(d.getTime()) ? '' : d.toLocaleDateString('sk-SK', { day: 'numeric', month: 'numeric' });
 };
 
-function Tim({ tim, skore = [], vitaz, rozhodnute, cielUrl, faza }) {
+// Klub ma v `logo` nazov suboru, reprezentacia kod timu — z toho sa nazov
+// vlajky sklada podla konvencie (/flags/fifa_flag_mex.png).
+const obrazokTimu = (logo, styl, slug) => {
+    if (!logo) return null;
+    if (styl === 'club') return `/logos/${slug}/${logo}`;
+    const predpona = slug === 'fifa2026' ? 'fifa_flag' : 'team_flag';
+    return `/flags/${predpona}_${String(logo).toLowerCase()}.png`;
+};
+
+function Tim({ tim, skore = [], vitaz, rozhodnute, cielUrl, faza, styl, slug }) {
     const prazdny = !tim.name;
     return (
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 8px',
                       background: vitaz ? '#eaf7ee' : 'transparent',
                       borderRadius: 4, minWidth: 0 }}>
             {tim.logo
-                ? <img src={`/logos/ucl2026/${tim.logo}`} alt=""
+                ? <img src={obrazokTimu(tim.logo, styl, slug)} alt=""
                        style={{ width: 20, height: 20, objectFit: 'contain', flexShrink: 0 }}
                        onError={e => { e.currentTarget.style.visibility = 'hidden'; }} />
                 : <span style={{ width: 20, flexShrink: 0 }} />}
@@ -73,7 +85,7 @@ function Tim({ tim, skore = [], vitaz, rozhodnute, cielUrl, faza }) {
     );
 }
 
-function Dvojica({ tie, cielUrl, faza }) {
+function Dvojica({ tie, cielUrl, faza, styl, slug }) {
     const rozhodnute = tie.winner_id !== null;
     const zapasy = [tie.first_leg, tie.second_leg].filter(Boolean);
 
@@ -82,7 +94,8 @@ function Dvojica({ tie, cielUrl, faza }) {
         return (
             <div style={{ background: '#fff', border: '1px solid #e9ecef', borderRadius: 8,
                           padding: 6, marginBottom: 10 }}>
-                <Tim tim={tie.team_a} vitaz={false} rozhodnute={false} />
+                <Tim tim={tie.team_a} vitaz={false} rozhodnute={false}
+                     styl={styl} slug={slug} />
             </div>
         );
     }
@@ -100,41 +113,60 @@ function Dvojica({ tie, cielUrl, faza }) {
         <div style={{ background: '#fff', border: '1px solid #e9ecef', borderRadius: 8,
                       padding: 6, marginBottom: 10 }}>
             <Tim tim={tie.team_a} skore={skoreTimu('a')} cielUrl={cielUrl} faza={faza}
+                 styl={styl} slug={slug}
                  vitaz={rozhodnute && tie.winner_id === tie.team_a.id} rozhodnute={rozhodnute} />
             <Tim tim={tie.team_b} skore={skoreTimu('b')} cielUrl={cielUrl} faza={faza}
+                 styl={styl} slug={slug}
                  vitaz={rozhodnute && tie.winner_id === tie.team_b.id} rozhodnute={rozhodnute} />
 
         </div>
     );
 }
 
-export default function UclBracket() {
+export default function Bracket({ competitionId }) {
     // Admin upravuje výsledky vo svojej obrazovke, hráč ich vidí v Zápasoch.
     const { user } = useAuth();
     const cielUrl = user?.role === 'admin' ? '/admin/results' : '/games';
 
-    const [fazy, setFazy] = useState([]);
+    const [data, setData] = useState(null);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const nacitaj = () => getUclBracket().then(setFazy).catch(e => setError(e.message));
-        nacitaj().finally(() => setLoading(false));
+        if (!competitionId) return;
+        let zive = true;
+        const nacitaj = () => getBracket(competitionId)
+            .then(d => { if (zive) setData(d); })
+            .catch(e => { if (zive) setError(e.message); });
+        nacitaj().finally(() => { if (zive) setLoading(false); });
         // Po schválení výsledku sa mení postup, preto sa pavúk sám obnovuje.
-        const iv = setInterval(() => { getUclBracket().then(setFazy).catch(() => {}); }, 30000);
-        return () => clearInterval(iv);
-    }, []);
+        const iv = setInterval(() => { getBracket(competitionId).then(d => {
+            if (zive) setData(d);
+        }).catch(() => {}); }, 30000);
+        return () => { zive = false; clearInterval(iv); };
+    }, [competitionId]);
 
     if (loading) return <p>Načítavam pavúka…</p>;
     if (error) return <p style={{ color: '#c0392b' }}>✗ {error}</p>;
+
+    const fazy = data?.phases ?? [];
+    const styl = data?.logo_style ?? 'club';
+    const slug = data?.slug ?? '';
+    // Súťaž bez vyraďovacej časti, alebo ešte nerozlosovaná.
     if (!fazy.length) return null;
+    const dvojzapasy = slug === 'ucl2026';
 
     return (
         <div>
             <p style={{ fontSize: '0.82rem', color: '#666', margin: '0 0 12px', maxWidth: 760 }}>
-                Dvojice sa hrajú na dva zápasy, rozhoduje <strong>súčet gólov</strong>.
-                Pri rovnosti sa v odvete hrá predĺženie. Finále je jediný zápas.
-                Čísla vpravo sú súčet za dvojicu, pod nimi výsledky jednotlivých zápasov.
+                {dvojzapasy ? <>
+                    Dvojice sa hrajú na dva zápasy, rozhoduje <strong>súčet gólov</strong>.
+                    Pri rovnosti sa v odvete hrá predĺženie. Finále je jediný zápas.
+                    Čísla vpravo sú súčet za dvojicu, pod nimi výsledky jednotlivých zápasov.
+                </> : <>
+                    Vyraďovacia časť sa hrá na <strong>jeden zápas</strong>. Pri
+                    nerozhodnom výsledku rozhoduje predĺženie, prípadne nájazdy.
+                </>}
             </p>
 
             {/* alignItems: stretch — stĺpce musia byť rovnako vysoké, inak sa
@@ -159,7 +191,7 @@ export default function UclBracket() {
                                    rozdelenie voľného miesta okolo riadkov. */
                                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column',
                                               justifyContent: 'space-around' }}>
-                                    {f.ties.map((t, i) => <Dvojica key={t.tie_id ?? i} tie={t} cielUrl={cielUrl} faza={f.phase} />)}
+                                    {f.ties.map((t, i) => <Dvojica key={t.tie_id ?? i} tie={t} cielUrl={cielUrl} faza={f.phase} styl={styl} slug={slug} />)}
                                 </div>
                               )}
                     </div>

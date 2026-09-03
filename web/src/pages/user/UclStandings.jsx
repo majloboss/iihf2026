@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
-import { getUclStandings, getUclBracket } from '../../api/ucl';
-import UclBracket from './UclBracket';
+import { getUclStandings } from '../../api/ucl';
+import { getBracket } from '../../api/bracket';
+import { useCompetition } from '../../context/CompetitionContext';
+import Bracket from '../../components/Bracket';
 import styles from './GroupStandings.module.css';
 
 // Postupové pásma podľa umiestnenia v ligovej fáze.
@@ -11,6 +13,8 @@ const ZONES = {
 };
 
 export default function UclStandings() {
+    const { activeCompetition } = useCompetition();
+    const competitionId = activeCompetition?.id;
     const [rows, setRows] = useState([]);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(true);
@@ -29,12 +33,13 @@ export default function UclStandings() {
     // Ligová fáza skončila vtedy, keď sú zostavené dvojice baráže — dovtedy
     // sa nedajú určiť. Pavúk sa načítava aj tak, takže netreba ďalšie volanie.
     useEffect(() => {
-        getUclBracket()
-            .then(fazy => setJePlayoff(fazy.some(f => f.ready)))
+        if (!competitionId) return;
+        getBracket(competitionId)
+            .then(d => setJePlayoff((d?.phases ?? []).some(f => f.ready)))
             // Keď sa pavúka nepodarí načítať, zostane predvolená tabuľka —
             // obrazovka nesmie ostať visieť na "Načítavam".
             .catch(() => setJePlayoff(false));
-    }, []);
+    }, [competitionId]);
 
     // Predvolená záložka sa zvolí až keď sa vie, v ktorej fáze súťaž je;
     // po prepnutí používateľom sa už nemení.
@@ -71,7 +76,7 @@ export default function UclStandings() {
                     : <>{zalozka('tabulka', 'Ligová fáza')}{zalozka('pavuk', 'Play-off')}</>}
             </div>
 
-            {pohlad === 'pavuk' && <UclBracket />}
+            {pohlad === 'pavuk' && <Bracket competitionId={competitionId} />}
 
             {pohlad === 'tabulka' && <>
             <p style={{ fontSize: '0.82rem', color: '#666', margin: '4px 0 14px', maxWidth: 760 }}>

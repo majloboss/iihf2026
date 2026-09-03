@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { getFifaGames, saveFifaTip, getFifaGameTips } from '../../api/fifaGames';
+import Bracket from '../../components/Bracket';
+import { useCompetition } from '../../context/CompetitionContext';
 import FifaGroupStandings from './FifaGroupStandings';
 import { useTeamNames } from '../../components/Flag';
 import styles from './Games.module.css';
@@ -164,6 +166,10 @@ export default function FifaGames() {
     const [selectedDay, setSelectedDay]   = useState(null);
     const [showUntipped, setShowUntipped] = useState(false);
     const [view, setView]                 = useState('games'); // 'games'|'standings'
+    // Tabuľky a pavúk sú dva pohľady na to isté, prepínajú sa záložkami.
+    const [pohlad, setPohlad]             = useState('tabulka');
+    const { activeCompetition }           = useCompetition();
+    const competitionId                   = activeCompetition?.id;
     const calContainer = useRef(null);
 
     useEffect(() => {
@@ -317,12 +323,30 @@ export default function FifaGames() {
             </div>
 
             {view === 'standings' && (
-                <FifaGroupStandings onTeamClick={(team) => {
-                    setSelectedTeam(team);
-                    setPhase('GRP');
-                    setGroupFilter(null);
-                    setView('games');
-                }} />
+                <>
+                    <div style={{ display: 'flex', gap: 4, margin: '4px 0 14px',
+                                  borderBottom: '1px solid #e9ecef' }}>
+                        {[['tabulka', 'Tabuľky'], ['pavuk', 'Pavúk']].map(([k, popis]) => (
+                            <button key={k} onClick={() => setPohlad(k)}
+                                style={{ padding: '8px 18px', border: 'none', background: 'none',
+                                         cursor: 'pointer', fontSize: '0.9rem', fontWeight: 600,
+                                         marginBottom: -2,
+                                         borderBottom: '2px solid ' + (pohlad === k ? '#1a3a6b' : 'transparent'),
+                                         color: pohlad === k ? '#1a3a6b' : '#999' }}>
+                                {popis}
+                            </button>
+                        ))}
+                    </div>
+
+                    {pohlad === 'pavuk'
+                        ? <Bracket competitionId={competitionId} />
+                        : <FifaGroupStandings onTeamClick={(team) => {
+                              setSelectedTeam(team);
+                              setPhase('GRP');
+                              setGroupFilter(null);
+                              setView('games');
+                          }} />}
+                </>
             )}
 
             {view === 'games' && <>
