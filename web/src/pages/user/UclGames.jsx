@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getUclGames, saveUclTip } from '../../api/ucl';
 import { asDate, canTip, isUntipped as isUntippedGame, isValidDate, uclScoreText as scoreText } from '../../utils/tipWindow';
 import UclZapas from '../../components/UclZapas';
+import PhaseFilter from '../../components/PhaseFilter';
+import { useCompetition } from '../../context/CompetitionContext';
 import UclGroupTips from './UclGroupTips';
 import styles from './Games.module.css';
 
@@ -19,35 +21,10 @@ const timeFmtRaw = new Intl.DateTimeFormat('sk-SK', { hour: '2-digit', minute: '
 const dayFmtRaw = new Intl.DateTimeFormat('sk-SK', { weekday: 'short', day: 'numeric', month: 'numeric' });
 const timeFmt = s => { const d = asDate(s); return isValidDate(d) ? timeFmtRaw.format(d) : '—'; };
 const dayFmt = s => { const d = asDate(s); return isValidDate(d) ? dayFmtRaw.format(d) : '—'; };
-// Dátum bez roka — súťaž beží v jednom ročníku.
-const chipDay = key => {
-    const [, m, d] = key.split('-');
-    return m && d ? `${Number(d)}.${Number(m)}.` : key;
-};
+// Dnešok v tvare kľúča hracieho dňa — kalendár ho zvýrazní.
+const dnesK = new Date().toLocaleDateString('sv-SE');
 
 // Fázy v poradí, ako idú v súťaži. LF1–LF8 sú kolá ligovej fázy.
-const PHASES = [
-    ...Array.from({ length: 8 }, (_, i) => ({
-        key: `LF${i + 1}`, label: `LF${i + 1}`, code: 'LEAGUE', round: i + 1,
-        title: `Ligová fáza — ${i + 1}. kolo`,
-    })),
-    { key: 'BAR', label: 'BAR', code: 'PO',  title: 'Baráž o postup do play-off' },
-    { key: 'R16', label: 'R16', code: 'R16', title: 'Osemfinále' },
-    { key: 'QF',  label: 'QF',  code: 'QF',  title: 'Štvrťfinále' },
-    { key: 'SF',  label: 'SF',  code: 'SF',  title: 'Semifinále' },
-    { key: 'F',   label: 'F',   code: 'F',   title: 'Finále' },
-];
-
-// Farby filtrov podľa dôležitosti fázy — rovnaké ako v admine:
-// ligová fáza modrá, vyraďovacia zelená, baráž hnedá, finále zlaté.
-const phaseBtnClass = (p, on) => {
-    const [zakladna, aktivna] =
-          p.code === 'F'  ? [styles.pGold, styles.pGoldOn]
-        : p.code === 'PO' ? [styles.pBronze, styles.pBronzeOn]
-        : p.code === 'LEAGUE' ? [styles.pGroup, styles.pGroupOn]
-        : [styles.pPlayoff, styles.pPlayoffOn];
-    return [styles.pBtn, zakladna, on ? aktivna : ''].join(' ');
-};
 
 
 
@@ -61,12 +38,13 @@ export default function UclGames() {
 
     // Filtre
     // Odkaz z pavúka predvolí fázu aj deň: /games?faza=SF&den=2027-05-04.
-    // Fáza príde ako kód zápasu (PO, R16…), tu má vlastný kľúč (BAR pre PO).
+    // Fáza je skratka kola z číselníka (LF3, BAR-1, R16-2, F).
+    const navigate = useNavigate();
+    const { activeCompetition } = useCompetition();
+    const competitionId = activeCompetition?.id;
+
     const [searchParams] = useSearchParams();
-    const [phase, setPhase] = useState(() => {
-        const kod = searchParams.get('faza');
-        return PHASES.find(p => p.code === kod && !p.round)?.key || '';
-    });
+    const [phase, setPhase] = useState(() => searchParams.get('faza') || '');
     const [onlyUntipped, setOnlyUntipped] = useState(false);
     const [club, setClub] = useState('');
     // Logá klubov zaberajú celý riadok, preto sa ukážu až na vyžiadanie.
@@ -81,13 +59,13 @@ export default function UclGames() {
         return () => clearInterval(iv);
     }, []);
 
-    const matchesPhase = (g) => {
-        if (!phase) return true;
-        const p = PHASES.find(x => x.key === phase);
-        if (!p) return true;
-        if (g.game_type_code !== p.code) return false;
-        return p.round ? Number(g.round_no) === p.round : true;
-    };
+    // Zápas nesie skratku kola z číselníka; kým ju API nedopĺňa všade,
+    // odvodí sa zo starých stĺpcov rovnako, ako to robí migrácia 075.
+    const statKod = (g) => g.match_stat_code
+        || (g.game_type_code === 'LEAGUE' ? `LF${g.round_no}`
+            : g.leg ? `${g.game_type_code === 'PO' ? 'BAR' : g.game_type_code}-${g.leg}`
+            : g.game_type_code);
+    const matchesPhase = (g) => !phase || statKod(g) === phase;
     const matchesClub = (g) => !club || g.home_code === club || g.away_code === club;
     const isUntipped = (g) => isUntippedGame(g);
 
@@ -156,42 +134,40 @@ export default function UclGames() {
 
     return (
         <div>
-            {/* 1. riadok — nenatipované a kolá ligovej fázy */}
-            <div className={styles.filters} style={{ marginTop: 12 }}>
-                <button
-                    className={onlyUntipped ? styles.btnTabulkyActive : styles.btnTabulky}
-                    onClick={() => setOnlyUntipped(v => !v)}
-                    title="Zobraz iba zápasy, ktoré si ešte netipoval">
-                    1x2{untippedCount > 0 ? ` (${untippedCount})` : ''}
-                </button>
-                {PHASES.filter(p => p.code === 'LEAGUE').map(p => (
-                    <button key={p.key} title={p.title}
-                        className={phaseBtnClass(p, phase === p.key)}
-                        onClick={() => { setPhase(cur => cur === p.key ? '' : p.key); setDay(''); }}>
-                        {p.label}
-                    </button>
-                ))}
-            </div>
-
-            {/* 2. riadok — vyraďovacie fázy; Kluby vpravo, pod posledným kolom */}
-            <div className={styles.filtersWrap} style={{ marginTop: 6 }}>
-                {PHASES.filter(p => p.code !== 'LEAGUE').map(p => (
-                    <button key={p.key} title={p.title}
-                        className={phaseBtnClass(p, phase === p.key)}
-                        onClick={() => { setPhase(cur => cur === p.key ? '' : p.key); setDay(''); }}>
-                        {p.label}
-                    </button>
-                ))}
-                {/* Logá zaberajú celý riadok, preto sa ukážu až na vyžiadanie. */}
-                {clubs.length > 0 && (
-                    <button
-                        className={zobrazKluby ? styles.btnTabulkyActive : styles.btnTabulky}
-                        style={{ marginLeft: 'auto' }}
-                        onClick={() => setZobrazKluby(v => !v)}
-                        title="Filtrovať podľa klubu">
-                        KLUBY{club ? ` (${club})` : ''}
-                    </button>
-                )}
+            {/* Filter kôl — skratky, farby aj zbaľovanie určuje číselník. */}
+            <div style={{ marginTop: 12 }}>
+                <PhaseFilter
+                    competitionId={competitionId}
+                    hodnota={phase}
+                    onZmena={kod => { setPhase(kod); setDay(''); }}
+                    onVsetky={resetAll}
+                    prefix={
+                        <button
+                            className={onlyUntipped ? styles.btnTabulkyActive : styles.btnTabulky}
+                            onClick={() => setOnlyUntipped(v => !v)}
+                            title="Zobraz iba zápasy, ktoré si ešte netipoval">
+                            1x2{untippedCount > 0 ? ` (${untippedCount})` : ''}
+                        </button>
+                    }
+                    // Kluby nie sú fáza — filtrujú naprieč kolami.
+                    extra={clubs.length > 0 && (
+                        <button
+                            className={zobrazKluby ? styles.btnTabulkyActive : styles.btnTabulky}
+                            onClick={() => setZobrazKluby(v => !v)}
+                            title="Filtrovať podľa klubu">
+                            KLUBY{club ? ` (${club})` : ''}
+                        </button>
+                    )}
+                    // TAB nefiltruje — prepne na tabuľky, ako vo FIFA a IIHF.
+                    koniec={
+                        <button
+                            className={`${styles.btnTabulky} ${styles.btnTabulkyInline}`}
+                            onClick={() => navigate('/tabulky')}
+                            title="Tabuľky">
+                            TAB
+                        </button>
+                    }
+                />
             </div>
 
             {/* Logá klubov — až po kliknutí na KLUBY */}
@@ -213,14 +189,23 @@ export default function UclGames() {
 
             {/* 3. riadok — hracie dni */}
             {days.length > 0 && (
-                <div className={styles.filters} style={{ marginTop: 10 }}>
-                    {days.map(d => (
-                        <button key={d}
-                            className={day === d ? styles.btnTabulkyActive : styles.btnTabulky}
-                            onClick={() => setDay(cur => cur === d ? '' : d)}>
-                            {chipDay(d)}
-                        </button>
-                    ))}
+                <div className={styles.calRow}>
+                    {days.map(dk => {
+                        const d = new Date(dk + 'T12:00:00');
+                        return (
+                            <button key={dk}
+                                className={[styles.calDay,
+                                            dk === dnesK ? styles.calDayToday : '',
+                                            dk === day ? styles.calDayActive : ''].join(' ')}
+                                onClick={() => setDay(cur => cur === dk ? '' : dk)}>
+                                <span className={styles.calDayWeekday}>
+                                    {d.toLocaleDateString('sk-SK', { weekday: 'short' })}
+                                </span>
+                                <span className={styles.calDayNum}>{d.getDate()}</span>
+                                <span className={styles.calDayMonth}>{d.getMonth() + 1}.</span>
+                            </button>
+                        );
+                    })}
                 </div>
             )}
 

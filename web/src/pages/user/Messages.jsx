@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { getMessages, sendMessage, deleteMessage, uploadMessageImage } from '../../api/messages';
 import OrganizerMessages from './OrganizerMessages';
+import UserInvites from './UserInvites';
 import styles from './Messages.module.css';
 
 const fmtTime = (iso) => {
@@ -165,6 +166,7 @@ function AdminThread() {
 const TABS = [
     { key: 'organizator', label: 'Oznamy', sub: 'Oznamy organizátora k súťaži a ich história' },
     { key: 'admin',       label: 'Chat s adminom', sub: 'Otázky pre admina, nahlásenie chyby vo výsledku…' },
+    { key: 'pozvanky',    label: 'Pozvánky', sub: 'Pozvánky do skupín — prijaté aj odoslané' },
 ];
 
 export default function Messages() {
@@ -196,7 +198,11 @@ export default function Messages() {
             </div>
 
             {/* Vlákno s adminom si drží vlastný stav, preto sa nechá odmontovať. */}
-            {tab === 'admin' ? <AdminThread /> : (
+            {tab === 'pozvanky' ? (
+                <div style={{ flex: 1, overflowY: 'auto', padding: '4px 2px' }}>
+                    <UserInvites />
+                </div>
+            ) : tab === 'admin' ? <AdminThread /> : (
                 <div style={{ flex: 1, overflowY: 'auto', padding: '4px 2px' }}>
                     <OrganizerMessages />
                 </div>

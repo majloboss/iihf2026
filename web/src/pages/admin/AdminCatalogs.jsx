@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import UclCountryCatalog from './UclCountryCatalog';
 import UclTeamCatalog from './UclTeamCatalog';
+import CompetitionPhases from './CompetitionPhases';
 import styles from './Admin.module.css';
 
 export default function AdminCatalogs() {
@@ -18,9 +19,14 @@ export default function AdminCatalogs() {
                     style={{ padding: '8px 18px', border: 'none', background: 'none', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 600, marginBottom: -2, borderBottom: '2px solid ' + (tab === 'teams' ? '#1a3a6b' : 'transparent'), color: tab === 'teams' ? '#1a3a6b' : '#999' }}>
                     Kluby UEFA
                 </button>
+                <button onClick={() => setTab('phases')}
+                    style={{ padding: '8px 18px', border: 'none', background: 'none', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 600, marginBottom: -2, borderBottom: '2px solid ' + (tab === 'phases' ? '#1a3a6b' : 'transparent'), color: tab === 'phases' ? '#1a3a6b' : '#999' }}>
+                    Fázy a kolá
+                </button>
             </div>
             {tab === 'countries' && <UclCountryCatalog />}
             {tab === 'teams' && <UclTeamCatalog />}
+            {tab === 'phases' && <CompetitionPhases />}
         </div>
     );
 }

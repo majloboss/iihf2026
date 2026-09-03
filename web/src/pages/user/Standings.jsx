@@ -5,6 +5,7 @@ import { useCompetition } from '../../context/CompetitionContext';
 import { LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Flag } from '../../components/Flag';
 import styles from './Standings.module.css';
+import gStyles from './Games.module.css';
 
 const BUCKETS = ['pts7','pts6','pts5','pts4','pts3','pts2','pts1','pts0'];
 const BUCKET_LABELS = ['7','6','5','4','3','2','1','0'];
@@ -243,25 +244,126 @@ function GroupTable({ group, currentUserId, compId }) {
 }
 
 // Záložka Skupiny — súčasná funkcionalita (skupiny pre zvolený turnaj)
+// Štítok fázy pre filter — rovnaké označenia ako v Zápasoch (LF1, BAR, R16…).
+// Dvojzápas sa rozlíši číslom: SF1 je prvý zápas, SF2 odveta.
+//
+// Skratka sa určí z kódu fázy, a keď ho súťaž nemá (IIHF), odvodí sa z názvu.
+// Celý názov by na tlačidle nemal čo robiť — bol by široký cez pol obrazovky.
+const SKRATKY_KOD = { PO: 'BAR', R16: 'R16', QF: 'QF', SF: 'SF', F: 'F' };
+
+// Názvy fáz sa medzi súťažami líšia jazykom aj pomenovaním: UCL má slovenské,
+// FIFA anglické, IIHF používa rovno skratky. Preto sa hľadá podľa fragmentu,
+// nie podľa začiatku názvu.
+const SKRATKY_NAZOV = [
+    [/baráž/i, 'BAR'],
+    [/osemfinále|round of 16/i, 'R16'],
+    [/round of 32/i, 'R32'],
+    [/štvrťfinále|quarter/i, 'QF'],
+    [/semifinále|semi-?final/i, 'SF'],
+    [/o 3\. miesto|bronz|bronze/i, 'BRO'],
+    [/finále|final|gold/i, 'F'],
+];
+
+function kratkaFaza(f) {
+    const kolo = f.phase.match(/(\d+)\. kolo/);
+    if (kolo) return `LF${kolo[1]}`;
+
+    // Skupina si nesie svoje písmeno. Predpona `SK` je nutná: samotné `F` by
+    // kolidovalo s finále a `S` zase so semifinále (SF).
+    const skupina = f.phase.match(/skupina\s+(\w+)/i);
+    if (skupina) return `SK${skupina[1].toUpperCase()}`;
+
+    let zaklad = SKRATKY_KOD[f.code];
+    if (!zaklad) {
+        for (const [vzor, kratky] of SKRATKY_NAZOV) {
+            if (vzor.test(f.phase)) { zaklad = kratky; break; }
+        }
+    }
+    if (!zaklad) zaklad = f.code || f.phase.slice(0, 3).toUpperCase();
+
+    // Poradie zápasu len tam, kde sa hrá na dva.
+    if (/odveta/i.test(f.phase))       return `${zaklad}2`;
+    if (/1\.\s*zápas/i.test(f.phase)) return `${zaklad}1`;
+    return zaklad;
+}
+
+// Farby tlačidiel podľa dôležitosti fázy — rovnaké ako v Zápasoch.
+function farbaFazy(f, on) {
+    const kolo   = /\d+\. kolo/.test(f.phase);
+    const finale = f.code === 'F'  || /^(finále|final|gold)/i.test(f.phase);
+    const baraz  = f.code === 'PO' || /^baráž/i.test(f.phase);
+    const [zakl, akt] =
+          finale ? [gStyles.pGold, gStyles.pGoldOn]
+        : baraz  ? [gStyles.pPlayin, gStyles.pPlayinOn]
+        : kolo   ? [gStyles.pGroup, gStyles.pGroupOn]
+        : [gStyles.pPlayoff, gStyles.pPlayoffOn];
+    return [gStyles.pBtn, zakl, on ? akt : ''].join(' ');
+}
+
 function GroupsView({ currentUserId, compId }) {
     const [groups,  setGroups]  = useState([]);
     const [loading, setLoading] = useState(true);
     const [error,   setError]   = useState('');
+    const [fazy,    setFazy]    = useState([]);
+    const [faza,    setFaza]    = useState('');   // '' = celá súťaž
 
     useEffect(() => {
         setLoading(true);
-        const url = compId ? `v1/standings?competition_id=${compId}` : 'v1/standings';
+        const q = new URLSearchParams();
+        if (compId) q.set('competition_id', compId);
+        if (faza)   q.set('phase', faza);
+        const url = q.toString() ? `v1/standings?${q}` : 'v1/standings';
         apiFetch(url)
             .then(data => { setGroups(data); setLoading(false); })
             .catch(e   => { setError(e.message); setLoading(false); });
+    }, [compId, faza]);
+
+    // Zoznam kôl sa načíta raz pre súťaž. Bez súťaže (Global) sa nenačítava
+    // nič — zoznam sa vtedy nechá prázdny a filter sa nezobrazí.
+    useEffect(() => {
+        if (!compId) return;
+        let zive = true;
+        apiFetch(`v1/standings-phases?competition_id=${compId}`)
+            .then(d => { if (zive) setFazy(d); })
+            .catch(() => { if (zive) setFazy([]); });
+        return () => { zive = false; };
     }, [compId]);
 
-    if (loading) return <p>Načítavam…</p>;
-    if (error)   return <p style={{color:'red'}}>Chyba: {error}</p>;
+    // Pri zmene súťaže sa výber zruší — kolá inej súťaže by tam nesedeli.
+    // Rieši sa odvodením, nie efektom, aby nevznikol render navyše.
+    const zoznamFaz = fazy.map(f => f.phase);
+    const aktivnaFaza = zoznamFaz.includes(faza) ? faza : '';
 
-    return groups.length === 0
-        ? <p className={styles.empty}>Nie si v žiadnej skupine.</p>
-        : groups.map(g => <GroupTable key={g.id} group={g} currentUserId={currentUserId} compId={compId} />);
+    // Filter kôl stojí nad tabuľkami a platí pre všetky skupiny naraz.
+    const filter = fazy.length > 1 && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 12 }}>
+            <button onClick={() => setFaza('')} title="Celá súťaž"
+                    className={[gStyles.pBtn, gStyles.pGroup,
+                                aktivnaFaza === '' ? gStyles.pGroupOn : ''].join(' ')}>
+                ALL
+            </button>
+            {fazy.map(f => (
+                <button key={f.phase} onClick={() => setFaza(f.phase)}
+                        title={`${f.phase} · ${f.games} zápasov`}
+                        className={farbaFazy(f, aktivnaFaza === f.phase)}>
+                    {kratkaFaza(f)}
+                </button>
+            ))}
+        </div>
+    );
+
+    if (loading) return <>{filter}<p>Načítavam…</p></>;
+    if (error)   return <>{filter}<p style={{color:'red'}}>Chyba: {error}</p></>;
+
+    return (
+        <>
+            {filter}
+            {groups.length === 0
+                ? <p className={styles.empty}>Nie si v žiadnej skupine.</p>
+                : groups.map(g => <GroupTable key={g.id} group={g}
+                                              currentUserId={currentUserId} compId={compId} />)}
+        </>
+    );
 }
 
 // Záložka Global — všetci tipéri po turnajoch (zoradené podľa dátumu turnaja)

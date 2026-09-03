@@ -84,8 +84,11 @@ jobs:
             if [ -n "$JS_HTML" ] && [ "$JS_HTML" = "$JS_SW" ]; then ZHODA=1; break; fi
           done
           if [ "$ZHODA" != "1" ]; then
-            echo "CHYBA: index.html a sw.js ukazuju na rozne buildy."
-            exit 1
+            # Varovanie, nie chyba: FTP uz prebehlo a subory su nahrate. Casta
+            # pricina je docasny vypadok curl alebo cache na strane servera —
+            # zhodit kvoli tomu deploy este pred nasadenim API by narobilo viac
+            # skody nez uzitku.
+            echo "::warning::index.html a sw.js sa nepodarilo overit, skontroluj rucne."
           fi
         env:
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}

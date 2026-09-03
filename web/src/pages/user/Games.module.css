@@ -69,10 +69,12 @@
 .pGroup   { background: #dbeafe; color: #1e40af; border-color: #bfdbfe; }
 .pPlayoff { background: #dcfce7; color: #15803d; border-color: #bbf7d0; }
 .pBronze  { background: #fde8c8; color: #92400e; border-color: #fcd6a4; }
+.pPlayin  { background: #ede9fe; color: #6d28d9; border-color: #ddd6fe; }
 .pGold    { background: #fef9c3; color: #a16207; border-color: #fef08a; }
 .pGroupOn   { background: #1e40af; color: #fff; border-color: #1e40af; }
 .pPlayoffOn { background: #15803d; color: #fff; border-color: #15803d; }
 .pBronzeOn  { background: #92400e; color: #fff; border-color: #92400e; }
+.pPlayinOn  { background: #6d28d9; color: #fff; border-color: #6d28d9; }
 .pGoldOn    { background: #a16207; color: #fff; border-color: #a16207; }
 
 .dayGroup { margin-bottom: 28px; }
@@ -434,4 +436,37 @@
     .clubsRow .flagBtn { padding: 3px 0; border-width: 1px; }
     .clubLogo { width: 22px; height: 22px; }
     .clubCode { font-size: 0.5rem; letter-spacing: 0; }
+}
+
+/* Bublina s popisom kola.
+   Natívny `title` naskočí až po sekunde podržania a na dotyku vôbec —
+   pri malých ikonách filtra sa cezeň len prejde a nič sa nezobrazí. */
+.tipWrap { position: relative; display: inline-flex; flex-shrink: 0; }
+.tipWrap > button { width: 100%; }
+
+.tipWrap::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 4px 8px;
+    border-radius: 5px;
+    background: #333;
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 500;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.12s;
+    pointer-events: none;
+    z-index: 20;
+}
+
+.tipWrap:hover::after { opacity: 1; visibility: visible; }
+
+/* Pri dotyku bublina prekáža — popis je aj v `title`. */
+@media (hover: none) {
+    .tipWrap::after { display: none; }
 }
