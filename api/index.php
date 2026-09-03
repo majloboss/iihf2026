@@ -98,6 +98,7 @@ try {
         $path === 'v1/messages'            => require __DIR__ . '/v1/messages.php',
         $path === 'v1/message-image'       => require __DIR__ . '/v1/message-image.php',
         $path === 'v1/admin/messages'      => require __DIR__ . '/v1/admin/messages.php',
+        $path === 'v1/admin/competition-phases'         => require __DIR__ . '/v1/admin/competition_phases.php',
         $path === 'v1/standings-phases'                => require __DIR__ . '/v1/standings_phases.php',
         $path === 'v1/player-stats'                    => require __DIR__ . '/v1/player_stats.php',
         $path === 'v1/player-tips'         => require __DIR__ . '/v1/player_tips.php',

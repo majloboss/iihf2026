@@ -8,6 +8,7 @@ const BASE = import.meta.env.VITE_API_URL ?? '/api';
 import UclTestTools from './UclTestTools';
 import LivescoreTest from './LivescoreTest';
 import LivescoreLog from './LivescoreLog';
+import CompetitionPhases from './CompetitionPhases';
 import styles from './Admin.module.css';
 
 const isDev = (import.meta.env.VITE_API_URL ?? '').includes('dev_');
@@ -252,6 +253,11 @@ export default function AdminTools() {
             {/* ── Test livescore cez OpenRouter ───────────────────────── */}
             <LivescoreTest />
             <LivescoreLog />
+
+            {/* ── Číselník fáz a kôl ──────────────────────────────────── */}
+            <Section color="#6f42c1" title="🗂 Fázy a kolá súťaží">
+                <CompetitionPhases />
+            </Section>
 
             </>}
 
