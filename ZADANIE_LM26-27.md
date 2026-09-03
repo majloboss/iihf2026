@@ -192,6 +192,12 @@ Po skutočnom žrebe sa stavia načisto.
 | 🔲 Doplniť štadióny a URL | do `games_pdf`, rovnako ako pri ligovej fáze |
 | 🔲 Overiť postupový kľúč | súčet gólov z oboch zápasov, predĺženie až v odvete |
 
+### Budúce úlohy
+
+| Úloha | Poznámka |
+|---|---|
+| 🔲 Skratka a názov kola priamo v zápase | Zápas má dnes iba `game_type_code` (LEAGUE, PO, R16…) a `game_type_name` s celým názvom („Ligová fáza — 3. kolo"). Skratka do filtrov (LF3, BAR1, SF2) sa preto odvodzuje z názvu regulárnymi výrazmi, a to zvlášť pre každú súťaž — UCL má slovenské názvy, FIFA anglické, IIHF rovno skratky. Systémovejšie by bolo mať v zápase tri údaje: kód fázy, **skratku kola** a slovný názov. Väčší zásah (migrácia + všetky tri súťaže), preto zatiaľ odložené. |
+
 ### Nice to have
 
 | Úloha | Poznámka |
