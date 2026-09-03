@@ -118,6 +118,10 @@ export default function CompetitionPhases() {
                 <div style={{ background: '#f8f9fb', border: '1px solid #e9ecef',
                               borderRadius: 8, padding: 12, marginBottom: 14 }}>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'flex-end' }}>
+                        <label style={{ fontSize: '0.75rem', color: '#666' }}
+                               title="Fázy s rovnakou hodnotou sa vo filtri zbalia za jedno tlačidlo">
+                            Skupina<br />{pole('group_code', 80)}
+                        </label>
                         <label style={{ fontSize: '0.75rem', color: '#666' }}>
                             Kód fázy<br />{pole('phase_code', 70)}
                         </label>
@@ -141,10 +145,6 @@ export default function CompetitionPhases() {
                                     <option key={k} value={k}>{k} — {v.popis}</option>
                                 ))}
                             </select>
-                        </label>
-                        <label style={{ fontSize: '0.75rem', color: '#666' }}
-                               title="Fázy s rovnakou hodnotou sa vo filtri zbalia za jedno tlačidlo">
-                            Skupina<br />{pole('group_code', 80)}
                         </label>
                         <label style={{ fontSize: '0.75rem', color: '#666' }}>
                             Poradie<br />
@@ -174,13 +174,16 @@ export default function CompetitionPhases() {
                 <table className={styles.table}>
                     <thead>
                         <tr>
-                            <th>Kód</th><th>Fáza</th><th>Kód zápasu</th><th>Popis</th>
-                            <th>Farba</th><th>Skupina</th><th>Poradie</th><th></th>
+                            <th>Skupina</th><th>Kód</th><th>Fáza</th><th>Kód zápasu</th>
+                            <th>Popis</th><th>Farba</th><th>Poradie</th><th></th>
                         </tr>
                     </thead>
                     <tbody>
                         {fazy.map(f => (
                             <tr key={f.id} style={{ opacity: f.is_active ? 1 : 0.5 }}>
+                                <td style={{ fontSize: '0.78rem', color: '#888' }}>
+                                    {f.group_code || <span style={{ color: '#ccc' }}>—</span>}
+                                </td>
                                 <td>{f.phase_code}</td>
                                 <td>{f.phase_name}</td>
                                 <td>
@@ -193,9 +196,6 @@ export default function CompetitionPhases() {
                                 </td>
                                 <td>{f.match_stat_desc}</td>
                                 <td style={{ fontSize: '0.75rem', color: '#888' }}>{f.color_code}</td>
-                                <td style={{ fontSize: '0.78rem', color: '#888' }}>
-                                    {f.group_code || <span style={{ color: '#ccc' }}>—</span>}
-                                </td>
                                 <td style={{ textAlign: 'right', color: '#888' }}>{f.sort_order}</td>
                                 <td style={{ whiteSpace: 'nowrap' }}>
                                     <button className={styles.btnSmall} disabled={!!uprava}
