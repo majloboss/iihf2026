@@ -5,6 +5,7 @@ import { useCompetition } from '../context/CompetitionContext';
 import { getProfile, updateProfile, changePassword, deleteAccount, uploadAvatar } from '../api/profile';
 import Groups from './user/Groups';
 import Notifications from './user/Notifications';
+import Statistiky from './user/Statistiky';
 import UserInvites from './user/UserInvites';
 import styles from './Profile.module.css';
 
@@ -16,7 +17,7 @@ export default function Profile() {
     const [switchingId, setSwitchingId] = useState(null);
 
     const [searchParams, setSearchParams] = useSearchParams();
-    const TABS = ['profil', 'sutaze', 'skupiny', 'pozvanky', 'notif', 'odhlasenie'];
+    const TABS = ['profil', 'statistiky', 'sutaze', 'skupiny', 'pozvanky', 'notif', 'odhlasenie'];
     const urlTab = searchParams.get('tab');
     const [tab, setTabState] = useState(TABS.includes(urlTab) ? urlTab : 'profil');
 
@@ -114,6 +115,7 @@ export default function Profile() {
                 <div className={styles.tabsRow}>
                     <div className={styles.tabs}>
                         <button className={tab === 'profil'     ? styles.tabActive : styles.tab} onClick={() => setTab('profil')}>Profil</button>
+                        <button className={tab === 'statistiky' ? styles.tabActive : styles.tab} onClick={() => setTab('statistiky')}>Štatistiky</button>
                         <button className={tab === 'sutaze'     ? styles.tabActive : styles.tab} onClick={() => setTab('sutaze')}>Súťaže</button>
                         <button className={tab === 'skupiny'    ? styles.tabActive : styles.tab} onClick={() => setTab('skupiny')}>Skupiny</button>
                         <button className={tab === 'pozvanky'   ? styles.tabActive : styles.tab} onClick={() => setTab('pozvanky')}>Pozvánky</button>
@@ -175,6 +177,7 @@ export default function Profile() {
                 )}
                 {tab === 'skupiny'    && <div className={styles.tabContent}><Groups /></div>}
                 {tab === 'pozvanky'  && <div className={styles.tabContent}><UserInvites /></div>}
+                {tab === 'statistiky' && <div className={styles.tabContent}><Statistiky /></div>}
                 {tab === 'notif'     && <div className={styles.tabContent}><Notifications /></div>}
                 {tab === 'odhlasenie' && (
                     <div className={styles.tabContent}>
