@@ -1,5 +1,10 @@
 -- Migration 075: naviazanie zápasov na číselník fáz
 --
+-- !!! NESPUSTAT — pripravena do buducna, nebezi ani na DEV ani v produkcii.
+-- Stlpec `phase_id` zatial nic necita: filtre si skratku kola odvodzuju zo
+-- starych stlpcov. Spusti sa az spolu s prepisom pavuka, statistik a
+-- notifikacii na `phase_id`.
+--
 -- Zápas dostane `phase_id` a cez neho aj skratku kola, popis, farbu a poradie.
 -- Doteraz sa to odvodzovalo z `game_type_name` regulárnymi výrazmi, zvlášť pre
 -- každú súťaž.
