@@ -1,11 +1,20 @@
 import { precacheAndRoute, cleanupOutdatedCaches, createHandlerBoundToURL } from 'workbox-precaching';
 import { NavigationRoute, registerRoute } from 'workbox-routing';
 
-self.skipWaiting();
-self.clients.claim();
-
+// Precache sa napĺňa počas inštalácie; až potom má zmysel preberať kontrolu.
+// Pri `skipWaiting()` volanom hneď pri štarte sa nový worker aktivoval ešte
+// pred dotiahnutím súborov a stránka sa načítala uprostred výmeny — odtiaľ
+// biela obrazovka po nasadení.
 precacheAndRoute(self.__WB_MANIFEST);
 cleanupOutdatedCaches();
+
+self.addEventListener('install', event => {
+    event.waitUntil(self.skipWaiting());
+});
+
+self.addEventListener('activate', event => {
+    event.waitUntil(self.clients.claim());
+});
 registerRoute(new NavigationRoute(createHandlerBoundToURL('index.html'), {
   denylist: [/^\/api\//]
 }));
