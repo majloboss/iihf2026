@@ -101,18 +101,22 @@ export default function PhaseFilter({
                 {extra}
 
                 {riadok.map((p, i) => p.typ === 'faza' ? (
-                    <button key={p.f.code} title={p.f.title}
-                            onClick={() => { onZmena(hodnota === p.f.code ? '' : p.f.code); setRoz(null); }}
-                            className={triedaFazy(p.f.color, hodnota === p.f.code)}>
-                        {p.f.label}
-                    </button>
+                    <span key={p.f.code} className={styles.tipWrap} data-tip={p.f.title}>
+                        <button title={p.f.title}
+                                onClick={() => { onZmena(hodnota === p.f.code ? '' : p.f.code); setRoz(null); }}
+                                className={triedaFazy(p.f.color, hodnota === p.f.code)}>
+                            {p.f.label}
+                        </button>
+                    </span>
                 ) : (
-                    <button key={`g-${p.s.kod}-${i}`}
-                            title={p.s.nazov || `${p.s.polozky.length} kôl`}
-                            onClick={() => setRoz(otvorena === p.s.kod ? null : p.s.kod)}
-                            className={triedaFazy(p.s.farba, otvorena === p.s.kod)}>
-                        {p.s.kod}
-                    </button>
+                    <span key={`g-${p.s.kod}-${i}`} className={styles.tipWrap}
+                          data-tip={p.s.nazov || `${p.s.polozky.length} kôl`}>
+                        <button title={p.s.nazov || `${p.s.polozky.length} kôl`}
+                                onClick={() => setRoz(otvorena === p.s.kod ? null : p.s.kod)}
+                                className={triedaFazy(p.s.farba, otvorena === p.s.kod)}>
+                            {p.s.kod}
+                        </button>
+                    </span>
                 ))}
 
                 {koniec}
@@ -122,11 +126,13 @@ export default function PhaseFilter({
             {detail && (
                 <div className={styles.filtersWrap} style={{ marginTop: 6 }}>
                     {detail.polozky.map(f => (
-                        <button key={f.code} title={f.title}
-                                onClick={() => onZmena(hodnota === f.code ? '' : f.code)}
-                                className={triedaFazy(f.color, hodnota === f.code)}>
-                            {f.label}
-                        </button>
+                        <span key={f.code} className={styles.tipWrap} data-tip={f.title}>
+                            <button title={f.title}
+                                    onClick={() => onZmena(hodnota === f.code ? '' : f.code)}
+                                    className={triedaFazy(f.color, hodnota === f.code)}>
+                                {f.label}
+                            </button>
+                        </span>
                     ))}
                 </div>
             )}
