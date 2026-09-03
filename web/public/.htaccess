@@ -3,3 +3,25 @@ RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_URI} !^/api/
 RewriteRule ^ index.html [L]
+
+# Bez tychto pravidiel neposiela server ziadny Cache-Control a prehliadac si
+# lehotu domysli sam z Last-Modified — index.html aj sw.js potom drzi hodiny.
+# Nova verzia sa tak neprejavi ani po nasadeni: prehliadac si novy sw.js
+# vobec nevypyta a stary worker dalej podava stranku zo svojej cache.
+<IfModule mod_headers.c>
+    # index.html a service worker sa musia overit pri kazdom nacitani.
+    <FilesMatch "^(index\.html|sw\.js|registerSW\.js|manifest\.webmanifest)$">
+        Header set Cache-Control "no-cache, must-revalidate"
+    </FilesMatch>
+
+    # Assety maju v nazve hash buildu, takze sa nikdy nemenia pod rovnakym
+    # menom a mozu sa drzat dlho.
+    <FilesMatch "\.(js|css|woff2?|png|jpg|jpeg|svg|webp|ico)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
+
+    # Vynimka: sw.js a registerSW.js su tiez .js, ale patria k prvej skupine.
+    <FilesMatch "^(sw|registerSW)\.js$">
+        Header set Cache-Control "no-cache, must-revalidate"
+    </FilesMatch>
+</IfModule>
