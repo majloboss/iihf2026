@@ -248,5 +248,61 @@ foreach ($S['fazy'] as $kod => $nazov) {
     ];
 }
 
+
+// ── Usporiadanie stromu ──────────────────────────────────────────────────────
+//
+// Dvojice su zatial v kazdej faze zoradene samostatne, takze si stlpce
+// nesedia: postupujuci z prveho stlpca nestoji vedla zapasu, do ktoreho ide.
+//
+// Poradie zapasov struktru stromu nenesie — v FIFA berie R16[1] vitazov
+// z R32 #1 a #4, R16[2] z #3 a #6. Vazba sa preto hlada podla timov: pre
+// kazdu dvojicu sa najde ta z predoslej fazy, z ktorej jej tim prisiel.
+//
+// Sklada sa od konca: finale urcuje poradie semifinale, to zase stvrtfinale
+// a tak dalej az po prve kolo. Neodohrane fazy sa nechavaju tak — kym nie su
+// znami postupujuci, nie je co priradzovat.
+//
+// Baraz UCL sa preskakuje: jej poradie uz urcuje nasadenie z tabulky.
+$preusporiadaj = function (array $vystup) use ($slug) {
+    $timyDvojice = function ($t) {
+        return array_values(array_filter([$t['team_a']['id'] ?? null,
+                                          $t['team_b']['id'] ?? null],
+                                         fn($x) => $x !== null));
+    };
+
+    for ($i = count($vystup) - 1; $i > 0; $i--) {
+        $neskorsia = $vystup[$i]['ties'];
+        $skorsia   = $vystup[$i - 1];
+        if ($slug === 'ucl2026' && $skorsia['phase'] === 'PO') continue;
+
+        // Kazda dvojica neskorsej fazy si vypyta dvojice, z ktorych jej timy
+        // prisli — v poradi, v akom v nej stoja.
+        $zostava = $skorsia['ties'];
+        $nove = [];
+        foreach ($neskorsia as $t) {
+            foreach ($timyDvojice($t) as $tim) {
+                foreach ($zostava as $k => $kandidat) {
+                    if (in_array($tim, $timyDvojice($kandidat), true)) {
+                        $nove[] = $kandidat;
+                        unset($zostava[$k]);
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Dvojice, ktore sa priradit nepodarilo (neodohrane kolo, tim bez
+        // postupu), zostavaju v povodnom poradi na konci — nesmu zmiznut.
+        foreach ($zostava as $zvysok) $nove[] = $zvysok;
+
+        if (count($nove) === count($skorsia['ties'])) {
+            $vystup[$i - 1]['ties'] = $nove;
+        }
+    }
+    return $vystup;
+};
+
+$vystup = $preusporiadaj($vystup);
+
 json_ok(['phases' => $vystup, 'logo_style' => $T['logo'] !== null ? 'club' : 'flag',
          'slug' => $slug]);
