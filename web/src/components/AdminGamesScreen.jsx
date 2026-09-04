@@ -37,16 +37,11 @@ export default function AdminGamesScreen({
     // Skratka kola z číselníka — prázdna, kým zápas nie je naviazaný.
     const kodFazy = (g) => g.match_stat_code ?? null;
 
-    // Odvodená zo starých stĺpcov, ako to bolo pred číselníkom. Slúži na
-    // kontrolu migrácie 075: po nej musia oba stĺpce sedieť. Potom sa zmaže.
-    const kodFazyOld = (g) => M.prepisKodu
-        ? M.prepisKodu(g[M.staraFaza]) : g[M.staraFaza];
+
     const popisFazy = (kod) => fazy.find(f => f.code === kod)?.label ?? kod;
 
-    // Filtruje sa podľa toho, čo je k dispozícii — kým migrácia nebeží, podľa
-    // starých stĺpcov, inak by filter nenašiel nič.
     const filtrovane = faza === 'all' ? zapasy
-        : zapasy.filter(g => sediFaze(kodFazy(g) ?? kodFazyOld(g), faza));
+        : zapasy.filter(g => sediFaze(kodFazy(g), faza));
 
     if (nacitava) return <p>Načítavam…</p>;
     if (chyba)    return <p style={{ color: 'red' }}>Chyba: {chyba}</p>;
@@ -75,7 +70,6 @@ export default function AdminGamesScreen({
                     key: g[M.id],
                     number: M.cislo ? g[M.cislo] : g[M.id],
                     phaseLabel: kodFazy(g) ? popisFazy(kodFazy(g)) : null,
-                    phaseOld: popisFazy(kodFazyOld(g)),
                     dateLocal: M.formatCasu(g[M.cas]),
                     homeCell: bunkaTimu(M.domaci(g)),
                     awayCell: bunkaTimu(M.hostia(g)),
