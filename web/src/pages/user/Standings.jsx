@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { apiFetch } from '../../api/client';
+import PhaseFilter from '../../components/PhaseFilter';
 import { useAuth } from '../../context/AuthContext';
 import { useCompetition } from '../../context/CompetitionContext';
 import { LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
@@ -245,26 +246,6 @@ function GroupTable({ group, currentUserId, compId }) {
 
 // Záložka Skupiny — súčasná funkcionalita (skupiny pre zvolený turnaj)
 // Štítok fázy pre filter — rovnaké označenia ako v Zápasoch (LF1, BAR, R16…).
-// Skratka aj farba tlačidla prichádzajú z číselníka.
-//
-// Predtým sa odvodzovali z názvu regulárnymi výrazmi — skupiny dostávali
-// predponu `SK` (SKA, SKB…), lebo samotné `F` by kolidovalo s finále. Číselník
-// tento problém nemá: skratky sú v ňom jedinečné a admin ich vie zmeniť.
-const TRIEDY_FARIEB = {
-    GROUP:   [gStyles.pGroup, gStyles.pGroupOn],
-    PLAYOFF: [gStyles.pPlayoff, gStyles.pPlayoffOn],
-    PLAYIN:  [gStyles.pPlayin, gStyles.pPlayinOn],
-    BRONZE:  [gStyles.pBronze, gStyles.pBronzeOn],
-    GOLD:    [gStyles.pGold, gStyles.pGoldOn],
-};
-
-const kratkaFaza = (f) => f.code || f.phase;
-
-function farbaFazy(f, on) {
-    const [zakl, akt] = TRIEDY_FARIEB[f.color] ?? TRIEDY_FARIEB.PLAYOFF;
-    return [gStyles.pBtn, zakl, on ? akt : ''].join(' ');
-}
-
 function GroupsView({ currentUserId, compId }) {
     const [groups,  setGroups]  = useState([]);
     const [loading, setLoading] = useState(true);
@@ -300,20 +281,20 @@ function GroupsView({ currentUserId, compId }) {
     const aktivnaFaza = zoznamFaz.includes(faza) ? faza : '';
 
     // Filter kôl stojí nad tabuľkami a platí pre všetky skupiny naraz.
+    //
+    // Ponúkajú sa len kolá s odohranými tipmi — číselník ich má viac, ale kolo
+    // bez jediného zápasu by v tabuľke ukázalo samé nuly. Do tooltipu ide
+    // počet zápasov, ktorý zoznam kôl vracia.
     const filter = fazy.length > 1 && (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 12 }}>
-            <button onClick={() => setFaza('')} title="Celá súťaž"
-                    className={[gStyles.pBtn, gStyles.pGroup,
-                                aktivnaFaza === '' ? gStyles.pGroupOn : ''].join(' ')}>
-                ALL
-            </button>
-            {fazy.map(f => (
-                <button key={f.code} onClick={() => setFaza(f.code)}
-                        title={`${f.phase} · ${f.games} zápasov`}
-                        className={farbaFazy(f, aktivnaFaza === f.code)}>
-                    {kratkaFaza(f)}
-                </button>
-            ))}
+        <div style={{ marginBottom: 12 }}>
+            <PhaseFilter
+                competitionId={compId}
+                hodnota={aktivnaFaza}
+                onZmena={setFaza}
+                ibaKody={fazy.map(f => f.code)}
+                popisky={Object.fromEntries(
+                    fazy.map(f => [f.code, `${f.phase} · ${f.games} zápasov`]))}
+            />
         </div>
     );
 

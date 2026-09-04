@@ -8,8 +8,9 @@ $pdo  = db();
 // nebezi, appka pouzije stary stlpec `phase`.
 $maPhaseId = stlpec_existuje($pdo, 'iihf2026', 'games', 'phase_id');
 $fazaSelect = $maPhaseId
-    ? 'g.phase_id, ph.match_stat_code, ph.match_stat_desc,'
-    : 'NULL::int AS phase_id, NULL AS match_stat_code, NULL AS match_stat_desc,';
+    ? 'g.phase_id, ph.match_stat_code, ph.match_stat_desc, ph.color_code AS phase_color,'
+    : 'NULL::int AS phase_id, NULL AS match_stat_code, NULL AS match_stat_desc,
+       NULL AS phase_color,';
 $fazaJoin = $maPhaseId
     ? 'LEFT JOIN admin.competition_phases ph ON ph.id = g.phase_id'
     : '';

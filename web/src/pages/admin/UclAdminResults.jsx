@@ -10,8 +10,6 @@ import gStyles from '../user/Games.module.css';
 import styles from './AdminResults.module.css';
 
 // Fázy v poradí súťaže. LF1–LF8 sú kolá ligovej fázy, zvyšok vyraďovacia časť.
-const KNOCKOUT = ['PO', 'R16', 'QF', 'SF', 'F'];
-const PLAYOFF = new Set(KNOCKOUT);
 const PHASE_LABEL = {
     LEAGUE: 'Ligová fáza', PO: 'Baráž o play-off', R16: 'Osemfinále',
     QF: 'Štvrťfinále', SF: 'Semifinále', F: 'Finále',
@@ -29,7 +27,8 @@ const calcLivePoints = (tip1, tip2, game) => {
     const s1 = game.home_score_regular != null ? game.home_score_regular : game.ls_home;
     const s2 = game.away_score_regular != null ? game.away_score_regular : game.ls_away;
     if (s1 == null || s2 == null || tip1 == null || tip2 == null) return null;
-    const winPts = PLAYOFF.has(game.game_type_code) ? 5 : 3;
+    // Vyraďovacia časť má vyššie bodovanie; pozná sa podľa farby z číselníka.
+    const winPts = game.phase_color && game.phase_color !== 'GROUP' ? 5 : 3;
     const sign = (a, b) => (a > b ? 1 : a < b ? -1 : 0);
     return (sign(tip1, tip2) === sign(s1, s2) ? winPts : 0)
         + (tip1 === s1 ? 1 : 0) + (tip2 === s2 ? 1 : 0);
