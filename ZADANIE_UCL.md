@@ -224,6 +224,18 @@ kód a názov fázy, kód a popis zápasu, farba, zoskupenie, poradie.
   Číta ich už len generátor rozlosovania a import z PDF, ale kým súťaž beží,
   nemá zmysel do nich siahať.
 
+### Spoločné komponenty ✅ (produkcia)
+
+Rovnaká obrazovka pre všetky súťaže; rozdiely opisuje mapovanie, ktoré dodá
+volajúca obrazovka.
+
+- ✅ `PhaseFilter` — filter kôl (Zápasy, admin Zápasy, admin Výsledky, Skupiny)
+- ✅ `AdminGamesScreen` + `GameEditor` — zoznam zápasov a úprava v admine
+  (435 riadkov → 245); výsledok sa zadáva **iba** vo Výsledkoch, kde je logika
+  predĺženia a nájazdov
+- ✅ `Bracket` — pavúk
+- ✅ `usePhases` — číselník fáz a porovnanie kódu so skupinou
+
 ### Pavúk ✅ (produkcia)
 
 - ✅ Jeden endpoint `/v1/bracket?competition_id=` a jeden komponent `Bracket`

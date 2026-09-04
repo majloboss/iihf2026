@@ -317,6 +317,10 @@ Poradie migrácie:
 20. ✅ **Pavúk pre FIFA** — Tabuľky → Play-off; spoločný komponent so všetkými súťažami, strom sa skladá od finále
 21. ✅ **Filter kôl z číselníka** — spoločný `PhaseFilter` namiesto natvrdo písaného zoznamu fáz
 22. ✅ **Biela obrazovka po nasadení** — `skipWaiting` presunutý do `install`; k tomu `updateViaCache: 'none'`, bez ktorého si prehliadač cachoval samotný `sw.js` a nová verzia sa neprejavila
+23. ✅ **Strata rozpísanej správy** — appka sa neobnoví, kým človek píše (odloží sa o 30 s); rozpísaný text sa priebežne odkladá, takže prežije aj obnovenie stránky
+24. ✅ **Nasadenie: kontrola `sw.js` ↔ `index.html`** — pri nesúlade sa súbory nahrajú znova, až druhý neúspešný pokus zhodí deploy
+25. ✅ **Notifikácia pri správe od organizátora** — push aj e-mail, jednotná predpona predmetu `Betclub - `
+26. ✅ **Viac oznamov na Prehľade** — migrácia `077`, dva nezávislé prepínače (Prehľad / história) s tlačidlom Uložiť; obe odškrtnuté = oznam nie je vidieť nikde, ale dá sa zapnúť späť
 
 ---
 
