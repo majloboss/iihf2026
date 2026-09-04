@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getUclGames, saveUclTip } from '../../api/ucl';
 import { apiFetch } from '../../api/client';
+import OznamOrganizatora from '../../components/OznamOrganizatora';
 import { asDate, canTip, isValidDate, TIP_LOCK_MS, uclScoreText as scoreText } from '../../utils/tipWindow';
 import { useAuth } from '../../context/AuthContext';
 import { useCompetition } from '../../context/CompetitionContext';
@@ -202,21 +203,10 @@ export default function UclDashboard() {
 
     return (
         <div>
-            {announcement?.body && (
-                <div style={{ background: '#fff8e1', border: '1px solid #ffe0a3', borderRadius: 10,
-                              padding: '12px 16px', marginBottom: 16 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                                  gap: 10, marginBottom: 4 }}>
-                        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#a67c00' }}>
-                            Oznam organizátora
-                        </span>
-                        <Link to="/spravy?tab=organizator" style={{ fontSize: '0.75rem', color: '#a67c00', whiteSpace: 'nowrap' }}>
-                            História →
-                        </Link>
-                    </div>
-                    <div style={{ whiteSpace: 'pre-wrap', fontSize: '0.88rem' }}>{announcement.body}</div>
-                </div>
-            )}
+            {/* Rovnaký blok ako v IIHF a FIFA — vlastné vykreslenie tu testovalo
+                `announcement.body`, čo po zmene endpointu na pole prestalo
+                platiť a oznamy zmizli. */}
+            <OznamOrganizatora announcement={announcement} />
 
             {message && <p style={{ color: '#28a745', fontSize: '0.85rem' }}>{message}</p>}
             {error && <p style={{ color: '#c0392b', fontSize: '0.85rem' }}>✗ {error}</p>}
