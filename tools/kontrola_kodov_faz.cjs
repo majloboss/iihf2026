@@ -41,6 +41,23 @@ const check = (ok, m) => { console.log((ok ? 'OK    ' : 'CHYBA ') + m); if (!ok)
         `  ${r.slug.padEnd(10)}${r.phase_code.padEnd(6)}→ ${r.nazvy}`));
     check(kolizie.length === 0, 'každý kód fázy patrí jedinej fáze');
 
+    // Nazov skupiny nesmie kolidovat so skratkou inej fazy: tlacidlo filtra
+    // by potom znamenalo dve veci naraz a vytiahlo by nesuvisiace zapasy
+    // (skupina F vs finale, ktore ma group_code 'F').
+    const { rows: mix } = await c.query(`
+        SELECT k.slug, p.group_code, string_agg(DISTINCT q.phase_name, ' / ') AS kolidujuce
+          FROM admin.competition_phases p
+          JOIN admin.competitions k ON k.id = p.competition_id
+          JOIN admin.competition_phases q
+            ON q.competition_id = p.competition_id
+           AND q.match_stat_code = p.group_code
+           AND q.group_code IS DISTINCT FROM p.group_code
+         WHERE p.is_active AND q.is_active AND p.group_code IS NOT NULL
+         GROUP BY k.slug, p.group_code`);
+    mix.forEach(r => console.log(
+        `  ${r.slug.padEnd(10)}skupina ${r.group_code} sa volá ako fáza ${r.kolidujuce}`));
+    check(mix.length === 0, 'názov skupiny nekoliduje so skratkou inej fázy');
+
     // Skratka zapasu musi byt v sutazi jedinecna — filtre podla nej vyberaju.
     const { rows: dupl } = await c.query(`
         SELECT k.slug, p.match_stat_code, COUNT(*)::int n
