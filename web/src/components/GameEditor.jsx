@@ -18,11 +18,18 @@ const POLE = { padding: '8px 10px', border: '1px solid #ddd', borderRadius: 6,
                fontSize: '0.9rem', width: '100%', boxSizing: 'border-box' };
 
 // Dátum a čas zo zápasu do dvoch políčok formulára.
+//
+// Súťaže posielajú čas v troch tvaroch: UCL naive UTC ('2026-09-08 21:00:00'),
+// IIHF s časovou zónou ('2026-05-15 16:20:00+02') a ISO s 'T'. Zóna sa dopĺňa
+// len tam, kde žiadna nie je — inak by sa k už prepočítanému času pripočítal
+// posun druhýkrát.
 const naVstupy = (hodnota) => {
     if (!hodnota) return { datum: '', cas: '' };
-    // Naive UTC z API ('2026-09-08 21:00:00') aj ISO reťazec.
-    const d = new Date(String(hodnota).includes('T') ? hodnota
-                       : String(hodnota).replace(' ', 'T') + 'Z');
+    let text = String(hodnota).trim().replace(' ', 'T');
+    // Postgres píše posun ako '+02', ISO ho chce ako '+02:00'.
+    text = text.replace(/([+-]\d{2})$/, '$1:00');
+    if (!/[Zz]$|[+-]\d{2}:\d{2}$/.test(text)) text += 'Z';
+    const d = new Date(text);
     if (Number.isNaN(d.getTime())) return { datum: '', cas: '' };
     const p = n => String(n).padStart(2, '0');
     return {

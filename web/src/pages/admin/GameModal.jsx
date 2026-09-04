@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { updateGame } from '../../api/admin';
 import { apiFetch } from '../../api/client';
 import GameEditor from '../../components/GameEditor';
+import { useCompetition } from '../../context/CompetitionContext';
 
 // Úprava zápasu IIHF. Samotný formulár je spoločný pre všetky súťaže
 // (`GameEditor`); tu sa doplní len to, čím sa IIHF líši — názvy stĺpcov,
@@ -19,20 +20,23 @@ const MAPOVANIE = {
 };
 
 export default function GameModal({ game, onClose, onSaved }) {
+    const { activeCompetition } = useCompetition();
     const [timy, setTimy] = useState([]);
 
     // Tímy boli predtým napísané natvrdo v kóde (16 reprezentácií). Teraz sa
     // čítajú z číselníka, takže sa nemusia dopĺňať pri každej zmene účastníkov.
     useEffect(() => {
+        if (!activeCompetition?.id) return;
         let zive = true;
         // `v1/team-names` vracia mapu kód → názov a rieši všetky tri súťaže.
-        apiFetch('v1/team-names')
+        // Bez `competition_id` vráti 400 a zoznam by zostal prázdny.
+        apiFetch(`v1/team-names?competition_id=${activeCompetition.id}`)
             .then(d => { if (zive) setTimy(
                 Object.entries(d).map(([kod, nazov]) => ({ kod, nazov: `${kod} – ${nazov}` }))
                     .sort((a, b) => a.nazov.localeCompare(b.nazov, 'sk'))); })
             .catch(() => { if (zive) setTimy([]); });
         return () => { zive = false; };
-    }, []);
+    }, [activeCompetition?.id]);
 
     const uloz = async (z) => {
         const starts_at = z.datum && z.cas
