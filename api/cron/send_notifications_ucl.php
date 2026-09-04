@@ -44,14 +44,12 @@ function ucl_pts_label(int $pts): string {
 }
 
 // Krátke označenie fázy, rovnaké ako v aplikácii.
+//
+// Berie sa z číselníka. Predtým sa číslo kola vyťahovalo z názvu regulárnym
+// výrazom a ostatné fázy mala funkcia vymenované — pri zmene názvu alebo
+// pridaní kola sa to muselo dopisovať.
 function ucl_faza(array $g): string {
-    // Cislo kola nie je vlastny stlpec, je zapisane v nazve ("3. kolo").
-    if (preg_match('/(\d+)\. kolo/u', (string)($g['game_type_name'] ?? ''), $m)) {
-        return $m[1] . '. kolo';
-    }
-    $mapa = ['PO' => 'Baráž', 'R16' => 'Osemfinále', 'QF' => 'Štvrťfinále',
-             'SF' => 'Semifinále', 'F' => 'Finále'];
-    return $mapa[$g['game_type_code']] ?? $g['game_type_code'];
+    return (string)($g['match_stat_desc'] ?? $g['game_type_code'] ?? '');
 }
 
 // ── game_start + untipped_game + pre_game_reminder ───────────────────────────
@@ -96,10 +94,12 @@ foreach ($users as $u) {
 // ── result_entered ────────────────────────────────────────────────────────────
 $finished = $pdo->query('
     SELECT g.game_id, g.game_type_code, g.game_type_name, g.tie_id, g.leg,
+           ph.match_stat_desc,
            hc.club_name AS team1, ac.club_name AS team2,
            g.home_score_regular AS s1, g.away_score_regular AS s2,
            g.home_score_final AS f1, g.away_score_final AS f2
       FROM "lm2026-27".games g
+      LEFT JOIN admin.competition_phases ph ON ph.id = g.phase_id
       JOIN admin.uefa_clubs hc ON hc.club_id = g.home_team_id
       JOIN admin.uefa_clubs ac ON ac.club_id = g.away_team_id
      WHERE g.result_approved = TRUE AND g.home_score_regular IS NOT NULL
@@ -166,8 +166,11 @@ function ucl_upcoming_games(PDO $pdo, int $uid, int $min, string $logType): arra
     // Bez klubov (nezostavená dvojica play-off) nemá notifikácia zmysel.
     $stmt = $pdo->prepare('
         SELECT g.game_id, g.game_type_code, g.game_type_name, g.start_time,
+               ph.match_stat_desc,
                hc.club_name AS team1, ac.club_name AS team2
           FROM "lm2026-27".games g
+          LEFT JOIN admin.competition_phases ph ON ph.id = g.phase_id
+      LEFT JOIN admin.competition_phases ph ON ph.id = g.phase_id
           JOIN admin.uefa_clubs hc ON hc.club_id = g.home_team_id
           JOIN admin.uefa_clubs ac ON ac.club_id = g.away_team_id
          WHERE g.result_approved = FALSE
