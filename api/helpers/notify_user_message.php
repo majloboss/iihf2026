@@ -7,7 +7,7 @@ require_once __DIR__ . '/webpush.php';
 require_once __DIR__ . '/mailer.php';
 
 function notify_user_new_message(PDO $pdo, int $target_uid, string $text): void {
-    $u = $pdo->prepare("SELECT email FROM admin.users WHERE id = ? AND is_active = TRUE");
+    $u = $pdo->prepare("SELECT username, email FROM admin.users WHERE id = ? AND is_active = TRUE");
     $u->execute([$target_uid]);
     $row = $u->fetch();
     if (!$row) return;
@@ -29,7 +29,7 @@ function notify_user_new_message(PDO $pdo, int $target_uid, string $text): void 
     $jeTest   = defined('DB_NAME') && stripos(DB_NAME, 'DEV') !== false;
     $prostred = $jeTest ? ' [TEST]' : '';
 
-    // Dlhy text sa do notifikacie nezmesti; cely si ho precita v appke.
+    // Do push notifikacie sa dlhy text nezmesti; v maili sa posiela cely.
     $skratene = mb_strlen($text) > 120 ? mb_substr($text, 0, 120) . '…' : $text;
     $url      = '/spravy';
 
@@ -40,7 +40,7 @@ function notify_user_new_message(PDO $pdo, int $target_uid, string $text): void 
         $vapid = wp_load_vapid();
         if ($vapid) {
             $payload = json_encode([
-                'title' => 'Nová správa od admina' . $prostred,
+                'title' => 'Správa organizátora' . $prostred,
                 'body'  => $skratene,
                 'url'   => $url,
             ]);
@@ -50,10 +50,17 @@ function notify_user_new_message(PDO $pdo, int $target_uid, string $text): void 
     }
 
     if ($chceMail && !empty($row['email'])) {
-        // Predponu "Betclub - " doplna send_mail.
-        $mail = $skratene . "\n\n" . APP_URL . $url . "\n\n"
-              . ($jeTest ? "Táto správa prišla z TESTOVACEJ verzie (dev_betclub).\n\nBetClub" : 'BetClub');
-        try { send_mail_logged($pdo, $row['email'], 'nová správa od admina' . $prostred, $mail); }
+        // Predponu "Betclub - " doplna send_mail. V maili ide cely text
+        // spravy, nie skrateny — skracuje sa len push notifikacia.
+        $mail = "Ahoj {$row['username']},\n\n"
+              . "organizátor ti v aplikácii zanechal správu:\n\n"
+              . "\"$text\"\n\n"
+              . "Odpovedať môžeš v aplikácii v sekcii Správy:\n"
+              . APP_URL . $url . "\n\n"
+              . ($jeTest
+                  ? "Táto správa prišla z TESTOVACEJ verzie (dev_betclub).\n\nBetClub"
+                  : 'BetClub');
+        try { send_mail_logged($pdo, $row['email'], 'správa organizátora' . $prostred, $mail); }
         catch (Throwable $e) { error_log("admin_message email uid=$target_uid: " . $e->getMessage()); }
     }
 }
