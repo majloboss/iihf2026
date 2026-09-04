@@ -15,7 +15,7 @@ import styles from '../pages/user/Games.module.css';
 //
 //     prefix (1x2) · ALL · extra · číselník · koniec (TAB)
 //
-// `extra` je ďalší filter mimo číselníka — v UCL sú to KLUBY, ktoré filtrujú
+// `extra` je ďalší filter mimo číselníka — v UCL je to KLUB, ktorý filtruje
 // podľa klubu, nie podľa fázy. `koniec` stojí celkom vpravo a filter to už
 // nie je: TAB prepína na tabuľky.
 
@@ -40,7 +40,7 @@ export default function PhaseFilter({
     vsetkyPopis = 'ALL',
     onVsetky = null,   // ALL ruší všetky filtre obrazovky, nielen fázu
     ineFiltre = false, // je zapnutý filter mimo číselníka (klub, deň, 1x2)?
-    extra = null,      // ďalší filter mimo číselníka (napr. KLUBY)
+    extra = null,      // ďalší filter mimo číselníka (napr. KLUB)
     prefix = null,     // pred prvým tlačidlom (napr. 1x2)
     koniec = null,     // celkom vpravo, mimo filtrov (napr. TAB)
 }) {
