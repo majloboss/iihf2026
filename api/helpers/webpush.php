@@ -87,8 +87,16 @@ function send_push_to_user(PDO $pdo, int $uid, string $payload, array $vapid): a
 }
 
 function wp_load_vapid(): array|false {
+    // `require` vrati obsah suboru iba pri prvom volani; potom uz len TRUE.
+    // Notifikacne skripty sa nacitavaju za sebou do rovnakeho behu, takze
+    // druhy a dalsi by dostali TRUE namiesto klucov a push by ticho vypadol.
+    // Vysledok sa preto drzi v pamati.
+    static $vapid = null;
+    if ($vapid !== null) return $vapid;
+
     $f = __DIR__ . '/../config/vapid.php';
-    return file_exists($f) ? require $f : false;
+    $nacitane = file_exists($f) ? require $f : false;
+    return $vapid = is_array($nacitane) ? $nacitane : false;
 }
 
 function send_web_push(array $sub, string $payload, array $vapid): array {
