@@ -21,7 +21,7 @@ function notify_group_event(PDO $pdo, int $target_user_id, string $title, string
         try {
             require_once __DIR__ . '/mailer.php';
             $mail_body = $body_text . "\n\n" . APP_URL . $url . "\n\nBetClub – Tipujte s kamošmi";
-            send_mail_logged($pdo, $row['email'], $title . ' – BetClub', $mail_body);
+            send_mail_logged($pdo, $row['email'], $title, $mail_body);
         } catch (Throwable $e) { /* non-fatal */ }
     }
 

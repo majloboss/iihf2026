@@ -51,12 +51,21 @@ check(velke.length === 0,
 console.log('\nvýsledné predmety:');
 [
     'nová správa od admina',
+    'nová správa od <hráč>',
     'výsledok: SVK – CAN',
     'začína zápas: SVK – CAN o 16:20',
     'netipovaný zápas: SVK – CAN o 16:20',
     'pozvánka do tipovačky',
+    'reset hesla',
+    'vitaj medzi nami!',
     'skúšobná správa',
 ].forEach(s => console.log(`  Betclub - ${s}`));
+
+// Skupinove udalosti dostavaju titulok zvonku a sluzi aj ako titulok push
+// notifikacie, kde velke pismeno patri: "Betclub - Pozvánka do skupiny".
+console.log('');
+console.log('  Betclub - Pozvánka do skupiny        (titulok z notify_group_event)');
+console.log('  Betclub - Vstup do skupiny schválený');
 
 console.log(fail ? '\nNIEKTORE KONTROLY ZLYHALI' : '\nVsetky kontroly presli');
 process.exit(fail ? 1 : 0);
