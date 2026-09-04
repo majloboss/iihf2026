@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { editUclGame, getUclGames, recalcUcl } from '../../api/ucl';
+import usePhases from '../../hooks/usePhases';
+import { useCompetition } from '../../context/CompetitionContext';
 import { getUclTeams } from '../../api/uclAdmin';
 import AdminGamesTable from './AdminGamesTable';
 import gStyles from '../user/Games.module.css';
@@ -52,6 +54,8 @@ const dayFmtRaw = new Intl.DateTimeFormat('sk-SK', { day: 'numeric', month: 'num
 const dayFmt = s => { const d = asDate(s); return isValid(d) ? dayFmtRaw.format(d) : '—'; };
 
 export default function UclAdminGames() {
+    const { activeCompetition } = useCompetition();
+    const { fazy } = usePhases(activeCompetition?.id);
     const [games, setGames] = useState([]);
     const [clubs, setClubs] = useState([]);
     const [phase, setPhase] = useState('all');
@@ -183,6 +187,19 @@ export default function UclAdminGames() {
                                 <input type="datetime-local" value={editing.start_time}
                                        onChange={e => setEditing({ ...editing, start_time: e.target.value })} required />
                             </label>
+                            {/* Fáza určuje, pod ktorým kolom sa zápas zobrazí vo
+                                filtroch a v štatistikách. */}
+                            <label>Fáza / kolo
+                                <select value={editing.phase_id || ''}
+                                        onChange={e => setEditing({ ...editing, phase_id: e.target.value })}>
+                                    <option value="">— neurčená —</option>
+                                    {fazy.map(f => (
+                                        <option key={f.code} value={f.id}>
+                                            {f.label} — {f.title}
+                                        </option>
+                                    ))}
+                                </select>
+                            </label>
                             <label>Štadión
                                 <input value={editing.venue} maxLength={100}
                                        onChange={e => setEditing({ ...editing, venue: e.target.value })} />
@@ -229,6 +246,7 @@ export default function UclAdminGames() {
                 })}
                 onEdit={g => setEditing({
                     game_id: g.game_id, game_type_name: g.game_type_name,
+                    phase_id: g.phase_id ?? '',
                     home_team_id: g.home_team_id || '', away_team_id: g.away_team_id || '',
                     start_time: toInput(g.start_time), venue: g.venue || '',
                     flashscore_url: g.flashscore_url || '', tips_open: g.tips_open,

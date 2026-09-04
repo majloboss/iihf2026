@@ -23,7 +23,8 @@ $select = '
            g.home_score_regular, g.away_score_regular,
            g.home_score_final,   g.away_score_final,
            g.home_score_halftime, g.away_score_halftime,
-           g.result_approved, g.game_type_code, g.game_type_name,
+           g.result_approved, g.game_type_code, g.game_type_name, g.phase_id,
+           ph.match_stat_code, ph.match_stat_desc, ph.color_code AS phase_color,
            g.tie_id, g.leg,
            -- Pri odvete sa hodi vidiet prvy zapas: rozhoduje sucet za dvojicu.
            -- Domaci odvety bol v prvom zapase hostom, preto su goly prehodene.
@@ -45,6 +46,7 @@ $select = '
            acs.flag_file AS away_flag,
            t.home_score_tip, t.away_score_tip, t.points_earned
       FROM "lm2026-27".games g
+      LEFT JOIN admin.competition_phases ph ON ph.id = g.phase_id
       LEFT JOIN admin.uefa_clubs hc ON hc.club_id = g.home_team_id
       LEFT JOIN admin.uefa_clubs ac ON ac.club_id = g.away_team_id
       LEFT JOIN admin.countries  hs ON hs.country_code = hc.country_code
