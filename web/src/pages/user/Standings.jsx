@@ -296,7 +296,7 @@ function GroupsView({ currentUserId, compId }) {
 
     // Pri zmene súťaže sa výber zruší — kolá inej súťaže by tam nesedeli.
     // Rieši sa odvodením, nie efektom, aby nevznikol render navyše.
-    const zoznamFaz = fazy.map(f => f.phase);
+    const zoznamFaz = fazy.map(f => f.code);
     const aktivnaFaza = zoznamFaz.includes(faza) ? faza : '';
 
     // Filter kôl stojí nad tabuľkami a platí pre všetky skupiny naraz.
@@ -308,9 +308,9 @@ function GroupsView({ currentUserId, compId }) {
                 ALL
             </button>
             {fazy.map(f => (
-                <button key={f.phase} onClick={() => setFaza(f.phase)}
+                <button key={f.code} onClick={() => setFaza(f.code)}
                         title={`${f.phase} · ${f.games} zápasov`}
-                        className={farbaFazy(f, aktivnaFaza === f.phase)}>
+                        className={farbaFazy(f, aktivnaFaza === f.code)}>
                     {kratkaFaza(f)}
                 </button>
             ))}
