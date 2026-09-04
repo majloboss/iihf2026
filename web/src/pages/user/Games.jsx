@@ -4,11 +4,12 @@ import { useLocation } from 'react-router-dom';
 import { getGames } from '../../api/games';
 import { saveTip, getGameTips } from '../../api/tips';
 import GroupStandings from './GroupStandings';
+import PhaseFilter from '../../components/PhaseFilter';
+import usePhases from '../../hooks/usePhases';
+import { useCompetition } from '../../context/CompetitionContext';
 import { useTeamNames } from '../../components/Flag';
 import styles from './Games.module.css';
 
-const PHASE_LABEL = { A: 'Skupina A', B: 'Skupina B', QF: 'Štvrťfinále', SF: 'Semifinále', BRONZE: 'O bronz', GOLD: 'Finále' };
-const PHASE_BTN   = { all: 'ALL', A: 'A', B: 'B', QF: 'QF', SF: 'SF', BRONZE: 'BR', GOLD: 'F' };
 const FLAG_URL = (code) => `/flags/team_flag_${code?.toLowerCase()}.png`;
 const isLsLive = (g) => g.ls_score1 != null && g.ls_status && g.ls_status !== 'FT';
 const formatLsAge = (ts) => {
@@ -21,7 +22,8 @@ const calcLivePoints = (t1, t2, g) => {
     const s2 = g.ls_final2 != null ? +g.ls_final2 : (g.ls_score2 != null ? +g.ls_score2 : null);
     if (s1 == null || s2 == null || t1 == null || t2 == null) return null;
     const n1 = +t1, n2 = +t2;
-    const isPlayoff = ['QF','SF','BRONZE','GOLD'].includes(g.phase);
+    // Vyraďovacia časť má vyššie bodovanie; pozná sa podľa farby z číselníka.
+    const isPlayoff = g.phase_color && g.phase_color !== 'GROUP';
     const winPts = isPlayoff ? 5 : 3;
     const rw = s1 > s2 ? 1 : s1 < s2 ? -1 : 0;
     const tw = n1 > n2 ? 1 : n1 < n2 ? -1 : 0;
@@ -168,6 +170,9 @@ function GroupTips({ gameId, game }) {
 }
 
 export default function Games() {
+    const { activeCompetition } = useCompetition();
+    const competitionId = activeCompetition?.id;
+    const { sediFaze } = usePhases(competitionId);
     const navigate = useNavigate();
     const location = useLocation();
     const [games, setGames]               = useState([]);
@@ -187,12 +192,14 @@ export default function Games() {
                 setGames(data);
                 if (initial) {
                     setLoading(false);
-                    const PLAYOFF = ['QF', 'SF', 'BRONZE', 'GOLD'];
+                    // Po otvorení sa predvolí prebiehajúce alebo najbližšie
+                    // vyraďovacie kolo — v skupinovej fáze zostáva „všetko".
+                    const jePlayoff = g => g.phase_color && g.phase_color !== 'GROUP';
                     const live = data.find(g => g.status === 'live');
-                    if (live && PLAYOFF.includes(live.phase)) { setPhase(live.phase); return; }
+                    if (live && jePlayoff(live)) { setPhase(live.match_stat_code); return; }
                     const now = Date.now();
                     const next = data.find(g => g.status === 'scheduled' && new Date(g.starts_at).getTime() > now);
-                    if (next && PLAYOFF.includes(next.phase)) setPhase(next.phase);
+                    if (next && jePlayoff(next)) setPhase(next.match_stat_code);
                 }
             })
             .catch(e => { if (initial) { setError(e.message || 'Chyba API'); setLoading(false); } });
@@ -213,14 +220,13 @@ export default function Games() {
         setGames(prev => prev.map(g => g.id === gameId ? { ...g, tip1: t1, tip2: t2 } : g));
     }, []);
 
-    const phases  = ['all', 'A', 'B', 'QF', 'SF', 'BRONZE', 'GOLD'];
     const todayK  = dayKey(new Date().toISOString());
     const allDays = [...new Set(games.map(g => dayKey(g.starts_at)))].sort();
     const allTeams = [...new Set(games.flatMap(g => [g.team1, g.team2]).filter(Boolean))].sort();
 
     const now2 = Date.now();
     const filtered = games
-        .filter(g => phase === 'all' || g.phase === phase)
+        .filter(g => phase === 'all' || sediFaze(g.match_stat_code, phase))
         .filter(g => !selectedDay  || dayKey(g.starts_at) === selectedDay)
         .filter(g => !selectedTeam || g.team1 === selectedTeam || g.team2 === selectedTeam)
         .filter(g => !showUntipped || (
@@ -239,41 +245,31 @@ export default function Games() {
     if (loading) return <div className={styles.wrap}><p>Načítavam…</p></div>;
     if (error)   return <div className={styles.wrap}><p style={{color:'red'}}>Chyba: {error}</p></div>;
 
-    const phaseBtnClass = (p) => {
-        const base = p === 'QF' || p === 'SF' ? [styles.pBtn, styles.pPlayoff]
-                   : p === 'BRONZE'            ? [styles.pBtn, styles.pBronze]
-                   : p === 'GOLD'              ? [styles.pBtn, styles.pGold]
-                   : [styles.pBtn, styles.pGroup];
-        const active = p === 'QF' || p === 'SF' ? styles.pPlayoffOn
-                     : p === 'BRONZE'            ? styles.pBronzeOn
-                     : p === 'GOLD'              ? styles.pGoldOn
-                     : styles.pGroupOn;
-        return [...base, view === 'games' && phase === p ? active : ''].join(' ');
-    };
-
     return (
         <div className={styles.wrap}>
             {/* Fázy + Tabuľky toggle */}
             <div className={styles.topBar}>
                 <div className={styles.filters}>
-                    <button
-                        className={showUntipped ? styles.untippedBtnOn : styles.untippedBtn}
-                        onClick={() => setShowUntipped(v => !v)}
-                        title="Nenatipované zápasy"
-                    >1<span style={{fontSize:'0.7em',verticalAlign:'middle'}}>x</span>2</button>
-                    {phases.map(p => (
-                        <button key={p}
-                            onClick={() => { setPhase(p); setView('games'); }}
-                            className={phaseBtnClass(p)}>
-                            {PHASE_BTN[p]}
-                        </button>
-                    ))}
-                    <button
-                        className={`${styles.btnTabulky} ${styles.btnTabulkyInline}`}
-                        onClick={() => navigate('/tabulky')}
-                    >
-                        TAB
-                    </button>
+                    <PhaseFilter
+                        competitionId={competitionId}
+                        hodnota={phase === 'all' ? '' : phase}
+                        onZmena={kod => { setPhase(kod === '' ? 'all' : kod); setView('games'); }}
+                        prefix={
+                            <button
+                                className={showUntipped ? styles.untippedBtnOn : styles.untippedBtn}
+                                onClick={() => setShowUntipped(v => !v)}
+                                title="Nenatipované zápasy"
+                            >1<span style={{fontSize:'0.7em',verticalAlign:'middle'}}>x</span>2</button>
+                        }
+                        koniec={
+                            <button
+                                className={`${styles.btnTabulky} ${styles.btnTabulkyInline}`}
+                                onClick={() => navigate('/tabulky')}
+                            >
+                                TAB
+                            </button>
+                        }
+                    />
                 </div>
             </div>
 
@@ -337,7 +333,7 @@ export default function Games() {
                                 return (
                                     <div key={g.id} className={`${styles.card} ${es === 'finished' ? styles.cardFinished : es === 'live' ? styles.cardLive : ''}`}>
                                         <div className={styles.cardTop}>
-                                            <span className={styles.phase}>{PHASE_LABEL[g.phase] || g.phase} • Zápas {g.game_number}</span>
+                                            <span className={styles.phase}>{g.match_stat_desc || g.phase} • Zápas {g.game_number}</span>
                                             <span className={styles.time}>{new Date(g.starts_at).toLocaleTimeString('sk-SK', { hour: '2-digit', minute: '2-digit' })}</span>
                                         </div>
                                         <div className={styles.matchRow}>

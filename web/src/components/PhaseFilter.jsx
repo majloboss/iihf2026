@@ -43,9 +43,15 @@ export default function PhaseFilter({
     extra = null,      // ďalší filter mimo číselníka (napr. KLUB)
     prefix = null,     // pred prvým tlačidlom (napr. 1x2)
     koniec = null,     // celkom vpravo, mimo filtrov (napr. TAB)
+    ibaKody = null,    // zúži ponuku na tieto skratky (napr. len odohrané kolá)
+    popisky = null,    // { kód: text } do tooltipu (napr. počet zápasov)
 }) {
-    const { fazy } = usePhases(competitionId);
+    const { fazy: vsetky } = usePhases(competitionId);
     const [rozbalene, setRoz] = useState(null);   // otvorená zbalená skupina
+
+    // Niektoré obrazovky ponúkajú len kolá, ktoré majú čo zobraziť — inak by
+    // filter ponúkal kolá bez jediného zápasu.
+    const fazy = ibaKody ? vsetky.filter(f => ibaKody.includes(f.code)) : vsetky;
 
     if (!fazy.length) return null;
 
@@ -93,8 +99,9 @@ export default function PhaseFilter({
                 {extra}
 
                 {riadok.map((p, i) => p.typ === 'faza' ? (
-                    <span key={p.f.code} className={styles.tipWrap} data-tip={p.f.title}>
-                        <button title={p.f.title}
+                    <span key={p.f.code} className={styles.tipWrap}
+                          data-tip={popisky?.[p.f.code] ?? p.f.title}>
+                        <button title={popisky?.[p.f.code] ?? p.f.title}
                                 onClick={() => { onZmena(hodnota === p.f.code ? '' : p.f.code); setRoz(null); }}
                                 className={triedaFazy(p.f.color, hodnota === p.f.code)}>
                             {p.f.label}

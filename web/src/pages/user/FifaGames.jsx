@@ -2,17 +2,20 @@ import { useNavigate } from 'react-router-dom';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { getFifaGames, saveFifaTip, getFifaGameTips } from '../../api/fifaGames';
 import FifaGroupStandings from './FifaGroupStandings';
+import PhaseFilter from '../../components/PhaseFilter';
+import usePhases from '../../hooks/usePhases';
+import { useCompetition } from '../../context/CompetitionContext';
 import { useTeamNames } from '../../components/Flag';
 import styles from './Games.module.css';
 
-const PLAYOFF_CODES = ['R32','R16','QF','SF','BM','F'];
 // Živé body podľa aktuálneho livescore (group 3+1+1, playoff 5+1+1)
 const calcLiveFifaPoints = (tip1, tip2, game) => {
     // Zmrazený 90-min základ má prednosť (počas predĺženia), inak aktuálne živé skóre
     const s1 = game.home_score_regular != null ? game.home_score_regular : game.ls_home;
     const s2 = game.away_score_regular != null ? game.away_score_regular : game.ls_away;
     if (s1 == null || s2 == null || tip1 == null || tip2 == null) return null;
-    const isPlayoff = PLAYOFF_CODES.includes(game.game_type_code);
+    // Vyraďovacia časť má vyššie bodovanie; pozná sa podľa farby z číselníka.
+    const isPlayoff = game.phase_color && game.phase_color !== 'GROUP';
     const winPts = isPlayoff ? 5 : 3;
     const rw = s1 > s2 ? 1 : s1 < s2 ? -1 : 0;
     const tw = tip1 > tip2 ? 1 : tip1 < tip2 ? -1 : 0;
@@ -77,14 +80,6 @@ function GroupTips({ game }) {
     );
 }
 
-const GROUP_CODES = ['A','B','C','D','E','F','G','H','I','J','K','L'];
-const PHASE_LABEL = {
-    GROUP_A:'Skupina A', GROUP_B:'Skupina B', GROUP_C:'Skupina C', GROUP_D:'Skupina D',
-    GROUP_E:'Skupina E', GROUP_F:'Skupina F', GROUP_G:'Skupina G', GROUP_H:'Skupina H',
-    GROUP_I:'Skupina I', GROUP_J:'Skupina J', GROUP_K:'Skupina K', GROUP_L:'Skupina L',
-    R32:'Round of 32', R16:'Round of 16', QF:'Štvrťfinále', SF:'Semifinále', BM:'O bronz', F:'Finále',
-};
-const KNOCKOUT = ['R32','R16','QF','SF','BM','F'];
 const FLAG_URL  = (code) => `/flags/fifa_flag_${code?.toLowerCase()}.png`;
 const dayKey    = (iso)  => {
     const d = new Date(iso);
@@ -156,12 +151,14 @@ function TipInput({ game, onSaved }) {
 }
 
 export default function FifaGames() {
+    const { activeCompetition } = useCompetition();
+    const competitionId = activeCompetition?.id;
+    const { sediFaze } = usePhases(competitionId);
     const navigate = useNavigate();
     const [games, setGames]               = useState([]);
     const [loading, setLoading]           = useState(true);
     const [error, setError]               = useState('');
     const [phase, setPhase]               = useState('all');  // 'all'|'GRP'|'R32'|...
-    const [groupFilter, setGroupFilter]   = useState(null);   // 'A'-'L' or null
     const [selectedTeam, setSelectedTeam] = useState(null);
     const [selectedDay, setSelectedDay]   = useState(null);
     const [showUntipped, setShowUntipped] = useState(false);
@@ -200,13 +197,7 @@ export default function FifaGames() {
     // Filtrovanie zápasov
     const now2 = Date.now();
     const filtered = games.filter(g => {
-        const code = g.game_type_code;
-        if (phase === 'GRP') {
-            if (!code.startsWith('GROUP_')) return false;
-            if (groupFilter && code !== `GROUP_${groupFilter}`) return false;
-        } else if (phase !== 'all') {
-            if (code !== phase) return false;
-        }
+        if (phase !== 'all' && !sediFaze(g.match_stat_code, phase)) return false;
         if (selectedTeam && g.home_code !== selectedTeam && g.away_code !== selectedTeam) return false;
         if (selectedDay && dayKey(g.start_time + 'Z') !== selectedDay) return false;
         if (showUntipped) {
@@ -218,13 +209,7 @@ export default function FifaGames() {
 
     // Dni pre kalendár (podľa aktuálneho filtra bez dátumu)
     const calGames = games.filter(g => {
-        const code = g.game_type_code;
-        if (phase === 'GRP') {
-            if (!code.startsWith('GROUP_')) return false;
-            if (groupFilter && code !== `GROUP_${groupFilter}`) return false;
-        } else if (phase !== 'all') {
-            if (code !== phase) return false;
-        }
+        if (phase !== 'all' && !sediFaze(g.match_stat_code, phase)) return false;
         if (selectedTeam && g.home_code !== selectedTeam && g.away_code !== selectedTeam) return false;
         return true;
     });
@@ -232,21 +217,17 @@ export default function FifaGames() {
 
     // Vlajky — zobraz tímy podľa kontextu
     const flagTeams = (() => {
-        if (phase === 'GRP' && groupFilter) {
-            // 4 tímy vybranej skupiny
-            return [...new Set(games
-                .filter(g => g.game_type_code === `GROUP_${groupFilter}`)
-                .flatMap(g => [g.home_code, g.away_code])
+        const jeSkupina = g => g.game_type_code?.startsWith('GROUP_');
+        // Vybraná jedna skupina — jej štyri tímy.
+        if (phase !== 'all' && phase !== 'GRP') {
+            const zapasy = games.filter(g => sediFaze(g.match_stat_code, phase));
+            if (!zapasy.some(jeSkupina)) return [];
+            return [...new Set(zapasy.flatMap(g => [g.home_code, g.away_code])
                 .filter(Boolean))].sort();
         }
-        if (phase === 'GRP' || phase === 'all') {
-            // Všetky skupinové tímy (48)
-            return [...new Set(games
-                .filter(g => g.game_type_code.startsWith('GROUP_'))
-                .flatMap(g => [g.home_code, g.away_code])
-                .filter(Boolean))].sort();
-        }
-        return [];
+        // Všetky skupinové tímy (48).
+        return [...new Set(games.filter(jeSkupina)
+            .flatMap(g => [g.home_code, g.away_code]).filter(Boolean))].sort();
     })();
 
     const byDate = {};
@@ -259,70 +240,46 @@ export default function FifaGames() {
     });
 
     const todayK    = dayKey(new Date().toISOString());
-    const grpActive = phase === 'GRP' || (phase === 'all' && groupFilter);
-
     if (loading) return <div className={styles.wrap}><p>Načítavam…</p></div>;
     if (error)   return <div className={styles.wrap}><p style={{color:'red'}}>Chyba: {error}</p></div>;
-
-    const pBtnClass = (p) => {
-        const color = p === 'F' ? [styles.pGold, styles.pGoldOn]
-                    : p === 'BM' ? [styles.pBronze, styles.pBronzeOn]
-                    : KNOCKOUT.includes(p) ? [styles.pPlayoff, styles.pPlayoffOn]
-                    : [styles.pGroup, styles.pGroupOn];
-        const isOn = phase === p;
-        return [styles.pBtn, color[0], isOn ? color[1] : ''].join(' ');
-    };
 
     return (
         <div className={styles.wrap}>
             {/* Riadok 1: hlavné filtre */}
             <div className={styles.topBar}>
-                <div className={styles.filters}>
-                    <button
-                        className={showUntipped ? styles.untippedBtnOn : styles.untippedBtn}
-                        onClick={() => setShowUntipped(v => !v)}
-                        title="Nenatipované"
-                    >1<span style={{fontSize:'0.7em',verticalAlign:'middle'}}>x</span>2</button>
-                    <button
-                        className={[styles.pBtn, styles.pGroup, phase === 'all' && !groupFilter && !selectedTeam ? styles.pGroupOn : ''].join(' ')}
-                        onClick={() => { setPhase('all'); setGroupFilter(null); setSelectedTeam(null); setSelectedDay(null); }}
-                    >ALL</button>
-                    <button
-                        className={[styles.pBtn, styles.pGroup, grpActive ? styles.pGroupOn : ''].join(' ')}
-                        onClick={() => { setPhase('GRP'); setSelectedTeam(null); setSelectedDay(null); setView('games'); }}
-                    >GRP</button>
-                    {KNOCKOUT.map(p => (
-                        <button key={p} className={pBtnClass(p)}
-                            onClick={() => { setPhase(p); setGroupFilter(null); setSelectedTeam(null); setSelectedDay(null); setView('games'); }}
-                        >
-                            {p === 'BM' ? 'BR' : p}
-                        </button>
-                    ))}
-                    <button
-                        className={`${styles.btnTabulky} ${styles.btnTabulkyInline}`}
-                        onClick={() => navigate('/tabulky')}
-                    >TAB</button>
-                </div>
-
-                {/* Riadok 2: skupiny A–L (len keď GRP aktívne) — všetkých 12 v jednom riadku */}
-                {grpActive && (
-                    <div style={{display:'flex', flexWrap:'nowrap', gap:3, marginTop:4}}>
-                        {GROUP_CODES.map(g => (
-                            <button key={g}
-                                className={[styles.pBtn, styles.pGroup, groupFilter === g ? styles.pGroupOn : ''].join(' ')}
-                                style={{flex:'1 1 0', minWidth:0, padding:'5px 0', fontSize:'0.78rem'}}
-                                onClick={() => { setPhase('GRP'); setGroupFilter(g); setSelectedTeam(null); setSelectedDay(null); }}
-                            >{g}</button>
-                        ))}
-                    </div>
-                )}
+                {/* Skupiny sú v číselníku zbalené za GRP a rozbalia sa kliknutím —
+                    dvanásť tlačidiel by sa do riadku nezmestilo. */}
+                <PhaseFilter
+                    competitionId={competitionId}
+                    hodnota={phase === 'all' ? '' : phase}
+                    onZmena={kod => {
+                        setPhase(kod === '' ? 'all' : kod);
+                        setSelectedTeam(null); setSelectedDay(null); setView('games');
+                    }}
+                    onVsetky={() => {
+                        setPhase('all'); setSelectedTeam(null); setSelectedDay(null);
+                    }}
+                    ineFiltre={Boolean(selectedTeam || selectedDay || showUntipped)}
+                    prefix={
+                        <button
+                            className={showUntipped ? styles.untippedBtnOn : styles.untippedBtn}
+                            onClick={() => setShowUntipped(v => !v)}
+                            title="Nenatipované"
+                        >1<span style={{fontSize:'0.7em',verticalAlign:'middle'}}>x</span>2</button>
+                    }
+                    koniec={
+                        <button
+                            className={`${styles.btnTabulky} ${styles.btnTabulkyInline}`}
+                            onClick={() => navigate('/tabulky')}
+                        >TAB</button>
+                    }
+                />
             </div>
 
             {view === 'standings' && (
                 <FifaGroupStandings onTeamClick={(team) => {
                     setSelectedTeam(team);
                     setPhase('GRP');
-                    setGroupFilter(null);
                     setView('games');
                 }} />
             )}
@@ -375,7 +332,7 @@ export default function FifaGames() {
                         return (
                             <div key={g.game_id} className={`${styles.card} ${finished ? styles.cardFinished : live ? styles.cardLive : ''}`}>
                                 <div className={styles.cardTop}>
-                                    <span className={styles.phase}>{PHASE_LABEL[g.game_type_code] || g.game_type_code} • #{g.game_id}</span>
+                                    <span className={styles.phase}>{g.match_stat_desc || g.game_type_code} • #{g.game_id}</span>
                                     <span className={styles.time}>{start.toLocaleTimeString('sk-SK', {hour:'2-digit', minute:'2-digit'})}</span>
                                 </div>
                                 <div className={styles.matchRow}>
