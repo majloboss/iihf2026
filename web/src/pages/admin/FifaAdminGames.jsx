@@ -26,9 +26,6 @@ const MAPOVANIE = {
     domaci: g => ({ popis: g.home_code, obrazok: vlajka(g.home_code) }),
     hostia: g => ({ popis: g.away_code, obrazok: vlajka(g.away_code) }),
 
-    // Skupiny majú v zápasoch kód GROUP_A, v číselníku len A.
-    prepisKodu: kod => String(kod ?? '').replace(/^GROUP_/, ''),
-
     vysledok: g => g.result_approved && g.home_score_regular != null
         ? `${g.home_score_regular}:${g.away_score_regular}` : null,
     stav: g => g.result_approved ? 'finished' : 'scheduled',
