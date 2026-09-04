@@ -68,9 +68,9 @@ $T = $S['teams'];
 // Predtym boli vymenovane v kode zvlast pre kazdu sutaz. Skupinova cast sa
 // pozna podla farby GROUP — do pavuka nepatri.
 //
-// Pozor: vo FIFA ma `phase_code` hodnotu 'F' dvakrat — skupina F aj finale.
-// Skupiny sa preto odfiltruju uz vo vnutornom dopyte, az potom sa dvojice
-// zluc, inak by DISTINCT ON vybral skupinu a finale by z pavuka vypadlo.
+// Skupiny sa odfiltruju uz vo vnutornom dopyte, az potom sa duplicity zlucia.
+// Ma to zmysel aj ked su kody jednoznacne: `phase_code` sa v jednej sutazi
+// moze zopakovat (skupina F vs finale F) a DISTINCT ON by vybral ten prvy.
 $fq = $pdo->prepare('
     SELECT DISTINCT ON (phase_code) phase_code, phase_name, sort_order
       FROM (SELECT p.phase_code, p.phase_name, p.sort_order
