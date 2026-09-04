@@ -58,9 +58,36 @@ function AdminThread() {
         }
     };
 
-    const onInput = () => setHasText(!!inputRef.current?.innerText.trim());
+    // Rozpísaná správa sa priebežne odkladá, aby ju neodplavilo obnovenie
+    // stránky ani zatvorenie karty.
+    const konceptKluc = 'koncept_spravy_admin';
 
-    const clearInput = () => { if (inputRef.current) inputRef.current.innerText = ''; setHasText(false); };
+    const onInput = () => {
+        const t = inputRef.current?.innerText ?? '';
+        setHasText(!!t.trim());
+        try {
+            if (t.trim()) localStorage.setItem(konceptKluc, t);
+            else localStorage.removeItem(konceptKluc);
+        } catch { /* súkromné okno alebo plná pamäť — koncept sa neuloží */ }
+    };
+
+    // Obnovenie konceptu po návrate na obrazovku.
+    useEffect(() => {
+        if (!inputRef.current) return;
+        try {
+            const ulozene = localStorage.getItem(konceptKluc);
+            if (ulozene && !inputRef.current.innerText.trim()) {
+                inputRef.current.innerText = ulozene;
+                setHasText(true);
+            }
+        } catch { /* nedostupné úložisko */ }
+    }, []);
+
+    const clearInput = () => {
+        if (inputRef.current) inputRef.current.innerText = '';
+        setHasText(false);
+        try { localStorage.removeItem(konceptKluc); } catch { /* nedostupné */ }
+    };
 
     const send = async () => {
         const body = (inputRef.current?.innerText || '').trim();

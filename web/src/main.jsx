@@ -33,11 +33,31 @@ if ('serviceWorker' in navigator) {
 
   let obnovujem = false;
 
+  // Rozpisaný text sa obnovením stratí. Preto sa nikdy neobnovuje, kým je
+  // kurzor v poli — ani keď v ňom niečo zostalo napísané. Nová verzia počká
+  // na chvíľu, keď človek nič nepíše.
+  const pisePrave = () => {
+    const a = document.activeElement;
+    if (!a) return false;
+    if (a.isContentEditable) return true;
+    const t = a.tagName;
+    return t === 'INPUT' || t === 'TEXTAREA' || t === 'SELECT';
+  };
+
+  // Rozpísaný text mimo zameraného poľa — napríklad keď človek odíde myšou.
+  const maRozpisane = () => [...document.querySelectorAll('textarea, input[type="text"]')]
+      .some(el => el.value && el.value.trim() !== '');
+
   const obnovit = () => {
     if (obnovujem) return;
     if (window.location.pathname.startsWith('/register')) return;
     if (sessionStorage.getItem('just_registered')) {
       sessionStorage.removeItem('just_registered');
+      return;
+    }
+    // Radšej neskôr než stratiť rozpísanú správu: skúsi sa znovu o pol minúty.
+    if (pisePrave() || maRozpisane()) {
+      setTimeout(obnovit, 30000);
       return;
     }
     obnovujem = true;
