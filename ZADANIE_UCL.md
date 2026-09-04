@@ -90,12 +90,13 @@ Priebežné skóre sa načítava z Flashscore cez OpenRouter — **Nástroje →
 → Priebežné výsledky**. Model je použitý zámerne: vie sa zorientovať aj keď
 Flashscore zmení štruktúru, na rozdiel od pevného parsera.
 
-- 🟠 Jeden dopyt na Flashscore a jedno volanie modelu bez ohľadu na počet zápasov
-- 🟠 Ukladá sa skóre (`ls_home`, `ls_away`), stav (`ls_status`) a polčas (migrácia `060`)
-- 🟠 Adresu zápasu zadáva admin v **Zápasy → Upraviť** — bez nej sa zápas nesleduje
-- 🟠 Keď livescore potvrdí začiatok zápasu, tipovanie sa uzavrie
-- 🔲 **Cron** — zatiaľ sa spúšťa ručne alebo zaškrtnutím v admin obrazovke
-- 🔲 **Návrh výsledku** — predvyplnenie skóre v správe výsledkov po skončení zápasu
+- ✅ Jeden dopyt na Flashscore a jedno volanie modelu bez ohľadu na počet zápasov
+- ✅ Ukladá sa skóre (`ls_home`, `ls_away`), stav (`ls_status`) a polčas (migrácia `060`)
+- ✅ Adresu zápasu zadáva admin v **Zápasy → Upraviť** — bez nej sa zápas nesleduje
+- ✅ Keď livescore potvrdí začiatok zápasu, tipovanie sa uzavrie
+- ✅ **Cron** — `run_livescore.php`, zapnutý v produkcii
+- 🔲 **Návrh výsledku** — predvyplnenie skóre v správe výsledkov po skončení
+  zápasu. Odložené: uvidíme podľa reality pri prvých zápasoch 8. 9.
 
 **Neukladajú sa** karty ani strelci: keby livescore vypadol, nemal by ich kto
 doplniť ručne a nekompletný údaj je horší než žiadny.
