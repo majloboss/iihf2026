@@ -11,7 +11,9 @@ const fs = require('fs');
 const path = require('path');
 const { Client } = require('pg');
 
-const conf = fs.readFileSync(path.join(__dirname, '../api/config/db.php'), 'utf8');
+const prod = process.argv.includes('--prod');
+const conf = fs.readFileSync(path.join(__dirname,
+    prod ? '../../betclub/api/config/db.php' : '../api/config/db.php'), 'utf8');
 const val = k => conf.match(new RegExp("define\\('" + k + "'\\s*,\\s*'([^']*)'"))[1];
 
 let fail = false;
