@@ -25,8 +25,8 @@ const timeFmt = value => { const d = naDatum(value); return d ? timeFmtRaw.forma
 
 
 // Krátke označenie fázy, rovnaké ako v zozname zápasov.
-const shortPhase = g => g.round_no ? `LF${g.round_no}`
-    : ({ PO: 'BAR', R16: 'R16', QF: 'QF', SF: 'SF', F: 'F' }[g.game_type_code] || g.game_type_code);
+// Skratka kola z číselníka; zápas bez priradenej fázy ju nemá.
+const shortPhase = g => g.match_stat_code ?? '';
 
 // Karta zápasu: dátum vľavo, dvojica v strede, pod ňou tip a štadión.
 //
