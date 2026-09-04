@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { getGames } from '../../api/games';
+import usePhases from '../../hooks/usePhases';
+import { useCompetition } from '../../context/CompetitionContext';
 import GameModal from './GameModal';
 import AdminGamesTable from './AdminGamesTable';
 import styles from './Admin.module.css';
 
-const PHASE_LABEL = { A: 'Sk. A', B: 'Sk. B', QF: 'Štvrťf.', SF: 'Semif.', BRONZE: 'Bronz', GOLD: 'Finále' };
 const FLAG_IIHF = code => `/flags/team_flag_${code?.toLowerCase()}.png`;
 
 function effectiveStatus(g) {
@@ -21,6 +22,8 @@ function formatLocal(iso) {
 }
 
 export default function AdminGames() {
+    const { activeCompetition } = useCompetition();
+    const { fazy } = usePhases(activeCompetition?.id);
     const [games,   setGames]   = useState([]);
     const [loading, setLoading] = useState(true);
     const [error,   setError]   = useState('');
@@ -38,8 +41,12 @@ export default function AdminGames() {
         setEditing(null);
     };
 
-    const phases = ['all', 'A', 'B', 'QF', 'SF', 'BRONZE', 'GOLD'];
-    const filtered = (phase === 'all' ? games : games.filter(g => g.phase === phase))
+    // Fázy aj ich skratky určuje číselník. Zápas, ktorý ešte nie je naviazaný
+    // (migrácia 075 nebežala), sa priradí podľa starého stĺpca `phase`.
+    const kodFazy = (g) => g.match_stat_code ?? g.phase;
+    const popisFazy = (kod) => fazy.find(f => f.code === kod)?.label ?? kod;
+    const phases = ['all', ...fazy.map(f => f.code)];
+    const filtered = (phase === 'all' ? games : games.filter(g => kodFazy(g) === phase))
         .slice().sort((a, b) => a.game_number - b.game_number);
 
     if (loading) return <p>Načítavam…</p>;
@@ -54,7 +61,7 @@ export default function AdminGames() {
                         <button key={p}
                             className={phase === p ? styles.btnPhaseActive : styles.btnPhase}
                             onClick={() => setPhase(p)}>
-                            {p === 'all' ? 'Všetky' : (PHASE_LABEL[p] || p)}
+                            {p === 'all' ? 'Všetky' : popisFazy(p)}
                         </button>
                     ))}
                 </div>
@@ -74,7 +81,7 @@ export default function AdminGames() {
                     return {
                         key: g.id,
                         number: g.game_number,
-                        phaseLabel: PHASE_LABEL[g.phase] || g.phase,
+                        phaseLabel: popisFazy(kodFazy(g)),
                         dateLocal: formatLocal(g.starts_at),
                         homeCell: teamCell(g.team1),
                         awayCell: teamCell(g.team2),

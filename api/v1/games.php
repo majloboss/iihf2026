@@ -4,6 +4,17 @@
 $auth = require_auth();
 $pdo  = db();
 
+// Skratka kola z ciselnika. Stlpec `phase_id` pridava migracia 075 — kym
+// nebezi, appka pouzije stary stlpec `phase`.
+$maPhaseId = stlpec_existuje($pdo, 'iihf2026', 'games', 'phase_id');
+$fazaSelect = $maPhaseId
+    ? 'g.phase_id, ph.match_stat_code, ph.match_stat_desc,'
+    : 'NULL::int AS phase_id, NULL AS match_stat_code, NULL AS match_stat_desc,';
+$fazaJoin = $maPhaseId
+    ? 'LEFT JOIN admin.competition_phases ph ON ph.id = g.phase_id'
+    : '';
+
+
 if ($method === 'GET') {
     $id = isset($_GET['id']) ? (int)$_GET['id'] : null;
 
@@ -23,6 +34,7 @@ if ($method === 'GET') {
     try {
         $stmt = $pdo->prepare("
             SELECT g.id, g.game_number, g.phase, g.team1, g.team2,
+                   {$fazaSelect}
                    g.starts_at, g.venue, g.score1, g.score2, g.final1, g.final2, g.status,
                    g.flashscore_url,
                    g.ls_score1, g.ls_score2, g.ls_final1, g.ls_final2,
@@ -30,6 +42,7 @@ if ($method === 'GET') {
                    g.ls_requests_expected, g.ls_requests_actual,
                    t.tip1, t.tip2, t.points
             FROM iihf2026.games g
+            {$fazaJoin}
             LEFT JOIN iihf2026.tips t ON t.game_id = g.id AND t.user_id = :uid
             ORDER BY g.starts_at, g.game_number
         ");
