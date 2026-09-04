@@ -71,15 +71,17 @@ $T = $S['teams'];
 // Skupiny sa odfiltruju uz vo vnutornom dopyte, az potom sa duplicity zlucia.
 // Ma to zmysel aj ked su kody jednoznacne: `phase_code` sa v jednej sutazi
 // moze zopakovat (skupina F vs finale F) a DISTINCT ON by vybral ten prvy.
+// Farba sa odovzdava parametrom: v jednoduchych uvodzovkach by 'GROUP' retazec
+// predcasne ukoncilo a dopyt by skoncil chybou syntaxe.
 $fq = $pdo->prepare('
     SELECT DISTINCT ON (phase_code) phase_code, phase_name, sort_order
       FROM (SELECT p.phase_code, p.phase_name, p.sort_order
               FROM admin.competition_phases p
               JOIN admin.competitions k ON k.id = p.competition_id
              WHERE k.slug = ? AND p.is_active
-               AND p.color_code <> 'GROUP') x
+               AND p.color_code <> ?) x
      ORDER BY phase_code, sort_order');
-$fq->execute([$slug]);
+$fq->execute([$slug, 'GROUP']);
 $fazy = $fq->fetchAll();
 usort($fazy, fn($x, $y) => (int)$x['sort_order'] <=> (int)$y['sort_order']);
 

@@ -45,6 +45,29 @@ for (const file of process.argv.slice(2)) {
     if (quote) {
         console.log(`CHYBA ${file}: neuzavrety retazec ${quote} otvoreny na riadku ${zaciatok}`);
         chyb++;
+        continue;
+    }
+
+    // Retazec v jednoduchych uvodzovkach sa apostrofom vnutri predcasne ukonci:
+    //   $pdo->prepare('... WHERE color <> 'GROUP') x ...')
+    // Parovanie uvodzoviek to nezachyti — vyzera to ako tri uzavrete retazce.
+    // Prejavi sa az v prehliadaci ako "syntax error, unexpected identifier".
+    const zle = [];
+    for (const m of src.matchAll(/prepare\(\s*'((?:[^'\\]|\\.)*)'/g)) {
+        const sql = m[1];
+        // SQL po zavreti retazca pokracuje — spoznat sa to da podla toho, ze
+        // za nim nenasleduje ciarka, zatvorka ani bodkociarka. Biele znaky
+        // vratane zalomenia sa preskakuju: uzavierka moze byt na dalsom riadku.
+        const za = src.slice(m.index + m[0].length, m.index + m[0].length + 40);
+        if (!/^\s*[,)\.;]/.test(za)) {
+            const riadok = src.slice(0, m.index).split('\n').length;
+            zle.push(`riadok ${riadok}: ${sql.trim().slice(0, 50)}…`);
+        }
+    }
+    if (zle.length) {
+        console.log(`CHYBA ${file}: apostrof vnutri SQL predcasne ukoncil retazec`);
+        zle.forEach(z => console.log(`      ${z}`));
+        chyb++;
     } else {
         console.log(`OK    ${file}`);
     }
