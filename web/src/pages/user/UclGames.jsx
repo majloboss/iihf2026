@@ -153,7 +153,7 @@ export default function UclGames() {
                             className={zobrazKluby ? styles.btnTabulkyActive : styles.btnTabulky}
                             onClick={() => setZobrazKluby(v => !v)}
                             title="Filtrovať podľa klubu">
-                            KLUBY{club ? ` (${club})` : ''}
+                            KLUB{club ? ` (${club})` : ''}
                         </button>
                     )}
                     // TAB nefiltruje — prepne na tabuľky, ako vo FIFA a IIHF.
@@ -168,7 +168,7 @@ export default function UclGames() {
                 />
             </div>
 
-            {/* Logá klubov — až po kliknutí na KLUBY */}
+            {/* Logá klubov — až po kliknutí na KLUB */}
             {zobrazKluby && clubs.length > 0 && (
                 <div className={styles.clubsRow}>
                     {clubs.map(c => (
