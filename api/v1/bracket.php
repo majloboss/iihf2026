@@ -34,8 +34,6 @@ $SUTAZE = [
         'two_legs' => false,
         'teams' => ['tabulka' => 'iihf2026.teams', 'kluc' => 'code',
                     'nazov' => 'name', 'logo' => null, 'kod' => 'code'],
-        'fazy' => ['QF' => 'Štvrťfinále', 'SF' => 'Semifinále',
-                   'BRONZE' => 'O 3. miesto', 'GOLD' => 'Finále'],
     ],
     'fifa2026' => [
         'schema' => 'fifa2026',
@@ -47,9 +45,6 @@ $SUTAZE = [
         'two_legs' => false,
         'teams' => ['tabulka' => 'fifa2026.teams', 'kluc' => 'team_id',
                     'nazov' => 'team_name', 'logo' => null, 'kod' => 'team_code'],
-        'fazy' => ['R32' => 'Šestnásťfinále', 'R16' => 'Osemfinále',
-                   'QF' => 'Štvrťfinále', 'SF' => 'Semifinále',
-                   'BM' => 'O 3. miesto', 'F' => 'Finále'],
     ],
     'ucl2026' => [
         'schema' => 'lm2026-27',
@@ -61,14 +56,37 @@ $SUTAZE = [
         'two_legs' => true,
         'teams' => ['tabulka' => 'admin.uefa_clubs', 'kluc' => 'club_id',
                     'nazov' => 'club_name', 'logo' => 'logo_file'],
-        'fazy' => ['PO' => 'Baráž o play-off', 'R16' => 'Osemfinále',
-                   'QF' => 'Štvrťfinále', 'SF' => 'Semifinále', 'F' => 'Finále'],
     ],
 ];
 
 if (!isset($SUTAZE[$slug])) json_ok([]);   // sutaz bez pavuka
 $S = $SUTAZE[$slug];
 $T = $S['teams'];
+
+// Vyradovacie fazy z ciselnika, v poradi stromu.
+//
+// Predtym boli vymenovane v kode zvlast pre kazdu sutaz. Skupinova cast sa
+// pozna podla farby GROUP — do pavuka nepatri.
+//
+// Pozor: vo FIFA ma `phase_code` hodnotu 'F' dvakrat — skupina F aj finale.
+// Skupiny sa preto odfiltruju uz vo vnutornom dopyte, az potom sa dvojice
+// zluc, inak by DISTINCT ON vybral skupinu a finale by z pavuka vypadlo.
+$fq = $pdo->prepare('
+    SELECT DISTINCT ON (phase_code) phase_code, phase_name, sort_order
+      FROM (SELECT p.phase_code, p.phase_name, p.sort_order
+              FROM admin.competition_phases p
+              JOIN admin.competitions k ON k.id = p.competition_id
+             WHERE k.slug = ? AND p.is_active
+               AND p.color_code <> 'GROUP') x
+     ORDER BY phase_code, sort_order');
+$fq->execute([$slug]);
+$fazy = $fq->fetchAll();
+usort($fazy, fn($x, $y) => (int)$x['sort_order'] <=> (int)$y['sort_order']);
+
+$S['fazy'] = [];
+foreach ($fazy as $f) $S['fazy'][$f['phase_code']] = $f['phase_name'];
+
+if (!$S['fazy']) json_ok(['phases' => [], 'logo_style' => 'club', 'slug' => $slug]);
 
 $dvojzapas = $S['two_legs'];
 $schvalene = $S['schvalene'] ? "g.{$S['schvalene']}" : 'TRUE';
@@ -81,7 +99,7 @@ $logoH = $T['logo'] !== null ? "h.{$T['logo']}" : "h.{$T['kod']}";
 $logoA = $T['logo'] !== null ? "a.{$T['logo']}" : "a.{$T['kod']}";
 
 $sql = "
-    SELECT g.{$S['id']} AS game_id, g.{$S['faza']} AS faza, {$tieCols}
+    SELECT g.{$S['id']} AS game_id, ph.phase_code AS faza, {$tieCols}
            g.{$S['cas']} AS start_time,
            g.{$S['skore_h']} AS hs, g.{$S['skore_a']} AS ag,
            g.{$S['final_h']} AS hf, g.{$S['final_a']} AS af,
@@ -90,10 +108,11 @@ $sql = "
            h.{$T['nazov']} AS home_name, {$logoH} AS home_logo,
            a.{$T['nazov']} AS away_name, {$logoA} AS away_logo
       FROM \"{$S['schema']}\".games g
+      JOIN admin.competition_phases ph ON ph.id = g.phase_id
       LEFT JOIN {$T['tabulka']} h ON h.{$T['kluc']} = g.{$S['domaci']}
       LEFT JOIN {$T['tabulka']} a ON a.{$T['kluc']} = g.{$S['hostia']}
-     WHERE g.{$S['faza']} IN (" . implode(',', array_fill(0, count($S['fazy']), '?')) . ")
-     ORDER BY g.{$S['faza']}, " . ($dvojzapas ? 'g.tie_id, g.leg, ' : '') . "g.{$S['id']}";
+     WHERE ph.phase_code IN (" . implode(',', array_fill(0, count($S['fazy']), '?')) . ")
+     ORDER BY ph.sort_order, " . ($dvojzapas ? 'g.tie_id, g.leg, ' : '') . "g.{$S['id']}";
 
 $st = $pdo->prepare($sql);
 $st->execute(array_keys($S['fazy']));

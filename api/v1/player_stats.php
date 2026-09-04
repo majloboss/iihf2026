@@ -17,10 +17,10 @@ $uid  = (int)$auth['user_id'];
 function stats_schema(string $slug): array {
     if ($slug === 'iihf2026') {
         return ['schema' => 'iihf2026', 'gameKey' => 'g.id',
-                'phase' => 'g.phase', 'time' => 'g.starts_at', 'body' => 'points'];
+                'time' => 'g.starts_at', 'body' => 'points'];
     }
     return ['schema' => $slug === 'ucl2026' ? '"lm2026-27"' : 'fifa2026',
-            'gameKey' => 'g.game_id', 'phase' => 'g.game_type_name',
+            'gameKey' => 'g.game_id',
             'time' => 'g.start_time', 'body' => 'points_earned'];
 }
 
@@ -85,15 +85,18 @@ foreach ($rows as $c) {
         // Radí sa podľa čísla kola, nie podľa času: pri testovaní sa hracie
         // dni posúvajú, takže časy prestanú zodpovedať poradiu kôl. Fázy bez
         // čísla (baráž, play-off) idú za ligovou fázou v poradí prvého zápasu.
+        // Fáza aj jej poradie prichádzajú z číselníka. Predtým sa názov bral
+        // z `game_type_name` a číslo kola sa z neho vyťahovalo regulárnym
+        // výrazom — poradie sa tak rozpadlo pri každej zmene názvu.
         $fq = $pdo->prepare("
-            SELECT {$s['phase']} AS faza, COUNT(*) AS tipov,
+            SELECT ph.match_stat_desc AS faza, COUNT(*) AS tipov,
                    COALESCE(SUM(t.{$b}), 0) AS body
               FROM {$sch}.tips t
               JOIN {$sch}.games g ON {$s['gameKey']} = t.game_id
+              JOIN admin.competition_phases ph ON ph.id = g.phase_id
              WHERE t.user_id = ? AND t.{$b} IS NOT NULL
-             GROUP BY 1
-             ORDER BY COALESCE(NULLIF(substring({$s['phase']} from '([0-9]+)\. kolo'), '')::int, 99),
-                      MIN({$s['time']})");
+             GROUP BY ph.match_stat_desc, ph.sort_order
+             ORDER BY ph.sort_order");
         $fq->execute([$uid]);
         $fazy = array_map(fn($x) => [
             'faza'  => $x['faza'],
