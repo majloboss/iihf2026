@@ -47,8 +47,9 @@ export const deactivateAnnouncement = (id) => apiFetch('v1/admin/announcements',
     method: 'PATCH', body: JSON.stringify({ id })
 });
 
-// Zobrazenie oznamu na Prehľade; oznam zostáva v histórii aj keď sa tam neukáže.
-export const setAnnouncementDashboard = (id, show_dashboard) =>
+// Zobrazenie oznamu na Prehľade a v histórii. Sú nezávislé — keď sú vypnuté
+// obe, oznam nie je vidieť nikde, ale nič sa nemaže a dá sa zapnúť späť.
+export const updateAnnouncementFlags = (id, { is_active, show_dashboard }) =>
     apiFetch('v1/admin/announcements', {
-        method: 'PATCH', body: JSON.stringify({ id, show_dashboard })
+        method: 'PATCH', body: JSON.stringify({ id, is_active, show_dashboard })
     });

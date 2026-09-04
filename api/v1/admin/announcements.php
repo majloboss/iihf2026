@@ -53,14 +53,28 @@ if ($method === 'PATCH') {
     $body = json_decode(file_get_contents('php://input'), true);
     $id   = (int)($body['id'] ?? 0);
     if (!$id) json_err('Chýba id', 400);
-    // Bez `show_dashboard` v tele sa oznam vypina ako predtym.
-    if ($maStlpec && array_key_exists('show_dashboard', $body)) {
-        $hodnota = filter_var($body['show_dashboard'], FILTER_VALIDATE_BOOLEAN);
-        $pdo->prepare("UPDATE admin.announcements SET show_dashboard = ? WHERE id = ?")
-            ->execute([$hodnota ? 'true' : 'false', $id]);
-    } else {
-        $pdo->prepare("UPDATE admin.announcements SET is_active = FALSE WHERE id = ?")->execute([$id]);
+
+    // Zobrazenie na Prehlade a v historii su nezavisle. Ked su obe odskrtnute,
+    // oznam nie je vidiet nikde — tak sa stiahne chybne napisana sprava. Nic
+    // sa nemaze, takze sa da kedykolvek zapnut spat.
+    $sets = [];
+    $params = [];
+
+    if (array_key_exists('is_active', $body)) {
+        $sets[] = 'is_active = ?';
+        $params[] = filter_var($body['is_active'], FILTER_VALIDATE_BOOLEAN) ? 'true' : 'false';
     }
+    if ($maStlpec && array_key_exists('show_dashboard', $body)) {
+        $sets[] = 'show_dashboard = ?';
+        $params[] = filter_var($body['show_dashboard'], FILTER_VALIDATE_BOOLEAN) ? 'true' : 'false';
+    }
+
+    // Prazdne telo znamena povodne spravanie: vypni oznam.
+    if (!$sets) { $sets[] = 'is_active = FALSE'; }
+
+    $params[] = $id;
+    $pdo->prepare('UPDATE admin.announcements SET ' . implode(', ', $sets) . ' WHERE id = ?')
+        ->execute($params);
     json_ok(['ok' => true]);
 }
 
