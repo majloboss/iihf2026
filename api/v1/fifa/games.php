@@ -60,6 +60,7 @@ $stmt = $pdo->prepare("
            g.home_score_regular, g.away_score_regular,
            g.home_score_final,   g.away_score_final,
            g.result_approved, g.game_type_code, g.game_type_name,
+           {$fazaSelect}
            g.home_team_id, g.away_team_id, g.flashscore_url,
            g.ls_home, g.ls_away, g.ls_status, g.ls_updated_at,
            ht.team_code AS home_code, ht.team_name AS home_name,
