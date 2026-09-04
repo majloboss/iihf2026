@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getAnnouncements, createAnnouncement, deactivateAnnouncement,
-         setAnnouncementDashboard } from '../../api/admin';
+import { getAnnouncements, createAnnouncement, updateAnnouncementFlags } from '../../api/admin';
 import styles from './Admin.module.css';
 
 function fmtDate(iso) {
@@ -15,7 +14,6 @@ export default function AdminAnnouncements() {
     const [loading,    setLoading]    = useState(true);
     const [text,       setText]       = useState('');
     const [saving,     setSaving]     = useState(false);
-    const [deactivating, setDeactivating] = useState(false);
     const [err,        setErr]        = useState('');
     const [ok,         setOk]         = useState('');
 
@@ -47,31 +45,39 @@ export default function AdminAnnouncements() {
         finally { setSaving(false); }
     };
 
-    const deactivate = async (id) => {
-        setDeactivating(true); setErr(''); setOk('');
+    // Rozpracovane zmeny checkboxov, kym sa neulozia. Bez toho by kazde
+    // kliknutie islo na server samostatne a omylom zaskrtnute policko by sa
+    // uz nedalo vziat spat.
+    const [zmeny, setZmeny] = useState({});   // { [id]: { is_active, show_dashboard } }
+    const [ukladam, setUkladam] = useState(null);
+
+    const hodnota = (a, pole) => zmeny[a.id]?.[pole] ?? a[pole];
+    const zmenene = (a) => {
+        const z = zmeny[a.id];
+        return !!z && (z.is_active !== a.is_active || z.show_dashboard !== a.show_dashboard);
+    };
+
+    const prepni = (a, pole, val) => setZmeny(prev => ({
+        ...prev,
+        [a.id]: {
+            is_active: a.is_active, show_dashboard: a.show_dashboard,
+            ...prev[a.id], [pole]: val,
+        },
+    }));
+
+    const ulozOznam = async (a) => {
+        const z = zmeny[a.id];
+        if (!z) return;
+        setUkladam(a.id); setErr(''); setOk('');
         try {
-            await deactivateAnnouncement(id);
-            setList(prev => prev.map(a => a.id === id ? { ...a, is_active: false } : a));
-            setOk('Oznam bol vypnutý.');
+            await updateAnnouncementFlags(a.id, z);
+            setList(prev => prev.map(x => x.id === a.id ? { ...x, ...z } : x));
+            setZmeny(prev => { const { [a.id]: _, ...zvysok } = prev; return zvysok; });
+            setOk('Oznam bol uložený.');
         } catch (e) { setErr(e.message); }
-        finally { setDeactivating(false); }
+        finally { setUkladam(null); }
     };
 
-    // Prepnutie zobrazenia na Prehlade. Oznam zostava v historii aj ked sa
-    // tam neukazuje.
-    const prepniZobrazenie = async (id, hodnota) => {
-        setErr(''); setOk('');
-        // Prepne sa hned, aby checkbox nereagoval s odstupom; pri chybe sa vrati.
-        setList(prev => prev.map(a => a.id === id ? { ...a, show_dashboard: hodnota } : a));
-        try {
-            await setAnnouncementDashboard(id, hodnota);
-        } catch (e) {
-            setList(prev => prev.map(a => a.id === id ? { ...a, show_dashboard: !hodnota } : a));
-            setErr(e.message);
-        }
-    };
-
-    const activeAnnouncement = list.find(a => a.is_active);
     const naPrehlade = list.filter(a => a.is_active && a.show_dashboard).length;
 
     return (
@@ -80,58 +86,21 @@ export default function AdminAnnouncements() {
                 <h2>Oznamy</h2>
             </div>
 
-            {activeAnnouncement && (
+            {/* Prehlad toho, co je kde vidiet. Samotne prepinanie je nizsie
+                pri kazdom ozname — tlacidlo "Vypnut" tu uz netreba. */}
+            {naPrehlade > 0 && (
                 <div style={{
                     marginTop: 20, background: '#fffbea',
                     border: '1px solid #f0d060', borderLeft: '3px solid #e6b800',
-                    borderRadius: 10, padding: 16,
+                    borderRadius: 10, padding: '10px 16px',
+                    fontSize: '0.85rem', color: '#7a5c00',
                 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
-                        <div style={{ flex: 1 }}>
-                            <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#9a7200', marginBottom: 6 }}>
-                                ★ Aktuálny oznam
-                            </div>
-                            <div style={{ fontSize: '0.9rem', color: '#222', whiteSpace: 'pre-wrap', lineHeight: 1.5 }}>
-                                {activeAnnouncement.body}
-                            </div>
-                            <div style={{ fontSize: '0.75rem', color: '#aaa', marginTop: 6 }}>
-                                {activeAnnouncement.created_by_username && `${activeAnnouncement.created_by_username} · `}{fmtDate(activeAnnouncement.created_at)}
-                            </div>
-                        </div>
-                        <button
-                            className={styles.btnSmallWarn}
-                            onClick={() => deactivate(activeAnnouncement.id)}
-                            disabled={deactivating}
-                            style={{ flexShrink: 0 }}
-                        >
-                            {deactivating ? '…' : 'Vypnúť'}
-                        </button>
-                    </div>
+                    Na Prehľade sa zobrazuje <strong>{naPrehlade}</strong>
+                    {naPrehlade === 1 ? ' oznam' : naPrehlade < 5 ? ' oznamy' : ' oznamov'}.
+                    Zaškrtávacími políčkami nižšie určíš, čo sa zobrazí na Prehľade
+                    a čo v histórii.
                 </div>
             )}
-
-            <div style={{ marginTop: 20, background: '#fff', border: '1px solid #e9ecef', borderRadius: 10, padding: 20 }}>
-                <h4 style={{ margin: '0 0 10px', color: '#1a3a6b' }}>Nový oznam</h4>
-                <textarea
-                    value={text}
-                    onChange={e => setText(e.target.value)}
-                    rows={4}
-                    placeholder="Napíš oznam pre hráčov…"
-                    style={{
-                        width: '100%', boxSizing: 'border-box',
-                        padding: '10px', border: '1px solid #ddd',
-                        borderRadius: 8, fontSize: '0.92rem',
-                        resize: 'vertical', fontFamily: 'inherit',
-                    }}
-                />
-                <div style={{ marginTop: 10, display: 'flex', gap: 10, alignItems: 'center' }}>
-                    <button className={styles.btn} onClick={submit} disabled={saving || !text.trim()}>
-                        {saving ? 'Ukladám…' : 'Pridať oznam'}
-                    </button>
-                    {err && <span className={styles.error} style={{ marginTop: 0 }}>{err}</span>}
-                    {ok  && <span className={styles.success} style={{ marginTop: 0 }}>{ok}</span>}
-                </div>
-            </div>
 
             <div style={{ marginTop: 24 }}>
                 <h4 style={{ margin: '0 0 12px', color: '#1a3a6b' }}>História oznamov</h4>
@@ -151,15 +120,24 @@ export default function AdminAnnouncements() {
                             }}>
                                 {a.is_active ? '● Aktívny' : '○ Vypnutý'}
                             </span>
-                            <span style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                                {a.is_active && (
-                                    <label style={{ display: 'flex', alignItems: 'center', gap: 5,
-                                                    fontSize: '0.75rem', color: '#555', cursor: 'pointer' }}>
-                                        <input type="checkbox" checked={!!a.show_dashboard}
-                                               onChange={e => prepniZobrazenie(a.id, e.target.checked)} />
-                                        Zobrazené v prehľade
-                                    </label>
-                                )}
+                            <span style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                                <label style={{ display: 'flex', alignItems: 'center', gap: 5,
+                                                fontSize: '0.75rem', color: '#555', cursor: 'pointer' }}>
+                                    <input type="checkbox" checked={!!hodnota(a, 'show_dashboard')}
+                                           onChange={e => prepni(a, 'show_dashboard', e.target.checked)} />
+                                    Zobrazené v prehľade
+                                </label>
+                                <label style={{ display: 'flex', alignItems: 'center', gap: 5,
+                                                fontSize: '0.75rem', color: '#555', cursor: 'pointer' }}>
+                                    <input type="checkbox" checked={!!hodnota(a, 'is_active')}
+                                           onChange={e => prepni(a, 'is_active', e.target.checked)} />
+                                    Zobrazené v histórii
+                                </label>
+                                <button className={styles.btnSmall} disabled={!zmenene(a) || ukladam === a.id}
+                                        onClick={() => ulozOznam(a)}
+                                        style={{ opacity: zmenene(a) ? 1 : 0.4 }}>
+                                    {ukladam === a.id ? '…' : 'Uložiť'}
+                                </button>
                                 <span style={{ fontSize: '0.75rem', color: '#aaa' }}>
                                     {a.created_by_username && `${a.created_by_username} · `}{fmtDate(a.created_at)}
                                 </span>
