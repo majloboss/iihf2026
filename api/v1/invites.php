@@ -157,7 +157,7 @@ if ($method === 'POST') {
             $gname->execute([$group_id]);
             $group_name = $gname->fetchColumn() ?: null;
         }
-        $subject   = 'Pozvánka do BetClub Tipovačky';
+        $subject   = 'pozvánka do tipovačky';
         $rules_url = APP_URL . '/pravidla';
 
         $group_line = $group_name

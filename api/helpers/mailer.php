@@ -1,7 +1,20 @@
 <?php
 require_once __DIR__ . '/../config/mail.php';
 
+// Jednotna predpona predmetu.
+//
+// Predmety si predtym urcoval kazdy skript sam, takze v schranke sa maily
+// z BetClubu nedali odlisit od ostatnych. Doplna sa tu, nie pri kazdom
+// volani — inak by na nu casom niekde zabudlo.
+//
+// Ak uz predpona v predmete je (napr. pri opakovanom odoslani), nepridava sa
+// druhykrat.
+function betclub_predmet(string $subject): string {
+    return str_starts_with($subject, 'Betclub - ') ? $subject : 'Betclub - ' . $subject;
+}
+
 function send_mail(string $to, string $subject, string $body): void {
+    $subject = betclub_predmet($subject);
     $host = MAIL_HOST;
     $port = MAIL_PORT;
 
@@ -46,6 +59,8 @@ function send_mail(string $to, string $subject, string $body): void {
 }
 
 function send_mail_logged(PDO $pdo, string $to, string $subject, string $body): void {
+    // Do logu ma ist ten isty predmet, aky odisiel.
+    $subject = betclub_predmet($subject);
     try {
         send_mail($to, $subject, $body);
         $pdo->prepare("INSERT INTO admin.mail_log (to_email, subject, body, status) VALUES (?,?,?,'sent')")

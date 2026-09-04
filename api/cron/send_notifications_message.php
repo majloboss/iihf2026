@@ -65,7 +65,7 @@ foreach ($spravy as $s) {
     $skratene = mb_strlen($text) > 160 ? mb_substr($text, 0, 157) . '…' : $text;
 
     if (!empty($s['email']) && $s['chce_email']) {
-        $subject = 'Správa od organizátora' . $prostred;
+        $subject = 'nová správa od admina' . $prostred;
         $body = "Ahoj {$s['username']},\n\n"
               . "organizátor ti napísal:\n\n"
               . "$text\n\n"

@@ -40,7 +40,7 @@ foreach ($ziadosti as $z) {
     $cas = (new DateTime('now', new DateTimeZone('Europe/Bratislava')))->format('j. n. Y H:i');
 
     if (!empty($z['email'])) {
-        $subject = 'Skúšobná správa z BetClubu' . $prostred;
+        $subject = 'skúšobná správa' . $prostred;
         $body = "Ahoj {$z['username']},\n\n"
               . "toto je skúšobná správa, ktorú si si vyžiadal v nastaveniach upozornení.\n"
               . "Ak ju čítaš, e-maily z BetClubu ti chodia správne.\n\n"
