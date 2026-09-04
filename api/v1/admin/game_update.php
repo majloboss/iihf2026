@@ -38,25 +38,6 @@ if (array_key_exists('venue', $body)) {
     $params[':venue'] = trim($body['venue']) ?: null;
 }
 
-// Faza z ciselnika. Stlpec pridava migracia 075 — kym nebezi, hodnota sa
-// ticho ignoruje, aby obrazovka fungovala aj pred nou.
-if (array_key_exists('phase_id', $body)
-    && stlpec_existuje($pdo, 'iihf2026', 'games', 'phase_id')) {
-    $phaseId = $body['phase_id'] === null || $body['phase_id'] === ''
-        ? null : (int)$body['phase_id'];
-
-    // Faza musi patrit tejto sutazi, inak by zapas skoncil pod cudzim kolom.
-    if ($phaseId !== null) {
-        $ov = $pdo->prepare('SELECT 1 FROM admin.competition_phases p
-                               JOIN admin.competitions k ON k.id = p.competition_id
-                              WHERE p.id = ? AND k.slug = ?');
-        $ov->execute([$phaseId, 'iihf2026']);
-        if (!$ov->fetchColumn()) json_error('Neplatná fáza pre túto súťaž', 400);
-    }
-    $sets[] = 'phase_id = :phase_id';
-    $params[':phase_id'] = $phaseId;
-}
-
 if (array_key_exists('status', $body)) {
     if (!in_array($body['status'], ['scheduled', 'live', 'finished'], true)) json_error('Neplatný status', 400);
     $sets[] = 'status = :status';
@@ -94,10 +75,31 @@ if ($has_fs_url) {
     $params[':flashscore_url'] = trim($body['flashscore_url']) ?: null;
 }
 
+$pdo = db();
+
+// Faza z ciselnika. Stlpec pridava migracia 075 — kym nebezi, hodnota sa
+// ticho ignoruje, aby obrazovka fungovala aj pred nou.
+if (array_key_exists('phase_id', $body)
+    && stlpec_existuje($pdo, 'iihf2026', 'games', 'phase_id')) {
+    $phaseId = $body['phase_id'] === null || $body['phase_id'] === ''
+        ? null : (int)$body['phase_id'];
+
+    // Faza musi patrit tejto sutazi, inak by zapas skoncil pod cudzim kolom.
+    if ($phaseId !== null) {
+        $ov = $pdo->prepare('SELECT 1 FROM admin.competition_phases p
+                               JOIN admin.competitions k ON k.id = p.competition_id
+                              WHERE p.id = ? AND k.slug = ?');
+        $ov->execute([$phaseId, 'iihf2026']);
+        if (!$ov->fetchColumn()) json_error('Neplatná fáza pre túto súťaž', 400);
+    }
+    $sets[] = 'phase_id = :phase_id';
+    $params[':phase_id'] = $phaseId;
+}
+
 if (empty($sets)) json_error('Nič na uloženie', 400);
 
 $sets[] = 'updated_at = NOW()';
-$pdo = db();
+
 try {
     $pdo->prepare('UPDATE iihf2026.games SET ' . implode(', ', $sets) . ' WHERE id = :id')
         ->execute($params);
