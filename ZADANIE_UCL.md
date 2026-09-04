@@ -201,7 +201,7 @@ Prepínajú sa podľa slugu `ucl2026` v `App.jsx`:
 7. ✅ **Tipy skupín** v rozkliku zápasu
 8. ✅ **Rozpad bodov** v Poradí hráčov
 9. ✅ **Nasadenie do produkcie** — migrácie `070`, `071` (súťaž a zápasy), livescore aj notifikačný cron zapnutý a overený
-10. 🔲 Po oficiálnom žrebe (29. 8. 2026) opraviť dvojice a termíny
+10. ✅ Po oficiálnom žrebe (29. 8. 2026) opravené dvojice a termíny
 
 ### Číselník fáz a kôl ✅ (produkcia)
 
@@ -214,10 +214,15 @@ kód a názov fázy, kód a popis zápasu, farba, zoskupenie, poradie.
 - ✅ Komponent `PhaseFilter` — jeden filter pre všetky súťaže, riadený číselníkom
 - ✅ Zbaľovanie (`LF1`–`LF8` za `LF`), farby, tooltipy z popisu
 - ✅ Výber skupiny (`BAR`) zahrnie všetky jej kolá aj hracie dni
-- 🔲 **Migrácia `075`** — `phase_id` v `games`. Pripravená, **nespúšťa sa**: zatiaľ nič
-  nečíta, filtre si skratku odvodzujú zo starých stĺpcov. Spustiť až spolu
-  s prepisom pavúka, štatistík a notifikácií.
-- 🔲 Nahradiť zvyšné natvrdo písané mapovania fáz čítaním z číselníka
+- ✅ **Migrácia `075`** — `phase_id` v `games`, spustená na DEV aj v produkcii
+- ✅ Štatistiky, filter kôl nad tabuľkami, notifikácie UCL aj pavúk čítajú
+  fázu z číselníka; skončilo dopočítavanie skratky z názvu regulárnymi výrazmi
+- ✅ Jedna obrazovka zoznamu zápasov a jeden editor pre všetky súťaže;
+  výsledok sa zadáva iba vo Výsledkoch
+- ✅ Kontroly jednoznačnosti kódov (`tools/kontrola_kodov_faz.cjs`)
+- 🔲 Zmazať `game_type_code` / `game_type_name` — **až po skončení UCL**.
+  Číta ich už len generátor rozlosovania a import z PDF, ale kým súťaž beží,
+  nemá zmysel do nich siahať.
 
 ### Pavúk ✅ (produkcia)
 
