@@ -76,8 +76,35 @@ export default function AdminMessages() {
         const item = [...(e.clipboardData?.items || [])].find(i => i.type.startsWith('image/'));
         if (item) { e.preventDefault(); pickImage(item.getAsFile()); }
     };
-    const onInput = () => setHasText(!!inputRef.current?.innerText.trim());
-    const clearInput = () => { if (inputRef.current) inputRef.current.innerText = ''; setHasText(false); };
+    // Rozpísaná správa sa priebežne odkladá, aby ju neodplavilo obnovenie
+    // stránky ani zatvorenie karty. Kľúč je per-hráča, nech sa dva rozpísané
+    // texty neprepíšu.
+    const konceptKluc = `koncept_admin_${activeUser ?? 'ziadny'}`;
+
+    const onInput = () => {
+        const t = inputRef.current?.innerText ?? '';
+        setHasText(!!t.trim());
+        try {
+            if (t.trim()) localStorage.setItem(konceptKluc, t);
+            else localStorage.removeItem(konceptKluc);
+        } catch { /* súkromné okno alebo plná pamäť — koncept sa neuloží */ }
+    };
+
+    // Obnovenie konceptu po prepnutí na hráča alebo návrate na obrazovku.
+    useEffect(() => {
+        if (!inputRef.current) return;
+        try {
+            const ulozene = localStorage.getItem(konceptKluc);
+            inputRef.current.innerText = ulozene ?? '';
+            setHasText(!!ulozene?.trim());
+        } catch { /* nedostupné úložisko */ }
+    }, [konceptKluc]);
+
+    const clearInput = () => {
+        if (inputRef.current) inputRef.current.innerText = '';
+        setHasText(false);
+        try { localStorage.removeItem(konceptKluc); } catch { /* nedostupné */ }
+    };
 
     const send = async () => {
         const body = (inputRef.current?.innerText || '').trim();
