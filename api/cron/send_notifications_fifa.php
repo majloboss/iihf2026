@@ -92,7 +92,7 @@ foreach ($finished as $g) {
     ");
     $rec->execute([$gid, $gid]);
     foreach ($rec->fetchAll() as $u) {
-        $subject  = "Výsledok: {$g['team1']} – {$g['team2']}";
+        $subject  = "výsledok: {$g['team1']} – {$g['team2']}";
         $tip_line = $u['home_score_tip'] !== null
             ? "Tvoj tip: {$u['home_score_tip']}:{$u['away_score_tip']} → " . fifa_pts_label((int)($u['points_earned'] ?? 0))
             : "Na tento zápas si nemal tip.";
@@ -155,8 +155,8 @@ function fifa_send_game_mail(PDO $pdo, int $uid, string $email, string $username
         if ($checkUntipped && !fifa_is_untipped($pdo, $uid, (int)$g['game_id'])) continue;
         $time = (new DateTime($g['start_time'], new DateTimeZone('UTC')))->setTimezone(new DateTimeZone('Europe/Bratislava'))->format('H:i');
         $subject = $type === 'game_start'
-            ? "Začína zápas: {$g['team1']} – {$g['team2']} o $time"
-            : "Netipovaný zápas: {$g['team1']} – {$g['team2']} o $time";
+            ? "začína zápas: {$g['team1']} – {$g['team2']} o $time"
+            : "netipovaný zápas: {$g['team1']} – {$g['team2']} o $time";
         $body = $type === 'game_start'
             ? "Ahoj $username,\n\nO {$min} minút začína zápas #{$g['game_id']}: {$g['team1']} – {$g['team2']} ($time).\n\nBetClub · FIFA World Cup 2026"
             : "Ahoj $username,\n\nEšte nemáš tip na zápas #{$g['game_id']}: {$g['team1']} – {$g['team2']} ($time).\nTipovanie sa uzatvára o $time.\n\nBetClub · FIFA World Cup 2026";

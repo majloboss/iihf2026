@@ -23,29 +23,31 @@ if (!$slug) json_error('Súťaž neexistuje', 404);
 if ($slug === 'iihf2026') {
     $schema  = 'iihf2026';
     $gameKey = 'g.id';
-    $phase   = 'g.phase';
     $body    = 'points';
 } else {
     $schema  = $slug === 'ucl2026' ? '"lm2026-27"' : 'fifa2026';
     $gameKey = 'g.game_id';
-    $phase   = 'g.game_type_name';
     $body    = 'points_earned';
 }
 
-// Kód fázy určuje farbu tlačidla vo filtri; IIHF vlastný kód nemá, tam sa
-// použije priamo názov fázy.
-$kodCol = $slug === 'iihf2026' ? 'g.phase' : 'g.game_type_code';
-
+// Názov, skratka, farba aj poradie prichádzajú z číselníka. Predtým sa názov
+// bral z `game_type_name`, skratka z `game_type_code` (odtiaľ SKA, SKB…)
+// a poradie sa vyťahovalo z názvu regulárnym výrazom.
 $q = $pdo->query("
-    SELECT {$phase} AS phase, {$kodCol} AS code, COUNT(DISTINCT t.game_id) AS games
+    SELECT ph.match_stat_desc AS phase, ph.match_stat_code AS code,
+           ph.color_code, ph.group_code,
+           COUNT(DISTINCT t.game_id) AS games
       FROM {$schema}.games g
+      JOIN admin.competition_phases ph ON ph.id = g.phase_id
       JOIN {$schema}.tips t ON {$gameKey} = t.game_id AND t.{$body} IS NOT NULL
-     GROUP BY 1, 2
-     ORDER BY COALESCE(NULLIF(substring({$phase} from '([0-9]+)\\. kolo'), '')::int, 99),
-              MIN(" . ($slug === 'iihf2026' ? 'g.starts_at' : 'g.start_time') . ")");
+     GROUP BY ph.match_stat_desc, ph.match_stat_code, ph.color_code,
+              ph.group_code, ph.sort_order
+     ORDER BY ph.sort_order");
 
 json_ok(array_map(fn($r) => [
     'phase' => $r['phase'],
     'code'  => $r['code'],
+    'color' => $r['color_code'],
+    'group' => $r['group_code'],
     'games' => (int)$r['games'],
 ], $q->fetchAll()));

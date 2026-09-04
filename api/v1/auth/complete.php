@@ -58,7 +58,7 @@ if ($userEmail && filter_var($userEmail, FILTER_VALIDATE_EMAIL)) {
             . "3. Vytvor vlastnú skupinu — pozvi kamarátov a súťažte medzi sebou\n\n"
             . "Veľa šťastia a pekných tipov!\n"
             . "BetClub – Tipujte s kamošmi";
-        send_mail_logged($pdo, $userEmail, 'Vitaj v BetClub!', $welcomeBody);
+        send_mail_logged($pdo, $userEmail, 'vitaj medzi nami!', $welcomeBody);
     } catch (Throwable $e) { /* non-fatal */ }
 }
 

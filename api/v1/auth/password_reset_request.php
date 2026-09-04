@@ -39,7 +39,7 @@ $body_mail = "Ahoj,\n\n"
     . "BetClub – Tipujte s kamošmi";
 
 try {
-    send_mail_logged($pdo, $email, 'Reset hesla – BetClub', $body_mail);
+    send_mail_logged($pdo, $email, 'reset hesla', $body_mail);
 } catch (Throwable $e) {
     json_error('Nepodarilo sa odoslať email: ' . $e->getMessage(), 500);
 }

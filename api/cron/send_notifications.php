@@ -106,7 +106,7 @@ foreach ($finished as $g) {
     ");
     $email_recips->execute([$g['id'], $g['id']]);
     foreach ($email_recips->fetchAll() as $u) {
-        $subject  = "Výsledok: {$g['team1']} – {$g['team2']}";
+        $subject  = "výsledok: {$g['team1']} – {$g['team2']}";
         $tip_line = $u['home_score_tip'] !== null
             ? "Tvoj tip: {$u['home_score_tip']}:{$u['away_score_tip']} → " . pts_label((int)($u['points_earned'] ?? 0))
             : "Na tento zápas si nemal tip.";
@@ -177,8 +177,8 @@ function send_game_notifications(PDO $pdo, int $uid, string $email, string $user
         }
         $time    = (new DateTime($g['starts_at']))->setTimezone(new DateTimeZone('Europe/Bratislava'))->format('H:i');
         $subject = $type === 'game_start'
-            ? "Začína zápas: {$g['team1']} – {$g['team2']} o $time"
-            : "Netipovaný zápas: {$g['team1']} – {$g['team2']} o $time";
+            ? "začína zápas: {$g['team1']} – {$g['team2']} o $time"
+            : "netipovaný zápas: {$g['team1']} – {$g['team2']} o $time";
         $body    = $type === 'game_start'
             ? "Ahoj $username,\n\nO {$min} minút začína zápas č. {$g['game_number']}: {$g['team1']} – {$g['team2']} ($time).\n\nIIHF 2026 Tipovačka"
             : "Ahoj $username,\n\nEšte nemáš tip na zápas č. {$g['game_number']}: {$g['team1']} – {$g['team2']} ($time).\nTipovanie sa uzatvára o $time.\n\nIIHF 2026 Tipovačka";

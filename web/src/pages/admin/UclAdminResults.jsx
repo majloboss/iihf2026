@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { getUclGames, recalcUcl, updateUclGameResult } from '../../api/ucl';
+import PhaseFilter from '../../components/PhaseFilter';
+import usePhases from '../../hooks/usePhases';
+import { useCompetition } from '../../context/CompetitionContext';
 import { getUclAdminTips, setUclLive, clearUclLive } from '../../api/uclAdmin';
 import UclTieSummary from '../../components/UclTieSummary';
 import gStyles from '../user/Games.module.css';
@@ -387,11 +390,14 @@ export default function UclAdminResults() {
     const [searchParams] = useSearchParams();
     // Odkaz z pavúka predvolí fázu aj deň: /admin/results?faza=SF&den=2027-05-04.
     // Fázy vyraďovacej časti majú tu rovnaký kľúč ako kód zápasu.
+    const { activeCompetition } = useCompetition();
+    const competitionId = activeCompetition?.id;
+    const { sediFaze } = usePhases(competitionId);
+
     const [phase, setPhase] = useState(() => {
         const kod = searchParams.get('faza');
-        return KNOCKOUT.includes(kod) ? kod : 'all';
+        return kod || 'all';
     });
-    const [roundFilter, setRoundFilter] = useState(null);
     const [selectedDay, setSelectedDay] = useState(() => searchParams.get('den') || null);
     const [recalcing, setRecalcing] = useState(false);
     const [recalcMsg, setRecalcMsg] = useState('');
@@ -412,17 +418,9 @@ export default function UclAdminResults() {
         finally { setRecalcing(false); }
     };
 
-    const lfActive = phase === 'LF';
-
-    const vyhovuje = g => {
-        if (phase === 'LF') {
-            if (g.game_type_code !== 'LEAGUE') return false;
-            if (roundFilter && Number(g.round_no) !== roundFilter) return false;
-        } else if (phase !== 'all') {
-            if (g.game_type_code !== phase) return false;
-        }
-        return true;
-    };
+    // Skratku kola nesie zápas z číselníka; výber môže byť aj celá skupina
+    // (BAR zahrnie BAR-1 aj BAR-2).
+    const vyhovuje = g => phase === 'all' || sediFaze(g.match_stat_code, phase);
 
     const filtered = games
         .filter(g => vyhovuje(g) && (!selectedDay || dayKey(g.start_time) === selectedDay))
@@ -434,37 +432,16 @@ export default function UclAdminResults() {
     if (loading) return <p style={{ padding: 20 }}>Načítavam…</p>;
     if (error) return <p style={{ color: 'red', padding: 20 }}>Chyba: {error}</p>;
 
-    const pBtnClass = (p, on) => {
-        const color = p === 'F' ? [gStyles.pGold, gStyles.pGoldOn]
-                    : p === 'PO' ? [gStyles.pBronze, gStyles.pBronzeOn]
-                    : KNOCKOUT.includes(p) ? [gStyles.pPlayoff, gStyles.pPlayoffOn]
-                    : [gStyles.pGroup, gStyles.pGroupOn];
-        return [gStyles.pBtn, color[0], on ? color[1] : ''].join(' ');
-    };
-
     return (
         <div className={gStyles.wrap}>
             <div className={gStyles.topBar}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <div className={gStyles.filters} style={{ alignItems: 'center' }}>
-                    <button className={[gStyles.pBtn, gStyles.pGroup, phase === 'all' ? gStyles.pGroupOn : ''].join(' ')}
-                            onClick={() => { setPhase('all'); setRoundFilter(null); setSelectedDay(null); }}>ALL</button>
-                    {/* Kola ligovej fazy su rovnocenne filtre — netreba ich hladat
-                        v druhom riadku pod tlacidlom LF. */}
-                    {[1, 2, 3, 4, 5, 6, 7, 8].map(r => (
-                        <button key={r}
-                                className={[gStyles.pBtn, gStyles.pGroup,
-                                            lfActive && roundFilter === r ? gStyles.pGroupOn : ''].join(' ')}
-                                onClick={() => { setPhase('LF'); setRoundFilter(r); setSelectedDay(null); }}>
-                            LF{r}
-                        </button>
-                    ))}
-                    {KNOCKOUT.map(p => (
-                        <button key={p} className={pBtnClass(p, phase === p)}
-                                onClick={() => { setPhase(p); setRoundFilter(null); setSelectedDay(null); }}>
-                            {p === 'PO' ? 'BAR' : p}
-                        </button>
-                    ))}
+                {/* Rovnaké farebné ikony ako v Zápasoch — skratky, farby aj
+                    zbaľovanie určuje číselník. */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                    <PhaseFilter competitionId={competitionId}
+                                 hodnota={phase === 'all' ? '' : phase}
+                                 onZmena={kod => { setPhase(kod === '' ? 'all' : kod); setSelectedDay(null); }} />
                 </div>
                 <button className={styles.btnRecalc} onClick={handleRecalc} disabled={recalcing}
                         style={{ flex: '0 0 auto', whiteSpace: 'nowrap' }}>
