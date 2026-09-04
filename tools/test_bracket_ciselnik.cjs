@@ -23,7 +23,13 @@ const POVODNE = {
 };
 
 // Kody sa v ciselniku premenovali.
-const PREMENOVANE = { BRONZE: 'BR', GOLD: 'F', BM: 'BR', PO: 'BAR' };
+// Kody sa v ciselniku premenovali; kluc je sutaz + povodny kod, lebo to iste
+// 'F' znamena vo FIFA finale (-> FIN) a v IIHF ostava 'F'.
+const PREMENOVANE = {
+    'iihf2026:BRONZE': 'BR', 'iihf2026:GOLD': 'F',
+    'fifa2026:BM': 'BR', 'fifa2026:F': 'FIN',
+    'ucl2026:PO': 'BAR',
+};
 
 (async () => {
     const c = new Client({
@@ -49,7 +55,7 @@ const PREMENOVANE = { BRONZE: 'BR', GOLD: 'F', BM: 'BR', PO: 'BAR' };
         console.log(`${slug.padEnd(10)}${kody.join(' → ')}`);
 
         // Kazda povodna faza musi mat v ciselniku svoj protajsok.
-        const ocakavane = povodne.map(k => PREMENOVANE[k] ?? k);
+        const ocakavane = povodne.map(k => PREMENOVANE[`${slug}:${k}`] ?? k);
         const chyba = ocakavane.filter(k => !kody.includes(k));
         check(chyba.length === 0,
               `${slug}: všetky pôvodné fázy sú v číselníku` +
