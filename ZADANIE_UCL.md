@@ -90,12 +90,13 @@ Priebežné skóre sa načítava z Flashscore cez OpenRouter — **Nástroje →
 → Priebežné výsledky**. Model je použitý zámerne: vie sa zorientovať aj keď
 Flashscore zmení štruktúru, na rozdiel od pevného parsera.
 
-- 🟠 Jeden dopyt na Flashscore a jedno volanie modelu bez ohľadu na počet zápasov
-- 🟠 Ukladá sa skóre (`ls_home`, `ls_away`), stav (`ls_status`) a polčas (migrácia `060`)
-- 🟠 Adresu zápasu zadáva admin v **Zápasy → Upraviť** — bez nej sa zápas nesleduje
-- 🟠 Keď livescore potvrdí začiatok zápasu, tipovanie sa uzavrie
-- 🔲 **Cron** — zatiaľ sa spúšťa ručne alebo zaškrtnutím v admin obrazovke
-- 🔲 **Návrh výsledku** — predvyplnenie skóre v správe výsledkov po skončení zápasu
+- ✅ Jeden dopyt na Flashscore a jedno volanie modelu bez ohľadu na počet zápasov
+- ✅ Ukladá sa skóre (`ls_home`, `ls_away`), stav (`ls_status`) a polčas (migrácia `060`)
+- ✅ Adresu zápasu zadáva admin v **Zápasy → Upraviť** — bez nej sa zápas nesleduje
+- ✅ Keď livescore potvrdí začiatok zápasu, tipovanie sa uzavrie
+- ✅ **Cron** — `run_livescore.php`, zapnutý v produkcii
+- 🔲 **Návrh výsledku** — predvyplnenie skóre v správe výsledkov po skončení
+  zápasu. Odložené: uvidíme podľa reality pri prvých zápasoch 8. 9.
 
 **Neukladajú sa** karty ani strelci: keby livescore vypadol, nemal by ich kto
 doplniť ručne a nekompletný údaj je horší než žiadny.
@@ -223,6 +224,18 @@ kód a názov fázy, kód a popis zápasu, farba, zoskupenie, poradie.
 - 🔲 Zmazať `game_type_code` / `game_type_name` — **až po skončení UCL**.
   Číta ich už len generátor rozlosovania a import z PDF, ale kým súťaž beží,
   nemá zmysel do nich siahať.
+
+### Spoločné komponenty ✅ (produkcia)
+
+Rovnaká obrazovka pre všetky súťaže; rozdiely opisuje mapovanie, ktoré dodá
+volajúca obrazovka.
+
+- ✅ `PhaseFilter` — filter kôl (Zápasy, admin Zápasy, admin Výsledky, Skupiny)
+- ✅ `AdminGamesScreen` + `GameEditor` — zoznam zápasov a úprava v admine
+  (435 riadkov → 245); výsledok sa zadáva **iba** vo Výsledkoch, kde je logika
+  predĺženia a nájazdov
+- ✅ `Bracket` — pavúk
+- ✅ `usePhases` — číselník fáz a porovnanie kódu so skupinou
 
 ### Pavúk ✅ (produkcia)
 
