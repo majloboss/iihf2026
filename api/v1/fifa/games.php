@@ -4,6 +4,17 @@
 $auth = require_auth();
 $pdo  = db();
 
+// Skratka kola z ciselnika. Stlpec `phase_id` pridava migracia 075 — kym
+// nebezi, appka si skratku odvodi zo stareho `game_type_code`.
+$maPhaseId = stlpec_existuje($pdo, 'fifa2026', 'games', 'phase_id');
+$fazaSelect = $maPhaseId
+    ? 'g.phase_id, ph.match_stat_code, ph.match_stat_desc,'
+    : 'NULL::int AS phase_id, NULL AS match_stat_code, NULL AS match_stat_desc,';
+$fazaJoin = $maPhaseId
+    ? 'LEFT JOIN admin.competition_phases ph ON ph.id = g.phase_id'
+    : '';
+
+
 if ($method !== 'GET') json_error('Method not allowed', 405);
 
 // Deterministické typy (PDO pgsql môže vracať bool ako 't'/'f' a int ako string)
@@ -25,12 +36,14 @@ if ($id) {
                g.home_score_regular, g.away_score_regular,
                g.home_score_final, g.away_score_final,
                g.result_approved, g.game_type_code, g.game_type_name,
+               {$fazaSelect}
            g.home_team_id, g.away_team_id, g.flashscore_url,
            g.ls_home, g.ls_away, g.ls_status, g.ls_updated_at,
                ht.team_code AS home_code, ht.team_name AS home_name, ht.group_name AS home_group,
                at.team_code AS away_code, at.team_name AS away_name, at.group_name AS away_group,
                t.home_score_tip, t.away_score_tip, t.points_earned
         FROM fifa2026.games g
+        {$fazaJoin}
         LEFT JOIN fifa2026.teams ht ON ht.team_id = g.home_team_id
         LEFT JOIN fifa2026.teams at ON at.team_id = g.away_team_id
         LEFT JOIN fifa2026.tips  t  ON t.game_id  = g.game_id AND t.user_id = :uid
@@ -47,12 +60,14 @@ $stmt = $pdo->prepare("
            g.home_score_regular, g.away_score_regular,
            g.home_score_final,   g.away_score_final,
            g.result_approved, g.game_type_code, g.game_type_name,
+           {$fazaSelect}
            g.home_team_id, g.away_team_id, g.flashscore_url,
            g.ls_home, g.ls_away, g.ls_status, g.ls_updated_at,
            ht.team_code AS home_code, ht.team_name AS home_name,
            at.team_code AS away_code, at.team_name AS away_name,
            t.home_score_tip, t.away_score_tip, t.points_earned
     FROM fifa2026.games g
+    {$fazaJoin}
     LEFT JOIN fifa2026.teams ht ON ht.team_id = g.home_team_id
     LEFT JOIN fifa2026.teams at ON at.team_id = g.away_team_id
     LEFT JOIN fifa2026.tips  t  ON t.game_id  = g.game_id AND t.user_id = :uid

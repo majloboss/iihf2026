@@ -18,12 +18,38 @@ function ucl_cast_game(?array $r): ?array {
     return $r;
 }
 
+// Faza z ciselnika. Stlpec `phase_id` pridava migracia 075 — kym nebezi,
+// appka musi fungovat aj bez neho, preto sa jeho pritomnost overuje.
+//
+// `navrh_kolo` je skratka, ktoru by zapasu priradila migracia. Sluzi na to,
+// aby bolo v admine vidiet, co sa naviaze, este pred jej spustenim.
+$maPhaseId = stlpec_existuje($pdo, 'lm2026-27', 'games', 'phase_id');
+
+$navrhKolo = "CASE
+        WHEN g.game_type_code = 'LEAGUE'
+            THEN 'LF' || substring(g.game_type_name from '([0-9]+)\. kolo')
+        WHEN g.leg IS NOT NULL
+            THEN (CASE g.game_type_code WHEN 'PO' THEN 'BAR'
+                  ELSE g.game_type_code END) || '-' || g.leg
+        ELSE g.game_type_code
+    END AS navrh_kolo,";
+
+$phaseSelect = $maPhaseId
+    ? "g.phase_id, ph.match_stat_code, ph.match_stat_desc, ph.color_code AS phase_color, $navrhKolo"
+    : "NULL::int AS phase_id, NULL AS match_stat_code, NULL AS match_stat_desc,
+       NULL AS phase_color, $navrhKolo";
+
+$phaseJoin = $maPhaseId
+    ? 'LEFT JOIN admin.competition_phases ph ON ph.id = g.phase_id'
+    : '';
+
 $select = '
     SELECT g.game_id, g.start_time, g.venue, g.tips_open,
            g.home_score_regular, g.away_score_regular,
            g.home_score_final,   g.away_score_final,
            g.home_score_halftime, g.away_score_halftime,
            g.result_approved, g.game_type_code, g.game_type_name,
+           ' . $phaseSelect . '
            g.tie_id, g.leg,
            -- Pri odvete sa hodi vidiet prvy zapas: rozhoduje sucet za dvojicu.
            -- Domaci odvety bol v prvom zapase hostom, preto su goly prehodene.
@@ -45,6 +71,7 @@ $select = '
            acs.flag_file AS away_flag,
            t.home_score_tip, t.away_score_tip, t.points_earned
       FROM "lm2026-27".games g
+      ' . $phaseJoin . '
       LEFT JOIN admin.uefa_clubs hc ON hc.club_id = g.home_team_id
       LEFT JOIN admin.uefa_clubs ac ON ac.club_id = g.away_team_id
       LEFT JOIN admin.countries  hs ON hs.country_code = hc.country_code

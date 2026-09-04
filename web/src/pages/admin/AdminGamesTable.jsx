@@ -2,7 +2,10 @@ import styles from './Admin.module.css';
 
 // Zdieľaná tabuľka zápasov pre admin (IIHF aj FIFA).
 // rows: pole normalizovaných objektov:
-//   { key, number, phaseLabel, dateLocal, homeCell, awayCell, result, venue, status, flashscore_url, raw }
+//   { key, number, phaseLabel, phaseOld, dateLocal, homeCell, awayCell, result, venue, status, flashscore_url, raw }
+//
+// `phaseOld` je docasny stlpec na kontrolu migracie 075: `phaseLabel` uz cita
+// naviazanu fazu z ciselnika, `phaseOld` stare stlpce. Po overeni sa zmaze.
 // onEdit(raw)
 const STATUS_LABEL = { scheduled: 'Plánovaný', live: 'Prebieha', finished: 'Odohraný' };
 
@@ -14,6 +17,7 @@ export default function AdminGamesTable({ rows, onEdit }) {
                 <tr>
                     <th>#</th>
                     <th>Fáza</th>
+                    <th>Fáza OLD</th>
                     <th>Dátum</th>
                     <th>Domáci</th>
                     <th>Hostia</th>
@@ -27,7 +31,15 @@ export default function AdminGamesTable({ rows, onEdit }) {
                 {rows.map(r => (
                     <tr key={r.key}>
                         <td data-label="#">{r.number}</td>
-                        <td data-label="Fáza"><span className={styles.badge}>{r.phaseLabel}</span></td>
+                        <td data-label="Fáza">
+                            {r.phaseLabel
+                                ? <span className={styles.badge}>{r.phaseLabel}</span>
+                                : <span style={{ color: '#ccc' }}>—</span>}
+                        </td>
+                        <td data-label="Fáza OLD">
+                            <span className={styles.badge}
+                                  style={{ opacity: 0.55 }}>{r.phaseOld}</span>
+                        </td>
                         <td data-label="Dátum" style={{whiteSpace:'nowrap'}}>{r.dateLocal}</td>
                         <td data-label="Domáci">{r.homeCell}</td>
                         <td data-label="Hostia">{r.awayCell}</td>

@@ -15,7 +15,7 @@ $cid = (int)($_GET['competition_id'] ?? 0);
 if (!$cid) json_error('Chýba competition_id', 400);
 
 $q = $pdo->prepare('
-    SELECT phase_code, phase_name, match_stat_code, match_stat_desc,
+    SELECT id, phase_code, phase_name, match_stat_code, match_stat_desc,
            color_code, group_code, sort_order
       FROM admin.competition_phases
      WHERE competition_id = ? AND is_active
@@ -23,6 +23,7 @@ $q = $pdo->prepare('
 $q->execute([$cid]);
 
 json_ok(array_map(fn($r) => [
+    'id'         => (int)$r['id'],
     'phase_code' => $r['phase_code'],
     'phase_name' => $r['phase_name'],
     'code'       => $r['match_stat_code'],
