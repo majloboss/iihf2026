@@ -193,14 +193,41 @@ Prepínajú sa podľa slugu `ucl2026` v `App.jsx`:
 ## Stav a ďalšie kroky
 
 1. ✅ Migrácie `044`–`057` spustené na DB-DEV-BET
-2. 🟠 Číselníky štátov a klubov vrátane admin obrazoviek
-3. 🟠 Generátor rozlosovania (189 zápasov)
-4. 🟠 Používateľské aj admin obrazovky, tipovanie, tabuľka, bodovanie
-5. 🟠 **Validácie výsledku** — zákaz pred začiatkom, pravidlá predĺženia (overené 10 testami)
-6. 🟠 **Zobrazenie `X:Y (A:B pp)`** po predĺžení
-7. 🟠 **Tipy skupín** v rozkliku zápasu
-8. 🟠 **Rozpad bodov** v Poradí hráčov
-9. 🔲 Po oficiálnom žrebe opraviť dvojice a termíny
+2. ✅ Číselníky štátov a klubov vrátane admin obrazoviek
+3. ✅ Generátor rozlosovania (189 zápasov)
+4. ✅ Používateľské aj admin obrazovky, tipovanie, tabuľka, bodovanie
+5. ✅ **Validácie výsledku** — zákaz pred začiatkom, pravidlá predĺženia (overené 10 testami)
+6. ✅ **Zobrazenie `X:Y (A:B pp)`** po predĺžení
+7. ✅ **Tipy skupín** v rozkliku zápasu
+8. ✅ **Rozpad bodov** v Poradí hráčov
+9. ✅ **Nasadenie do produkcie** — migrácie `070`, `071` (súťaž a zápasy), livescore aj notifikačný cron zapnutý a overený
+10. 🔲 Po oficiálnom žrebe (29. 8. 2026) opraviť dvojice a termíny
+
+### Číselník fáz a kôl ✅ (produkcia)
+
+Skratka kola do filtrov a štatistík sa odvodzovala z názvu regulárnymi
+výrazmi, zvlášť pre každú súťaž. Teraz je v číselníku `admin.competition_phases`:
+kód a názov fázy, kód a popis zápasu, farba, zoskupenie, poradie.
+
+- ✅ Migrácie `072`–`074` (štruktúra), `076` (obsah, 41 fáz naprieč tromi súťažami)
+- ✅ Správa v **Číselníky → Fázy a kolá**
+- ✅ Komponent `PhaseFilter` — jeden filter pre všetky súťaže, riadený číselníkom
+- ✅ Zbaľovanie (`LF1`–`LF8` za `LF`), farby, tooltipy z popisu
+- ✅ Výber skupiny (`BAR`) zahrnie všetky jej kolá aj hracie dni
+- 🔲 **Migrácia `075`** — `phase_id` v `games`. Pripravená, **nespúšťa sa**: zatiaľ nič
+  nečíta, filtre si skratku odvodzujú zo starých stĺpcov. Spustiť až spolu
+  s prepisom pavúka, štatistík a notifikácií.
+- 🔲 Nahradiť zvyšné natvrdo písané mapovania fáz čítaním z číselníka
+
+### Pavúk ✅ (produkcia)
+
+- ✅ Jeden endpoint `/v1/bracket?competition_id=` a jeden komponent `Bracket`
+  pre všetky tri súťaže; rozdiely schém rieši mapovanie stĺpcov
+- ✅ Dostupný aj vo FIFA a IIHF (**Tabuľky → Play-off**)
+- ✅ Strom sa skladá **od finále dozadu** — poradie zápasov v databáze štruktúru
+  nenesie (FIFA: `R16[1]` berie víťazov z `R32` #1 a #4), väzba sa hľadá podľa tímov
+- ✅ Text podľa športu: hokej nájazdy, futbal penalty
+- ✅ Starý `/v1/ucl/bracket` odstránený
 
 ---
 

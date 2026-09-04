@@ -314,6 +314,9 @@ Poradie migrácie:
 18f. 🟠 **Auto-prepočet tabuliek aj cez obrazovku Výsledky** — `fifa_game_update.php` (volaný z FifaAdminResults, hlavný spôsob zadávania výsledkov adminom) neprepočítaval tabuľky skupín — robil to len `fifa_game_edit.php`. Doplnené volanie `fifa_recalc_standings()` pre skupinové zápasy aj do `fifa_game_update.php`.
 18b. 🟠 **Auto-prepočet tabuliek skupín** — skupinové tabuľky boli nulové, lebo `group_standings` sa prepočítaval len manuálnym POST sync-om. Logika presunutá do `helpers/fifa_standings_fn.php::fifa_recalc_standings()` a volá sa teraz automaticky v `fifa_game_edit.php` pri každej zmene stavu výsledku skupinového zápasu (schválenie aj zrušenie). POST admin endpoint volá tú istú funkciu (fallback). **Pozn.:** existujúce odohrané zápasy treba raz manuálne presynchronizovať (POST /v1/admin/fifa-group-standings), potom už beží samo.
 19. 🟡 *Nice-to-have:* automatické párovanie knockout bracketu z víťazov skupín (teraz manuálne)
+20. ✅ **Pavúk pre FIFA** — Tabuľky → Play-off; spoločný komponent so všetkými súťažami, strom sa skladá od finále
+21. ✅ **Filter kôl z číselníka** — spoločný `PhaseFilter` namiesto natvrdo písaného zoznamu fáz
+22. ✅ **Biela obrazovka po nasadení** — `skipWaiting` presunutý do `install`; k tomu `updateViaCache: 'none'`, bez ktorého si prehliadač cachoval samotný `sw.js` a nová verzia sa neprejavila
 
 ---
 
@@ -330,7 +333,7 @@ Poradie migrácie:
 | 7 | **Hromadné zadanie výsledkov** — nie je potrebné, futbalové zápasy nejdu naraz, admin zadáva po jednom cez livescore. | ❌ nepotrebné |
 | 8 | **Export výsledkov** — CSV export poradia skupiny. | ❌ nepotrebné |
 | 9 | **Správy/chat** — správa adminovi + jednoduchý chat pre tipérov v skupine. Nie sociálna sieť. Riešiť ako úplne posledné. | ✅ chat s adminom v produkcii (text+obrázky); user↔user neimplementované (zámerne) |
-| 10 | **Štatistiky usera** — úspešnosť, najlepší/najhorší zápas, streak. | 🔲 dlhodobé |
+| 10 | **Štatistiky usera** — úspešnosť, najlepší/najhorší zápas, streak. | ✅ produkcia (Profil → Štatistiky, výber súťaže aj „všetky", vyhodnotenie po kolách) |
 | 11 | **Sieň slávy** — po skončení každého turnaja sa uloží finálne globálne poradie. Top 10 dostane body (1.=10, 2.=9, ... 10.=1, od 11.=0). Tri tabuľky: (a) Globálna (všetky turnaje), (b) Futbalová (FIFA, LM, ME, Olympiáda...), (c) Hokejová (MS, Olympiáda...). Body sa kumulujú naprieč turnajmi v rámci športu — tipér súťaží len v tom športe ktorý tipuje. Klik na hráča rozroluje turnaje kde získal body (accordion). | ✅ produkcia (naplní sa po skončení 1. turnaja) |
 
 ### Obrazovka Skupiny — záložky ✅ (main/prod)
