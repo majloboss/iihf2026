@@ -40,6 +40,15 @@ const V_HISTORII  = 'SELECT id FROM admin.announcements WHERE is_active = TRUE';
     console.log(`  na Prehľade: ${p.map(r => '#' + r.id).join(', ') || 'žiadny'}`);
     console.log(`  v histórii:  ${h.map(r => '#' + r.id).join(', ') || 'žiadny'}\n`);
 
+    // Historia ma zmysel len ked v nej nieco je. Ked ju cely archiv opusti,
+    // je to priznak, ze `is_active` zmenilo vyznam pod rukami — presne to sa
+    // stalo, ked historia zacala tento priznak respektovat.
+    const { rows: pocty } = await c.query(
+        'SELECT COUNT(*)::int spolu, COUNT(*) FILTER (WHERE is_active)::int historia' +
+        ' FROM admin.announcements');
+    check(pocty[0].spolu === 0 || pocty[0].historia > 1,
+          `história nie je prázdna (${pocty[0].historia} z ${pocty[0].spolu} oznamov)`);
+
     await c.query('BEGIN');
     try {
         const { rows: novy } = await c.query(
