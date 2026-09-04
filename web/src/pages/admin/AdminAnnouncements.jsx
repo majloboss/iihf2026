@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { getAnnouncements, createAnnouncement, deactivateAnnouncement } from '../../api/admin';
+import { getAnnouncements, createAnnouncement, deactivateAnnouncement,
+         setAnnouncementDashboard } from '../../api/admin';
 import styles from './Admin.module.css';
 
 function fmtDate(iso) {
@@ -18,7 +19,11 @@ export default function AdminAnnouncements() {
     const [err,        setErr]        = useState('');
     const [ok,         setOk]         = useState('');
 
-    const normalize = a => ({ ...a, is_active: a.is_active === true || a.is_active === 't' || a.is_active === '1' || a.is_active === 1 });
+    // PDO pgsql vracia boolean ako 't'/'f' — reťazec 'f' je v JS pravdivý.
+    const naBool = v => v === true || v === 't' || v === '1' || v === 1;
+    const normalize = a => ({ ...a,
+        is_active: naBool(a.is_active),
+        show_dashboard: naBool(a.show_dashboard) });
 
     useEffect(() => {
         getAnnouncements()
@@ -33,8 +38,8 @@ export default function AdminAnnouncements() {
         try {
             const r = await createAnnouncement(text.trim());
             setList(prev => [
-                { ...r, body: text.trim(), is_active: true },
-                ...prev.map(a => ({ ...a, is_active: false })),
+                { ...r, body: text.trim(), is_active: true, show_dashboard: true },
+                ...prev,
             ]);
             setText('');
             setOk('Oznam bol pridaný.');
@@ -52,7 +57,22 @@ export default function AdminAnnouncements() {
         finally { setDeactivating(false); }
     };
 
+    // Prepnutie zobrazenia na Prehlade. Oznam zostava v historii aj ked sa
+    // tam neukazuje.
+    const prepniZobrazenie = async (id, hodnota) => {
+        setErr(''); setOk('');
+        // Prepne sa hned, aby checkbox nereagoval s odstupom; pri chybe sa vrati.
+        setList(prev => prev.map(a => a.id === id ? { ...a, show_dashboard: hodnota } : a));
+        try {
+            await setAnnouncementDashboard(id, hodnota);
+        } catch (e) {
+            setList(prev => prev.map(a => a.id === id ? { ...a, show_dashboard: !hodnota } : a));
+            setErr(e.message);
+        }
+    };
+
     const activeAnnouncement = list.find(a => a.is_active);
+    const naPrehlade = list.filter(a => a.is_active && a.show_dashboard).length;
 
     return (
         <div style={{ maxWidth: 700 }}>
@@ -131,8 +151,18 @@ export default function AdminAnnouncements() {
                             }}>
                                 {a.is_active ? '● Aktívny' : '○ Vypnutý'}
                             </span>
-                            <span style={{ fontSize: '0.75rem', color: '#aaa' }}>
-                                {a.created_by_username && `${a.created_by_username} · `}{fmtDate(a.created_at)}
+                            <span style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                {a.is_active && (
+                                    <label style={{ display: 'flex', alignItems: 'center', gap: 5,
+                                                    fontSize: '0.75rem', color: '#555', cursor: 'pointer' }}>
+                                        <input type="checkbox" checked={!!a.show_dashboard}
+                                               onChange={e => prepniZobrazenie(a.id, e.target.checked)} />
+                                        Zobrazené v prehľade
+                                    </label>
+                                )}
+                                <span style={{ fontSize: '0.75rem', color: '#aaa' }}>
+                                    {a.created_by_username && `${a.created_by_username} · `}{fmtDate(a.created_at)}
+                                </span>
                             </span>
                         </div>
                         <div style={{ fontSize: '0.88rem', color: '#333', whiteSpace: 'pre-wrap', lineHeight: 1.5 }}>

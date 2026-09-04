@@ -134,7 +134,7 @@ function TabSkupiny() {
                         <span className={styles.stepNum}>1</span>
                         <div>
                             <strong>Vytvor pozvánku</strong>
-                            <p>V Profile → <em>Pozvánky</em> klikni na <em>Nová pozvánka</em>. Môžeš zadať e-mail adresáta — pozvánka mu bude doručená automaticky. Bez e-mailu ti systém vygeneruje link, ktorý mu pošleš sám.</p>
+                            <p>V Správach → <em>Pozvánky</em> klikni na <em>Nová pozvánka</em>. Môžeš zadať e-mail adresáta — pozvánka mu bude doručená automaticky. Bez e-mailu ti systém vygeneruje link, ktorý mu pošleš sám.</p>
                         </div>
                     </div>
                     <div className={styles.step}>
@@ -257,9 +257,12 @@ function TabOvladanie() {
                 <div className={styles.guideList}>
                     <div className={styles.guideItem}><span className={styles.guideLabel}>Filter nenatipovaných (1x2)</span> — prvé tlačidlo. Tmavé = zobrazené len zápasy bez tvojho tipu.</div>
                     <div className={styles.guideItem}><span className={styles.guideLabel}>Filtre fázy</span> — ALL (všetko), GRP / skupiny, vyraďovacie kolá (napr. R32, R16, QF, SF, bronz, finále). Pri voľbe GRP sa zobrazí riadok skupín (A, B, C…).</div>
-                    <div className={styles.guideItem}><span className={styles.guideLabel}>TAB</span> — prepne na skupinové tabuľky tímov. Klikom na tím sa vrátiš na jeho zápasy.</div>
+                    <div className={styles.guideItem}><span className={styles.guideLabel}>Farebné ikony</span> — filter podľa kola. Skratky sa líšia podľa turnaja: v hokeji <em>A, B, QF, SF, BR, F</em>, vo futbale <em>A–L, R32, R16, QF, SF, BR, FIN</em>, v Lige majstrov <em>LF</em> (osem kôl ligovej fázy), <em>BAR, R16, QF, SF, F</em>.</div>
+                    <div className={styles.guideItem}><span className={styles.guideLabel}>Zbalené kolá</span> — ikona so skupinou (napr. <em>LF</em> alebo <em>GRP</em>) sa po kliknutí rozbalí na jednotlivé kolá. Kliknutím na samotnú skupinu sa zobrazia všetky jej zápasy naraz.</div>
+                    <div className={styles.guideItem}><span className={styles.guideLabel}>ALL</span> — zruší všetky filtre naraz (kolo, tím aj dátum).</div>
+                    <div className={styles.guideItem}><span className={styles.guideLabel}>TAB</span> — prepne na obrazovku Tabuľky.</div>
                     <div className={styles.guideItem}><span className={styles.guideLabel}>Kalendár</span> — filter podľa dátumu. Po otvorení sa automaticky nastaví aktuálne kolo.</div>
-                    <div className={styles.guideItem}><span className={styles.guideLabel}>Vlajky tímov</span> — filter podľa tímu.</div>
+                    <div className={styles.guideItem}><span className={styles.guideLabel}>Vlajky tímov</span> — filter podľa tímu. V Lige majstrov je pod tlačidlom <strong>KLUB</strong>, lebo klubov je 36.</div>
                     <div className={styles.guideItem}><span className={styles.guideLabel}>Tipovanie</span> — pri otvorených zápasoch zadáš skóre priamo na karte a potvrdíš.</div>
                     <div className={styles.guideItem}><span className={styles.guideLabel}>Tipy skupín</span> — pri live a odohraných zápasoch rozbalíš tipy členov tvojich skupín (počas live sa zobrazujú priebežné body).</div>
                 </div>
@@ -267,8 +270,13 @@ function TabOvladanie() {
 
             <div className={styles.card}>
                 <h3 className={styles.cardTitle}>Tabuľky</h3>
-                <p>Skupinové tabuľky tímov (poradie tímov v skupinách). Pri turnajoch s viacerými skupinami obsahuje aj <strong>tabuľku najlepších tretích miest</strong> (ktoré tretie tímy postupujú do vyraďovacej časti).</p>
-                <p>Tú istú tabuľku otvoríš aj z obrazovky Zápasy tlačidlom <strong>TAB</strong>. Klikom na tím sa prepneš na zoznam jeho zápasov.</p>
+                <p>Obrazovka má dve záložky:</p>
+                <div className={styles.guideList}>
+                    <div className={styles.guideItem}><span className={styles.guideLabel}>Skupiny</span> — poradie tímov v skupinách. Pri turnajoch s viacerými skupinami obsahuje aj <strong>tabuľku najlepších tretích miest</strong> (ktoré tretie tímy postupujú ďalej). V Lige majstrov je namiesto skupín jedna spoločná <strong>ligová fáza</strong> so všetkými 36 klubmi.</div>
+                    <div className={styles.guideItem}><span className={styles.guideLabel}>Play-off</span> — pavúk vyraďovacej časti. Fázy idú zľava doprava, postupujúci tím stojí vedľa zápasu, do ktorého ide. Klikom na skóre sa prepneš na daný zápas.</div>
+                </div>
+                <p>Tú istú obrazovku otvoríš aj zo Zápasov tlačidlom <strong>TAB</strong>. Klikom na tím sa prepneš na zoznam jeho zápasov.</p>
+                <p className={styles.note}>V hokeji a futbale sa vyraďovacia časť hrá na <strong>jeden zápas</strong> — pri nerozhodnom výsledku rozhoduje predĺženie, prípadne nájazdy (hokej) alebo penalty (futbal). V Lige majstrov sa hrá na <strong>dva zápasy</strong> a rozhoduje súčet gólov; finále je jediný zápas.</p>
             </div>
 
             <div className={styles.card}>
@@ -278,15 +286,26 @@ function TabOvladanie() {
 
             <div className={styles.card}>
                 <h3 className={styles.cardTitle}>Profil</h3>
-                <p>V Profile spravuješ údaje, súťaže, skupiny, pozvánky a notifikácie.</p>
+                <p>V Profile spravuješ údaje, súťaže, skupiny, štatistiky a notifikácie.</p>
                 <div className={styles.guideList}>
                     <div className={styles.guideItem}><span className={styles.guideLabel}>Súťaže</span> — výber aktívneho turnaja.</div>
                     <div className={styles.guideItem}><span className={styles.guideLabel}>Skupiny</span> — vytváranie skupín, popis/podmienka vstupu, pozývanie členov, schvaľovanie žiadostí.</div>
-                    <div className={styles.guideItem}><span className={styles.guideLabel}>Pozvánky</span> — odoslané pozvánky a tvorba nových.</div>
+                    <div className={styles.guideItem}><span className={styles.guideLabel}>Štatistiky</span> — tvoja úspešnosť: rozpad získaných bodov, priemer na zápas a výsledky po jednotlivých kolách. Cez výber súťaže si pozrieš jeden turnaj alebo všetky spolu.</div>
                     <div className={styles.guideItem}><span className={styles.guideLabel}>Avatar a údaje</span> — fotka, meno, e-mail (potrebný pre e-mailové notifikácie), telefón, zmena hesla. <span style={{color:'#c0392b', fontWeight:600}}>Bez vyplneného e-mailu nie je možné resetovať zabudnuté heslo bez pomoci administrátora.</span></div>
-                    <div className={styles.guideItem}><span className={styles.guideLabel}>Notifikácie</span> — upozornenia pred zápasom, pri netipovanom zápase, po zadaní výsledku a skupinové udalosti (pozvánka do skupiny, schválenie vstupu). E-mailom aj push (Chrome, Edge, Firefox aj mobil) — push aktivuješ tlačidlom v záložke Notifikácie.</div>
+                    <div className={styles.guideItem}><span className={styles.guideLabel}>Notifikácie</span> — upozornenia pred zápasom, pri netipovanom zápase, po zadaní výsledku, pri správe od organizátora a pri skupinových udalostiach (pozvánka do skupiny, schválenie vstupu). E-mailom aj push (Chrome, Edge, Firefox aj mobil) — push aktivuješ tlačidlom v záložke Notifikácie. Každý druh upozornenia sa dá vypnúť zvlášť, aj len pre e-mail alebo len pre push.</div>
                     <div className={styles.guideItem}><span className={styles.guideLabel}>Odhlásenie</span> — záložka Odhlásenie.</div>
                 </div>
+            </div>
+
+            <div className={styles.card}>
+                <h3 className={styles.cardTitle}>Správy</h3>
+                <p>Komunikácia s organizátorom a pozývanie nových hráčov.</p>
+                <div className={styles.guideList}>
+                    <div className={styles.guideItem}><span className={styles.guideLabel}>Chat s adminom</span> — otázky, nahlásenie chyby vo výsledku, návrhy. Posielať sa dajú aj obrázky (napr. snímka obrazovky). Keď organizátor odpovie, príde ti upozornenie.</div>
+                    <div className={styles.guideItem}><span className={styles.guideLabel}>Od organizátora</span> — archív správ a oznamov.</div>
+                    <div className={styles.guideItem}><span className={styles.guideLabel}>Pozvánky</span> — odoslané pozvánky a tvorba nových.</div>
+                </div>
+                <p className={styles.note}>Rozpísaná správa sa priebežne ukladá, takže ju nestratíš ani po obnovení stránky.</p>
             </div>
         </>
     );

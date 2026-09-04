@@ -46,3 +46,9 @@ export const createAnnouncement = (body) => apiFetch('v1/admin/announcements', {
 export const deactivateAnnouncement = (id) => apiFetch('v1/admin/announcements', {
     method: 'PATCH', body: JSON.stringify({ id })
 });
+
+// Zobrazenie oznamu na Prehľade; oznam zostáva v histórii aj keď sa tam neukáže.
+export const setAnnouncementDashboard = (id, show_dashboard) =>
+    apiFetch('v1/admin/announcements', {
+        method: 'PATCH', body: JSON.stringify({ id, show_dashboard })
+    });
