@@ -188,8 +188,13 @@ export default function UclAdminGames() {
                                        onChange={e => setEditing({ ...editing, start_time: e.target.value })} required />
                             </label>
                             {/* Fáza určuje, pod ktorým kolom sa zápas zobrazí vo
-                                filtroch a v štatistikách. */}
-                            <label>Fáza / kolo
+                                filtroch a v štatistikách.
+
+                                Kým nebeží migrácia 075, stĺpec `phase_id` ešte
+                                neexistuje a výber sa neuloží — preto je vidieť
+                                aspoň to, čo zápas nesie dnes a čo mu migrácia
+                                priradí. */}
+                            <label className={styles.uclEditorFull}>Fáza / kolo
                                 <select value={editing.phase_id || ''}
                                         onChange={e => setEditing({ ...editing, phase_id: e.target.value })}>
                                     <option value="">— neurčená —</option>
@@ -199,6 +204,17 @@ export default function UclAdminGames() {
                                         </option>
                                     ))}
                                 </select>
+                                <small style={{ display: 'block', marginTop: 4, color: '#888',
+                                                fontWeight: 400, lineHeight: 1.5 }}>
+                                    V zápase je <code>{editing.game_type_code}</code>
+                                    {editing.leg ? <>, odveta <code>{editing.leg}</code></> : null}
+                                    {' · '}
+                                    {editing.phase_id
+                                        ? <>naviazané na <strong>{editing.match_stat_code}</strong></>
+                                        : editing.navrh_kolo
+                                            ? <>migrácia priradí <strong>{editing.navrh_kolo}</strong></>
+                                            : <>bez fázy</>}
+                                </small>
                             </label>
                             <label>Štadión
                                 <input value={editing.venue} maxLength={100}
@@ -247,6 +263,8 @@ export default function UclAdminGames() {
                 onEdit={g => setEditing({
                     game_id: g.game_id, game_type_name: g.game_type_name,
                     phase_id: g.phase_id ?? '',
+                    match_stat_code: g.match_stat_code, navrh_kolo: g.navrh_kolo,
+                    game_type_code: g.game_type_code, leg: g.leg,
                     home_team_id: g.home_team_id || '', away_team_id: g.away_team_id || '',
                     start_time: toInput(g.start_time), venue: g.venue || '',
                     flashscore_url: g.flashscore_url || '', tips_open: g.tips_open,

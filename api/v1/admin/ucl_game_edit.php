@@ -24,8 +24,11 @@ if ($homeId !== null && $homeId === $awayId) json_error('Tím nemôže hrať sá
 if ($start === '' || !strtotime($start)) json_error('Neplatný čas začiatku', 400);
 if (mb_strlen($venue) > 100) json_error('Štadión môže mať najviac 100 znakov', 400);
 
+// Stlpec pridava migracia 075; kym nebezi, faza sa neuklada.
+$maPhaseId = stlpec_existuje($pdo, 'lm2026-27', 'games', 'phase_id');
+
 // Faza musi patrit tejto sutazi, inak by zapas skoncil pod cudzim kolom.
-if ($phaseId !== null) {
+if ($maPhaseId && $phaseId !== null) {
     $ov = $pdo->prepare('SELECT 1 FROM admin.competition_phases p
                            JOIN admin.competitions k ON k.id = p.competition_id
                           WHERE p.id = ? AND k.slug = ?');
@@ -48,13 +51,15 @@ $tipsOpenSql = $tipsOpen ? 'TRUE' : 'FALSE';
 $stmt = $pdo->prepare('
     UPDATE "lm2026-27".games
        SET home_team_id = ?, away_team_id = ?, start_time = ?, venue = ?,
-           flashscore_url = ?, phase_id = ?,
+           flashscore_url = ?, ' . ($maPhaseId ? 'phase_id = ?,' : '') . '
            tips_open = ' . $tipsOpenSql . ', updated_at = NOW()
      WHERE game_id = ?
     RETURNING game_id, home_team_id, away_team_id, start_time, venue, flashscore_url,
-              phase_id, tips_open');
-$stmt->execute([$homeId, $awayId, date('Y-m-d H:i:s', strtotime($start)), $venue,
-                $flash ?: null, $phaseId, $gameId]);
+              ' . ($maPhaseId ? 'phase_id,' : '') . ' tips_open');
+$parametre = [$homeId, $awayId, date('Y-m-d H:i:s', strtotime($start)), $venue, $flash ?: null];
+if ($maPhaseId) $parametre[] = $phaseId;
+$parametre[] = $gameId;
+$stmt->execute($parametre);
 $row = $stmt->fetch();
 if (!$row) json_error('Zápas neexistuje', 404);
 json_ok($row);

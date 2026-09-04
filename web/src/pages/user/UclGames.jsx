@@ -61,9 +61,10 @@ export default function UclGames() {
         return () => clearInterval(iv);
     }, []);
 
-    // Skratku kola nesie zápas z číselníka (`phase_id`). Zápas bez nej sa vo
-    // filtri neukáže — admin ju doplní v Zápasy → Upraviť.
-    const matchesPhase = (g) => sediFaze(g.match_stat_code, phase);
+    // Skratku kola nesie zápas z číselníka. Kým nebeží migrácia 075, príde
+    // z API `navrh_kolo` — tá istá hodnota, akú migrácia priradí.
+    const kolo = (g) => g.match_stat_code ?? g.navrh_kolo;
+    const matchesPhase = (g) => sediFaze(kolo(g), phase);
     const matchesClub = (g) => !club || g.home_code === club || g.away_code === club;
     const isUntipped = (g) => isUntippedGame(g);
 
@@ -243,7 +244,7 @@ export default function UclGames() {
                                         <div style={{ whiteSpace: 'nowrap' }}>{dayFmt(g.start_time)}</div>
                                         <div style={{ whiteSpace: 'nowrap' }}>{timeFmt(g.start_time)}</div>
                                         <div style={{ color: '#999' }}>
-                                            {g.match_stat_code}
+                                            {kolo(g)}
                                         </div>
                                     </>}
                                     stred={

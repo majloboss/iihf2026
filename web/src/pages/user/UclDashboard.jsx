@@ -25,8 +25,9 @@ const timeFmt = value => { const d = naDatum(value); return d ? timeFmtRaw.forma
 
 
 // Krátke označenie fázy, rovnaké ako v zozname zápasov.
-// Skratka kola z číselníka; zápas bez priradenej fázy ju nemá.
-const shortPhase = g => g.match_stat_code ?? '';
+// Skratka kola z číselníka; kým nebeží migrácia 075, príde z API `navrh_kolo`
+// — tá istá hodnota, akú migrácia priradí.
+const shortPhase = g => g.match_stat_code ?? g.navrh_kolo ?? '';
 
 // Karta zápasu: dátum vľavo, dvojica v strede, pod ňou tip a štadión.
 //
