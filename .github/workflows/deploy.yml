@@ -68,27 +68,48 @@ jobs:
           CMD="$CMD put -O . web/dist/sw.js; put -O . web/dist/index.html; bye"
           lftp -u "ftp.fellow.sk,$FTP_PASSWORD" fellow.sk -e "$CMD"
 
-          # Overenie, ze index.html a sw.js ukazuju na rovnaky build. Bez neho
-          # sa nesulad prejavi az bielou obrazovkou u pouzivatela.
+          # Overenie, ze index.html a sw.js ukazuju na rovnaky build.
           #
-          # Skusa sa opakovane: server nemusi novy subor podat okamzite a jediny
-          # pokus po piatich sekundach zhodil cely deploy este pred nahratim API.
+          # Ked sa rozidu, service worker si drzi zoznam suborov z ineho buildu
+          # a pri navigacii poda stranku zo svojej cache — stara verzia sa tak
+          # vracia vsetkym pouzivatelom, nielen tomu, kto prave nasadzoval.
+          #
+          # Skusa sa opakovane: server nemusi novy subor podat okamzite.
           BASE="https://${SERVER_DIR#/sub/}"
           BASE="${BASE%/}.fellow.sk"
-          ZHODA=0
-          for i in 1 2 3 4 5 6; do
-            sleep 5
-            JS_HTML=$(curl -s -H 'Cache-Control: no-cache' "$BASE/" | grep -o 'index-[A-Za-z0-9_-]*\.js' | head -1)
-            JS_SW=$(curl -s -H 'Cache-Control: no-cache' "$BASE/sw.js" | grep -o 'index-[A-Za-z0-9_-]*\.js' | head -1)
-            echo "pokus $i: index.html -> ${JS_HTML:-?}, sw.js -> ${JS_SW:-?}"
-            if [ -n "$JS_HTML" ] && [ "$JS_HTML" = "$JS_SW" ]; then ZHODA=1; break; fi
-          done
-          if [ "$ZHODA" != "1" ]; then
-            # Varovanie, nie chyba: FTP uz prebehlo a subory su nahrate. Casta
-            # pricina je docasny vypadok curl alebo cache na strane servera —
-            # zhodit kvoli tomu deploy este pred nasadenim API by narobilo viac
-            # skody nez uzitku.
-            echo "::warning::index.html a sw.js sa nepodarilo overit, skontroluj rucne."
+          OCAKAVANY=$(grep -o 'index-[A-Za-z0-9_-]*\.js' web/dist/index.html | head -1)
+          echo "očakávaný build: ${OCAKAVANY:-?}"
+
+          skus_overit() {
+            for i in 1 2 3 4 5 6; do
+              sleep 5
+              JS_HTML=$(curl -s -H 'Cache-Control: no-cache' "$BASE/?cb=$RANDOM" | grep -o 'index-[A-Za-z0-9_-]*\.js' | head -1)
+              JS_SW=$(curl -s -H 'Cache-Control: no-cache' "$BASE/sw.js?cb=$RANDOM" | grep -o 'index-[A-Za-z0-9_-]*\.js' | head -1)
+              echo "  pokus $i: index.html -> ${JS_HTML:-?}, sw.js -> ${JS_SW:-?}"
+              if [ -n "$JS_HTML" ] && [ "$JS_HTML" = "$JS_SW" ]                  && { [ -z "$OCAKAVANY" ] || [ "$JS_HTML" = "$OCAKAVANY" ]; }; then
+                return 0
+              fi
+            done
+            return 1
+          }
+
+          if skus_overit; then
+            echo "index.html a sw.js sedia na rovnaky build."
+          else
+            # Nesulad znamena, ze niektory zo suborov sa nenahral. Nahra sa
+            # znova — samotne cakanie problem nevyriesi.
+            echo "::warning::index.html a sw.js sa rozchadzaju, nahravam znova."
+            lftp -u "ftp.fellow.sk,$FTP_PASSWORD" fellow.sk -e "$CMD"
+
+            if skus_overit; then
+              echo "Po opakovanom nahrati uz subory sedia."
+            else
+              # Az teraz sa deploy zhodi: dva neuspesne pokusy uz nie su
+              # docasny vypadok siete, ale stav, ktory by pouzivatelom podaval
+              # staru verziu.
+              echo "::error::index.html a sw.js sa rozchadzaju ani po opakovanom nahrati."
+              exit 1
+            fi
           fi
         env:
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
