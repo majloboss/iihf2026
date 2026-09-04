@@ -45,6 +45,25 @@ if (array_key_exists('away_team_id', $body)) {
     $params[] = ($body['away_team_id'] !== '' && $body['away_team_id'] !== null) ? (int)$body['away_team_id'] : null;
 }
 
+// Faza z ciselnika. Stlpec pridava migracia 075 — kym nebezi, hodnota sa
+// ticho ignoruje, aby obrazovka fungovala aj pred nou.
+if (array_key_exists('phase_id', $body)
+    && stlpec_existuje($pdo, 'fifa2026', 'games', 'phase_id')) {
+    $phaseId = ($body['phase_id'] === '' || $body['phase_id'] === null)
+        ? null : (int)$body['phase_id'];
+
+    // Faza musi patrit tejto sutazi, inak by zapas skoncil pod cudzim kolom.
+    if ($phaseId !== null) {
+        $ov = $pdo->prepare('SELECT 1 FROM admin.competition_phases p
+                               JOIN admin.competitions k ON k.id = p.competition_id
+                              WHERE p.id = ? AND k.slug = ?');
+        $ov->execute([$phaseId, 'fifa2026']);
+        if (!$ov->fetchColumn()) json_error('Neplatná fáza pre túto súťaž', 400);
+    }
+    $sets[] = "phase_id = ?";
+    $params[] = $phaseId;
+}
+
 $status   = $body['status'] ?? null;
 $finished = $status === 'finished';
 
