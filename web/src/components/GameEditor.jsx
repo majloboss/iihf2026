@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import usePhases from '../hooks/usePhases';
 import { useCompetition } from '../context/CompetitionContext';
 import styles from '../pages/admin/UserModal.module.css';
@@ -55,6 +55,20 @@ export default function GameEditor({
     const [uklada, setUklada] = useState(false);
     const [chyba, setChyba]   = useState('');
 
+    // Zoznam tímov aj číselník fáz prichádzajú až po prvom vykreslení. Dovtedy
+    // `select` nemá zodpovedajúcu `option`, takže výber zahodí — hodnota sa
+    // preto nastaví znovu, keď zoznamy dorazia.
+    useEffect(() => {
+        if (timy.length) {
+            setDom(zapas[M.domaci] ?? '');
+            setHos(zapas[M.hostia] ?? '');
+        }
+    }, [timy.length, zapas, M.domaci, M.hostia]);
+
+    useEffect(() => {
+        if (fazy.length) setFazaId(zapas.phase_id ?? '');
+    }, [fazy.length, zapas.phase_id]);
+
     const uloz = async () => {
         setUklada(true);
         setChyba('');
@@ -75,6 +89,9 @@ export default function GameEditor({
             setUklada(false);
         }
     };
+
+    // Ikona vedie na zadaný odkaz; kým nie je platný, neotvára nič.
+    const platnyOdkaz = /^https?:\/\//i.test(odkaz.trim());
 
     // Kým nebeží migrácia 075, zápas fázu ešte naviazanú nemá — vtedy sa
     // aspoň ukáže, čo mu priradí.
@@ -148,8 +165,22 @@ export default function GameEditor({
                 {/* 4. riadok — odkiaľ sa sťahuje živé skóre */}
                 <div className={styles.section}>
                     <label>FlashScore link
-                        <input value={odkaz} style={POLE} placeholder="https://www.flashscore.sk/zapas/..."
-                               onChange={e => setOdkaz(e.target.value)} />
+                        <span style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                            <input value={odkaz} style={POLE} placeholder="https://www.flashscore.sk/zapas/..."
+                                   onChange={e => setOdkaz(e.target.value)} />
+                            {/* Odkaz sa dá hneď overiť. Bez neho ikona zmatnie
+                                a neotvára nič. */}
+                            <a href={platnyOdkaz ? odkaz : undefined}
+                               target="_blank" rel="noopener noreferrer"
+                               title={platnyOdkaz ? 'Otvoriť na FlashScore' : 'Zadaj odkaz'}
+                               onClick={e => { if (!platnyOdkaz) e.preventDefault(); }}
+                               style={{ flexShrink: 0, display: 'inline-flex',
+                                        opacity: platnyOdkaz ? 1 : 0.3,
+                                        cursor: platnyOdkaz ? 'pointer' : 'default' }}>
+                                <img src="/flashscore.png" alt="FlashScore"
+                                     style={{ width: 24, height: 24, borderRadius: 4 }} />
+                            </a>
+                        </span>
                     </label>
                 </div>
 
