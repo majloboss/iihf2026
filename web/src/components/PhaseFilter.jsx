@@ -128,7 +128,11 @@ export default function PhaseFilter({
                     </span>
                 ))}
 
-                {koniec}
+                {koniec && (
+                    <span style={{ marginLeft: 'auto', flexShrink: 0, display: 'inline-flex' }}>
+                        {koniec}
+                    </span>
+                )}
             </div>
 
             {/* Rozbalená skupina — vlastný riadok pod filtrom. */}
