@@ -141,10 +141,10 @@ export default function UclGames() {
                     ineFiltre={Boolean(club || day || onlyUntipped)}
                     prefix={
                         <button
-                            className={onlyUntipped ? styles.btnTabulkyActive : styles.btnTabulky}
+                            className={onlyUntipped ? styles.untippedBtnOn : styles.untippedBtn}
                             onClick={() => setOnlyUntipped(v => !v)}
                             title="Zobraz iba zápasy, ktoré si ešte netipoval">
-                            1x2
+                            1<span style={{ fontSize: '0.7em', verticalAlign: 'middle' }}>x</span>2
                         </button>
                     }
                     // Kluby nie sú fáza — filtrujú naprieč kolami.
@@ -159,7 +159,7 @@ export default function UclGames() {
                     // TAB nefiltruje — prepne na tabuľky, ako vo FIFA a IIHF.
                     koniec={
                         <button
-                            className={`${styles.btnTabulky} ${styles.btnTabulkyInline}`}
+                            className={styles.btnTabulky}
                             onClick={() => navigate('/tabulky')}
                             title="Tabuľky">
                             TAB

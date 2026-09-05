@@ -46,5 +46,24 @@ for (const [subor, popis] of OBRAZOVKY) {
           `${popis}: neskladá skratky z názvu fázy`);
 }
 
+// Tlacidla okolo filtra maju vyzerat rovnako vo vsetkych sutaziach. UCL malo
+// 1x2 sive namiesto cerveneho a v IIHF sa TAB neodsadilo doprava.
+const ZAPASY = [
+    ['pages/user/Games.jsx', 'Zápasy IIHF'],
+    ['pages/user/FifaGames.jsx', 'Zápasy FIFA'],
+    ['pages/user/UclGames.jsx', 'Zápasy UCL'],
+];
+for (const [subor, popis] of ZAPASY) {
+    const t = src(subor);
+    check(/untippedBtnOn : styles\.untippedBtn/.test(t), `${popis}: 1x2 má červený štýl`);
+    check(!/btnTabulkyInline/.test(t),
+          `${popis}: odsadenie TAB rieši komponent, nie obrazovka`);
+}
+
+// Odsadenie doprava patri komponentu — inak zavisi od toho, ci je tlacidlo
+// priamym potomkom flexu, co v IIHF neplatilo.
+check(/marginLeft: 'auto'/.test(src('components/PhaseFilter.jsx')),
+      'PhaseFilter odsadzuje `koniec` doprava');
+
 console.log(fail ? '\nNIEKTORE KONTROLY ZLYHALI' : '\nVsetky kontroly presli');
 process.exit(fail ? 1 : 0);

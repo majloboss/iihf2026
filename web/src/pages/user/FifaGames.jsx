@@ -269,7 +269,7 @@ export default function FifaGames() {
                     }
                     koniec={
                         <button
-                            className={`${styles.btnTabulky} ${styles.btnTabulkyInline}`}
+                            className={styles.btnTabulky}
                             onClick={() => navigate('/tabulky')}
                         >TAB</button>
                     }
