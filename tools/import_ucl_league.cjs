@@ -26,27 +26,27 @@ if (!csvPath || !outPath) {
 }
 const version = Number(versionArg || 60);
 
-// Posun miestneho casu voci UTC. Leto +2 (CEST), zima +1 (CET).
-// Ligova faza sa hra od septembra do decembra, preto sa pocita podla datumu.
+// Prevod miestneho casu (Europe/Bratislava) na UTC, ktore drzi DB.
+//
+// Offset sa zistuje cez Intl, nie rucnym pocitanim poslednej nedele v marci
+// a oktobri. Povodna rucna verzia mala offset s opacnym znamienkom a ulozila
+// vsetky zapasy o 1-2 hodiny skor (opravene migraciou 078) — Intl pozna
+// pravidla pasma vratane DST a rovnaku chybu spravit neda.
 function toUtc(dateStr, timeStr) {
     const [y, m, d] = dateStr.split('-').map(Number);
     const [hh, mm] = timeStr.split(':').map(Number);
-    // Date s explicitnym offsetom podla toho, ci je letny cas.
-    const local = new Date(Date.UTC(y, m - 1, d, hh, mm));
-    // Posledna nedela v oktobri = koniec letneho casu.
-    const lastSundayOct = (year) => {
-        const dt = new Date(Date.UTC(year, 9, 31));
-        dt.setUTCDate(31 - dt.getUTCDay());
-        return dt;
-    };
-    const lastSundayMar = (year) => {
-        const dt = new Date(Date.UTC(year, 2, 31));
-        dt.setUTCDate(31 - dt.getUTCDay());
-        return dt;
-    };
-    const isSummer = local >= lastSundayMar(y) && local < lastSundayOct(y);
-    const offset = isSummer ? 2 : 1;
-    const utc = new Date(local.getTime() - offset * 3600000);
+
+    // Zisti, o kolko hodin je pasmo pred UTC v danom okamihu.
+    // Postup: vezmi cas ako keby bol UTC, pozri, ako sa zobrazi v Bratislave,
+    // a rozdiel je hladany offset.
+    const akoUtc = new Date(Date.UTC(y, m - 1, d, hh, mm));
+    const vBratislave = new Date(akoUtc.toLocaleString('en-US', { timeZone: 'Europe/Bratislava' }));
+    const vUtc = new Date(akoUtc.toLocaleString('en-US', { timeZone: 'UTC' }));
+    const offsetMs = vBratislave.getTime() - vUtc.getTime();
+
+    // Miestny cas minus offset = UTC.
+    const utc = new Date(akoUtc.getTime() - offsetMs);
+
     const p = n => String(n).padStart(2, '0');
     return `${utc.getUTCFullYear()}-${p(utc.getUTCMonth() + 1)}-${p(utc.getUTCDate())} `
          + `${p(utc.getUTCHours())}:${p(utc.getUTCMinutes())}:00`;
