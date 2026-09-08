@@ -36,7 +36,7 @@ export default function LivescoreCiselnik() {
     async function nacitat() {
         setCaka(true);
         try {
-            const r = await apiFetch('v1/admin/livescore-model?vsetky=1');
+            const r = await apiFetch('v1/admin/livescore-model');
             setModely(r.modely);
         } catch (e) {
             setChyba(e.message);

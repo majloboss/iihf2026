@@ -3,7 +3,6 @@
 //
 // GET  /v1/admin/livescore-model?competition_id=5
 //      Ktory model dnes bezi, jeho cena, minute dnes a predpoklad na den.
-//      &vsetky=1  vrati cely ciselnik, nie len 40 najlepsich kandidatov
 //
 // POST /v1/admin/livescore-model
 //      { competition_id, model_id }        zmen model na dnes
@@ -212,7 +211,11 @@ foreach ($sutaze as $s) {
     ];
 }
 
-// Modely na vyber — otestovane hore, potom podla ceny
+// Modely na vyber.
+//
+// Vracia sa CELY zoznam, nie prvych 40: odkedy je zoradenie abecedne, orezanie
+// by zoznam ukoncilo niekde pri 'google/...' a na ostatne modely by sa nedalo
+// prepnut. Vyber podla kvality a ceny sa robi v ciselniku.
 $kandidati = array_map(static fn($m) => [
     'model_id'     => $m['model_id'],
     'name'         => $m['name'],
@@ -237,6 +240,6 @@ $kandidati = array_map(static fn($m) => [
       -- Abecedne: v rozbalovacom zozname sa model uz len hlada, vyber podla
       -- kvality a ceny sa robi v ciselniku.
       ORDER BY m.model_id
-      LIMIT " . (isset($_GET['vsetky']) ? 1000 : 40))->fetchAll());
+      LIMIT 1000")->fetchAll());
 
 json_ok(['den' => $den, 'sutaze' => $vysledok, 'modely' => $kandidati]);
