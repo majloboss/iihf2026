@@ -14,7 +14,9 @@ const SPORTY = ['futbal', 'hokej', 'volejbal', 'basketbal', 'hádzaná', 'tenis'
 export default function LivescoreTestModelov() {
     const [url, setUrl]         = useState('');
     const [sport, setSport]     = useState('futbal');
-    const [pocet, setPocet]     = useState(15);
+    const [pocet, setPocet]     = useState(20);
+    const [davka, setDavka]     = useState('lacne');
+    const [davky, setDavky]     = useState([]);
     const [sutaz, setSutaz]     = useState('');
     const [sutaze, setSutaze]   = useState([]);
 
@@ -40,6 +42,7 @@ export default function LivescoreTestModelov() {
             setKandidati(r.kandidati);
             setSuhrn(r.suhrn);
             setHistoria(r.testy);
+            setDavky(r.davky ?? []);
         } catch (e) { setChyba(e.message); }
     }
 
@@ -69,6 +72,7 @@ export default function LivescoreTestModelov() {
                     url: url.trim(),
                     competition_id: sutaz ? Number(sutaz) : null,
                     limit: Number(pocet),
+                    davka,
                 }),
             });
             setPriprava(p);
@@ -127,6 +131,10 @@ export default function LivescoreTestModelov() {
         });
     }
 
+    // Kolko modelov naozaj pobezi: davka moze mat menej nez zvoleny strop.
+    const vDavke = davky.find(d => d.kluc === davka)?.pocet ?? 0;
+    const kolkoBude = Math.min(Number(pocet) || 0, vDavke || Number(pocet) || 0);
+
     const cenaBehu = vysledky.reduce((s, v) => s + (v.cost_usd || 0), 0);
     const uspesnych = vysledky.filter(v => v.passed).length;
 
@@ -178,16 +186,34 @@ export default function LivescoreTestModelov() {
                     </label>
 
                     <label>
-                        <span>Počet modelov</span>
-                        <input type="number" min="1" max="40" value={pocet}
+                        <span>Ktoré modely</span>
+                        <select value={davka} onChange={e => setDavka(e.target.value)}
+                                disabled={bezi}>
+                            {davky.map(d => (
+                                <option key={d.kluc} value={d.kluc}>
+                                    {d.popis} — {d.pocet}
+                                </option>
+                            ))}
+                        </select>
+                    </label>
+
+                    <label>
+                        <span>Najviac modelov</span>
+                        <input type="number" min="1" max="400" value={pocet}
                                onChange={e => setPocet(e.target.value)} disabled={bezi} />
                     </label>
                 </div>
 
                 <div className={styles.tlacidla}>
                     <button className={styles.hlavne} onClick={spustit} disabled={bezi}>
-                        {bezi ? 'Testujem…' : `Spustiť test (${pocet} modelov)`}
+                        {bezi ? 'Testujem…' : `Spustiť test (${kolkoBude} modelov)`}
                     </button>
+                    {!bezi && kolkoBude > 25 && (
+                        <span className={styles.odhad}>
+                            potrvá zhruba {Math.ceil(kolkoBude * 17 / 60)} min —
+                            nechaj okno otvorené
+                        </span>
+                    )}
                     {bezi && (
                         <button className={styles.zrusit} onClick={() => { zastavRef.current = true; }}>
                             Zastaviť

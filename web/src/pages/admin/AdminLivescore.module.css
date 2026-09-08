@@ -625,3 +625,10 @@
   color: #6b7280;
   background: #eef0f2;
 }
+
+/* Odhad casu pri dlhsom teste — aby bolo jasne, ze okno treba nechat otvorene */
+.odhad {
+  align-self: center;
+  font-size: .8rem;
+  color: #9a6700;
+}

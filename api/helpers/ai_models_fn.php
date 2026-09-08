@@ -426,3 +426,74 @@ function ai_uvedom_admina_rozpocet(string $predmet, string $telo): void {
         error_log('rozpocet livescore: notifikacia zlyhala - ' . $e->getMessage());
     }
 }
+
+// ------------------------------------------------------------
+// Vyber davky modelov na testovanie.
+//
+// Testovat vsetkych 338 nema zmysel: trvalo by to okolo 95 minut a vacsina
+// modelov je pre livescore aj tak nevhodna (drahe, maly kontext). Tato
+// funkcia vyberie rozumnu davku podla zvoleneho kriteria.
+//
+// $davka:
+//   'free'        len bezplatne
+//   'lacne'       bezplatne + platene do 0,50 USD za 1M tokenov
+//   'stredne'     bezplatne + platene do 2 USD za 1M
+//   'netestovane' este netestovane (doplnenie historie)
+//   'najlepsie'   uz otestovane s najvyssou zhodou (overenie vitazov)
+//   'vsetky'      cely zoznam (pozor na cas)
+//
+// Kontext pod 16 000 tokenov sa vzdy vynecha — livescore posiela okolo
+// 6 500 znakov a kratsi kontext by odpoved orezal.
+// ------------------------------------------------------------
+function ai_davka_na_test(string $davka, int $limit = 30): array {
+    $kde = ["is_enabled", "unavailable_reason IS NULL",
+            "(context_length IS NULL OR context_length >= 16000)"];
+    $radenie = "is_free DESC, COALESCE(price_input_1m,0) + COALESCE(price_output_1m,0) ASC";
+
+    switch ($davka) {
+        case 'free':
+            $kde[] = "is_free";
+            break;
+
+        case 'lacne':
+            $kde[] = "(is_free OR (price_input_1m IS NOT NULL
+                       AND price_input_1m + price_output_1m <= 0.5))";
+            break;
+
+        case 'stredne':
+            $kde[] = "(is_free OR (price_input_1m IS NOT NULL
+                       AND price_input_1m + price_output_1m <= 2))";
+            break;
+
+        case 'netestovane':
+            $kde[] = "tests_total = 0";
+            $kde[] = "(is_free OR (price_input_1m IS NOT NULL
+                       AND price_input_1m + price_output_1m <= 2))";
+            break;
+
+        case 'najlepsie':
+            // Uz otestovane, bez halucinacii, zoradene podla zhody —
+            // sluzi na overenie, ci vitazi obstoja aj na inom zapase.
+            $kde[] = "tests_total > 0";
+            $kde[] = "NOT EXISTS (SELECT 1 FROM admin.livescore_model_test t
+                                   WHERE t.model_key = admin.ai_models.model_id
+                                     AND t.teams_agree = FALSE)";
+            $radenie = "COALESCE(agree_rate, -1) DESC, COALESCE(success_rate, -1) DESC,
+                        COALESCE(price_input_1m,0) + COALESCE(price_output_1m,0) ASC";
+            break;
+
+        default:  // 'vsetky'
+            $kde[] = "(is_free OR (price_input_1m IS NOT NULL AND price_output_1m IS NOT NULL))";
+    }
+
+    return db()->query(
+        "SELECT * FROM admin.ai_models
+          WHERE " . implode(' AND ', $kde) . "
+          ORDER BY $radenie
+          LIMIT " . (int)$limit)->fetchAll();
+}
+
+// Kolko modelov by dana davka mala — pre odhad casu pred spustenim.
+function ai_pocet_v_davke(string $davka): int {
+    return count(ai_davka_na_test($davka, 1000));
+}

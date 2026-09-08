@@ -58,7 +58,29 @@ if ($method === 'GET') {
            FROM admin.livescore_log
           WHERE call_type = 'test'")->fetch();
 
+    // Davky na testovanie s poctami — aby bolo pred spustenim jasne,
+    // kolko modelov to je a ako dlho to potrva.
+    $davky = [];
+    foreach ([
+        'free'        => 'len bezplatné',
+        'lacne'       => 'bezplatné + do $0,50 / 1M',
+        'stredne'     => 'bezplatné + do $2 / 1M',
+        'netestovane' => 'ešte netestované',
+        'najlepsie'   => 'najlepšie doteraz (overenie)',
+        'vsetky'      => 'všetky (dlho!)',
+    ] as $kluc => $popis) {
+        $pocet = ai_pocet_v_davke($kluc);
+        $davky[] = [
+            'kluc'   => $kluc,
+            'popis'  => $popis,
+            'pocet'  => $pocet,
+            // 17 s na model je priemer z doterajsich testov
+            'minut'  => (int)ceil($pocet * 17 / 60),
+        ];
+    }
+
     json_ok([
+        'davky'     => $davky,
         'kandidati' => $kandidati,
         'testy'     => $st->fetchAll(),
         'suhrn'     => [
@@ -154,9 +176,15 @@ if (($_GET['step'] ?? '') === '1') {
 // ------------------------------------------------------------
 // POST — priprav test: stiahni stranku a vrat zoznam modelov
 // ------------------------------------------------------------
-$limit  = min(40, max(1, (int)($body['limit'] ?? 15)));
-$modely = array_column(ai_kandidati($limit), 'model_id');
-if (!$modely) json_error('V číselníku nie je žiadny použiteľný model', 400);
+$limit = min(400, max(1, (int)($body['limit'] ?? 15)));
+$davka = trim((string)($body['davka'] ?? ''));
+
+// Bez zvolenej davky sa berie doterajsie poradie kandidatov.
+$modely = array_column(
+    $davka !== '' ? ai_davka_na_test($davka, $limit) : ai_kandidati($limit),
+    'model_id');
+
+if (!$modely) json_error('Kritériám nezodpovedá žiadny model', 400);
 
 $page = livescore_fetch_page($url);
 
