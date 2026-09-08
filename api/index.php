@@ -67,6 +67,8 @@ try {
         $path === 'v1/admin/livescore-models'   => require __DIR__ . '/v1/admin/livescore_models.php',
         $path === 'v1/admin/livescore-log'      => require __DIR__ . '/v1/admin/livescore_log.php',
         $path === 'v1/admin/livescore-batch'    => require __DIR__ . '/v1/admin/livescore_batch.php',
+        $path === 'v1/admin/livescore-models-sync' => require __DIR__ . '/v1/admin/livescore_models_sync.php',
+        $path === 'v1/admin/livescore-test-run'    => require __DIR__ . '/v1/admin/livescore_test_run.php',
         $path === 'v1/admin/ucl-livescore'      => require __DIR__ . '/v1/admin/ucl_livescore.php',
         $path === 'v1/admin/ucl-recalc'         => require __DIR__ . '/v1/admin/ucl_recalc.php',
         $path === 'v1/admin/ucl-load-pdf'         => require __DIR__ . '/v1/admin/ucl_load_pdf.php',

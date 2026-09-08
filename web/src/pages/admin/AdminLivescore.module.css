@@ -1,0 +1,259 @@
+/* Sprava → Livescore. Pisane mobile-first. */
+
+.stranka h1 { margin: 0 0 4px; font-size: 1.3rem; }
+
+.popis {
+  margin: 0 0 16px;
+  color: #6b7280;
+  font-size: .88rem;
+  max-width: 70ch;
+}
+
+/* ---------- zalozky ---------- */
+.zalozky {
+  display: flex;
+  gap: 4px;
+  margin: 12px 0 18px;
+  border-bottom: 1px solid #e3e6ea;
+  overflow-x: auto;
+}
+.zalozky button {
+  flex: 0 0 auto;
+  min-height: 40px;
+  padding: 8px 16px;
+  font: inherit;
+  font-size: .9rem;
+  cursor: pointer;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: #6b7280;
+  white-space: nowrap;
+}
+.zalozky button:hover { color: #1a1d21; }
+.zalozky button.aktivna { color: #1f6feb; border-bottom-color: #1f6feb; font-weight: 600; }
+
+/* ---------- sumarizacia ---------- */
+.suhrn {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+  margin-bottom: 18px;
+}
+.suhrn > div {
+  padding: 10px 12px;
+  border: 1px solid #e3e6ea;
+  border-radius: 8px;
+  background: #f7f8fa;
+}
+.suhrn span   { display: block; font-size: .75rem; color: #6b7280; }
+.suhrn strong { display: block; margin-top: 2px; font-size: 1.1rem; }
+
+/* ---------- formular ---------- */
+.formular {
+  padding: 14px;
+  margin-bottom: 18px;
+  border: 1px solid #e3e6ea;
+  border-radius: 8px;
+}
+.formular label { display: block; margin-bottom: 12px; }
+.formular label > span {
+  display: block;
+  margin-bottom: 4px;
+  font-size: .8rem;
+  font-weight: 600;
+}
+.formular input, .formular select {
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 10px;
+  font: inherit;
+  font-size: 16px;              /* mensie pismo Safari na iPhone priblizi */
+  border: 1px solid #d5d9de;
+  border-radius: 6px;
+}
+
+.riadok { display: flex; flex-direction: column; gap: 0; }
+
+.tlacidla { display: flex; flex-direction: column; gap: 8px; }
+.hlavne {
+  min-height: 42px;
+  padding: 10px 20px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  border: 0;
+  border-radius: 6px;
+  background: #1f6feb;
+  color: #fff;
+}
+.hlavne:disabled { opacity: .55; cursor: default; }
+.zrusit {
+  min-height: 42px;
+  padding: 10px 16px;
+  font: inherit;
+  cursor: pointer;
+  border: 1px solid #cf222e;
+  border-radius: 6px;
+  background: transparent;
+  color: #cf222e;
+}
+
+@media (min-width: 700px) {
+  .riadok { flex-direction: row; gap: 12px; }
+  .riadok label { flex: 1; }
+  .tlacidla { flex-direction: row; }
+  .hlavne, .zrusit { width: auto; }
+}
+
+/* ---------- panel so vstupom ---------- */
+.panel {
+  padding: 12px 14px;
+  margin-bottom: 18px;
+  border: 1px solid #e3e6ea;
+  border-radius: 8px;
+  background: #f7f8fa;
+}
+.panel h3 { margin: 0 0 8px; font-size: .95rem; }
+
+.udaje { margin: 0 0 8px; }
+.udaje > div { display: flex; gap: 8px; font-size: .85rem; padding: 2px 0; }
+.udaje dt { color: #6b7280; flex: 0 0 80px; }
+.udaje dd { margin: 0; font-weight: 500; }
+
+.panel summary { cursor: pointer; color: #1f6feb; font-size: .85rem; min-height: 32px; }
+.nahlad {
+  max-height: 220px;
+  overflow: auto;
+  margin: 8px 0 0;
+  padding: 10px;
+  border: 1px solid #e3e6ea;
+  border-radius: 6px;
+  background: #fff;
+  font-size: .72rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* ---------- vysledky ---------- */
+.hlavickaVysledkov {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+.hlavickaVysledkov h3 { margin: 0; font-size: 1rem; }
+.hlavickaVysledkov span { color: #6b7280; font-size: .82rem; }
+
+.bezi { margin: 0 0 10px; font-size: .8rem; color: #6b7280; }
+.bezi code { font-size: .78rem; }
+
+.karty { list-style: none; margin: 0; padding: 0; }
+.karty > li {
+  margin-bottom: 8px;
+  border: 1px solid #e3e6ea;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.karty > li.ok  { border-left: 3px solid #1a7f37; }
+.karty > li.zle { border-left: 3px solid #cf222e; opacity: .8; }
+
+.karta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  border: 0;
+  background: none;
+}
+.znak { flex: 0 0 auto; font-size: 1.2rem; font-weight: 700; }
+.ok .znak  { color: #1a7f37; }
+.zle .znak { color: #cf222e; }
+
+.stred { flex: 1; min-width: 0; }
+.stred code {
+  display: block;
+  font-size: .78rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.znacky { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 3px; }
+.mam   { font-size: .72rem; color: #1a7f37; }
+.nemam { font-size: .72rem; color: #9198a1; }
+
+.cisla {
+  flex: 0 0 auto;
+  text-align: right;
+  font-size: .75rem;
+  color: #6b7280;
+  font-variant-numeric: tabular-nums;
+}
+
+.chybaKarty {
+  margin: 0;
+  padding: 0 12px 10px;
+  font-size: .8rem;
+  color: #cf222e;
+}
+
+.detail {
+  max-height: 300px;
+  overflow: auto;
+  margin: 0;
+  padding: 10px 12px;
+  border-top: 1px solid #e3e6ea;
+  background: #f7f8fa;
+  font-size: .72rem;
+}
+
+.chyba {
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  border: 1px solid #cf222e;
+  border-left-width: 3px;
+  border-radius: 6px;
+  background: #fdf0f0;
+  color: #cf222e;
+  font-size: .85rem;
+}
+
+/* ---------- historia a poradie ---------- */
+.historia { margin-top: 18px; }
+.historia summary {
+  cursor: pointer;
+  color: #1f6feb;
+  font-size: .88rem;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+}
+
+.tabulkaObal { overflow-x: auto; margin-top: 8px; }
+.tabulkaObal table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .8rem;
+  white-space: nowrap;
+}
+.tabulkaObal th {
+  padding: 6px 10px;
+  text-align: left;
+  background: #f7f8fa;
+  border-bottom: 1px solid #e3e6ea;
+}
+.tabulkaObal td { padding: 6px 10px; border-bottom: 1px solid #eef0f2; }
+.cislo { text-align: right; font-variant-numeric: tabular-nums; }
+
+.poradie { margin: 8px 0 0; padding-left: 24px; font-size: .82rem; }
+.poradie li { margin-bottom: 4px; }
+.poradie code { font-size: .78rem; }
+.free   { margin-left: 8px; color: #1a7f37; font-size: .75rem; }
+.cena   { margin-left: 8px; color: #6b7280; font-size: .75rem; }
+.uspech { margin-left: 8px; color: #1f6feb; font-size: .75rem; }

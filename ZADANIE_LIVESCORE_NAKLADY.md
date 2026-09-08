@@ -189,7 +189,23 @@ Nová záložka, posledná v menu Správa. Dve podzáložky.
 
 Na mobile sumarizácia ako karty, tabuľka vodorovne posuvná.
 
-### 4.2 Model info
+### 4.2 Test
+
+Ručné spustenie toho istého testu, ktorý beží hodinu pred prvým zápasom dňa —
+kedykoľvek a na ľubovoľnom zápase z Flashscore.
+
+- URL zápasu, šport, súťaž (nepovinná), počet modelov
+- Modely sa volajú **postupne**, priebeh vidno v reálnom čase
+- Pri každom modeli tri značky: skóre / časť hry / minúta
+- Kliknutím sa rozbalí surová odpoveď modelu
+- Sumarizácia: počet testovacích volaní, úspešných, tokeny, **cena testov**
+- História testov a poradie modelov pre automatický výber
+
+**Každý test = jeden záznam v `admin.livescore_log`** s `call_type='test'`.
+Test na 15 modeloch pridá 15 záznamov. Zápas identifikuje **`url`**, nie
+`game_id` — testuje sa spravidla na cudzom zápase, preto je `game_id` nullable.
+
+### 4.3 Model info
 
 - Aktuálny model pre dnešok, per súťaž
 - Cena za volanie a **predpoklad na dnešný deň** (počet volaní × priemerná cena)
@@ -258,6 +274,7 @@ z histórie, nie z jedného behu.
 | 3 | Zápis nákladov do logu pri každom volaní (UCL) | 🔲 |
 | 4 | API: `/v1/admin/livescore-naklady`, `/v1/admin/livescore-model` | 🔲 |
 | 5 | Admin obrazovka Náklady | 🔲 |
+| 5b | Admin obrazovka Test — ručné spustenie testu modelov | ✅ |
 | 6 | Admin obrazovka Model info + ručná zmena a vypnutie | 🔲 |
 | 7 | Automatický test a výber modelu (cron) | 🔲 |
 | 8 | Denný strop: prepnutie na 80 %, zastavenie na 150 %, e-mail + push | 🔲 |
