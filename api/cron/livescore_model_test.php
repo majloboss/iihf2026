@@ -37,6 +37,7 @@ require_once __DIR__ . '/../helpers/ai_models_fn.php';
 require_once __DIR__ . '/../helpers/livescore_fn.php';
 require_once __DIR__ . '/../helpers/livescore_test_fn.php';
 require_once __DIR__ . '/../helpers/mailer.php';
+require_once __DIR__ . '/../helpers/cron_heartbeat.php';
 
 // ------------------------------------------------------------
 // Sprava adminom. Nefunkcna posta nesmie zhodit cely beh, preto try/catch.
@@ -74,6 +75,7 @@ $st->execute([TEST_COMPETITION_ID, $den]);
 $cfgDen = $st->fetch();
 
 if ($cfgDen && ($cfgDen['model_id'] || !in_array($cfgDen['is_enabled'], [true,'t','1',1], true))) {
+    cron_beh('livescore_model_test', 'na dnes je rozhodnute');
     exit("Na dnes je už rozhodnuté ({$cfgDen['chosen_by']}), test netreba.\n");
 }
 
@@ -88,7 +90,7 @@ $st = $pdo->prepare(
 $st->execute([$den, $den]);
 $prvy = $st->fetchColumn();
 
-if (!$prvy) exit("Dnes nie sú zápasy s adresou Flashscore.\n");
+if (!$prvy) { cron_beh('livescore_model_test', 'dnes niet zapasov'); exit("Dnes nie sú zápasy s adresou Flashscore.\n"); }
 
 $prvyTs = strtotime($prvy . ' UTC');
 $teraz  = time();
@@ -97,6 +99,7 @@ $teraz  = time();
 // priamo na nom.
 if ($teraz < $prvyTs - 3600) {
     $o = (int)round(($prvyTs - 3600 - $teraz) / 60);
+    cron_beh('livescore_model_test', "caka sa, test o $o min");
     exit("Prvý zápas o " . gmdate('H:i', $prvyTs) . " UTC, test začne o $o minút.\n");
 }
 
@@ -127,7 +130,7 @@ if (!$testUrl) {
     $testUrl = $st->fetchColumn();
 }
 
-if (!$testUrl) exit("Nenašiel sa zápas, na ktorom testovať.\n");
+if (!$testUrl) { cron_beh('livescore_model_test', 'niet zapasu na test'); exit("Nenašiel sa zápas, na ktorom testovať.\n"); }
 echo "Testujem na: $testUrl\n";
 
 // ------------------------------------------------------------
@@ -183,6 +186,7 @@ if ($vitaz === null) {
 }
 
 ai_nastav_model_na_den(TEST_COMPETITION_ID, (int)$vitaz['id'], 'auto', null, $den);
+cron_beh('livescore_model_test', 'vybrany model: ' . $vitaz['model_id']);
 
 $cena = $vitaz['price_input_1m'] === null ? 'zdarma'
       : '$' . round((float)$vitaz['price_input_1m'] + (float)$vitaz['price_output_1m'], 4) . ' / 1M';

@@ -26,6 +26,7 @@ if (!file_exists($cfg)) {
 }
 require_once $cfg;
 require_once __DIR__ . '/../helpers/ucl_livescore_fn.php';
+require_once __DIR__ . '/../helpers/cron_heartbeat.php';
 
 $cas = gmdate('Y-m-d H:i:s') . ' UTC';
 
@@ -34,17 +35,23 @@ try {
     $games = ucl_livescore_games($pdo);
 
     if (!$games) {
+        cron_beh('ucl_livescore', 'dnes sa nehra');
         exit("$cas — dnes sa nehra, nic sa nerobi.\n");
     }
     if (!ucl_livescore_due($games)) {
+        cron_beh('ucl_livescore', 'zapasy su, ziadny prave nebezi');
         exit("$cas — dnes su zapasy, ale ziadny prave nebezi.\n");
     }
 
     $res = ucl_livescore_refresh($pdo, $games);
     if (isset($res['error'])) {
+        cron_beh('ucl_livescore', 'CHYBA: ' . $res['error']);
         http_response_code(502);
         exit("$cas — CHYBA: {$res['error']}\n");
     }
+
+    cron_beh('ucl_livescore',
+             "aktualizovanych {$res['updated']} z {$res['watched']}");
 
     echo "$cas — aktualizovanych {$res['updated']} z {$res['watched']} sledovanych\n";
     foreach ($res['games'] as $g) {
@@ -55,6 +62,7 @@ try {
         echo '  vo feede chybali: ' . implode(', ', $res['missing']) . "\n";
     }
 } catch (Throwable $e) {
+    cron_beh('ucl_livescore', 'CHYBA: ' . $e->getMessage());
     http_response_code(500);
     exit("$cas — CHYBA: " . $e->getMessage() . "\n");
 }
