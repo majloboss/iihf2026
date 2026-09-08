@@ -12,7 +12,8 @@ export default function UserLayout({ children }) {
     const location    = useLocation();
     const [profile, setProfile] = useState(null);
     const [unread, setUnread]   = useState(0);
-    const { activeCompetition, competitionEmoji } = useCompetition();
+    const { activeCompetition, competitionEmoji, competitions, switchCompetition } = useCompetition();
+    const [prepinam, setPrepinam] = useState(false);
 
     useEffect(() => {
         apiFetch('v1/profile').then(setProfile).catch(() => {});
@@ -43,15 +44,40 @@ export default function UserLayout({ children }) {
                             />
                         )}
                     </div>
-                    {activeCompetition && (
-                        <button
-                            type="button"
-                            className={styles.brandSwitch}
-                            onClick={() => navigate('/profile?tab=sutaze')}
-                            title="Prepnúť súťaž">
-                            <span className={styles.brandName}>{activeCompetition.name}</span>
-                            <span className={styles.brandSwitchHint}>zmeniť súťaž ▾</span>
-                        </button>
+                    {/*
+                      Prepinac je priamo v hlavicke, nie odkaz do profilu:
+                      predtym tu bolo tlacidlo podmienene `activeCompetition`,
+                      takze kto mal aktivnu sutaz prazdnu, nemal sa ako prepnut
+                      a zostal na predvolenej vetve — teda na hokeji.
+                      Zoznam sa preto zobrazi vzdy, ked su nacitane sutaze.
+                    */}
+                    {competitions.length > 0 && (
+                        <div className={styles.brandSwitch}>
+                            <span className={styles.brandName}>
+                                {activeCompetition?.name ?? 'Vyber súťaž'}
+                            </span>
+                            <select
+                                className={styles.brandSelect}
+                                value={activeCompetition?.id ?? ''}
+                                disabled={prepinam}
+                                onChange={async e => {
+                                    const id = Number(e.target.value);
+                                    if (!id || id === activeCompetition?.id) return;
+                                    setPrepinam(true);
+                                    try { await switchCompetition(id); }
+                                    finally { setPrepinam(false); }
+                                }}
+                                aria-label="Prepnúť súťaž"
+                            >
+                                {!activeCompetition && <option value="">— vyber súťaž —</option>}
+                                {competitions.map(c => (
+                                    <option key={c.id} value={c.id}>{c.name}</option>
+                                ))}
+                            </select>
+                            <span className={styles.brandSwitchHint}>
+                                {prepinam ? 'prepínam…' : 'zmeniť súťaž ▾'}
+                            </span>
+                        </div>
                     )}
                 </div>
                 <nav>
