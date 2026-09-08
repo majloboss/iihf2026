@@ -208,3 +208,104 @@ function ai_vyrad_model(string $modelKey, string $dovod): void {
             SET is_enabled = FALSE, unavailable_reason = ?, last_error = ?, updated_at = NOW()
           WHERE model_id = ?')->execute([$dovod, $dovod, $modelKey]);
 }
+
+// ------------------------------------------------------------
+// Ktory model ma dnes obsluhovat livescore danej sutaze.
+//
+// Poradie hladania:
+//   1. nastavenie pre konkretny den (admin.livescore_day_config)
+//   2. predvoleny model sutaze (admin.livescore_competition_default)
+//   3. konstanta OPENROUTER_MODEL z konfiguraku
+//   4. natvrdo minimax/minimax-m3
+//
+// Vracia [model_id, riadok_z_ciselnika|null, dovod].
+// Ked je livescore pre dany den vypnuty, model_id je null.
+// ------------------------------------------------------------
+function ai_model_pre_livescore(int $competitionId, ?string $den = null): array {
+    $pdo = db();
+    $den = $den ?? date('Y-m-d');
+
+    // 1) nastavenie na den — vratane pripadneho vypnutia
+    $st = $pdo->prepare(
+        'SELECT d.is_enabled, d.disabled_reason, d.chosen_by, m.*
+           FROM admin.livescore_day_config d
+           LEFT JOIN admin.ai_models m ON m.id = d.model_id
+          WHERE d.competition_id = ? AND d.den = ?');
+    $st->execute([$competitionId, $den]);
+    $den_cfg = $st->fetch();
+
+    if ($den_cfg) {
+        $zapnute = in_array($den_cfg['is_enabled'], [true, 't', '1', 1], true);
+        if (!$zapnute) {
+            return [null, null, 'Livescore je pre dnešok vypnuté: '
+                              . ($den_cfg['disabled_reason'] ?: 'bez uvedeného dôvodu')];
+        }
+        if (!empty($den_cfg['model_id'])) {
+            return [$den_cfg['model_id'], $den_cfg,
+                    'nastavenie na deň (' . $den_cfg['chosen_by'] . ')'];
+        }
+    }
+
+    // 2) predvoleny model sutaze
+    $st = $pdo->prepare(
+        'SELECT c.is_enabled, m.*
+           FROM admin.livescore_competition_default c
+           LEFT JOIN admin.ai_models m ON m.id = c.model_id
+          WHERE c.competition_id = ?');
+    $st->execute([$competitionId]);
+    $sutaz_cfg = $st->fetch();
+
+    if ($sutaz_cfg) {
+        $zapnute = in_array($sutaz_cfg['is_enabled'], [true, 't', '1', 1], true);
+        if (!$zapnute) {
+            return [null, null, 'Livescore je pre túto súťaž vypnuté'];
+        }
+        if (!empty($sutaz_cfg['model_id'])) {
+            return [$sutaz_cfg['model_id'], $sutaz_cfg, 'predvolený model súťaže'];
+        }
+    }
+
+    // 3) konfigurak — zaloha, kym sa model v ciselniku nenastavi
+    if (defined('OPENROUTER_MODEL') && OPENROUTER_MODEL !== '') {
+        $st = $pdo->prepare('SELECT * FROM admin.ai_models WHERE model_id = ?');
+        $st->execute([OPENROUTER_MODEL]);
+        return [OPENROUTER_MODEL, $st->fetch() ?: null, 'konfigurák openrouter.php'];
+    }
+
+    return ['minimax/minimax-m3', null, 'zabudovaná predvoľba'];
+}
+
+// ------------------------------------------------------------
+// Nastavi model pre sutaz a den. Pouziva ho admin aj automaticky vyber.
+// ------------------------------------------------------------
+function ai_nastav_model_na_den(int $competitionId, int $modelDbId, string $chosenBy,
+                                ?int $userId = null, ?string $den = null): void {
+    db()->prepare(
+        "INSERT INTO admin.livescore_day_config
+            (competition_id, den, model_id, chosen_by, chosen_by_user_id, chosen_at, is_enabled)
+         VALUES (?, ?, ?, ?, ?, NOW(), TRUE)
+         ON CONFLICT (competition_id, den) DO UPDATE
+            SET model_id = EXCLUDED.model_id,
+                chosen_by = EXCLUDED.chosen_by,
+                chosen_by_user_id = EXCLUDED.chosen_by_user_id,
+                chosen_at = NOW(),
+                is_enabled = TRUE,
+                disabled_reason = NULL")
+        ->execute([$competitionId, $den ?? date('Y-m-d'), $modelDbId, $chosenBy, $userId]);
+}
+
+// Vypne livescore pre sutaz a den.
+function ai_vypni_livescore(int $competitionId, string $dovod,
+                            ?int $userId = null, ?string $den = null): void {
+    db()->prepare(
+        "INSERT INTO admin.livescore_day_config
+            (competition_id, den, is_enabled, disabled_reason, chosen_by,
+             chosen_by_user_id, chosen_at)
+         VALUES (?, ?, FALSE, ?, 'admin', ?, NOW())
+         ON CONFLICT (competition_id, den) DO UPDATE
+            SET is_enabled = FALSE,
+                disabled_reason = EXCLUDED.disabled_reason,
+                chosen_by_user_id = EXCLUDED.chosen_by_user_id,
+                chosen_at = NOW()")
+        ->execute([$competitionId, $den ?? date('Y-m-d'), $dovod, $userId]);
+}

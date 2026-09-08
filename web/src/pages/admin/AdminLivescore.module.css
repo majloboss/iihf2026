@@ -280,3 +280,118 @@
 .skoreZhoda   { color: #1a7f37; background: rgba(26, 127, 55, .12); }
 .skoreInak    { color: #9a6700; background: rgba(154, 103, 0, .14); }
 .skoreNeutral { color: #6b7280; background: rgba(107, 114, 128, .12); }
+
+/* ---------- zalozka Model ---------- */
+.hlaska {
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  border: 1px solid #1a7f37;
+  border-left-width: 3px;
+  border-radius: 6px;
+  background: #f0f9f2;
+  color: #1a7f37;
+  font-size: .85rem;
+}
+
+.sutazBlok {
+  padding: 14px;
+  margin-bottom: 18px;
+  border: 1px solid #e3e6ea;
+  border-radius: 8px;
+}
+.sutazBlok h3 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 12px;
+  font-size: 1rem;
+}
+
+.stavZap, .stavVyp {
+  padding: 1px 8px;
+  border-radius: 10px;
+  font-size: .7rem;
+  font-weight: 700;
+}
+.stavZap { color: #1a7f37; background: rgba(26, 127, 55, .12); }
+.stavVyp { color: #cf222e; background: rgba(207, 34, 46, .1); }
+
+.dovod {
+  margin: 0 0 12px;
+  padding: 8px 12px;
+  border-left: 3px solid #cf222e;
+  background: #fdf0f0;
+  font-size: .82rem;
+  color: #cf222e;
+}
+
+/* Zvyraznenie, ked sa blizi denny strop */
+.varovanie { border-color: #9a6700 !important; background: #fff9e6 !important; }
+.zvyraznene { border-color: #1f6feb !important; background: #eef4ff !important; }
+.pct { font-style: normal; font-size: .8rem; color: #6b7280; font-weight: 400; }
+
+.akcie { margin-top: 14px; }
+.akciaPole { display: block; margin-bottom: 10px; }
+.akciaPole > span {
+  display: block;
+  margin-bottom: 4px;
+  font-size: .8rem;
+  font-weight: 600;
+}
+.akciaPole select {
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 10px;
+  font: inherit;
+  font-size: 16px;
+  border: 1px solid #d5d9de;
+  border-radius: 6px;
+}
+
+.vedlajsie {
+  min-height: 42px;
+  padding: 10px 16px;
+  font: inherit;
+  cursor: pointer;
+  border: 1px solid #d5d9de;
+  border-radius: 6px;
+  background: #fff;
+  color: #1a1d21;
+}
+.vedlajsie:hover:not(:disabled) { border-color: #1f6feb; color: #1f6feb; }
+.vedlajsie:disabled { opacity: .55; cursor: default; }
+
+/* ---------- zalozka Naklady: graf po dnoch ---------- */
+.graf { margin-bottom: 18px; }
+.graf h3 { margin: 0 0 8px; font-size: .95rem; }
+.graf ul { list-style: none; margin: 0; padding: 0; }
+.graf li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 3px 0;
+  font-size: .78rem;
+}
+.grafDen  { flex: 0 0 46px; color: #6b7280; }
+.grafPruh {
+  flex: 1;
+  height: 14px;
+  background: #eef0f2;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.grafPruh > span {
+  display: block;
+  height: 100%;
+  background: #1f6feb;
+  border-radius: 3px;
+  min-width: 2px;
+}
+.grafCena {
+  flex: 0 0 auto;
+  font-variant-numeric: tabular-nums;
+  color: #1a1d21;
+}
+.grafCena em { font-style: normal; color: #9198a1; }
+
+.riadokZle td { color: #9198a1; }

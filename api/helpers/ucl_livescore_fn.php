@@ -1,4 +1,9 @@
 <?php
+require_once __DIR__ . '/ai_models_fn.php';
+
+// Id sutaze v admin.competitions. Sluzi na dohladanie modelu pre livescore,
+// ktory sa nastavuje per sutaz a den.
+const UCL_COMPETITION_ID = 5;
 // Stiahnutie priebezneho stavu zapasov LM z Flashscore.
 //
 // Rovnaku pracu potrebuje admin tlacidlom aj cron, preto zije mimo endpointu.
@@ -45,7 +50,16 @@ function ucl_livescore_refresh(PDO $pdo, array $games): array {
                 'note' => 'Dnes nie je čo sledovať — žiadny zápas s adresou Flashscore.'];
     }
 
-    $model = defined('OPENROUTER_MODEL') ? OPENROUTER_MODEL : 'minimax/minimax-m3';
+    // Model sa berie z ciselnika, nie z konfiguraku: da sa tak menit za behu
+    // cez Sprava/Livescore bez zasahu do suborov na serveri. Konstanta
+    // OPENROUTER_MODEL zostava ako zaloha, kym sa model v DB nenastavi.
+    [$model, $modelRow, $dovod] = ai_model_pre_livescore(UCL_COMPETITION_ID);
+
+    if ($model === null) {
+        return ['updated' => 0, 'watched' => count($watch), 'games' => [],
+                'note' => $dovod];
+    }
+
     $res = livescore_bulk_check(array_keys($watch), $model);
     if (!$res['ok']) return ['error' => $res['error'] ?? 'neznáma chyba'];
 

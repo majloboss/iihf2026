@@ -1,0 +1,19 @@
+# Presmerovanie starej domeny iihf2026.fellow.sk na betclub.fellow.sk
+#
+# Nahrat ako .htaccess do /sub/iihf2026/ na FTP.
+#
+# Preco: na tejto domene bezi stara kopia aplikacie, ktora sa uz nenasadzuje
+# (v .github/workflows/deploy.yml nie je). Kto ma stary odkaz v zalozkach,
+# vidi neaktualne data — 8.9.2026 sa tak stalo, ze hrac videl zapasy IIHF
+# namiesto Ligy majstrov a hladali sme to niekolko hodin.
+#
+# 301 = trvale presmerovanie, prehliadac si ho zapamata a nabuduce ide rovno
+# na spravnu adresu. Cesta zostava zachovana, takze kto ma v zalozke /games,
+# dostane sa na /games na novej domene.
+
+RewriteEngine On
+
+# Vynimka: samotny .htaccess a pripadne overovacie subory hostingu
+RewriteCond %{REQUEST_URI} !^/\.well-known/
+
+RewriteRule ^(.*)$ https://betclub.fellow.sk/$1 [R=301,L]
