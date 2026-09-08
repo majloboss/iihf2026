@@ -3,3 +3,35 @@ RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_URI} !^/api/
 RewriteRule ^ index.html [L]
+
+# ============================================================
+# Cache
+#
+# Server dosial neposielal Cache-Control vobec, takze prehliadac si
+# index.html drzal podla vlastnej heuristiky — aj hodiny. Po nasadeni novej
+# verzie tak pouzivatel dostaval stary index.html, ktory ukazoval na stare
+# assety, a nova verzia sa k nemu nedostala ani po obnoveni stranky.
+#
+# Preto:
+#   index.html a sw.js  — nikdy necachovat, vzdy overit na serveri
+#   assety s hashom      — cachovat natrvalo, nazov sa pri zmene meni
+# ============================================================
+<IfModule mod_headers.c>
+    <FilesMatch "^(index\.html|sw\.js|manifest\.webmanifest)$">
+        Header set Cache-Control "no-cache, no-store, must-revalidate"
+        Header set Pragma "no-cache"
+        Header set Expires "0"
+    </FilesMatch>
+
+    # Nazov suboru obsahuje hash obsahu, takze sa pri zmene aj tak zmeni.
+    # sw.js je z tohto vynaty prvym pravidlom — FilesMatch sa vyhodnocuju
+    # v poradi a to prve uz Cache-Control nastavilo.
+    <FilesMatch "\.(css|woff2?|png|jpg|jpeg|svg|webp|ico)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
+
+    # JS okrem sw.js — ten sa nesmie cachovat, inak sa nova verzia nenacita.
+    <FilesMatch "^(?!sw\.js$).*\.js$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
+</IfModule>
