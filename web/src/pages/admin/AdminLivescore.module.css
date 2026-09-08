@@ -615,3 +615,13 @@
   background: #eef0f2;
   white-space: nowrap;
 }
+
+/* Testovacie volania sa v prehlade nakladov odlisia stitkom */
+.stitokTest {
+  padding: 1px 7px;
+  border-radius: 8px;
+  font-size: .68rem;
+  font-weight: 700;
+  color: #6b7280;
+  background: #eef0f2;
+}
