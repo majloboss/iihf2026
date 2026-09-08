@@ -67,9 +67,16 @@ function ucl_livescore_refresh(PDO $pdo, array $games): array {
     // a game_id zostava NULL; konkretne zapasy su v poznamke.
     ucl_zapis_naklady($model, $modelRow, $res, count($watch));
 
+    // Zlyhanie sa zapocita — po troch za sebou livescore prejde na dalsi
+    // model v poradi, aby pri tom nemusel sediet admin.
+    $prepnutie = ai_po_volani(UCL_COMPETITION_ID, !empty($res['ok']),
+                              $res['error'] ?? null);
+
     // Po zapise sa skontroluje denny strop: pri 80 % sa prepne na lacnejsi
     // model, pri 150 % sa livescore pre dany den zastavi.
     $zasahy = ai_straz_rozpocet(UCL_COMPETITION_ID);
+    if ($prepnutie !== null) $zasahy[] = ['typ' => 'prepnute_po_zlyhani',
+                                          'popis' => $prepnutie];
 
     if (!$res['ok']) return ['error' => $res['error'] ?? 'neznáma chyba',
                              'rozpocet' => $zasahy];

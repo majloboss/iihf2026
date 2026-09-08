@@ -246,6 +246,16 @@ function ai_model_pre_livescore(int $competitionId, ?string $den = null): array 
         }
     }
 
+    // Poradie nahradnych modelov. Berie sa ten, na ktorom sme prave skoncili —
+    // po prepnuti sa tak livescore nevracia k modelu, ktory uz zlyhal.
+    $poradie = ai_poradie($competitionId);
+    if ($poradie) {
+        $index = max(1, (int)($den_cfg['poradie_index'] ?? 1));
+        $model = $poradie[min($index, count($poradie)) - 1];
+        return [$model['model_id'], $model,
+                sprintf('poradie %d z %d', $index, count($poradie))];
+    }
+
     // 2) predvoleny model sutaze
     $st = $pdo->prepare(
         'SELECT c.is_enabled, m.*
@@ -496,4 +506,110 @@ function ai_davka_na_test(string $davka, int $limit = 30): array {
 // Kolko modelov by dana davka mala — pre odhad casu pred spustenim.
 function ai_pocet_v_davke(string $davka): int {
     return count(ai_davka_na_test($davka, 1000));
+}
+
+// ------------------------------------------------------------
+// Poradie nahradnych modelov pre sutaz.
+//
+// Vracia zoznam v poradi, v akom sa maju skusat. Prazdny zoznam znamena,
+// ze poradie nie je nastavene — vtedy plati jediny model z day_config.
+// ------------------------------------------------------------
+function ai_poradie(int $competitionId): array {
+    $st = db()->prepare(
+        'SELECT p.poradie, m.*
+           FROM admin.livescore_poradie p
+           JOIN admin.ai_models m ON m.id = p.model_id
+          WHERE p.competition_id = ? AND p.is_enabled
+            AND m.is_enabled AND m.unavailable_reason IS NULL
+          ORDER BY p.poradie');
+    $st->execute([$competitionId]);
+    return $st->fetchAll();
+}
+
+// ------------------------------------------------------------
+// Zaznamena vysledok volania a v pripade opakovanych zlyhani prepne
+// na dalsi model v poradi.
+//
+// Prepina sa az po TROCH zlyhaniach za sebou — jedno zlyhanie moze byt
+// vypadok siete a striedat model pri kazdom zakolisani by bolo horsie
+// nez chvilu pockat.
+//
+// Vracia popis prepnutia, alebo null ked sa nic nemenilo.
+// ------------------------------------------------------------
+function ai_po_volani(int $competitionId, bool $uspech, ?string $chyba = null): ?string {
+    $pdo = db();
+    $den = date('Y-m-d');
+
+    if ($uspech) {
+        // Uspech vynuluje pocitadlo — tri zlyhania musia byt za sebou.
+        $pdo->prepare(
+            'UPDATE admin.livescore_day_config SET fails_in_row = 0
+              WHERE competition_id = ? AND den = ? AND fails_in_row > 0')
+            ->execute([$competitionId, $den]);
+        return null;
+    }
+
+    // Trvala prekazka vyradi model z ciselnika hned, netreba cakat na tri.
+    $trvala = ai_trvala_chyba($chyba);
+
+    $st = $pdo->prepare(
+        "INSERT INTO admin.livescore_day_config (competition_id, den, fails_in_row)
+         VALUES (?, ?, 1)
+         ON CONFLICT (competition_id, den) DO UPDATE
+            SET fails_in_row = admin.livescore_day_config.fails_in_row + 1
+         RETURNING fails_in_row, poradie_index");
+    $st->execute([$competitionId, $den]);
+    $stav = $st->fetch();
+
+    $zlyhani = (int)$stav['fails_in_row'];
+    if ($trvala === null && $zlyhani < 3) return null;
+
+    // --- prepnutie na dalsi model v poradi ---
+    $poradie = ai_poradie($competitionId);
+    if (!$poradie) return null;
+
+    $terajsi = (int)$stav['poradie_index'];
+
+    if ($trvala !== null) {
+        [$model] = ai_model_pre_livescore($competitionId, $den);
+        if ($model !== null) ai_vyrad_model($model, $trvala);
+    }
+
+    // Dalsi v poradi. Ked sme na konci, livescore sa vypne — vsetky modely
+    // zlyhali a hadzat nespravne skore je horsie nez ziadne.
+    $dalsi = $terajsi + 1;
+    if ($dalsi > count($poradie)) {
+        $dovod = 'Zlyhali všetky modely z poradia (' . count($poradie) . ')';
+        ai_vypni_livescore($competitionId, $dovod, null, $den);
+        ai_uvedom_admina_rozpocet('Livescore zastavené — zlyhali všetky modely',
+            "$dovod.
+
+Posledná chyba: " . ($chyba ?? 'neuvedená')
+          . "
+
+V Správa → Livescore → Model súťaže sa dá nastaviť ručne.");
+        return $dovod;
+    }
+
+    $novy = $poradie[$dalsi - 1];
+
+    $pdo->prepare(
+        "INSERT INTO admin.livescore_day_config
+            (competition_id, den, model_id, poradie_index, is_enabled,
+             chosen_by, chosen_at, fails_in_row, prepnuti_dnes)
+         VALUES (?, ?, ?, ?, TRUE, 'fail', NOW(), 0, 1)
+         ON CONFLICT (competition_id, den) DO UPDATE
+            SET model_id = EXCLUDED.model_id,
+                poradie_index = EXCLUDED.poradie_index,
+                chosen_by = 'fail', chosen_at = NOW(), fails_in_row = 0,
+                prepnuti_dnes = admin.livescore_day_config.prepnuti_dnes + 1")
+        ->execute([$competitionId, $den, (int)$novy['id'], $dalsi]);
+
+    $sprava = sprintf('Model %s zlyhal (%s), livescore prepnuté na %s',
+        $poradie[$terajsi - 1]['model_id'] ?? '?',
+        $trvala ?? "$zlyhani× za sebou",
+        $novy['model_id']);
+
+    ai_uvedom_admina_rozpocet('Livescore prepnuté na náhradný model', $sprava);
+    return $sprava;
 }

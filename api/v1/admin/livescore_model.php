@@ -81,6 +81,42 @@ if ($method === 'POST') {
         json_ok(['budget' => $b]);
     }
 
+    // Poradie nahradnych modelov — zoznam nazvov v poradi, v akom sa maju
+    // skusat. Prazdny zoznam poradie zrusi.
+    if (isset($body['poradie'])) {
+        $zoznam = is_array($body['poradie']) ? $body['poradie'] : [];
+
+        $pdo->beginTransaction();
+        try {
+            $pdo->prepare('DELETE FROM admin.livescore_poradie WHERE competition_id = ?')
+                ->execute([$cid]);
+
+            $vloz = $pdo->prepare(
+                'INSERT INTO admin.livescore_poradie (competition_id, poradie, model_id)
+                 SELECT ?, ?, id FROM admin.ai_models WHERE model_id = ?');
+
+            $i = 0;
+            foreach ($zoznam as $nazov) {
+                $nazov = trim((string)$nazov);
+                if ($nazov === '') continue;
+                $vloz->execute([$cid, ++$i, $nazov]);
+            }
+
+            // Po zmene poradia sa zacina od zaciatku.
+            $pdo->prepare(
+                'UPDATE admin.livescore_day_config
+                    SET poradie_index = 1, fails_in_row = 0
+                  WHERE competition_id = ? AND den = ?')->execute([$cid, $den]);
+
+            $pdo->commit();
+        } catch (Throwable $e) {
+            $pdo->rollBack();
+            json_error('Poradie sa nepodarilo uložiť: ' . $e->getMessage(), 500);
+        }
+
+        json_ok(['poradie' => $i]);
+    }
+
     $modelKey = trim((string)($body['model_id'] ?? ''));
     if ($modelKey === '') json_error('Chýba model_id', 400);
 
@@ -125,7 +161,8 @@ foreach ($sutaze as $s) {
     // Strop a stav vypnutia
     $st = $pdo->prepare(
         'SELECT d.daily_budget_usd, d.is_enabled, d.disabled_reason, d.chosen_by,
-                d.chosen_at, u.username AS kto
+                d.chosen_at, d.poradie_index, d.prepnuti_dnes, d.fails_in_row,
+                u.username AS kto
            FROM admin.livescore_day_config d
            LEFT JOIN admin.users u ON u.id = d.chosen_by_user_id
           WHERE d.competition_id = ? AND d.den = ?');
@@ -193,6 +230,16 @@ foreach ($sutaze as $s) {
 
         // Zapnute a "ma nastaveny model" su dva rozne stavy: livescore moze
         // byt zapnute a este cakat na rany test, ktory model vyberie.
+        'poradie'        => array_map(static fn($p) => [
+            'model_id' => $p['model_id'],
+            'is_free'  => in_array($p['is_free'], [true,'t','1',1], true),
+            'cena_1m'  => round((float)($p['price_input_1m'] ?? 0)
+                              + (float)($p['price_output_1m'] ?? 0), 4),
+        ], ai_poradie($sid)),
+        'poradie_index'  => (int)($cfgDen['poradie_index'] ?? 1),
+        'prepnuti_dnes'  => (int)($cfgDen['prepnuti_dnes'] ?? 0),
+        'zlyhani_v_rade' => (int)($cfgDen['fails_in_row'] ?? 0),
+
         'zapnute'        => $cfgDen
                             ? in_array($cfgDen['is_enabled'], [true,'t','1',1], true)
                             : ($model !== null),

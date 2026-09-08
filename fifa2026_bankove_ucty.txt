@@ -1,0 +1,15 @@
+--------------------------------------------------------------------------------
+USER    PRIEZVISKO MENO     BANKOVÝ ÚČET              MENO K BÚ
+--------------------------------------------------------------------------------
+
+Adrian:  Gabriel Adrián    - SK2811000000002614721039 (Gabriel Adrián, Mgr.)
+david:   Kováč Dávid       - SK4811110000001003802003 (David Kovac)
+Duttu:   Ilavský Dušan     - SK4309000000000230762326 (Dusan Ilavsky)
+HAKY:    Haspra Jozef      - SK1111000000002939391015 (Hasprova Andrea)
+jerry:   Herich Peter      - CZ1555000000001345207001 (Peter Herich)
+Kamas:   Kaca Kamil        - SK7611000000002930454884 (Kača Kamil)
+Lukas:   Lukáš Mojto       - SK1002000000003149312153 (Lukas Mojto)
+Milo:    Krchniak Miloslav - SK9411000000002616032552 (Krchniak Miloslav)
+Ranko:   Mastilovic Ranko  - cash 11.6.2026
+Roderik: Klein Roderik     - SK5911000000002619261633 (Klein Roderik, Ing.)
+--------------------------------------------------------------------------------

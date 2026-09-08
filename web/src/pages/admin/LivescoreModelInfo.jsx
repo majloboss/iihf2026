@@ -14,6 +14,8 @@ export default function LivescoreModelInfo() {
     const [caka, setCaka]     = useState(false);
     const [vyber, setVyber]   = useState({});     // competition_id -> model_id
     const [strop, setStrop]   = useState({});     // competition_id -> denny strop
+    const [porad, setPorad]   = useState({});     // competition_id -> pole nazvov
+    const [pridat, setPridat] = useState({});     // competition_id -> rozpisany nazov
     const { activeCompetition } = useCompetition();
 
     useEffect(() => { nacitat(); }, []);
@@ -65,6 +67,11 @@ export default function LivescoreModelInfo() {
     if (!data) {
         return <p className={styles.popis}>{chyba || 'Načítavam…'}</p>;
     }
+
+    // Poradie sa edituje lokalne a uklada sa az tlacidlom, aby presuny
+    // hore-dole nerobili sietove volanie pri kazdom kliknuti.
+    const poradieSutaze = s => porad[s.competition_id]
+        ?? (s.poradie ?? []).map(p => p.model_id);
 
     return (
         <div>
@@ -219,6 +226,133 @@ export default function LivescoreModelInfo() {
                                 >
                                     Uložiť strop
                                 </button>
+                            </div>
+                        </div>
+
+                        {/* Poradie nahradnych modelov.
+
+                            Admin nemoze pri livescore sediet cely vecer. Ked model
+                            prestane odpovedat (tri zlyhania za sebou alebo trvala
+                            prekazka), livescore prejde na dalsi v poradi. Ked sa
+                            zoznam vycerpa, livescore sa vypne a pride mail. */}
+                        <div className={styles.poradie}>
+                            <h4>
+                                Poradie náhradných modelov
+                                {s.prepnuti_dnes > 0 && (
+                                    <em className={styles.prepnute}>
+                                        dnes prepnuté {s.prepnuti_dnes}&times;
+                                    </em>
+                                )}
+                            </h4>
+                            <p className={styles.poradiePopis}>
+                                Keď model prestane odpovedať, livescore sa sám prepne na
+                                ďalší v zozname. Zvyčajne pár bezplatných a platený ako
+                                poistka na koniec. Prázdny zoznam znamená bez prepínania.
+                            </p>
+
+                            {poradieSutaze(s).length === 0 ? (
+                                <p className={styles.caka}>Poradie nie je nastavené.</p>
+                            ) : (
+                                <ol className={styles.poradieZoznam}>
+                                    {poradieSutaze(s).map((nazov, i) => {
+                                        const info = (s.poradie ?? []).find(x => x.model_id === nazov);
+                                        const zoznam = poradieSutaze(s);
+                                        // "Bezi" ukazuje skutocny stav, preto len kym
+                                        // su ulozene zmeny — pri rozrobenom poradi by
+                                        // sa znacka nalepila na nespravny riadok.
+                                        const bezi = !porad[s.competition_id]
+                                                     && (i + 1) === s.poradie_index;
+                                        return (
+                                            <li key={nazov} className={bezi ? styles.poradieBezi : ''}>
+                                                <code>{nazov}</code>
+                                                {info?.is_free
+                                                    ? <span className={styles.free}>zdarma</span>
+                                                    : info && <span className={styles.cenaStitok}>
+                                                          ${info.cena_1m}/1M</span>}
+                                                {bezi && <span className={styles.stavZap}>beží</span>}
+                                                <span className={styles.poradieTlacidla}>
+                                                    <button disabled={caka || i === 0}
+                                                        title="Posunúť vyššie"
+                                                        onClick={() => {
+                                                            const n = [...zoznam];
+                                                            [n[i - 1], n[i]] = [n[i], n[i - 1]];
+                                                            setPorad(x => ({ ...x, [s.competition_id]: n }));
+                                                        }}>&uarr;</button>
+                                                    <button disabled={caka || i === zoznam.length - 1}
+                                                        title="Posunúť nižšie"
+                                                        onClick={() => {
+                                                            const n = [...zoznam];
+                                                            [n[i + 1], n[i]] = [n[i], n[i + 1]];
+                                                            setPorad(x => ({ ...x, [s.competition_id]: n }));
+                                                        }}>&darr;</button>
+                                                    <button disabled={caka}
+                                                        title="Odobrať zo zoznamu"
+                                                        className={styles.zrusit}
+                                                        onClick={() => setPorad(x => ({
+                                                            ...x,
+                                                            [s.competition_id]: zoznam.filter((_, j) => j !== i),
+                                                        }))}>&times;</button>
+                                                </span>
+                                            </li>
+                                        );
+                                    })}
+                                </ol>
+                            )}
+
+                            <div className={styles.akcieRiadok}>
+                                <VyberModelu
+                                    modely={data.modely}
+                                    hodnota={pridat[s.competition_id] ?? ''}
+                                    disabled={caka}
+                                    onZmena={v => setPridat(x => ({
+                                        ...x, [s.competition_id]: v,
+                                    }))}
+                                />
+                                <button
+                                    className={styles.vedlajsie}
+                                    disabled={caka
+                                        || !znamyModel(pridat[s.competition_id])
+                                        || poradieSutaze(s).includes(pridat[s.competition_id])}
+                                    onClick={() => {
+                                        setPorad(x => ({
+                                            ...x,
+                                            [s.competition_id]: [...poradieSutaze(s),
+                                                                 pridat[s.competition_id]],
+                                        }));
+                                        setPridat(x => ({ ...x, [s.competition_id]: '' }));
+                                    }}
+                                >
+                                    Pridať do poradia
+                                </button>
+                                <button
+                                    className={styles.hlavne}
+                                    disabled={caka || !porad[s.competition_id]}
+                                    onClick={async () => {
+                                        await posli({ competition_id: s.competition_id,
+                                              poradie: porad[s.competition_id] });
+                                        setPorad(x => {
+                                            const n = { ...x };
+                                            delete n[s.competition_id];
+                                            return n;
+                                        });
+                                    }}
+                                    title="Uloží poradie a začne znova od prvého modelu"
+                                >
+                                    Uložiť poradie
+                                </button>
+                                {porad[s.competition_id] && (
+                                    <button
+                                        className={styles.zrusit}
+                                        disabled={caka}
+                                        onClick={() => setPorad(x => {
+                                            const n = { ...x };
+                                            delete n[s.competition_id];
+                                            return n;
+                                        })}
+                                    >
+                                        Zrušiť zmeny
+                                    </button>
+                                )}
                             </div>
                         </div>
                     </section>
