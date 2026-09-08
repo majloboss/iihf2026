@@ -21,7 +21,7 @@ require_once __DIR__ . '/../../helpers/livescore_fn.php';
 $body  = json_decode(file_get_contents('php://input'), true) ?: [];
 $url   = trim((string)($body['url'] ?? ''));
 $model = trim((string)($body['model'] ?? ''))
-      ?: (defined('OPENROUTER_MODEL') ? OPENROUTER_MODEL : 'google/gemma-4-31b-it:free');
+      ?: (defined('OPENROUTER_MODEL') ? OPENROUTER_MODEL : 'minimax/minimax-m3');
 
 if ($url === '') json_error('Chýba URL', 400);
 livescore_check_url($url);

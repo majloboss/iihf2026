@@ -19,7 +19,7 @@ require_once __DIR__ . '/../../helpers/livescore_bulk_fn.php';
 
 $body  = json_decode(file_get_contents('php://input'), true) ?: [];
 $model = trim((string)($body['model'] ?? ''))
-      ?: (defined('OPENROUTER_MODEL') ? OPENROUTER_MODEL : 'minimax/minimax-m3:free');
+      ?: (defined('OPENROUTER_MODEL') ? OPENROUTER_MODEL : 'minimax/minimax-m3');
 
 $urls = $body['urls'] ?? [];
 if (!is_array($urls) || !$urls) json_error('Chýbajú adresy zápasov', 400);

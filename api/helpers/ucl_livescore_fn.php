@@ -45,7 +45,7 @@ function ucl_livescore_refresh(PDO $pdo, array $games): array {
                 'note' => 'Dnes nie je čo sledovať — žiadny zápas s adresou Flashscore.'];
     }
 
-    $model = defined('OPENROUTER_MODEL') ? OPENROUTER_MODEL : 'minimax/minimax-m3:free';
+    $model = defined('OPENROUTER_MODEL') ? OPENROUTER_MODEL : 'minimax/minimax-m3';
     $res = livescore_bulk_check(array_keys($watch), $model);
     if (!$res['ok']) return ['error' => $res['error'] ?? 'neznáma chyba'];
 
