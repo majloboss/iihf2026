@@ -61,7 +61,18 @@ function ucl_livescore_refresh(PDO $pdo, array $games): array {
     }
 
     $res = livescore_bulk_check(array_keys($watch), $model);
-    if (!$res['ok']) return ['error' => $res['error'] ?? 'neznáma chyba'];
+
+    // Naklady sa zapisu vzdy, aj ked volanie zlyhalo — tokeny sa mohli minut.
+    // Jedno volanie obsluzi viac zapasov, preto je to jeden riadok za volanie
+    // a game_id zostava NULL; konkretne zapasy su v poznamke.
+    ucl_zapis_naklady($model, $modelRow, $res, count($watch));
+
+    // Po zapise sa skontroluje denny strop: pri 80 % sa prepne na lacnejsi
+    // model, pri 150 % sa livescore pre dany den zastavi.
+    $zasahy = ai_straz_rozpocet(UCL_COMPETITION_ID);
+
+    if (!$res['ok']) return ['error' => $res['error'] ?? 'neznáma chyba',
+                             'rozpocet' => $zasahy];
 
     // Polcasove skore sa prepise len ked ho livescore pozna — inak zostane povodne.
     $upd = $pdo->prepare('
@@ -158,4 +169,40 @@ function ucl_livescore_due(array $games): bool {
         if ($teraz >= $start - 300 && $teraz <= $start + 3 * 3600) return true;
     }
     return false;
+}
+
+// ------------------------------------------------------------
+// Zapise naklady ostreho volania livescore do admin.livescore_log.
+//
+// Jedno volanie modelu obsluzi vsetky sledovane zapasy naraz, preto vznika
+// jeden riadok s call_type='live' a game_id NULL. Bez tohto zapisu by
+// obrazovka Naklady nemala z coho pocitat.
+// ------------------------------------------------------------
+function ucl_zapis_naklady(string $model, ?array $modelRow, array $res, int $zapasov): void {
+    try {
+        $u = $res['usage'] ?? [];
+        $vstup  = $u['prompt_tokens']     ?? null;
+        $vystup = $u['completion_tokens'] ?? null;
+        $spolu  = $u['total_tokens']      ?? null;
+
+        $cena = $modelRow ? ai_cena_volania($modelRow, $vstup, $vystup) : 0.0;
+
+        db()->prepare(
+            "INSERT INTO admin.livescore_log
+                (call_type, provider, competition_id, model,
+                 prompt_tokens, completion_tokens, tokens, cost_usd,
+                 success, error, notes)
+             VALUES ('live', 'openrouter', ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+            ->execute([
+                UCL_COMPETITION_ID,
+                mb_substr($model, 0, 100),
+                $vstup, $vystup, $spolu, round($cena, 6),
+                !empty($res['ok']) ? 't' : 'f',
+                isset($res['error']) ? mb_substr((string)$res['error'], 0, 1000) : null,
+                "Sledovaných zápasov: $zapasov",
+            ]);
+    } catch (Throwable $e) {
+        // Zlyhany zapis nakladov nesmie zhodit livescore.
+        error_log('ucl_zapis_naklady: ' . $e->getMessage());
+    }
 }

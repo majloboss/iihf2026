@@ -309,3 +309,120 @@ function ai_vypni_livescore(int $competitionId, string $dovod,
                 chosen_at = NOW()")
         ->execute([$competitionId, $den ?? date('Y-m-d'), $dovod, $userId]);
 }
+
+// ------------------------------------------------------------
+// Strazi denny strop nakladov.
+//
+// Vola sa po kazdom ostrom volani livescore. Podla vyuzitia stropu:
+//   80 %  prepne na najlacnejsi funkcny model — zapas dobehne lacnejsie
+//         namiesto toho, aby livescore zhaslo uprostred
+//   150 % zastavi livescore pre dany den
+//
+// Obe hranice posielaju spravu adminovi, kazdu najviac raz za den.
+// Vracia zoznam vykonanych zasahov (prazdny, ked sa nic nedialo).
+// ------------------------------------------------------------
+function ai_straz_rozpocet(int $competitionId, ?string $den = null): array {
+    $pdo = db();
+    $den = $den ?? date('Y-m-d');
+    $zasahy = [];
+
+    // Kolko sa dnes minulo — len ostre volania
+    $st = $pdo->prepare(
+        "SELECT COALESCE(SUM(cost_usd), 0) FROM admin.livescore_log
+          WHERE call_type = 'live' AND competition_id = ? AND checked_at::date = ?::date");
+    $st->execute([$competitionId, $den]);
+    $minute = (float)$st->fetchColumn();
+
+    $st = $pdo->prepare(
+        'SELECT d.daily_budget_usd, d.warned_80_at, d.stopped_150_at, d.model_id,
+                m.model_id AS model_key
+           FROM admin.livescore_day_config d
+           LEFT JOIN admin.ai_models m ON m.id = d.model_id
+          WHERE d.competition_id = ? AND d.den = ?');
+    $st->execute([$competitionId, $den]);
+    $cfg = $st->fetch();
+
+    if (!$cfg) {
+        $st = $pdo->prepare(
+            'SELECT daily_budget_usd FROM admin.livescore_competition_default
+              WHERE competition_id = ?');
+        $st->execute([$competitionId]);
+        $cfg = ['daily_budget_usd' => $st->fetchColumn() ?: 1.0,
+                'warned_80_at' => null, 'stopped_150_at' => null,
+                'model_id' => null, 'model_key' => null];
+    }
+
+    $strop = (float)($cfg['daily_budget_usd'] ?: 1.0);
+    if ($strop <= 0) return $zasahy;
+
+    $podiel = $minute / $strop;
+
+    // --- 150 %: zastavit ---
+    if ($podiel >= 1.5 && empty($cfg['stopped_150_at'])) {
+        $dovod = sprintf('Prekročený denný strop: minuté $%.4f z $%.2f (%.0f %%)',
+                         $minute, $strop, $podiel * 100);
+        ai_vypni_livescore($competitionId, $dovod, null, $den);
+        $pdo->prepare(
+            'UPDATE admin.livescore_day_config SET stopped_150_at = NOW()
+              WHERE competition_id = ? AND den = ?')->execute([$competitionId, $den]);
+
+        ai_uvedom_admina_rozpocet('Livescore zastavené — prekročený strop',
+            "$dovod
+
+Livescore je pre dnešok vypnuté. V Správa → Livescore → Model "
+          . "sa dá znova zapnúť alebo zvýšiť denný strop.");
+
+        $zasahy[] = ['typ' => 'zastavene', 'minute' => $minute, 'strop' => $strop];
+        return $zasahy;
+    }
+
+    // --- 80 %: prepnut na najlacnejsi ---
+    if ($podiel >= 0.8 && empty($cfg['warned_80_at'])) {
+        $lacny = ai_najlacnejsi();
+
+        if ($lacny && $lacny['model_id'] !== ($cfg['model_key'] ?? null)) {
+            ai_nastav_model_na_den($competitionId, (int)$lacny['id'], 'budget', null, $den);
+            $sprava = sprintf(
+                'Minuté $%.4f z denného stropu $%.2f (%.0f %%). Livescore prepnuté '
+              . 'na najlacnejší funkčný model %s, aby zápas dobehol.',
+                $minute, $strop, $podiel * 100, $lacny['model_id']);
+            $zasahy[] = ['typ' => 'prepnute', 'model' => $lacny['model_id'],
+                         'minute' => $minute, 'strop' => $strop];
+        } else {
+            $sprava = sprintf(
+                'Minuté $%.4f z denného stropu $%.2f (%.0f %%). Lacnejší model '
+              . 'sa nenašiel — pri 150 %% sa livescore zastaví.',
+                $minute, $strop, $podiel * 100);
+            $zasahy[] = ['typ' => 'upozornenie', 'minute' => $minute, 'strop' => $strop];
+        }
+
+        $pdo->prepare(
+            "INSERT INTO admin.livescore_day_config (competition_id, den, warned_80_at)
+             VALUES (?, ?, NOW())
+             ON CONFLICT (competition_id, den) DO UPDATE SET warned_80_at = NOW()")
+            ->execute([$competitionId, $den]);
+
+        ai_uvedom_admina_rozpocet('Livescore sa blíži k dennému stropu', $sprava);
+    }
+
+    return $zasahy;
+}
+
+// Sprava adminom o rozpocte. Nefunkcna posta nesmie zhodit livescore.
+function ai_uvedom_admina_rozpocet(string $predmet, string $telo): void {
+    try {
+        if (!function_exists('send_mail_logged')) {
+            $m = __DIR__ . '/mailer.php';
+            if (file_exists($m)) require_once $m; else return;
+        }
+        $pdo = db();
+        $st = $pdo->query(
+            "SELECT email FROM admin.users
+              WHERE role = 'admin' AND is_active AND email IS NOT NULL AND email <> ''");
+        foreach ($st->fetchAll(PDO::FETCH_COLUMN) as $email) {
+            send_mail_logged($pdo, $email, $predmet, nl2br(htmlspecialchars($telo)));
+        }
+    } catch (Throwable $e) {
+        error_log('rozpocet livescore: notifikacia zlyhala - ' . $e->getMessage());
+    }
+}
