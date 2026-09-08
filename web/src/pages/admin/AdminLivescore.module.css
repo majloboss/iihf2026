@@ -572,3 +572,40 @@
   font-size: .75rem;
   color: #9198a1;
 }
+
+/* ---------- akcie v riadku ----------
+   Vyber modelu a tlacidla vedla seba; na uzkom displeji sa zalomia. */
+.akcieRiadok {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+/* Zoznam nezaberá celu sirku — tlacidla musia zostat na tom istom riadku */
+.vyberModelu {
+  flex: 1 1 260px;
+  max-width: 460px;
+  min-width: 0;
+  min-height: 40px;
+  padding: 8px 10px;
+  font: inherit;
+  font-size: 16px;          /* mensie pismo Safari na iPhone priblizi */
+  border: 1px solid #d5d9de;
+  border-radius: 6px;
+  background: #fff;
+}
+
+/* Strop sa upravuje priamo v poli, nie cez vyskakovacie okno */
+.stropPole { display: flex; flex-direction: column; gap: 4px; margin: 0; }
+.stropPole > span { font-size: .78rem; font-weight: 600; color: #6b7280; }
+.stropPole input {
+  width: 110px;
+  min-height: 40px;
+  padding: 8px 10px;
+  font: inherit;
+  font-size: 16px;
+  border: 1px solid #d5d9de;
+  border-radius: 6px;
+}

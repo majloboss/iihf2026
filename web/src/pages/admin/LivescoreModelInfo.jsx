@@ -10,9 +10,9 @@ import styles from './AdminLivescore.module.css';
 export default function LivescoreModelInfo() {
     const [data, setData]     = useState(null);
     const [chyba, setChyba]   = useState(null);
-    const [hlaska, setHlaska] = useState(null);
     const [caka, setCaka]     = useState(false);
     const [vyber, setVyber]   = useState({});     // competition_id -> model_id
+    const [strop, setStrop]   = useState({});     // competition_id -> denny strop
     const { activeCompetition } = useCompetition();
 
     useEffect(() => { nacitat(); }, []);
@@ -21,22 +21,26 @@ export default function LivescoreModelInfo() {
         try {
             const r = await apiFetch('v1/admin/livescore-model');
             setData(r);
-            const v = {};
-            for (const s of r.sutaze) if (s.model) v[s.competition_id] = s.model;
+            const v = {}, b = {};
+            for (const s of r.sutaze) {
+                if (s.model) v[s.competition_id] = s.model;
+                b[s.competition_id] = s.budget;
+            }
             setVyber(v);
+            setStrop(b);
         } catch (e) { setChyba(e.message); }
     }
 
-    async function posli(telo, sprava) {
+    // Vysledok sa neoznamuje hlaskou — prejavi sa priamo na stave sutaze,
+    // ktory sa hned znovu nacita.
+    async function posli(telo) {
         setCaka(true);
         setChyba(null);
-        setHlaska(null);
         try {
             await apiFetch('v1/admin/livescore-model', {
                 method: 'POST',
                 body: JSON.stringify(telo),
             });
-            setHlaska(sprava);
             await nacitat();
         } catch (e) {
             setChyba(e.message);
@@ -65,8 +69,7 @@ export default function LivescoreModelInfo() {
                 testu. Zoznam všetkých modelov je v záložke <strong>Číselník modelov</strong>.
             </p>
 
-            {chyba  && <div className={styles.chyba}>{chyba}</div>}
-            {hlaska && <div className={styles.hlaska}>{hlaska}</div>}
+            {chyba && <div className={styles.chyba}>{chyba}</div>}
 
             {zoradene.map(s => {
                 const prekrocene = s.vyuzitie_pct !== null && s.vyuzitie_pct >= 80;
@@ -142,84 +145,83 @@ export default function LivescoreModelInfo() {
                         </dl>
 
                         <div className={styles.akcie}>
-                            <label className={styles.akciaPole}>
-                                <span>
-                                    Model na dnes
-                                    <em className={styles.napoveda}>
-                                        vyber zo zoznamu a ulož tlačidlom „Nastaviť model"
-                                    </em>
-                                </span>
+                            {/* Vyber modelu a akcie v jednom riadku. Zapnutie rovno
+                                nastavi vybrany model — osobitne tlacidlo netreba. */}
+                            <div className={styles.akcieRiadok}>
                                 <select
+                                    className={styles.vyberModelu}
                                     value={vyber[s.competition_id] ?? ''}
                                     disabled={caka}
                                     onChange={e => setVyber(v => ({
                                         ...v, [s.competition_id]: e.target.value,
                                     }))}
+                                    aria-label="Model na dnes"
                                 >
+                                    <option value="">— vyber model —</option>
                                     {data.modely.map(m => (
                                         <option key={m.model_id} value={m.model_id}>
                                             {m.model_id}
                                             {m.is_free ? ' · zdarma' : ` · $${m.cena_1m}/1M`}
-                                            {m.agree_rate !== null ? ` · zhoda ${m.agree_rate}%` : ''}
-                                            {m.halucinacii > 0 ? ` · ⚠ ${m.halucinacii}× vymyslené` : ''}
+                                            {m.halucinacii > 0 ? ` · ⚠ ${m.halucinacii}×` : ''}
                                         </option>
                                     ))}
                                 </select>
-                            </label>
-
-                            <div className={styles.tlacidla}>
-                                <button
-                                    className={styles.hlavne}
-                                    disabled={caka || !vyber[s.competition_id]
-                                              || vyber[s.competition_id] === s.model}
-                                    onClick={() => posli(
-                                        { competition_id: s.competition_id,
-                                          model_id: vyber[s.competition_id] },
-                                        `Model zmenený na ${vyber[s.competition_id]}`)}
-                                    title="Uloží model vybraný v zozname pre dnešný deň"
-                                >
-                                    Nastaviť model
-                                </button>
 
                                 {s.zapnute ? (
-                                    <button
-                                        className={styles.zrusit}
-                                        disabled={caka}
-                                        onClick={() => {
-                                            const d = prompt('Prečo vypínaš livescore na dnes?',
-                                                             'príliš drahé');
-                                            if (d !== null) posli(
-                                                { competition_id: s.competition_id,
-                                                  vypnut: true, dovod: d },
-                                                'Livescore je pre dnešok vypnuté');
-                                        }}
-                                    >
-                                        Vypnúť na dnes
-                                    </button>
+                                    <>
+                                        <button
+                                            className={styles.hlavne}
+                                            disabled={caka || !vyber[s.competition_id]
+                                                      || vyber[s.competition_id] === s.model}
+                                            onClick={() => posli({ competition_id: s.competition_id,
+                                                  model_id: vyber[s.competition_id] })}
+                                            title="Uloží vybraný model pre dnešný deň"
+                                        >
+                                            Uložiť model
+                                        </button>
+                                        <button
+                                            className={styles.zrusit}
+                                            disabled={caka}
+                                            onClick={() => posli({ competition_id: s.competition_id, vypnut: true,
+                                                  dovod: 'vypnuté administrátorom' })}
+                                        >
+                                            Vypnúť na dnes
+                                        </button>
+                                    </>
                                 ) : (
                                     <button
                                         className={styles.hlavne}
                                         disabled={caka}
-                                        onClick={() => posli(
-                                            { competition_id: s.competition_id, zapnut: true },
-                                            'Livescore je zapnuté')}
+                                        onClick={() => posli({ competition_id: s.competition_id, zapnut: true,
+                                              model_id: vyber[s.competition_id] || null })}
+                                        title="Zapne livescore a nastaví vybraný model"
                                     >
                                         Zapnúť
                                     </button>
                                 )}
+                            </div>
 
+                            {/* Strop sa meni priamo v poli, nie cez vyskakovacie okno */}
+                            <div className={styles.akcieRiadok}>
+                                <label className={styles.stropPole}>
+                                    <span>Denný strop ($)</span>
+                                    <input
+                                        type="number" min="0" max="100" step="0.5"
+                                        value={strop[s.competition_id] ?? s.budget}
+                                        disabled={caka}
+                                        onChange={e => setStrop(v => ({
+                                            ...v, [s.competition_id]: e.target.value,
+                                        }))}
+                                    />
+                                </label>
                                 <button
                                     className={styles.vedlajsie}
-                                    disabled={caka}
-                                    onClick={() => {
-                                        const b = prompt('Denný strop v USD:', s.budget);
-                                        if (b !== null && !isNaN(Number(b))) posli(
-                                            { competition_id: s.competition_id,
-                                              budget: Number(b) },
-                                            `Denný strop nastavený na $${Number(b).toFixed(2)}`);
-                                    }}
+                                    disabled={caka
+                                        || Number(strop[s.competition_id] ?? s.budget) === Number(s.budget)}
+                                    onClick={() => posli({ competition_id: s.competition_id,
+                                          budget: Number(strop[s.competition_id]) })}
                                 >
-                                    Zmeniť strop
+                                    Uložiť strop
                                 </button>
                             </div>
                         </div>

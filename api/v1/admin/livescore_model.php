@@ -35,17 +35,30 @@ if ($method === 'POST') {
     }
 
     if (!empty($body['zapnut'])) {
+        // Zapnutie rovno nastavi aj model, ked je vybrany — su to v praxi
+        // dve casti jednej akcie a osobitne tlacidlo bolo len navyse.
+        $mid = null;
+        if (!empty($body['model_id'])) {
+            $st = $pdo->prepare('SELECT id FROM admin.ai_models WHERE model_id = ?');
+            $st->execute([trim((string)$body['model_id'])]);
+            $mid = $st->fetchColumn() ?: null;
+        }
+
         // INSERT ... ON CONFLICT, nie UPDATE: ked na dnes zaznam este nie je,
         // UPDATE by nemal co aktualizovat a zapnutie by ticho zlyhalo.
         $pdo->prepare(
             "INSERT INTO admin.livescore_day_config
-                (competition_id, den, is_enabled, chosen_by, chosen_by_user_id, chosen_at)
-             VALUES (?, ?, TRUE, 'admin', ?, NOW())
+                (competition_id, den, model_id, is_enabled, chosen_by,
+                 chosen_by_user_id, chosen_at)
+             VALUES (?, ?, ?, TRUE, 'admin', ?, NOW())
              ON CONFLICT (competition_id, den) DO UPDATE
                 SET is_enabled = TRUE, disabled_reason = NULL,
+                    -- model sa prepise len ked prisiel; inak zostane povodny
+                    model_id = COALESCE(EXCLUDED.model_id, admin.livescore_day_config.model_id),
                     chosen_by_user_id = EXCLUDED.chosen_by_user_id, chosen_at = NOW()")
-            ->execute([$cid, $den, $auth['user_id']]);
-        json_ok(['stav' => 'zapnute']);
+            ->execute([$cid, $den, $mid, $auth['user_id']]);
+
+        json_ok(['stav' => 'zapnute', 'model' => $body['model_id'] ?? null]);
     }
 
     if (isset($body['budget'])) {
