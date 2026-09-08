@@ -203,6 +203,10 @@ Pravidlá:
 - Skóre uvádzaj ako čísla, nie text.
 - Vo feede Flashscore znamená AE domáci tím, AF hosťujúci, AG skóre domácich,
   AH skóre hostí, AB stav zápasu, AD čas začiatku.
+- IG = góly DOMÁCICH v danej časti, IH = góly HOSTÍ v danej časti
+  (napr. "AC÷1st Half¬IG÷0¬IH÷2" = v 1. polčase domáci 0, hostia 2).
+  Prvé číslo v dvojici patrí VŽDY domácim — riaď sa IG/IH, nie poradím
+  mien strelcov v texte.
 - V sekcii ZIVE UDAJE ZAPASU (feed STAV A SKORE) platí:
   DE = góly domácich, DF = góly hostí (aktuálne skóre),
   DG = góly domácich za 1. polčas, DH = góly hostí za 1. polčas,

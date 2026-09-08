@@ -43,8 +43,17 @@ Pravidlá:
 - Ak údaj na stránke nie je, daj null. Nikdy si nič nedomýšľaj.
 - Skóre uvádzaj ako čísla. Pri volejbale je skóre počet setov.
 - Minútu majú len športy, ktoré ju merajú — pri volejbale daj null.
-- Vo feede Flashscore znamená AE domáci tím, AF hosťujúci, AG skóre domácich,
-  AH skóre hostí, AB stav zápasu, AD čas začiatku, AZ prebiehajúcu minútu.
+KĽÚČ K FEEDU FLASHSCORE — drž sa ho presne, nehádaj:
+- AE = domáci tím, AF = hosťujúci tím
+- AG = skóre DOMÁCICH, AH = skóre HOSTÍ
+- IG = góly DOMÁCICH v danej časti, IH = góly HOSTÍ v danej časti
+  (napr. "AC÷1st Half¬IG÷0¬IH÷2" znamená: v 1. polčase dali domáci 0 a hostia 2)
+- AB = stav zápasu, AD = čas začiatku, AZ = prebiehajúca minúta
+- IA÷1 pri góle znamená domáceho hráča, IA÷2 hosťujúceho
+
+Celkové skóre je súčet IG cez všetky časti pre domácich a IH pre hostí.
+Prvé číslo v dvojici patrí VŽDY domácim. Ak si nie si istý, komu gól patrí,
+riaď sa IG/IH — nie poradím mien v texte.
 
 OBSAH STRÁNKY:
 {$vstup}
