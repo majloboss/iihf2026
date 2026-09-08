@@ -105,6 +105,7 @@ function ls_test_model(array $model, string $vstup, string $url, string $sport =
         'total_tokens'      => null,
         'cost_usd'          => 0.0,
         'score_text'        => null,
+        'teams_text'        => null,
     ];
 
     if ($odpoved === false) {
@@ -157,6 +158,25 @@ function ls_test_model(array $model, string $vstup, string $url, string $sport =
     $vysledok['score_text'] = $vysledok['got_score']
         ? ((int)$d['home_score'] . ':' . (int)$d['away_score'])
         : null;
+
+    // Nazvy timov su najlepsi ukazovatel halucinacie: model, ktory namiesto
+    // skutocnych timov vrati 'Real Madrid — Barcelona', si vymyslel aj skore.
+    // Odhali to az porovnanie s ostatnymi, preto sa nazvy ukladaju zvlast.
+    $vysledok['teams_text'] = (!empty($d['home_team']) && !empty($d['away_team']))
+        ? mb_substr(trim((string)$d['home_team']) . ' — ' . trim((string)$d['away_team']), 0, 120)
+        : null;
+
+    // Model, ktory skopiroval text zo sablony promptu, zjavne nepochopil ulohu.
+    foreach (['home_team', 'away_team', 'period'] as $pole) {
+        $h = (string)($d[$pole] ?? '');
+        if ($h !== '' && (str_contains($h, 'názov') || str_contains($h, 'alebo null'))) {
+            $vysledok['passed'] = false;
+            $vysledok['error']  = 'Model skopíroval text zo šablóny namiesto údajov';
+            $vysledok['score_text'] = null;
+            $vysledok['teams_text'] = null;
+            break;
+        }
+    }
 
     return $vysledok;
 }
@@ -223,15 +243,15 @@ function ls_zapis_test(array $v, string $url, ?int $competitionId, ?string $spor
     $pdo->prepare(
         'INSERT INTO admin.livescore_model_test
             (competition_id, model_id, model_key, test_url, sport,
-             run_id, score_text,
+             run_id, score_text, teams_text,
              got_score, got_period, got_minute, passed,
              prompt_tokens, completion_tokens, total_tokens, cost_usd, took_ms,
              error, raw)
-         VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)')
+         VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)')
         ->execute([
             $competitionId, $v['model_db_id'], mb_substr($v['model'], 0, 150),
             mb_substr($url, 0, 500), $sport !== null ? mb_substr($sport, 0, 30) : null,
-            $runId, $v['score_text'],
+            $runId, $v['score_text'], $v['teams_text'],
             $v['got_score']  ? 't' : 'f',
             $v['got_period'] ? 't' : 'f',
             $v['got_minute'] ? 't' : 'f',
@@ -263,17 +283,47 @@ function ls_zapis_test(array $v, string $url, ?int $competitionId, ?string $spor
 function ls_vyhodnot_zhodu(int $runId): array {
     $pdo = db();
 
+    // --- 1) Zhoda na NAZVOCH TIMOV ---
+    //
+    // Nazvy su spolahlivejsi ukazovatel nez skore: skore sa moze zhodovat
+    // nahodou (0:0 je bezne), nazvy timov nie. Model, ktory vrati uplne ine
+    // timy, si vymyslel aj skore.
+    $st = $pdo->prepare(
+        "SELECT teams_text, COUNT(*) AS pocet
+           FROM admin.livescore_model_test
+          WHERE run_id = ? AND teams_text IS NOT NULL
+          GROUP BY teams_text ORDER BY COUNT(*) DESC LIMIT 1");
+    $st->execute([$runId]);
+    $timy = $st->fetch();
+
+    if ($timy) {
+        $pdo->prepare(
+            'UPDATE admin.livescore_model_test
+                SET teams_agree = (teams_text = ?)
+              WHERE run_id = ? AND teams_text IS NOT NULL')
+            ->execute([$timy['teams_text'], $runId]);
+
+        // Model, ktory si timy vymyslel, nemoze byt oznaceny ako uspesny —
+        // aj keby vratil cisla v spravnom tvare.
+        $pdo->prepare(
+            'UPDATE admin.livescore_model_test
+                SET passed = FALSE,
+                    error = COALESCE(error, ?)
+              WHERE run_id = ? AND teams_agree = FALSE')
+            ->execute(['Model vrátil iné tímy než ostatné — pravdepodobne si údaje vymyslel', $runId]);
+    }
+
+    // --- 2) Zhoda na SKORE (len medzi tymi, co maju spravne timy) ---
     $st = $pdo->prepare(
         "SELECT score_text, COUNT(*) AS pocet
            FROM admin.livescore_model_test
           WHERE run_id = ? AND passed AND score_text IS NOT NULL
-          GROUP BY score_text
-          ORDER BY COUNT(*) DESC, score_text
-          LIMIT 1");
+            AND (teams_agree IS NULL OR teams_agree)
+          GROUP BY score_text ORDER BY COUNT(*) DESC, score_text LIMIT 1");
     $st->execute([$runId]);
     $vitaz = $st->fetch();
 
-    if (!$vitaz) return [null, 0, 0];
+    if (!$vitaz) return [null, 0, 0, $timy['teams_text'] ?? null];
 
     $pdo->prepare(
         'UPDATE admin.livescore_model_test
@@ -286,17 +336,20 @@ function ls_vyhodnot_zhodu(int $runId): array {
           WHERE run_id = " . (int)$runId . " AND passed AND score_text IS NOT NULL")
         ->fetchColumn();
 
-    // Uspesnost v ciselniku: podiel behov, v ktorych sa model zhodol
-    // s vacsinou. Toto je spolahlivejsie kriterium nez samotne 'passed'.
+    // --- 3) Prepocet uspesnosti v ciselniku ---
+    //
+    // Zhoda na timoch ma prednost: model, ktory halucinuje timy, je
+    // nepouzitelny bez ohladu na to, ako casto trafi skore.
     $pdo->exec(
         "UPDATE admin.ai_models m SET
             agree_rate = s.podiel, updated_at = NOW()
          FROM (SELECT model_key,
-                      ROUND(100.0 * COUNT(*) FILTER (WHERE agrees) / COUNT(*), 2) AS podiel
+                      ROUND(100.0 * COUNT(*) FILTER (WHERE agrees AND
+                            (teams_agree IS NULL OR teams_agree)) / COUNT(*), 2) AS podiel
                  FROM admin.livescore_model_test
                 WHERE agrees IS NOT NULL
                 GROUP BY model_key) s
          WHERE m.model_id = s.model_key");
 
-    return [$vitaz['score_text'], (int)$vitaz['pocet'], $spolu];
+    return [$vitaz['score_text'], (int)$vitaz['pocet'], $spolu, $timy['teams_text'] ?? null];
 }

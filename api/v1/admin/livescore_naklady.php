@@ -110,10 +110,13 @@ $st = $pdo->prepare(
     "SELECT COALESCE(l.game_id::text, l.url)     AS kluc,
             MAX(l.game_id)                        AS game_id,
             MAX(l.url)                            AS url,
-            (array_agg(l.home_team ORDER BY l.checked_at DESC)
-               FILTER (WHERE l.home_team IS NOT NULL))[1] AS domaci,
-            (array_agg(l.away_team ORDER BY l.checked_at DESC)
-               FILTER (WHERE l.away_team IS NOT NULL))[1] AS hostia,
+            -- Najcastejsi nazov, nie posledny: model, ktory si timy vymyslel,
+            -- by inak prepisal spravny nazov v prehlade.
+            mode() WITHIN GROUP (ORDER BY l.home_team) FILTER (WHERE l.home_team IS NOT NULL) AS domaci,
+            mode() WITHIN GROUP (ORDER BY l.away_team) FILTER (WHERE l.away_team IS NOT NULL) AS hostia,
+            -- Kolko roznych dvojic timov modely vratili. Viac nez jedna znamena,
+            -- ze si niektory model udaje vymyslel.
+            COUNT(DISTINCT l.home_team || ' - ' || l.away_team) AS roznych_timov,
             COUNT(*)                              AS volani,
             COUNT(*) FILTER (WHERE l.success)     AS uspesnych,
             COUNT(DISTINCT l.model)               AS modelov,

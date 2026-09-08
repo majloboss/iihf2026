@@ -192,6 +192,13 @@ export default function LivescoreNaklady() {
                                                 <a href={z.url} target="_blank" rel="noreferrer"
                                                    className={styles.odkaz}>↗</a>
                                             )}
+                                            {/* Viac nez jedna dvojica timov = niektory model si udaje vymyslel */}
+                                            {z.roznych_timov > 1 && (
+                                                <span className={styles.varovanieTimy}
+                                                      title={`Modely vrátili ${z.roznych_timov} rôznych dvojíc tímov — niektorý si údaje vymyslel`}>
+                                                    ⚠ {z.roznych_timov} verzií
+                                                </span>
+                                            )}
                                         </td>
                                         <td className={styles.cislo}>{z.volani}</td>
                                         <td className={styles.cislo}>{z.uspesnych}</td>
