@@ -49,6 +49,10 @@ export default function LivescoreModelInfo() {
         }
     }
 
+    // Existuje model s tymto nazvom? Do pola sa da napisat hocico, ulozit
+    // sa vsak smie len to, co je v ciselniku.
+    const znamyModel = nazov => data?.modely.some(m => m.model_id === nazov) ?? false;
+
     // Aktualne vybrana sutaz ide prva — je to tá, ktorú admin práve rieši.
     const zoradene = useMemo(() => {
         if (!data) return [];
@@ -148,30 +152,41 @@ export default function LivescoreModelInfo() {
                             {/* Vyber modelu a akcie v jednom riadku. Zapnutie rovno
                                 nastavi vybrany model — osobitne tlacidlo netreba. */}
                             <div className={styles.akcieRiadok}>
-                                <select
-                                    className={styles.vyberModelu}
-                                    value={vyber[s.competition_id] ?? ''}
-                                    disabled={caka}
-                                    onChange={e => setVyber(v => ({
-                                        ...v, [s.competition_id]: e.target.value,
-                                    }))}
-                                    aria-label="Model na dnes"
-                                >
-                                    <option value="">— vyber model —</option>
-                                    {data.modely.map(m => (
-                                        <option key={m.model_id} value={m.model_id}>
-                                            {m.model_id}
-                                            {m.is_free ? ' · zdarma' : ` · $${m.cena_1m}/1M`}
-                                            {m.halucinacii > 0 ? ` · ⚠ ${m.halucinacii}×` : ''}
-                                        </option>
-                                    ))}
-                                </select>
+                                {/* Pole s navrhmi, nie rozbalovaci zoznam: modelov je
+                                    vyse 300 a pisanim sa hlada rychlejsie nez scrollovanim.
+                                    <datalist> je nativny, takze funguje aj na mobile. */}
+                                <span className={styles.vyberModelu}>
+                                    <input
+                                        type="text"
+                                        list={`modely-${s.competition_id}`}
+                                        value={vyber[s.competition_id] ?? ''}
+                                        disabled={caka}
+                                        placeholder="píš názov modelu…"
+                                        onChange={e => setVyber(v => ({
+                                            ...v, [s.competition_id]: e.target.value,
+                                        }))}
+                                        aria-label="Model na dnes"
+                                    />
+                                    <datalist id={`modely-${s.competition_id}`}>
+                                        {data.modely.map(m => (
+                                            <option key={m.model_id} value={m.model_id}>
+                                                {m.is_free ? 'zdarma' : `$${m.cena_1m}/1M`}
+                                                {m.halucinacii > 0 ? ` · ⚠ ${m.halucinacii}× vymyslené` : ''}
+                                                {m.agree_rate !== null ? ` · zhoda ${m.agree_rate}%` : ''}
+                                            </option>
+                                        ))}
+                                    </datalist>
+                                    {/* Kym nazov nesedi so ziadnym modelom, ulozenie sa nepusti */}
+                                    {vyber[s.competition_id] && !znamyModel(vyber[s.competition_id]) && (
+                                        <em className={styles.neznamyModel}>neznámy model</em>
+                                    )}
+                                </span>
 
                                 {s.zapnute ? (
                                     <>
                                         <button
                                             className={styles.hlavne}
-                                            disabled={caka || !vyber[s.competition_id]
+                                            disabled={caka || !znamyModel(vyber[s.competition_id])
                                                       || vyber[s.competition_id] === s.model}
                                             onClick={() => posli({ competition_id: s.competition_id,
                                                   model_id: vyber[s.competition_id] })}
@@ -193,7 +208,8 @@ export default function LivescoreModelInfo() {
                                         className={styles.hlavne}
                                         disabled={caka}
                                         onClick={() => posli({ competition_id: s.competition_id, zapnut: true,
-                                              model_id: vyber[s.competition_id] || null })}
+                                              model_id: znamyModel(vyber[s.competition_id])
+                                                        ? vyber[s.competition_id] : null })}
                                         title="Zapne livescore a nastaví vybraný model"
                                     >
                                         Zapnúť
