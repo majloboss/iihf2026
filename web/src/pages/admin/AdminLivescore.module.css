@@ -481,3 +481,39 @@
 }
 
 .zleCislo { color: #cf222e; font-weight: 700; }
+
+/* ---------- ciselnik modelov ---------- */
+.triedic { cursor: pointer; user-select: none; white-space: nowrap; }
+.triedic:hover { background: #24497f !important; }
+
+.prepinace {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.prepinac {
+  display: flex !important;
+  align-items: center;
+  gap: 6px;
+  margin: 0 !important;
+  font-size: .85rem;
+  cursor: pointer;
+}
+.prepinac input {
+  width: auto !important;
+  min-height: 0 !important;
+  margin: 0;
+  accent-color: #1f6feb;
+}
+.pocet { margin-left: auto; font-size: .8rem; color: #6b7280; }
+
+/* Sutaz, ktoru ma admin prave vybranu */
+.aktivnaSutaz {
+  padding: 1px 8px;
+  border-radius: 10px;
+  font-size: .7rem;
+  font-weight: 700;
+  color: #1f6feb;
+  background: rgba(31, 111, 235, .12);
+}

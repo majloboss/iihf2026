@@ -34,12 +34,16 @@ if ($method === 'POST') {
     }
 
     if (!empty($body['zapnut'])) {
+        // INSERT ... ON CONFLICT, nie UPDATE: ked na dnes zaznam este nie je,
+        // UPDATE by nemal co aktualizovat a zapnutie by ticho zlyhalo.
         $pdo->prepare(
-            "UPDATE admin.livescore_day_config
+            "INSERT INTO admin.livescore_day_config
+                (competition_id, den, is_enabled, chosen_by, chosen_by_user_id, chosen_at)
+             VALUES (?, ?, TRUE, 'admin', ?, NOW())
+             ON CONFLICT (competition_id, den) DO UPDATE
                 SET is_enabled = TRUE, disabled_reason = NULL,
-                    chosen_by_user_id = ?, chosen_at = NOW()
-              WHERE competition_id = ? AND den = ?")
-            ->execute([$auth['user_id'], $cid, $den]);
+                    chosen_by_user_id = EXCLUDED.chosen_by_user_id, chosen_at = NOW()")
+            ->execute([$cid, $den, $auth['user_id']]);
         json_ok(['stav' => 'zapnute']);
     }
 
@@ -55,8 +59,11 @@ if ($method === 'POST') {
              ON CONFLICT (competition_id, den) DO UPDATE SET daily_budget_usd = EXCLUDED.daily_budget_usd")
             ->execute([$cid, $den, $b]);
         $pdo->prepare(
-            "UPDATE admin.livescore_competition_default SET daily_budget_usd = ?, updated_at = NOW()
-              WHERE competition_id = ?")->execute([$b, $cid]);
+            "INSERT INTO admin.livescore_competition_default (competition_id, daily_budget_usd)
+             VALUES (?, ?)
+             ON CONFLICT (competition_id) DO UPDATE
+                SET daily_budget_usd = EXCLUDED.daily_budget_usd, updated_at = NOW()")
+            ->execute([$cid, $b]);
 
         json_ok(['budget' => $b]);
     }

@@ -1,19 +1,22 @@
 import { useState } from 'react';
 import LivescoreNaklady from './LivescoreNaklady';
 import LivescoreModelInfo from './LivescoreModelInfo';
+import LivescoreCiselnik from './LivescoreCiselnik';
 import LivescoreTestModelov from './LivescoreTestModelov';
 import styles from './AdminLivescore.module.css';
 
 // Sprava → Livescore.
 //
-// Naklady   — kolko livescore stoji, filtre a sumarizacia
-// Model     — ktory model dnes bezi, cena a predpoklad, rucna zmena
-// Test      — rucne spustenie testu modelov na skutocnom zapase
+// Naklady          — kolko livescore stoji, filtre a sumarizacia
+// Model sutaze     — ktory model dnes bezi, cena a predpoklad, rucna zmena
+// Ciselnik modelov — vsetky modely s filtrom a triedenim
+// Test             — rucne spustenie testu modelov na skutocnom zapase
 
 const ZALOZKY = [
-    { key: 'naklady', label: 'Náklady' },
-    { key: 'model',   label: 'Model' },
-    { key: 'test',    label: 'Test' },
+    { key: 'naklady',  label: 'Náklady' },
+    { key: 'sutaz',    label: 'Model súťaže' },
+    { key: 'ciselnik', label: 'Číselník modelov' },
+    { key: 'test',     label: 'Test' },
 ];
 
 export default function AdminLivescore() {
@@ -35,9 +38,10 @@ export default function AdminLivescore() {
                 ))}
             </div>
 
-            {zalozka === 'naklady' && <LivescoreNaklady />}
-            {zalozka === 'model'   && <LivescoreModelInfo />}
-            {zalozka === 'test'    && <LivescoreTestModelov />}
+            {zalozka === 'naklady'  && <LivescoreNaklady />}
+            {zalozka === 'sutaz'    && <LivescoreModelInfo />}
+            {zalozka === 'ciselnik' && <LivescoreCiselnik />}
+            {zalozka === 'test'     && <LivescoreTestModelov />}
         </div>
     );
 }

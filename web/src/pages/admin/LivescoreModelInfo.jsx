@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { apiFetch } from '../../api/client';
+import { useCompetition } from '../../context/CompetitionContext';
 import styles from './AdminLivescore.module.css';
 
 // Zalozka Model — ktory model dnes obsluhuje livescore, co uz stal a co sa
@@ -12,6 +13,7 @@ export default function LivescoreModelInfo() {
     const [hlaska, setHlaska] = useState(null);
     const [caka, setCaka]     = useState(false);
     const [vyber, setVyber]   = useState({});     // competition_id -> model_id
+    const { activeCompetition } = useCompetition();
 
     useEffect(() => { nacitat(); }, []);
 
@@ -43,6 +45,14 @@ export default function LivescoreModelInfo() {
         }
     }
 
+    // Aktualne vybrana sutaz ide prva — je to tá, ktorú admin práve rieši.
+    const zoradene = useMemo(() => {
+        if (!data) return [];
+        const aktivna = activeCompetition?.id;
+        return [...data.sutaze].sort((a, b) =>
+            (b.competition_id === aktivna) - (a.competition_id === aktivna));
+    }, [data, activeCompetition]);
+
     if (!data) {
         return <p className={styles.popis}>{chyba || 'Načítavam…'}</p>;
     }
@@ -50,20 +60,22 @@ export default function LivescoreModelInfo() {
     return (
         <div>
             <p className={styles.popis}>
-                Model sa berie z číselníka, nie zo súboru na serveri — dá sa preto
-                meniť za behu. Zmena platí pre dnešný deň; zajtra sa použije
-                predvolený model súťaže alebo výsledok ranného testu.
+                Ktorý model dnes obsluhuje livescore. Zmena platí pre dnešný deň;
+                zajtra sa použije predvolený model súťaže alebo výsledok ranného
+                testu. Zoznam všetkých modelov je v záložke <strong>Číselník modelov</strong>.
             </p>
 
             {chyba  && <div className={styles.chyba}>{chyba}</div>}
             {hlaska && <div className={styles.hlaska}>{hlaska}</div>}
 
-            {data.sutaze.map(s => {
+            {zoradene.map(s => {
                 const prekrocene = s.vyuzitie_pct !== null && s.vyuzitie_pct >= 80;
                 return (
                     <section key={s.competition_id} className={styles.sutazBlok}>
                         <h3>
                             {s.name}
+                            {s.competition_id === activeCompetition?.id &&
+                                <span className={styles.aktivnaSutaz}>aktuálna</span>}
                             {s.zapnute
                                 ? <span className={styles.stavZap}>beží</span>
                                 : <span className={styles.stavVyp}>vypnuté</span>}
@@ -199,47 +211,6 @@ export default function LivescoreModelInfo() {
                 );
             })}
 
-            <details className={styles.historia}>
-                <summary>Poradie modelov pre automatický výber ({data.modely.length})</summary>
-                <div className={styles.tabulkaObal}>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Model</th>
-                                <th className={styles.cislo}>Vymyslené</th>
-                                <th className={styles.cislo}>Zhoda</th>
-                                <th className={styles.cislo}>Úspešnosť</th>
-                                <th className={styles.cislo}>Testov</th>
-                                <th className={styles.cislo}>Čas</th>
-                                <th className={styles.cislo}>Cena / 1M</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {data.modely.map(m => (
-                                <tr key={m.model_id}>
-                                    <td className={styles.bunkaModel}><code>{m.model_id}</code></td>
-                                    <td className={styles.cislo}>
-                                        {m.halucinacii > 0
-                                            ? <span className={styles.zleCislo}
-                                                    title="Koľkokrát model vrátil iné tímy než ostatné">
-                                                {m.halucinacii}×
-                                              </span>
-                                            : '—'}</td>
-                                    <td className={styles.cislo}>
-                                        {m.agree_rate !== null ? `${m.agree_rate} %` : '—'}</td>
-                                    <td className={styles.cislo}>
-                                        {m.success_rate !== null ? `${m.success_rate} %` : '—'}</td>
-                                    <td className={styles.cislo}>{m.tests_total}</td>
-                                    <td className={styles.cislo}>
-                                        {m.avg_ms ? `${(m.avg_ms / 1000).toFixed(1)} s` : '—'}</td>
-                                    <td className={styles.cislo}>
-                                        {m.is_free ? 'zdarma' : `$${m.cena_1m}`}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            </details>
         </div>
     );
 }
