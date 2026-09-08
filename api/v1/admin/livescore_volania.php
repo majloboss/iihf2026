@@ -18,14 +18,20 @@ $pdo = db();
 $kde = [];
 $par = [];
 
-// Hromadne volanie obsluzi viac zapasov naraz a game_id ostava NULL. Taky
-// riadok sa v prehlade zlucuje pod kluc NULL, preto ho treba vediet vybrat.
-$kluc = $_GET['kluc'] ?? '';
-if ($kluc === 'null' || $kluc === '') {
-    $kde[] = 'l.game_id IS NULL AND l.url IS NULL';
+// Riadok v prehlade je zapas. Volanie ho obsluzilo, ked je v jeho live_ids —
+// game_id samotne je pri hromadnom volani NULL a nedalo by sa podla neho hladat.
+$gameId = $_GET['game_id'] ?? '';
+$url    = $_GET['url'] ?? '';
+
+if ($gameId !== '') {
+    $kde[] = '? = ANY(l.live_ids)';
+    $par[] = (int)$gameId;
+} elseif ($url !== '') {
+    $kde[] = 'l.url = ?';
+    $par[] = $url;
 } else {
-    $kde[] = 'COALESCE(l.game_id::text, l.url) = ?';
-    $par[] = $kluc;
+    // Volania bez zapasu — starsie zaznamy spred zavedenia live_ids.
+    $kde[] = 'l.live_ids IS NULL AND l.url IS NULL';
 }
 
 if (!empty($_GET['model'])) {

@@ -99,10 +99,13 @@ export default function LivescoreNaklady2() {
         setDetail(d => ({ ...d, [kluc]: null }));
         try {
             const q = new URLSearchParams({
-                kluc:  r.game_id === null && !r.url ? 'null' : r.kluc,
-                model: r.model,
-                od:    filtre.od,
-                do:    filtre.do,
+                // Riadok je zápas; volania sa dohľadajú podľa neho. Testovacie
+                // volania zápas nemajú, tam sa hľadá podľa adresy.
+                game_id: r.game_id ?? '',
+                url:     r.game_id === null ? (r.url ?? '') : '',
+                model:   r.model,
+                od:      filtre.od,
+                do:      filtre.do,
             }).toString();
             const res = await apiFetch('v1/admin/livescore-volania?' + q);
             setDetail(d => ({ ...d, [kluc]: res.volania }));
@@ -116,8 +119,9 @@ export default function LivescoreNaklady2() {
     return (
         <div>
             <p className={styles.popisJeden}>
-                Jeden riadok = zápas obslúžený jedným modelom. Ak sa model počas zápasu
-                zmenil, zápas má viac riadkov. Súhrn platí pre vyfiltrované riadky.
+                Jeden riadok = zápas obslúžený jedným modelom. Jedno volanie sa pýta na
+                všetky zápasy naraz, preto sa jeho cena delí medzi tie, ktoré vtedy
+                naozaj bežali. Kliknutím na riadok sa rozbalia jednotlivé volania.
             </p>
 
             {chyba && <div className={styles.chyba}>{chyba}</div>}
@@ -142,7 +146,7 @@ export default function LivescoreNaklady2() {
                         <select value={filtre.game} onChange={e => zmen('game', e.target.value)}>
                             <option value="">— všetky —</option>
                             {(data?.filtre.zapasy ?? []).map(z => (
-                                <option key={z.kluc} value={z.kluc}>
+                                <option key={z.game_id} value={z.game_id}>
                                     {den(z.den)} · {z.nazov}
                                 </option>
                             ))}
