@@ -11,9 +11,9 @@ function cron_beh(string $skript, string $vysledok = ''): void {
     try {
         db()->prepare(
             'INSERT INTO admin.cron_heartbeat (skript, posledny, vysledok, behov_dnes, den)
-             VALUES (?, NOW(), ?, 1, CURRENT_DATE)
+             VALUES (?, (NOW() AT TIME ZONE 'UTC'), ?, 1, CURRENT_DATE)
              ON CONFLICT (skript) DO UPDATE
-                SET posledny   = NOW(),
+                SET posledny   = (NOW() AT TIME ZONE 'UTC'),
                     vysledok   = EXCLUDED.vysledok,
                     -- Pocitadlo sa cez polnoc zacina odznova, aby sa dalo
                     -- povedat "dnes zabehol N-krat" bez pocitania historie.

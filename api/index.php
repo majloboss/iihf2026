@@ -72,6 +72,7 @@ try {
         $path === 'v1/admin/livescore-model'       => require __DIR__ . '/v1/admin/livescore_model.php',
         $path === 'v1/admin/livescore-naklady'     => require __DIR__ . '/v1/admin/livescore_naklady.php',
         $path === 'v1/admin/livescore-naklady2'    => require __DIR__ . '/v1/admin/livescore_naklady2.php',
+        $path === 'v1/admin/livescore-volania'     => require __DIR__ . '/v1/admin/livescore_volania.php',
         $path === 'v1/admin/ucl-livescore'      => require __DIR__ . '/v1/admin/ucl_livescore.php',
         $path === 'v1/admin/ucl-recalc'         => require __DIR__ . '/v1/admin/ucl_recalc.php',
         $path === 'v1/admin/ucl-load-pdf'         => require __DIR__ . '/v1/admin/ucl_load_pdf.php',

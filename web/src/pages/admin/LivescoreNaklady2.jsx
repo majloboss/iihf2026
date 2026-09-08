@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Fragment } from 'react';
 import { apiFetch } from '../../api/client';
+import { useCompetition } from '../../context/CompetitionContext';
 import admin from './Admin.module.css';
 import styles from './AdminLivescore.module.css';
 
@@ -12,11 +13,32 @@ import styles from './AdminLivescore.module.css';
 // filtra sa da zistit cena dna, konkretneho zapasu alebo modelu.
 
 const DNES = () => new Date().toISOString().slice(0, 10);
-const PRED_TYZDNOM = () => {
-    const d = new Date();
-    d.setDate(d.getDate() - 7);
-    return d.toISOString().slice(0, 10);
-};
+
+// Filtre prezijú odchod zo stránky, aby sa po návrate nemuseli klikať znova.
+// Držia sa v localStorage, nie v URL — je to nastavenie prehľadu, nie adresa,
+// ktorú by malo zmysel niekomu poslať.
+const KLUC = 'livescore-naklady-filtre';
+
+function ulozFiltre(f) {
+    try { localStorage.setItem(KLUC, JSON.stringify(f)); } catch { /* privátne okno */ }
+}
+
+// Predvolba pri prvom príchode: aktuálna súťaž a dnešný deň. Týždňový rozsah
+// ukazoval hlavne prázdno — náklady sa sledujú za deň, keď sa hrá.
+function nacitajFiltre(aktualnaSutaz) {
+    const zaklad = {
+        competition_id: aktualnaSutaz ? String(aktualnaSutaz) : '',
+        game: '', model: '', od: DNES(), do: DNES(),
+    };
+    try {
+        const ulozene = JSON.parse(localStorage.getItem(KLUC) || 'null');
+        // Súťaž sa preberá z uloženého len keď ju používateľ naozaj zvolil;
+        // inak nasleduje prepínač súťaže v ľavom paneli.
+        return ulozene ? { ...zaklad, ...ulozene } : zaklad;
+    } catch {
+        return zaklad;
+    }
+}
 
 const cas = t => new Date(t + 'Z').toLocaleString('sk-SK',
     { day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' });
@@ -28,13 +50,11 @@ export default function LivescoreNaklady2() {
     const [chyba, setChyba] = useState(null);
     const [caka, setCaka]   = useState(false);
 
-    const [filtre, setFiltre] = useState({
-        competition_id: '',
-        game: '',
-        model: '',
-        od: PRED_TYZDNOM(),
-        do: DNES(),
-    });
+    const { activeCompetition } = useCompetition();
+    const [filtre, setFiltre] = useState(() => nacitajFiltre(activeCompetition?.id));
+
+    // Rozbalene riadky: kluc riadku -> zoznam volani (null = prave sa nacita)
+    const [detail, setDetail] = useState({});
 
     useEffect(() => { nacitat(); }, []);
 
@@ -57,7 +77,38 @@ export default function LivescoreNaklady2() {
     function zmen(k, v) {
         const f = { ...filtre, [k]: v };
         setFiltre(f);
+        ulozFiltre(f);
+        // Zmena filtra prekresli tabulku, takze rozbalene riadky uz nesedia.
+        setDetail({});
         nacitat(f);
+    }
+
+    // Jedno volanie obsluzi vsetky zapasy naraz, preto riadok casto zdruzuje
+    // desiatky volani. Rozbalenie ukaze, kedy ktore bezalo a co vratilo.
+    async function prepniDetail(r) {
+        const kluc = r.kluc + '|' + r.model;
+        if (kluc in detail) {
+            setDetail(d => {
+                const n = { ...d };
+                delete n[kluc];
+                return n;
+            });
+            return;
+        }
+
+        setDetail(d => ({ ...d, [kluc]: null }));
+        try {
+            const q = new URLSearchParams({
+                kluc:  r.game_id === null && !r.url ? 'null' : r.kluc,
+                model: r.model,
+                od:    filtre.od,
+                do:    filtre.do,
+            }).toString();
+            const res = await apiFetch('v1/admin/livescore-volania?' + q);
+            setDetail(d => ({ ...d, [kluc]: res.volania }));
+        } catch (e) {
+            setDetail(d => ({ ...d, [kluc]: { chyba: e.message } }));
+        }
     }
 
     const s = data?.sumar;
@@ -161,9 +212,17 @@ export default function LivescoreNaklady2() {
                     </tr>
                 </thead>
                 <tbody>
-                    {(data?.riadky ?? []).map(r => (
-                        <tr key={r.kluc + '|' + r.model}>
+                    {(data?.riadky ?? []).map(r => {
+                      const kluc = r.kluc + '|' + r.model;
+                      const otvorene = kluc in detail;
+                      return (
+                        <Fragment key={kluc}>
+                        <tr onClick={() => prepniDetail(r)}
+                            className={styles.riadokKlik}
+                            title="Rozbalí jednotlivé volania">
                             <td data-label="Súťaž">
+                                <span className={styles.sipka}>
+                                    {otvorene ? '▾' : '▸'}</span>{' '}
                                 {r.typ === 'test'
                                     ? <span className={styles.stitokTest}>TEST</span>
                                     : r.sutaz}
@@ -194,7 +253,59 @@ export default function LivescoreNaklady2() {
                             <td data-label="Naposledy" className={styles.bunkaCas}>
                                 {cas(r.posledne)}</td>
                         </tr>
-                    ))}
+
+                        {otvorene && (
+                            <tr className={styles.detailRiadok}>
+                                <td colSpan={10}>
+                                    {detail[kluc] === null && <p>Načítavam volania…</p>}
+                                    {detail[kluc]?.chyba && (
+                                        <p className={styles.chyba}>{detail[kluc].chyba}</p>
+                                    )}
+                                    {Array.isArray(detail[kluc]) && (
+                                        <table className={styles.detailTabulka}>
+                                            <thead>
+                                                <tr>
+                                                    <th>Čas</th><th>Stav</th><th>Tímy</th>
+                                                    <th>Skóre</th><th>Minúta</th>
+                                                    <th className={styles.cislo}>Tokeny</th>
+                                                    <th className={styles.cislo}>Cena</th>
+                                                    <th className={styles.cislo}>Trvanie</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {detail[kluc].map(v => (
+                                                    <tr key={v.id}>
+                                                        <td>{cas(v.cas)}</td>
+                                                        <td>{v.ok
+                                                            ? <span className={styles.okZnak}>OK</span>
+                                                            : <span className={styles.zleCislo}
+                                                                    title={v.chyba ?? ''}>
+                                                                chyba</span>}</td>
+                                                        <td>{v.timy ?? '—'}</td>
+                                                        <td>{v.skore ?? '—'}</td>
+                                                        <td>{v.minuta ?? '—'}</td>
+                                                        <td className={styles.cislo}>
+                                                            {v.tokenov.toLocaleString('sk')}</td>
+                                                        <td className={styles.cislo}>
+                                                            ${v.cena.toFixed(6)}</td>
+                                                        <td className={styles.cislo}>
+                                                            {v.trvanie_ms !== null
+                                                                ? (v.trvanie_ms / 1000).toFixed(1) + ' s'
+                                                                : '—'}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    )}
+                                    {Array.isArray(detail[kluc]) && detail[kluc].length === 0 && (
+                                        <p>Žiadne volania.</p>
+                                    )}
+                                </td>
+                            </tr>
+                        )}
+                        </Fragment>
+                      );
+                    })}
                 </tbody>
             </table>
 
