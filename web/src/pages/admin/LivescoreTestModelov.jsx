@@ -273,18 +273,33 @@ export default function LivescoreTestModelov() {
                                     <span className={styles.znak}>{v.passed ? '✓' : '✕'}</span>
                                     <span className={styles.stred}>
                                         <code>{v.model}</code>
+                                        {/* Skutocne hodnoty, nie len zaskrtavatka:
+                                            z 'OK' sa neda posudit, ci model
+                                            vytiahol spravnu cast hry a minutu. */}
                                         <span className={styles.znacky}>
-                                            {v.score_text && (
-                                                <span className={
+                                            {v.data?.home_team && (
+                                                <span className={styles.timy}>
+                                                    {v.data.home_team} — {v.data.away_team ?? '?'}
+                                                </span>
+                                            )}
+                                            {v.score_text
+                                                ? <span className={
                                                     zhoda && zhoda.najcastejsie_skore
                                                         ? (v.score_text === zhoda.najcastejsie_skore
                                                             ? styles.skoreZhoda : styles.skoreInak)
                                                         : styles.skoreNeutral
-                                                }>{v.score_text}</span>
-                                            )}
-                                            <Znacka ok={v.got_score}  text="skóre" />
-                                            <Znacka ok={v.got_period} text="časť hry" />
-                                            <Znacka ok={v.got_minute} text="minúta" />
+                                                  }>{v.score_text}</span>
+                                                : <span className={styles.nemam}>– skóre</span>}
+                                            {v.data?.period || v.data?.period_number
+                                                ? <span className={styles.hodnota}>
+                                                    {v.data.period ?? `časť ${v.data.period_number}`}
+                                                    {v.data.period && v.data.period_number
+                                                        ? ` ${v.data.period_number}` : ''}
+                                                  </span>
+                                                : <span className={styles.nemam}>– časť hry</span>}
+                                            {v.got_minute
+                                                ? <span className={styles.hodnota}>{v.data.minute}. min</span>
+                                                : <span className={styles.nemam}>– minúta</span>}
                                         </span>
                                     </span>
                                     <span className={styles.cisla}>
@@ -313,7 +328,8 @@ export default function LivescoreTestModelov() {
                         <table>
                             <thead>
                                 <tr>
-                                    <th>Kedy</th><th>Model</th><th>Šport</th>
+                                    <th>Kedy</th><th>Model</th><th>Zápas</th>
+                                    <th className={styles.cislo}>Skóre</th>
                                     <th>Výsledok</th><th className={styles.cislo}>Tokeny</th>
                                     <th className={styles.cislo}>Cena</th>
                                 </tr>
@@ -325,7 +341,12 @@ export default function LivescoreTestModelov() {
                                              { day: 'numeric', month: 'numeric',
                                                hour: '2-digit', minute: '2-digit' })}</td>
                                         <td><code>{t.model_key}</code></td>
-                                        <td>{t.sport || '—'}</td>
+                                        <td className={styles.bunkaZapas}>
+                                            {t.teams_text ?? '—'}
+                                            {t.teams_agree === false &&
+                                                <span className={styles.varovanieTimy}>⚠ iné</span>}
+                                        </td>
+                                        <td className={styles.cislo}>{t.score_text ?? '—'}</td>
                                         <td>{t.passed ? '✓ prešiel' : (t.error ? '✕ ' + t.error.slice(0, 40) : '✕')}</td>
                                         <td className={styles.cislo}>{t.total_tokens ?? '—'}</td>
                                         <td className={styles.cislo}>
@@ -357,13 +378,5 @@ export default function LivescoreTestModelov() {
                 </details>
             )}
         </div>
-    );
-}
-
-function Znacka({ ok, text }) {
-    return (
-        <span className={ok ? styles.mam : styles.nemam}>
-            {ok ? '✓' : '–'} {text}
-        </span>
     );
 }

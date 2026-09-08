@@ -609,3 +609,23 @@
   border: 1px solid #d5d9de;
   border-radius: 6px;
 }
+
+/* Skutocne hodnoty z odpovede modelu — timy, cast hry, minuta.
+   Zaskrtavatko 'OK' nestacilo: nebolo z neho vidiet, CO model vytiahol. */
+.timy {
+  font-size: .74rem;
+  color: #1a1d21;
+  font-weight: 600;
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.hodnota {
+  padding: 0 6px;
+  border-radius: 8px;
+  font-size: .72rem;
+  color: #1a1d21;
+  background: #eef0f2;
+  white-space: nowrap;
+}

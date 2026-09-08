@@ -43,6 +43,7 @@ if ($method === 'GET') {
     $st = $pdo->prepare(
         "SELECT t.tested_at, t.model_key, t.sport, t.passed,
                 t.got_score, t.got_period, t.got_minute,
+                t.teams_text, t.score_text, t.teams_agree,
                 t.total_tokens, t.cost_usd, t.took_ms, t.error, t.test_url
            FROM admin.livescore_model_test t
           ORDER BY t.tested_at DESC LIMIT 60");
