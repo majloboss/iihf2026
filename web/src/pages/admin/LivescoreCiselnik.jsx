@@ -36,7 +36,7 @@ export default function LivescoreCiselnik() {
     async function nacitat() {
         setCaka(true);
         try {
-            const r = await apiFetch('v1/admin/livescore-model');
+            const r = await apiFetch('v1/admin/livescore-model?vsetky=1');
             setModely(r.modely);
         } catch (e) {
             setChyba(e.message);
@@ -78,40 +78,34 @@ export default function LivescoreCiselnik() {
 
     return (
         <div>
-            <p className={styles.popis}>
-                Všetky modely z cenníka OpenRoutera. Kliknutím na názov stĺpca sa
-                zoznam zoradí. <strong>Vymyslené</strong> je počet testov, v ktorých
-                model vrátil iné tímy než ostatné — taký model do produkcie nepatrí.
+            <p className={styles.popisJeden}>
+                Kliknutím na názov stĺpca sa zoradí. <strong>Vymyslené</strong> = koľkokrát
+                model vrátil iné tímy než ostatné; taký do produkcie nepatrí.
             </p>
 
             {chyba && <div className={styles.chyba}>{chyba}</div>}
 
-            <div className={styles.formular}>
-                <label>
-                    <span>Hľadať model</span>
-                    <input
-                        type="search"
-                        value={filter}
-                        onChange={e => setFilter(e.target.value)}
-                        placeholder="napr. minimax, gemma, claude…"
-                    />
+            <div className={styles.filtreRiadok}>
+                <input
+                    className={styles.hladanie}
+                    type="search"
+                    value={filter}
+                    onChange={e => setFilter(e.target.value)}
+                    placeholder="Hľadať model…"
+                />
+                <label className={styles.prepinac}>
+                    <input type="checkbox" checked={lenFree}
+                           onChange={e => setLenFree(e.target.checked)} />
+                    len bezplatné
                 </label>
-
-                <div className={styles.prepinace}>
-                    <label className={styles.prepinac}>
-                        <input type="checkbox" checked={lenFree}
-                               onChange={e => setLenFree(e.target.checked)} />
-                        len bezplatné
-                    </label>
-                    <label className={styles.prepinac}>
-                        <input type="checkbox" checked={lenTest}
-                               onChange={e => setLenTest(e.target.checked)} />
-                        len otestované
-                    </label>
-                    <span className={styles.pocet}>
-                        {zobrazene.length} z {modely.length}
-                    </span>
-                </div>
+                <label className={styles.prepinac}>
+                    <input type="checkbox" checked={lenTest}
+                           onChange={e => setLenTest(e.target.checked)} />
+                    len otestované
+                </label>
+                <span className={styles.pocet}>
+                    {zobrazene.length} z {modely.length}
+                </span>
             </div>
 
             {caka && <p className={styles.popis}>Načítavam…</p>}

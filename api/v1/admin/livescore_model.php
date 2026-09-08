@@ -3,6 +3,7 @@
 //
 // GET  /v1/admin/livescore-model?competition_id=5
 //      Ktory model dnes bezi, jeho cena, minute dnes a predpoklad na den.
+//      &vsetky=1  vrati cely ciselnik, nie len 40 najlepsich kandidatov
 //
 // POST /v1/admin/livescore-model
 //      { competition_id, model_id }        zmen model na dnes
@@ -201,6 +202,6 @@ $kandidati = array_map(static fn($m) => [
                COALESCE(m.agree_rate, -1) DESC,
                COALESCE(m.success_rate, -1) DESC,
                COALESCE(m.price_input_1m, 0) + COALESCE(m.price_output_1m, 0)
-      LIMIT 40")->fetchAll());
+      LIMIT " . (isset($_GET['vsetky']) ? 1000 : 40))->fetchAll());
 
 json_ok(['den' => $den, 'sutaze' => $vysledok, 'modely' => $kandidati]);
