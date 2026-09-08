@@ -177,12 +177,24 @@ if (($_GET['step'] ?? '') === '1') {
 // POST — priprav test: stiahni stranku a vrat zoznam modelov
 // ------------------------------------------------------------
 $limit = min(400, max(1, (int)($body['limit'] ?? 15)));
-$davka = trim((string)($body['davka'] ?? ''));
+// Davok moze byt viac naraz — zjednotia sa a duplicity vypadnu. Napriklad
+// 'bezplatne' + 'este netestovane' otestuje oboje na jeden beh.
+$davky = $body['davky'] ?? ($body['davka'] ?? '');
+if (is_string($davky)) $davky = $davky === '' ? [] : [$davky];
+if (!is_array($davky)) $davky = [];
 
-// Bez zvolenej davky sa berie doterajsie poradie kandidatov.
-$modely = array_column(
-    $davka !== '' ? ai_davka_na_test($davka, $limit) : ai_kandidati($limit),
-    'model_id');
+if ($davky) {
+    $modely = [];
+    foreach ($davky as $d) {
+        foreach (ai_davka_na_test((string)$d, $limit) as $m) {
+            // Model uz vybrany inou davkou sa neprida druhy raz.
+            $modely[$m['model_id']] = true;
+        }
+    }
+    $modely = array_slice(array_keys($modely), 0, $limit);
+} else {
+    $modely = array_column(ai_kandidati($limit), 'model_id');
+}
 
 if (!$modely) json_error('Kritériám nezodpovedá žiadny model', 400);
 

@@ -643,3 +643,51 @@
   line-height: 1;
   margin-top: 2px;
 }
+
+/* ---------- vyber skupin modelov ---------- */
+.davky {
+  margin: 0 0 12px;
+  padding: 10px 14px;
+  border: 1px solid #e3e6ea;
+  border-radius: 8px;
+}
+.davky legend {
+  padding: 0 6px;
+  font-size: .8rem;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.davkaPolozka {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+  margin: 0 !important;
+  padding: 4px 0;
+  font-size: .88rem;
+  cursor: pointer;
+}
+.davkaPolozka input {
+  width: 16px !important;
+  height: 16px;
+  min-height: 0 !important;
+  margin: 0;
+  accent-color: #1f6feb;
+}
+.davkaPolozka span { flex: 1; }
+.davkaPolozka em {
+  font-style: normal;
+  font-size: .78rem;
+  color: #9198a1;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (min-width: 700px) {
+  /* Na sirsom displeji dve polozky vedla seba — zoznam je kratsi. */
+  .davky {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 20px;
+  }
+  .davky legend { grid-column: 1 / -1; }
+}

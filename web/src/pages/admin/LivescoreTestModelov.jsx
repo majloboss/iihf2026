@@ -15,7 +15,7 @@ export default function LivescoreTestModelov() {
     const [url, setUrl]         = useState('');
     const [sport, setSport]     = useState('futbal');
     const [pocet, setPocet]     = useState(20);
-    const [davka, setDavka]     = useState('lacne');
+    const [vybraneDavky, setVybraneDavky] = useState(['lacne']);
     const [davky, setDavky]     = useState([]);
     const [kol, setKol]         = useState(1);
     const [sutaz, setSutaz]     = useState('');
@@ -56,6 +56,7 @@ export default function LivescoreTestModelov() {
 
     async function spustit() {
         if (!url.trim()) { setChyba('Zadaj URL zápasu z Flashscore'); return; }
+        if (!vybraneDavky.length) { setChyba('Vyber aspoň jednu skupinu modelov'); return; }
 
         setChyba(null);
         setVysledky([]);
@@ -73,11 +74,13 @@ export default function LivescoreTestModelov() {
                     url: url.trim(),
                     competition_id: sutaz ? Number(sutaz) : null,
                     limit: Number(pocet),
-                    davka,
+                    davky: vybraneDavky,
                 }),
             });
             setPriprava(p);
             const kolks = Math.max(1, Number(kol) || 1);
+            // Server vratil presny zoznam po zjednoteni davok — moze byt
+            // mensi nez horny odhad zo suctu.
             setPostup({ done: 0, total: p.modely.length * kolks, teraz: null, kolo: 1 });
 
             // 2) testuj po jednom, v tolkych kolach, kolko sa zvolilo.
@@ -162,9 +165,14 @@ export default function LivescoreTestModelov() {
         });
     }
 
-    // Kolko modelov naozaj pobezi: davka moze mat menej nez zvoleny strop.
-    const vDavke = davky.find(d => d.kluc === davka)?.pocet ?? 0;
-    const kolkoBude = Math.min(Number(pocet) || 0, vDavke || Number(pocet) || 0);
+    // Kolko modelov naozaj pobezi. Davky sa prekryvaju, takze sucet je horny
+    // odhad — presny pocet vrati server pri zalozeni behu.
+    const vDavkach = davky
+        .filter(d => vybraneDavky.includes(d.kluc))
+        .reduce((n, d) => n + d.pocet, 0);
+    const kolkoBude = vDavkach
+        ? Math.min(Number(pocet) || 0, vDavkach)
+        : (Number(pocet) || 0);
 
     const cenaBehu = vysledky.reduce((s, v) => s + (v.cost_usd || 0), 0);
     const uspesnych = vysledky.filter(v => v.passed).length;
@@ -213,18 +221,6 @@ export default function LivescoreTestModelov() {
                         <select value={sutaz} onChange={e => setSutaz(e.target.value)} disabled={bezi}>
                             <option value="">— žiadna —</option>
                             {sutaze.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                        </select>
-                    </label>
-
-                    <label>
-                        <span>Ktoré modely</span>
-                        <select value={davka} onChange={e => setDavka(e.target.value)}
-                                disabled={bezi}>
-                            {davky.map(d => (
-                                <option key={d.kluc} value={d.kluc}>
-                                    {d.popis} — {d.pocet}
-                                </option>
-                            ))}
                         </select>
                     </label>
 
