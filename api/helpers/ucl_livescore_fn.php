@@ -65,7 +65,9 @@ function ucl_livescore_refresh(PDO $pdo, array $games): array {
     // Naklady sa zapisu vzdy, aj ked volanie zlyhalo — tokeny sa mohli minut.
     // Jedno volanie obsluzi viac zapasov, preto je to jeden riadok za volanie
     // a game_id zostava NULL; konkretne zapasy su v poznamke.
-    ucl_zapis_naklady($model, $modelRow, $res, count($watch));
+    // Zoznam zapasov, nie len ich pocet: bez neho sa z logu neda zistit,
+    // kolko stal konkretny zapas.
+    ucl_zapis_naklady($model, $modelRow, $res, $watch, $games);
 
     // Zlyhanie sa zapocita — po troch za sebou livescore prejde na dalsi
     // model v poradi, aby pri tom nemusel sediet admin.
@@ -187,7 +189,8 @@ function ucl_livescore_due(array $games): bool {
 // jeden riadok s call_type='live' a game_id NULL. Bez tohto zapisu by
 // obrazovka Naklady nemala z coho pocitat.
 // ------------------------------------------------------------
-function ucl_zapis_naklady(string $model, ?array $modelRow, array $res, int $zapasov): void {
+function ucl_zapis_naklady(string $model, ?array $modelRow, array $res,
+                          array $watch, array $games = []): void {
     try {
         $u = $res['usage'] ?? [];
         $vstup  = $u['prompt_tokens']     ?? null;
@@ -196,19 +199,45 @@ function ucl_zapis_naklady(string $model, ?array $modelRow, array $res, int $zap
 
         $cena = $modelRow ? ai_cena_volania($modelRow, $vstup, $vystup) : 0.0;
 
+        // Vsetky sledovane zapasy. $watch je flashscore_id => game_id.
+        $vsetky = array_values(array_map('intval', $watch));
+
+        // Z nich tie, ktore v tomto volani naozaj bezali. Zapas pred vykopom
+        // alebo po konci je vo feede tiez, ale hodnotu neprinasa — keby sa
+        // cena delila vsetkymi, vecerny zapas by platil aj za tie ostatne.
+        $bezali = [];
+        foreach ($res['games'] ?? [] as $fsId => $d) {
+            if (!isset($watch[$fsId]) || !is_array($d)) continue;
+            $zacal   = !empty($d['started']);
+            $skoncil = !empty($d['finished']);
+            if ($zacal && !$skoncil) $bezali[] = (int)$watch[$fsId];
+        }
+
+        // Ked nebezal ziadny, cenu nesie cele sledovanie — inak by volanie
+        // zostalo bez majitela a v sucte by chybalo.
+        if (!$bezali) $bezali = $vsetky;
+
+        // Pole pre Postgres sa sklada cez json_encode: hranate zatvorky sa
+        // v dotaze pretypuju na int[], takze netreba rucne skladat literal.
+        $polePg = static fn(array $x) => $x ? json_encode(array_values($x)) : null;
+
         db()->prepare(
             "INSERT INTO admin.livescore_log
                 (call_type, provider, competition_id, model,
                  prompt_tokens, completion_tokens, tokens, cost_usd,
-                 success, error, notes)
-             VALUES ('live', 'openrouter', ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+                 success, error, notes, game_ids, live_ids)
+             VALUES ('live', 'openrouter', ?, ?, ?, ?, ?, ?, ?, ?, ?,
+                     TRANSLATE(?, '[]', '{}')::int[],
+                     TRANSLATE(?, '[]', '{}')::int[])")
             ->execute([
                 UCL_COMPETITION_ID,
                 mb_substr($model, 0, 100),
                 $vstup, $vystup, $spolu, round($cena, 6),
                 !empty($res['ok']) ? 't' : 'f',
                 isset($res['error']) ? mb_substr((string)$res['error'], 0, 1000) : null,
-                "Sledovaných zápasov: $zapasov",
+                'Sledovaných zápasov: ' . count($vsetky)
+                    . ', prave bežali: ' . count($bezali),
+                $polePg($vsetky), $polePg($bezali),
             ]);
     } catch (Throwable $e) {
         // Zlyhany zapis nakladov nesmie zhodit livescore.

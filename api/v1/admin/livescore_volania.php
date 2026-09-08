@@ -48,7 +48,16 @@ $st = $pdo->prepare(
             l.home_team, l.away_team, l.home_score, l.away_score,
             l.status, l.minute, l.period_number,
             l.prompt_tokens, l.completion_tokens, l.tokens,
-            l.cost_usd, l.took_ms, l.http_status, l.error, l.notes
+            l.cost_usd, l.took_ms, l.http_status, l.error, l.notes,
+            l.game_ids, l.live_ids,
+            -- Nazvy zapasov, ktore volanie prave sledovalo. Bez nich je v
+            -- detaile len cislo a neda sa povedat, za co sa platilo.
+            (SELECT string_agg(hc.club_name || ' — ' || ac.club_name, ', '
+                               ORDER BY g.start_time, g.game_id)
+               FROM "lm2026-27".games g
+               LEFT JOIN admin.uefa_clubs hc ON hc.club_id = g.home_team_id
+               LEFT JOIN admin.uefa_clubs ac ON ac.club_id = g.away_team_id
+              WHERE g.game_id = ANY(COALESCE(l.live_ids, l.game_ids))) AS zapasy_nazvy
        FROM admin.livescore_log l
        $where
       ORDER BY l.checked_at DESC
@@ -81,6 +90,11 @@ foreach ($st->fetchAll() as $r) {
         'http'       => $r['http_status'] !== null ? (int)$r['http_status'] : null,
         'chyba'      => $r['error'],
         'poznamka'   => $r['notes'],
+        'zapasy'     => $r['zapasy_nazvy'],
+        // Podiel volania na jeden beziaci zapas — takto sa cena zapasu
+        // necha zratat naprieč volaniami.
+        'zapasov'    => $r['live_ids'] !== null
+                        ? substr_count($r['live_ids'], ',') + 1 : null,
     ];
 }
 

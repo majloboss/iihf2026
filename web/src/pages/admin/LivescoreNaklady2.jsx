@@ -265,8 +265,9 @@ export default function LivescoreNaklady2() {
                                         <table className={styles.detailTabulka}>
                                             <thead>
                                                 <tr>
-                                                    <th>Čas</th><th>Stav</th><th>Tímy</th>
-                                                    <th>Skóre</th><th>Minúta</th>
+                                                    <th>Čas</th><th>Stav</th>
+                                                    <th>Sledované zápasy</th>
+                                                    <th className={styles.cislo}>Zápasov</th>
                                                     <th className={styles.cislo}>Tokeny</th>
                                                     <th className={styles.cislo}>Cena</th>
                                                     <th className={styles.cislo}>Trvanie</th>
@@ -281,9 +282,10 @@ export default function LivescoreNaklady2() {
                                                             : <span className={styles.zleCislo}
                                                                     title={v.chyba ?? ''}>
                                                                 chyba</span>}</td>
-                                                        <td>{v.timy ?? '—'}</td>
-                                                        <td>{v.skore ?? '—'}</td>
-                                                        <td>{v.minuta ?? '—'}</td>
+                                                        <td className={styles.bunkaZapas}>
+                                                            {v.zapasy ?? v.timy ?? '—'}</td>
+                                                        <td className={styles.cislo}>
+                                                            {v.zapasov ?? '—'}</td>
                                                         <td className={styles.cislo}>
                                                             {v.tokenov.toLocaleString('sk')}</td>
                                                         <td className={styles.cislo}>
