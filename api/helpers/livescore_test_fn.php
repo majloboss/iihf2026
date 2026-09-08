@@ -16,6 +16,9 @@ require_once __DIR__ . '/ai_models_fn.php';
 // ------------------------------------------------------------
 function ls_test_prompt(string $vstup, string $sport = 'neznámy'): string {
     return <<<PROMPT
+Odpovedz IBA JSON objektom. Nepíš žiadne úvahy, vysvetlenia ani text pred
+alebo za JSON. Prvý znak odpovede musí byť { a posledný }.
+
 Si asistent, ktorý z obsahu športovej stránky vyčíta stav zápasu.
 Šport: {$sport}
 
@@ -60,7 +63,9 @@ function ls_test_model(array $model, string $vstup, string $url, string $sport =
         'model'       => $model['model_id'],
         'messages'    => [['role' => 'user', 'content' => $prompt]],
         'temperature' => 0,
-        'max_tokens'  => 700,
+        // 2000 staci na JSON aj na kratke uvazovanie pred nim. Pri 700 sa
+        // vacsina modelov nedostala k odpovedi — minula limit na premyslani.
+        'max_tokens'  => 2000,
     ], JSON_UNESCAPED_UNICODE);
 
     $ch = curl_init(defined('OPENROUTER_URL') ? OPENROUTER_URL
@@ -119,17 +124,18 @@ function ls_test_model(array $model, string $vstup, string $url, string $sport =
     $vysledok['cost_usd'] = ai_cena_volania(
         $model, $vysledok['prompt_tokens'], $vysledok['completion_tokens']);
 
-    if (($ai['choices'][0]['finish_reason'] ?? null) === 'length') {
-        $vysledok['error'] = 'Odpoveď bola orezaná (model uvažoval namiesto JSON)';
-        return $vysledok;
-    }
+    // Orezana odpoved nemusi byt strata: ked model uvazoval a JSON uz stihol
+    // dopisat, da sa z textu vytiahnut. Chyba sa hlasi az ked tam JSON nie je.
+    $orezane = ($ai['choices'][0]['finish_reason'] ?? null) === 'length';
 
     // Model niekedy obali JSON do ```json ... ``` alebo pripoji komentar.
     if (preg_match('/\{.*\}/s', $obsah, $m)) $obsah = $m[0];
     $d = json_decode($obsah, true);
 
     if (!is_array($d)) {
-        $vysledok['error'] = 'Odpoveď nie je platný JSON';
+        $vysledok['error'] = $orezane
+            ? 'Odpoveď bola orezaná (model uvažoval namiesto JSON)'
+            : 'Odpoveď nie je platný JSON';
         return $vysledok;
     }
 
