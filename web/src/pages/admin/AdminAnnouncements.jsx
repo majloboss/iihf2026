@@ -102,6 +102,34 @@ export default function AdminAnnouncements() {
                 </div>
             )}
 
+            {/* Formular na novy oznam. Pri prepracovani prepinacov (v2.60) sa
+                nechtiac stratil, hoci funkcia submit() zostala — oznam sa tak
+                nedal pridat vobec. */}
+            <div style={{ marginTop: 20, background: '#fff', border: '1px solid #e9ecef',
+                          borderRadius: 10, padding: 20 }}>
+                <h4 style={{ margin: '0 0 10px', color: '#1a3a6b' }}>Nový oznam</h4>
+                <textarea
+                    value={text}
+                    onChange={e => setText(e.target.value)}
+                    rows={4}
+                    placeholder="Napíš oznam pre hráčov…"
+                    style={{
+                        width: '100%', boxSizing: 'border-box',
+                        padding: '10px', border: '1px solid #ddd',
+                        borderRadius: 8, fontSize: '0.92rem',
+                        resize: 'vertical', fontFamily: 'inherit',
+                    }}
+                />
+                <div style={{ marginTop: 10, display: 'flex', gap: 10, alignItems: 'center',
+                              flexWrap: 'wrap' }}>
+                    <button className={styles.btn} onClick={submit} disabled={saving || !text.trim()}>
+                        {saving ? 'Ukladám…' : 'Pridať oznam'}
+                    </button>
+                    {err && <span className={styles.error} style={{ marginTop: 0 }}>{err}</span>}
+                    {ok  && <span className={styles.success} style={{ marginTop: 0 }}>{ok}</span>}
+                </div>
+            </div>
+
             <div style={{ marginTop: 24 }}>
                 <h4 style={{ margin: '0 0 12px', color: '#1a3a6b' }}>História oznamov</h4>
                 {loading && <p style={{ color: '#aaa' }}>Načítavam…</p>}
