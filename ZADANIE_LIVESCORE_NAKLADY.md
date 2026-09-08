@@ -271,14 +271,29 @@ z histórie, nie z jedného behu.
 |---|---|---|
 | 1 | Migrácia: `ai_models`, `livescore_day_config`, rozšírenie `livescore_log` | ✅ |
 | 2 | Naplnenie číselníka zo živého cenníka OpenRoutera | ✅ |
-| 3 | Zápis nákladov do logu pri každom volaní (UCL) | 🔲 |
-| 4 | API: `/v1/admin/livescore-naklady`, `/v1/admin/livescore-model` | 🔲 |
-| 5 | Admin obrazovka Náklady | 🔲 |
+| 3 | Zápis nákladov do logu pri každom volaní (UCL) | ✅ |
+| 4 | API: `/v1/admin/livescore-naklady`, `/v1/admin/livescore-model` | ✅ |
+| 5 | Admin obrazovka Náklady | ✅ |
 | 5b | Admin obrazovka Test — ručné spustenie testu modelov | ✅ |
-| 6 | Admin obrazovka Model info + ručná zmena a vypnutie | 🔲 |
-| 7 | Automatický test a výber modelu (cron) | 🔲 |
-| 8 | Denný strop: prepnutie na 80 %, zastavenie na 150 %, e-mail + push | 🔲 |
+| 6 | Admin obrazovka Model info + ručná zmena a vypnutie | ✅ |
+| 7 | Automatický test a výber modelu (cron) | ✅ |
+| 8 | Denný strop: prepnutie na 80 %, zastavenie na 150 %, e-mail | ✅ |
 | 9 | Prerobiť IIHF z api-sports na OpenRouter | 🔲 |
+
+## 8. Nastavenie cronu
+
+Do cron plánovača na hostingu treba pridať:
+
+```
+# každých 15 minút — automatický výber modelu na deň
+https://betclub.fellow.sk/api/cron/livescore_model_test.php?token=<CRON_SECRET>
+
+# každých 5 minút — samotný livescore (už beží)
+https://betclub.fellow.sk/api/cron/ucl_livescore.php?token=<CRON_SECRET>
+```
+
+Oba skripty samy rozhodnú, či majú niečo robiť — mimo okna zápasov skončia
+hneď a nič nestoja.
 
 ## 7. Rozhodnutia
 
