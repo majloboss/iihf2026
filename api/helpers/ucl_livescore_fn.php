@@ -112,7 +112,9 @@ function ucl_livescore_refresh(PDO $pdo, array $games): array {
         $status = mb_substr(trim($status), 0, 30);
 
         // Ked livescore potvrdi, ze zapas zacal, tipovanie sa uzavrie.
-        $started = !empty($d['started']);
+        // 't'/'f' namiesto PHP boolean: PDO posiela false ako prazdny retazec
+        // a Postgres ho v 'CASE WHEN ?' odmietne s chybou o neplatnom booleane.
+        $started = !empty($d['started']) ? 't' : 'f';
 
         $htHome = is_numeric($d['home_score_halftime'] ?? null) ? (int)$d['home_score_halftime'] : null;
         $htAway = is_numeric($d['away_score_halftime'] ?? null) ? (int)$d['away_score_halftime'] : null;
