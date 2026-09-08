@@ -143,13 +143,32 @@ foreach ($sutaze as $s) {
     $volani = (int)$dnes['volani'];
 
     // Predpoklad na cely den: priemerna cena volania krat odhad poctu volani.
-    // Odhad vychadza zo zapasov, ktore dnes este len budu bezat.
-    $st = $pdo->prepare(
-        "SELECT COUNT(*) FROM \"lm2026-27\".games
-          WHERE (start_time AT TIME ZONE 'UTC') AT TIME ZONE 'Europe/Bratislava' >= NOW()
-            AND (start_time AT TIME ZONE 'UTC') AT TIME ZONE 'Europe/Bratislava' < ?::date + 1");
-    try { $st->execute([$den]); $zostava = (int)$st->fetchColumn(); }
-    catch (Throwable $e) { $zostava = 0; }
+    // Odhad vychadza zo zapasov danej SUTAZE, ktore dnes este len budu bezat.
+    //
+    // Kazda sutaz ma vlastnu schemu a stlpec s casom sa v nich vola inak:
+    // IIHF ma starts_at, ostatne start_time. Slug 'ucl2026' navyse nesedi
+    // s nazvom schemy 'lm2026-27', preto je mapovanie explicitne.
+    $schemy = [
+        'iihf2026' => ['iihf2026',  'starts_at'],
+        'fifa2026' => ['fifa2026',  'start_time'],
+        'ucl2026'  => ['lm2026-27', 'start_time'],
+    ];
+
+    $zostava = 0;
+    if (isset($schemy[$s['slug']])) {
+        [$schema, $stlpec] = $schemy[$s['slug']];
+        try {
+            $st = $pdo->prepare(
+                "SELECT COUNT(*) FROM \"$schema\".games
+                  WHERE ($stlpec AT TIME ZONE 'UTC') AT TIME ZONE 'Europe/Bratislava' >= NOW()
+                    AND ($stlpec AT TIME ZONE 'UTC') AT TIME ZONE 'Europe/Bratislava' < ?::date + 1");
+            $st->execute([$den]);
+            $zostava = (int)$st->fetchColumn();
+        } catch (Throwable $e) {
+            // Sutaz moze mat inak pomenovanu schemu alebo este nemat zapasy.
+            $zostava = 0;
+        }
+    }
 
     $cenaVolania = $volani > 0 ? $minute / $volani
                  : ($modelRow ? ai_cena_volania($modelRow, 3200, 400) : 0.0);
