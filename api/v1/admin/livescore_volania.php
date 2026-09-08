@@ -55,7 +55,7 @@ $st = $pdo->prepare(
             l.status, l.minute, l.period_number,
             l.prompt_tokens, l.completion_tokens, l.tokens,
             l.cost_usd, l.took_ms, l.http_status, l.error, l.notes,
-            l.game_ids, l.live_ids,
+            l.game_ids, l.live_ids, l.vysledky, l.stav,
             -- Nazvy zapasov, ktore volanie prave sledovalo. Bez nich je v
             -- detaile len cislo a neda sa povedat, za co sa platilo.
             (SELECT string_agg(hc.club_name || ' — ' || ac.club_name, ', '
@@ -97,6 +97,11 @@ foreach ($st->fetchAll() as $r) {
         'chyba'      => $r['error'],
         'poznamka'   => $r['notes'],
         'zapasy'     => $r['zapasy_nazvy'],
+        'vysledky'   => $r['vysledky'],
+        // ok / nehra_sa / chyba — 'nehra_sa' nie je zlyhanie, len zapasy,
+        // ktore este nezacali. Starsie zaznamy stav nemaju, tam sa odvodi.
+        'stav'       => $r['stav'] ?? (
+            in_array($r['success'], [true, 't', '1', 1], true) ? 'ok' : 'chyba'),
         // Podiel volania na jeden beziaci zapas — takto sa cena zapasu
         // necha zratat naprieč volaniami.
         'zapasov'    => $r['live_ids'] !== null

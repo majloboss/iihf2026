@@ -805,3 +805,12 @@
 .detailTabulka tr:last-child td { border-bottom: 0; }
 
 .okZnak { color: #1a7f37; }
+
+/* ---- Stav volania ----
+   Volanie bez skore nemusi byt chyba: zapasy pred vykopom su vo feede tiez.
+   Zlyhanie modelu preto vyzera inak nez pokojne "este sa nehra". */
+
+.stavOk    { color: #1a7f37; }
+.stavNehra { color: #6b7280; }
+.stavCiast { color: #9a5b00; }
+.stavChyba { color: #cf222e; font-weight: 600; }

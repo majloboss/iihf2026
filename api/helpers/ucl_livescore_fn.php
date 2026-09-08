@@ -215,7 +215,33 @@ function ucl_zapis_naklady(string $model, ?array $modelRow, array $res,
 
         // Ked nebezal ziadny, cenu nesie cele sledovanie — inak by volanie
         // zostalo bez majitela a v sucte by chybalo.
+        $ziadenNebezal = !$bezali;
         if (!$bezali) $bezali = $vsetky;
+
+        // Kratky prehlad toho, co model vratil. Bez neho sa v detaile nedalo
+        // overit, co ktore volanie hlasilo — skore islo rovno do tabulky games.
+        $vysledky = [];
+        foreach ($res['games'] ?? [] as $fsId => $d) {
+            if (!isset($watch[$fsId]) || !is_array($d)) continue;
+            $h = $d['home_score'] ?? null;
+            $a = $d['away_score'] ?? null;
+            $skore  = is_numeric($h) && is_numeric($a) ? "$h:$a" : '-:-';
+            // Minuta v hranatych zatvorkach: okrudle by v tomto retazci
+            // rozhodili kontrolu vyvazenosti zatvoriek.
+            $minuta = !empty($d['minute']) ? ' [' . (int)$d['minute'] . "']" : '';
+            $vysledky[] = trim(($d['home_team'] ?? '?') . " $skore "
+                               . ($d['away_team'] ?? '?') . $minuta);
+        }
+
+        // Preco volanie neprinieslo skore. Model, ktory zlyhal, a zapasy, ktore
+        // este nezacali, nesmu v prehlade vyzerat rovnako.
+        if (empty($res['ok'])) {
+            $stav = 'chyba';
+        } elseif ($ziadenNebezal) {
+            $stav = 'nehra_sa';
+        } else {
+            $stav = 'ok';
+        }
 
         // Pole pre Postgres sa sklada cez json_encode: hranate zatvorky sa
         // v dotaze pretypuju na int[], takze netreba rucne skladat literal.
@@ -225,10 +251,10 @@ function ucl_zapis_naklady(string $model, ?array $modelRow, array $res,
             "INSERT INTO admin.livescore_log
                 (call_type, provider, competition_id, model,
                  prompt_tokens, completion_tokens, tokens, cost_usd,
-                 success, error, notes, game_ids, live_ids)
+                 success, error, notes, game_ids, live_ids, vysledky, stav)
              VALUES ('live', 'openrouter', ?, ?, ?, ?, ?, ?, ?, ?, ?,
                      TRANSLATE(?, '[]', '{}')::int[],
-                     TRANSLATE(?, '[]', '{}')::int[])")
+                     TRANSLATE(?, '[]', '{}')::int[], ?, ?)")
             ->execute([
                 UCL_COMPETITION_ID,
                 mb_substr($model, 0, 100),
@@ -238,6 +264,8 @@ function ucl_zapis_naklady(string $model, ?array $modelRow, array $res,
                 'Sledovaných zápasov: ' . count($vsetky)
                     . ', prave bežali: ' . count($bezali),
                 $polePg($vsetky), $polePg($bezali),
+                $vysledky ? mb_substr(implode(' · ', $vysledky), 0, 500) : null,
+                $stav,
             ]);
     } catch (Throwable $e) {
         // Zlyhany zapis nakladov nesmie zhodit livescore.

@@ -45,6 +45,16 @@ const cas = t => new Date(t + 'Z').toLocaleString('sk-SK',
 const den = d => new Date(d).toLocaleDateString('sk-SK',
     { day: 'numeric', month: 'numeric' });
 
+// Volanie bez skóre nemusí byť chyba: zápasy, ktoré ešte nezačali, sú vo feede
+// tiež. Preto sa stav rozlišuje — zlyhanie modelu má inú váhu než pokojný stav
+// „ešte sa nehrá".
+const STAVY = {
+    ok:        { text: 'OK',        trieda: 'stavOk' },
+    nehra_sa:  { text: 'nehrá sa',  trieda: 'stavNehra' },
+    ciastocne: { text: 'čiastočne', trieda: 'stavCiast' },
+    chyba:     { text: 'chyba',     trieda: 'stavChyba' },
+};
+
 export default function LivescoreNaklady2() {
     const [data, setData]   = useState(null);
     const [chyba, setChyba] = useState(null);
@@ -270,7 +280,7 @@ export default function LivescoreNaklady2() {
                                             <thead>
                                                 <tr>
                                                     <th>Čas</th><th>Stav</th>
-                                                    <th>Sledované zápasy</th>
+                                                    <th>Čo model vrátil</th>
                                                     <th className={styles.cislo}>Zápasov</th>
                                                     <th className={styles.cislo}>Tokeny</th>
                                                     <th className={styles.cislo}>Cena</th>
@@ -281,13 +291,19 @@ export default function LivescoreNaklady2() {
                                                 {detail[kluc].map(v => (
                                                     <tr key={v.id}>
                                                         <td>{cas(v.cas)}</td>
-                                                        <td>{v.ok
-                                                            ? <span className={styles.okZnak}>OK</span>
-                                                            : <span className={styles.zleCislo}
-                                                                    title={v.chyba ?? ''}>
-                                                                chyba</span>}</td>
+                                                        <td>
+                                                            {(() => {
+                                                                const st = STAVY[v.stav] ?? STAVY.chyba;
+                                                                return <span className={styles[st.trieda]}
+                                                                             title={v.chyba ?? ''}>
+                                                                    {st.text}</span>;
+                                                            })()}
+                                                        </td>
                                                         <td className={styles.bunkaZapas}>
-                                                            {v.zapasy ?? v.timy ?? '—'}</td>
+                                                            {/* Skóre, ktoré volanie vrátilo. Staršie
+                                                                záznamy ho nemajú — tam ostáva zoznam
+                                                                sledovaných zápasov. */}
+                                                            {v.vysledky ?? v.zapasy ?? v.timy ?? '—'}</td>
                                                         <td className={styles.cislo}>
                                                             {v.zapasov ?? '—'}</td>
                                                         <td className={styles.cislo}>
