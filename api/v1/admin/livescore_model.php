@@ -178,13 +178,22 @@ $kandidati = array_map(static fn($m) => [
     'agree_rate'   => $m['agree_rate']   !== null ? (float)$m['agree_rate']   : null,
     'tests_total'  => (int)$m['tests_total'],
     'avg_ms'       => $m['avg_ms'] !== null ? (int)$m['avg_ms'] : null,
+    // Kolkokrat model vratil ine timy nez vacsina. Pri vybere do produkcie
+    // je to podstatnejsie nez cena — model, ktory halucinuje, hlasi hracom
+    // vymyslene vysledky.
+    'halucinacii'  => (int)($m['halucinacii'] ?? 0),
 ], $pdo->query(
-    "SELECT * FROM admin.ai_models
-      WHERE is_enabled AND unavailable_reason IS NULL
-        AND (is_free OR (price_input_1m IS NOT NULL AND price_output_1m IS NOT NULL))
-      ORDER BY COALESCE(agree_rate, -1) DESC,
-               COALESCE(success_rate, -1) DESC,
-               COALESCE(price_input_1m, 0) + COALESCE(price_output_1m, 0)
+    "SELECT m.*,
+            (SELECT COUNT(*) FROM admin.livescore_model_test t
+              WHERE t.model_key = m.model_id AND t.teams_agree = FALSE) AS halucinacii
+       FROM admin.ai_models m
+      WHERE m.is_enabled AND m.unavailable_reason IS NULL
+        AND (m.is_free OR (m.price_input_1m IS NOT NULL AND m.price_output_1m IS NOT NULL))
+      ORDER BY (SELECT COUNT(*) FROM admin.livescore_model_test t
+                 WHERE t.model_key = m.model_id AND t.teams_agree = FALSE) ASC,
+               COALESCE(m.agree_rate, -1) DESC,
+               COALESCE(m.success_rate, -1) DESC,
+               COALESCE(m.price_input_1m, 0) + COALESCE(m.price_output_1m, 0)
       LIMIT 40")->fetchAll());
 
 json_ok(['den' => $den, 'sutaze' => $vysledok, 'modely' => $kandidati]);

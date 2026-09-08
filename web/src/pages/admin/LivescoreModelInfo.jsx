@@ -134,6 +134,7 @@ export default function LivescoreModelInfo() {
                                             {m.model_id}
                                             {m.is_free ? ' · zdarma' : ` · $${m.cena_1m}/1M`}
                                             {m.agree_rate !== null ? ` · zhoda ${m.agree_rate}%` : ''}
+                                            {m.halucinacii > 0 ? ` · ⚠ ${m.halucinacii}× vymyslené` : ''}
                                         </option>
                                     ))}
                                 </select>
@@ -205,6 +206,7 @@ export default function LivescoreModelInfo() {
                         <thead>
                             <tr>
                                 <th>Model</th>
+                                <th className={styles.cislo}>Vymyslené</th>
                                 <th className={styles.cislo}>Zhoda</th>
                                 <th className={styles.cislo}>Úspešnosť</th>
                                 <th className={styles.cislo}>Testov</th>
@@ -215,7 +217,14 @@ export default function LivescoreModelInfo() {
                         <tbody>
                             {data.modely.map(m => (
                                 <tr key={m.model_id}>
-                                    <td><code>{m.model_id}</code></td>
+                                    <td className={styles.bunkaModel}><code>{m.model_id}</code></td>
+                                    <td className={styles.cislo}>
+                                        {m.halucinacii > 0
+                                            ? <span className={styles.zleCislo}
+                                                    title="Koľkokrát model vrátil iné tímy než ostatné">
+                                                {m.halucinacii}×
+                                              </span>
+                                            : '—'}</td>
                                     <td className={styles.cislo}>
                                         {m.agree_rate !== null ? `${m.agree_rate} %` : '—'}</td>
                                     <td className={styles.cislo}>

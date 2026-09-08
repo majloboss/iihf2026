@@ -152,6 +152,23 @@ function ls_test_model(array $model, string $vstup, string $url, string $sport =
     // Minuta je bonus — volejbal ju nema. Staci skore a cast hry.
     $vysledok['passed'] = $vysledok['got_score'] && $vysledok['got_period'];
 
+    // Nezmyselne hodnoty. Model, ktory pri futbale vrati 38:1, necital
+    // stranku — vytiahol nejake cislo z ineho miesta (poradie v tabulke,
+    // pocet striel). Hranice su volne, aby presli aj tenis a volejbal.
+    if ($vysledok['passed']) {
+        $dh = (int)$d['home_score'];
+        $da = (int)$d['away_score'];
+        $minuta = is_numeric($d['minute'] ?? null) ? (int)$d['minute'] : null;
+
+        if ($dh < 0 || $da < 0 || $dh > 30 || $da > 30) {
+            $vysledok['passed'] = false;
+            $vysledok['error']  = "Nezmyselné skóre $dh:$da";
+        } elseif ($minuta !== null && ($minuta < 0 || $minuta > 200)) {
+            $vysledok['passed'] = false;
+            $vysledok['error']  = "Nezmyselná minúta: $minuta";
+        }
+    }
+
     // Skore ako text, aby sa dala porovnat zhoda medzi modelmi. Prvy ostry
     // test ukazal, ze 11 modelov vratilo 6 roznych skore toho isteho zapasu —
     // samotne 'passed' teda nestaci, overuje len ci model vratil cisla.

@@ -78,12 +78,33 @@ if (($_GET['zhoda'] ?? '') === '1') {
     $runId = (int)($body['run_id'] ?? 0);
     if ($runId === 0) json_error('Chýba run_id', 400);
 
-    [$skore, $zhodlo, $spolu] = ls_vyhodnot_zhodu($runId);
+    [$skore, $zhodlo, $spolu, $timy] = ls_vyhodnot_zhodu($runId);
+
+    // Rozpad skore: na com sa modely zhodli a na com nie. Ked je najsilnejsia
+    // zhoda slaba, vysledok netreba brat vazne ani od vitaza.
+    $st = $pdo->prepare(
+        "SELECT score_text, COUNT(*) AS modelov,
+                string_agg(model_key, ', ' ORDER BY model_key) AS ktore
+           FROM admin.livescore_model_test
+          WHERE run_id = ? AND passed AND score_text IS NOT NULL
+          GROUP BY score_text ORDER BY COUNT(*) DESC");
+    $st->execute([$runId]);
+    $rozpad = $st->fetchAll();
+
+    // Modely, ktore si vymyslel ine timy nez vacsina
+    $st = $pdo->prepare(
+        "SELECT model_key, teams_text FROM admin.livescore_model_test
+          WHERE run_id = ? AND teams_agree = FALSE");
+    $st->execute([$runId]);
+    $halucinacie = $st->fetchAll();
 
     json_ok([
         'najcastejsie_skore' => $skore,
         'zhodlo_sa'          => $zhodlo,
         's_vysledkom'        => $spolu,
+        'timy'               => $timy,
+        'rozpad_skore'       => $rozpad,
+        'halucinacie'        => $halucinacie,
     ]);
 }
 

@@ -440,3 +440,44 @@
   background: rgba(154, 103, 0, .14);
   white-space: nowrap;
 }
+
+/* ---------- rozpad zhody na skore ---------- */
+.zhodaSuhrn p { margin: 0; }
+.slabaZhoda { color: #9a6700; font-weight: 600; }
+
+.rozpad {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  font-size: .78rem;
+}
+.rozpad li {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 2px 0;
+  color: #6b7280;
+}
+.rozpad li strong {
+  flex: 0 0 42px;
+  font-variant-numeric: tabular-nums;
+}
+.rozpad li span { flex: 0 0 32px; }
+.rozpad li em {
+  font-style: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rozpadVitaz { color: #1a7f37 !important; font-weight: 600; }
+
+.halucinacie {
+  margin: 8px 0 0 !important;
+  padding: 6px 10px;
+  border-radius: 4px;
+  background: rgba(207, 34, 46, .08);
+  color: #cf222e;
+  font-size: .78rem;
+}
+
+.zleCislo { color: #cf222e; font-weight: 700; }

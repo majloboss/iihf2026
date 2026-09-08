@@ -226,12 +226,41 @@ export default function LivescoreTestModelov() {
                     )}
 
                     {zhoda && zhoda.najcastejsie_skore && (
-                        <p className={styles.zhodaSuhrn}>
-                            Najčastejšie skóre: <strong>{zhoda.najcastejsie_skore}</strong>
-                            {' '}— zhodlo sa {zhoda.zhodlo_sa} z {zhoda.s_vysledkom} modelov.
-                            {zhoda.zhodlo_sa < zhoda.s_vysledkom / 2 &&
-                                ' Modely sa výrazne rozchádzajú, výsledok overte na Flashscore.'}
-                        </p>
+                        <div className={styles.zhodaSuhrn}>
+                            <p>
+                                {zhoda.timy && <><strong>{zhoda.timy}</strong> · </>}
+                                najčastejšie skóre <strong>{zhoda.najcastejsie_skore}</strong>
+                                {' '}— zhodlo sa {zhoda.zhodlo_sa} z {zhoda.s_vysledkom} modelov
+                                {zhoda.zhodlo_sa < zhoda.s_vysledkom / 2 &&
+                                    <span className={styles.slabaZhoda}>
+                                        {' '}· slabá zhoda, výsledok over na Flashscore
+                                    </span>}
+                            </p>
+
+                            {/* Rozpad: na com sa modely rozchadzaju */}
+                            {zhoda.rozpad_skore && zhoda.rozpad_skore.length > 1 && (
+                                <ul className={styles.rozpad}>
+                                    {zhoda.rozpad_skore.map(r => (
+                                        <li key={r.score_text}
+                                            className={r.score_text === zhoda.najcastejsie_skore
+                                                       ? styles.rozpadVitaz : ''}>
+                                            <strong>{r.score_text}</strong>
+                                            <span>{r.modelov}×</span>
+                                            <em title={r.ktore}>{r.ktore}</em>
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+
+                            {/* Modely, ktore si vymyslel ine timy */}
+                            {zhoda.halucinacie && zhoda.halucinacie.length > 0 && (
+                                <p className={styles.halucinacie}>
+                                    ⚠ Vymyslené údaje ({zhoda.halucinacie.length}):{' '}
+                                    {zhoda.halucinacie.map(h =>
+                                        `${h.model_key} → ${h.teams_text ?? '?'}`).join(', ')}
+                                </p>
+                            )}
+                        </div>
                     )}
 
                     <ul className={styles.karty}>
