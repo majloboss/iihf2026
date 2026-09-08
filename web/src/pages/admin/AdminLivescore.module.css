@@ -632,3 +632,14 @@
   font-size: .8rem;
   color: #9a6700;
 }
+
+/* Pocet uspesnych kol pri modeli — 7/10 hovori viac nez samotne ✓ */
+.kola {
+  display: block;
+  font-style: normal;
+  font-size: .62rem;
+  font-weight: 600;
+  color: #6b7280;
+  line-height: 1;
+  margin-top: 2px;
+}

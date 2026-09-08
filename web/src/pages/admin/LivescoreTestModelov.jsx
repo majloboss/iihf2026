@@ -17,6 +17,7 @@ export default function LivescoreTestModelov() {
     const [pocet, setPocet]     = useState(20);
     const [davka, setDavka]     = useState('lacne');
     const [davky, setDavky]     = useState([]);
+    const [kol, setKol]         = useState(1);
     const [sutaz, setSutaz]     = useState('');
     const [sutaze, setSutaze]   = useState([]);
 
@@ -26,7 +27,7 @@ export default function LivescoreTestModelov() {
 
     const [priprava, setPriprava] = useState(null);
     const [bezi, setBezi]         = useState(false);
-    const [postup, setPostup]     = useState({ done: 0, total: 0, teraz: null });
+    const [postup, setPostup]     = useState({ done: 0, total: 0, teraz: null, kolo: 1 });
     const [vysledky, setVysledky] = useState([]);
     const [chyba, setChyba]       = useState(null);
     const [rozbalene, setRozbalene] = useState(null);
@@ -76,10 +77,15 @@ export default function LivescoreTestModelov() {
                 }),
             });
             setPriprava(p);
-            setPostup({ done: 0, total: p.modely.length, teraz: null });
+            const kolks = Math.max(1, Number(kol) || 1);
+            setPostup({ done: 0, total: p.modely.length * kolks, teraz: null, kolo: 1 });
 
-            // 2) testuj po jednom
-            for (const model of p.modely) {
+            // 2) testuj po jednom, v tolkych kolach, kolko sa zvolilo.
+            //    Viac kol odhali model, ktory raz nahodou trafi a inokedy nie —
+            //    zhoda sa pocita z historie, takze sa vysledky kumuluju.
+            for (let kolo = 1; kolo <= kolks && !zastavRef.current; kolo++) {
+              setPostup(s => ({ ...s, kolo }));
+              for (const model of p.modely) {
                 if (zastavRef.current) break;
                 setPostup(s => ({ ...s, teraz: model }));
                 try {
@@ -93,15 +99,17 @@ export default function LivescoreTestModelov() {
                             run_id: p.run_id,
                         }),
                     });
-                    setVysledky(v => zorad([...v, r.vysledok]));
+                    setVysledky(v => zluc(v, r.vysledok));
                 } catch (e) {
-                    setVysledky(v => zorad([...v, {
+                    setVysledky(v => zluc(v, {
                         model, passed: false, error: e.message,
                         cost_usd: 0, total_tokens: null, took_ms: null,
-                    }]));
+                    }));
                 }
                 setPostup(s => ({ ...s, done: s.done + 1 }));
+              }
             }
+
             // Po dobehnuti sa zisti, na akom skore sa modely zhodli. Model,
             // ktory vratil ine skore nez vacsina, je podozrivy — test overuje
             // len to, ci vratil cisla, nie ci su spravne.
@@ -120,6 +128,29 @@ export default function LivescoreTestModelov() {
             setPostup(s => ({ ...s, teraz: null }));
             nacitat();          // obnov suhrn a historiu
         }
+    }
+
+    // Vysledok z dalsieho kola sa priratava k modelu, nevytvara novy riadok.
+    // Vidno tak 'presiel 7 z 10 kol', co je uzitocnejsie nez desat riadkov.
+    function zluc(zoznam, novy) {
+        const i = zoznam.findIndex(x => x.model === novy.model);
+        if (i < 0) {
+            return zorad([...zoznam, { ...novy, kol: 1, presiel: novy.passed ? 1 : 0 }]);
+        }
+        const stary = zoznam[i];
+        const spojene = {
+            ...novy,
+            kol: (stary.kol ?? 1) + 1,
+            presiel: (stary.presiel ?? 0) + (novy.passed ? 1 : 0),
+            // Cena a cas sa scitavaju, aby sedel sucet za cely beh
+            cost_usd: (stary.cost_usd || 0) + (novy.cost_usd || 0),
+            took_ms: novy.took_ms,
+            // Chyba z posledneho kola sa ukaze len ked model neprešiel ani raz
+            error: (stary.presiel ?? 0) + (novy.passed ? 1 : 0) > 0 ? null : novy.error,
+            passed: (stary.presiel ?? 0) + (novy.passed ? 1 : 0) > 0,
+        };
+        const bezNeho = zoznam.filter((_, j) => j !== i);
+        return zorad([...bezNeho, spojene]);
     }
 
     // Uspesne hore, medzi nimi rychlejsie skor — to je poradie, v akom
@@ -202,15 +233,23 @@ export default function LivescoreTestModelov() {
                         <input type="number" min="1" max="400" value={pocet}
                                onChange={e => setPocet(e.target.value)} disabled={bezi} />
                     </label>
+
+                    <label>
+                        <span>Kôl</span>
+                        <input type="number" min="1" max="20" value={kol}
+                               onChange={e => setKol(e.target.value)} disabled={bezi}
+                               title="Koľkokrát prejsť celý zoznam. Viac kôl odhalí model, ktorý raz náhodou trafí." />
+                    </label>
                 </div>
 
                 <div className={styles.tlacidla}>
                     <button className={styles.hlavne} onClick={spustit} disabled={bezi}>
-                        {bezi ? 'Testujem…' : `Spustiť test (${kolkoBude} modelov)`}
+                        {bezi ? 'Testujem…'
+                              : `Spustiť test (${kolkoBude} modelov${Number(kol) > 1 ? ` × ${kol} kôl` : ''})`}
                     </button>
-                    {!bezi && kolkoBude > 25 && (
+                    {!bezi && kolkoBude * Number(kol || 1) > 25 && (
                         <span className={styles.odhad}>
-                            potrvá zhruba {Math.ceil(kolkoBude * 17 / 60)} min —
+                            potrvá zhruba {Math.ceil(kolkoBude * Number(kol || 1) * 17 / 60)} min —
                             nechaj okno otvorené
                         </span>
                     )}
@@ -243,8 +282,9 @@ export default function LivescoreTestModelov() {
                     <div className={styles.hlavickaVysledkov}>
                         <h3>Výsledky</h3>
                         <span>
-                            {postup.done} / {postup.total} · úspešných {uspesnych} ·
-                            cena behu ${cenaBehu.toFixed(5)}
+                            {postup.done} / {postup.total}
+                            {Number(kol) > 1 && ` · kolo ${postup.kolo} z ${kol}`}
+                            {' · '}úspešných {uspesnych} · cena behu ${cenaBehu.toFixed(5)}
                         </span>
                     </div>
                     {postup.teraz && (
@@ -296,7 +336,12 @@ export default function LivescoreTestModelov() {
                                     className={styles.karta}
                                     onClick={() => setRozbalene(rozbalene === v.model ? null : v.model)}
                                 >
-                                    <span className={styles.znak}>{v.passed ? '✓' : '✕'}</span>
+                                    <span className={styles.znak}>
+                                        {v.passed ? '✓' : '✕'}
+                                        {v.kol > 1 && (
+                                            <em className={styles.kola}>{v.presiel}/{v.kol}</em>
+                                        )}
+                                    </span>
                                     <span className={styles.stred}>
                                         <code>{v.model}</code>
                                         {/* Skutocne hodnoty, nie len zaskrtavatka:
