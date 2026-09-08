@@ -56,6 +56,7 @@ $st = $pdo->prepare(
             l.prompt_tokens, l.completion_tokens, l.tokens,
             l.cost_usd, l.took_ms, l.http_status, l.error, l.notes,
             l.game_ids, l.live_ids, l.vysledky, l.stav,
+            l.vysledky_json,
             -- Nazvy zapasov, ktore volanie prave sledovalo. Bez nich je v
             -- detaile len cislo a neda sa povedat, za co sa platilo.
             (SELECT string_agg(hc.club_name || ' — ' || ac.club_name, ', '
@@ -69,6 +70,20 @@ $st = $pdo->prepare(
       ORDER BY l.checked_at DESC
       LIMIT 200");
 $st->execute($par);
+
+// Z odpovede volania vyberie tu cast, ktora patri zapasu v detaile.
+// Ked sa detail neviaze na zapas (testy, starsie zaznamy), vrati vsetko.
+$vysledokZapasu = static function (array $r) use ($gameId) {
+    if ($gameId !== '' && !empty($r['vysledky_json'])) {
+        $data = json_decode($r['vysledky_json'], true);
+        if (is_array($data) && isset($data[(string)(int)$gameId]['popis'])) {
+            return $data[(string)(int)$gameId]['popis'];
+        }
+        // Zapas v tomto volani nebol — nie je co ukazat.
+        return null;
+    }
+    return $r['vysledky'];
+};
 
 $volania = [];
 foreach ($st->fetchAll() as $r) {
@@ -97,7 +112,9 @@ foreach ($st->fetchAll() as $r) {
         'chyba'      => $r['error'],
         'poznamka'   => $r['notes'],
         'zapasy'     => $r['zapasy_nazvy'],
-        'vysledky'   => $r['vysledky'],
+        // V detaile zapasu patri len jeho vlastny vysledok. Cela odpoved
+        // volania sa vracia len ked sa detail neviaze na konkretny zapas.
+        'vysledky'   => $vysledokZapasu($r),
         // ok / nehra_sa / chyba — 'nehra_sa' nie je zlyhanie, len zapasy,
         // ktore este nezacali. Starsie zaznamy stav nemaju, tam sa odvodi.
         'stav'       => $r['stav'] ?? (
