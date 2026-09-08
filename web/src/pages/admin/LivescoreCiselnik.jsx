@@ -104,11 +104,9 @@ export default function LivescoreCiselnik() {
                     len otestované
                 </label>
                 <span className={styles.pocet}>
-                    {zobrazene.length} z {modely.length}
+                    {caka ? 'načítavam…' : `${zobrazene.length} z ${modely.length}`}
                 </span>
             </div>
-
-            {caka && <p className={styles.popis}>Načítavam…</p>}
 
             <table className={admin.table}>
                 <thead>

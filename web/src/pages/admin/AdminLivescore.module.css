@@ -2,6 +2,9 @@
 
 .stranka h1 { margin: 0 0 4px; font-size: 1.3rem; }
 
+/* Sirku urcuje obsah, nie text: tabulky maju vyuzit celu plochu. */
+.stranka { max-width: none; }
+
 .popis {
   margin: 0 0 16px;
   color: #6b7280;
@@ -513,7 +516,9 @@
   margin: 0 0 12px;
   color: #6b7280;
   font-size: .85rem;
+  max-width: none;      /* na rozdiel od .popis sa nezuzuje, text ide na riadok */
 }
+
 .prepinac {
   display: flex;
   align-items: center;
