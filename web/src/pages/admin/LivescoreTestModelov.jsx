@@ -208,6 +208,28 @@ export default function LivescoreTestModelov() {
                     />
                 </label>
 
+
+                {/* Davok sa da zvolit viac naraz — zjednotia sa a duplicity
+                    vypadnu. Napriklad 'bezplatne' + 'netestovane' na jeden beh. */}
+                <fieldset className={styles.davky}>
+                    <legend>Ktoré modely testovať</legend>
+                    {davky.map(d => (
+                        <label key={d.kluc} className={styles.davkaPolozka}>
+                            <input
+                                type="checkbox"
+                                checked={vybraneDavky.includes(d.kluc)}
+                                disabled={bezi}
+                                onChange={e => setVybraneDavky(v =>
+                                    e.target.checked
+                                        ? [...v, d.kluc]
+                                        : v.filter(x => x !== d.kluc))}
+                            />
+                            <span>{d.popis}</span>
+                            <em>{d.pocet}</em>
+                        </label>
+                    ))}
+                </fieldset>
+
                 <div className={styles.riadok}>
                     <label>
                         <span>Šport</span>
