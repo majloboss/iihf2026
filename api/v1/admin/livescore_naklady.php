@@ -58,7 +58,7 @@ $st = $pdo->prepare(
     "SELECT COUNT(*)                              AS volani,
             COUNT(*) FILTER (WHERE l.success)     AS uspesnych,
             COUNT(DISTINCT l.model)               AS modelov,
-            COUNT(DISTINCT l.game_id)             AS zapasov,
+            COUNT(DISTINCT COALESCE(l.game_id::text, l.url)) AS zapasov,
             COALESCE(SUM(l.prompt_tokens), 0)     AS vstup,
             COALESCE(SUM(l.completion_tokens), 0) AS vystup,
             COALESCE(SUM(l.tokens), 0)            AS tokenov,
@@ -101,6 +101,31 @@ $st->execute($par);
 $poDnoch = $st->fetchAll();
 
 // ------------------------------------------------------------
+// Naklady podla zapasu
+//
+// Zapas identifikuje game_id, a ked chyba (testovacie volania bezia na cudzom
+// zapase), tak URL. Nazvy timov sa beru z posledneho volania, ktore ich vratilo.
+// ------------------------------------------------------------
+$st = $pdo->prepare(
+    "SELECT COALESCE(l.game_id::text, l.url)     AS kluc,
+            MAX(l.game_id)                        AS game_id,
+            MAX(l.url)                            AS url,
+            (array_agg(l.home_team ORDER BY l.checked_at DESC)
+               FILTER (WHERE l.home_team IS NOT NULL))[1] AS domaci,
+            (array_agg(l.away_team ORDER BY l.checked_at DESC)
+               FILTER (WHERE l.away_team IS NOT NULL))[1] AS hostia,
+            COUNT(*)                              AS volani,
+            COUNT(*) FILTER (WHERE l.success)     AS uspesnych,
+            COUNT(DISTINCT l.model)               AS modelov,
+            COALESCE(SUM(l.tokens), 0)            AS tokenov,
+            COALESCE(SUM(l.cost_usd), 0)          AS cena,
+            MAX(l.checked_at)                     AS naposledy
+       FROM admin.livescore_log l $where
+      GROUP BY 1 ORDER BY SUM(l.cost_usd) DESC NULLS LAST LIMIT 40");
+$st->execute($par);
+$poZapasoch = $st->fetchAll();
+
+// ------------------------------------------------------------
 // Naklady podla modelu
 // ------------------------------------------------------------
 $st = $pdo->prepare(
@@ -138,6 +163,7 @@ json_ok([
     ],
     'volania'     => $volania,
     'po_dnoch'    => $poDnoch,
+    'po_zapasoch' => $poZapasoch,
     'po_modeloch' => $poModeloch,
     'filtre'      => ['sutaze' => $sutaze, 'modely' => $modely],
 ]);

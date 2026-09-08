@@ -395,3 +395,36 @@
 .grafCena em { font-style: normal; color: #9198a1; }
 
 .riadokZle td { color: #9198a1; }
+
+/* ---------- zarovnanie tabuliek ----------
+   Cisla vpravo a s rovnakou sirkou cislic, aby sa stlpce nerozchadzali.
+   Prvy stlpec (zapas, model) berie zvysok sirky. */
+.tabulka { table-layout: auto; }
+
+.tabulka th, .tabulka td { padding: 6px 12px; vertical-align: middle; }
+
+/* Cisla: pevna sirka a zarovnanie vpravo */
+.tabulka th.cislo, .tabulka td.cislo {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  width: 1%;                 /* stlpec sa zmrsti na obsah */
+}
+
+/* Nazov zapasu a modelu — zvysok sirky, dlhe nazvy sa orezu */
+.bunkaZapas, .bunkaModel {
+  max-width: 340px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.bunkaModel code { font-size: .76rem; }
+.bunkaCas { white-space: nowrap; color: #6b7280; width: 1%; }
+
+.odkaz {
+  margin-left: 6px;
+  color: #1f6feb;
+  text-decoration: none;
+  font-size: .8rem;
+}
+.odkaz:hover { text-decoration: underline; }

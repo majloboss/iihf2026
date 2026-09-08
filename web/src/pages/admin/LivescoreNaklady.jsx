@@ -25,7 +25,10 @@ export default function LivescoreNaklady() {
         model: '',
         od: PRED_TYZDNOM(),
         do: DNES(),
-        call_type: 'live',
+        // Predvolene sa ukazuje vsetko vratane testov — kym livescore len
+        // nabieha, su testovacie volania to zaujimavejsie. Prepnutim na
+        // 'ostre' sa daju naklady sutaze oddelit.
+        call_type: 'vsetko',
     });
 
     useEffect(() => { nacitat(); }, []);
@@ -58,8 +61,8 @@ export default function LivescoreNaklady() {
     return (
         <div>
             <p className={styles.popis}>
-                Náklady na livescore. Testovacie volania sa nezapočítavajú do
-                nákladov súťaže — dajú sa zobraziť prepnutím typu.
+                Náklady na livescore. Prepínačom <strong>Typ volania</strong> sa dajú
+                oddeliť ostré volania (skutočné náklady súťaže) od testovacích.
             </p>
 
             {chyba && <div className={styles.chyba}>{chyba}</div>}
@@ -161,12 +164,60 @@ export default function LivescoreNaklady() {
                 </section>
             )}
 
+            {/* Naklady podla zapasu — zapas je to, co admina zaujima najprv */}
+            {data && data.po_zapasoch.length > 0 && (
+                <details className={styles.historia} open>
+                    <summary>Podľa zápasu ({data.po_zapasoch.length})</summary>
+                    <div className={styles.tabulkaObal}>
+                        <table className={styles.tabulka}>
+                            <thead>
+                                <tr>
+                                    <th>Zápas</th>
+                                    <th className={styles.cislo}>Volaní</th>
+                                    <th className={styles.cislo}>Úspešných</th>
+                                    <th className={styles.cislo}>Modelov</th>
+                                    <th className={styles.cislo}>Tokeny</th>
+                                    <th className={styles.cislo}>Cena</th>
+                                    <th>Naposledy</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {data.po_zapasoch.map(z => (
+                                    <tr key={z.kluc}>
+                                        <td className={styles.bunkaZapas}>
+                                            {z.domaci
+                                                ? `${z.domaci} — ${z.hostia ?? '?'}`
+                                                : (z.game_id ? `zápas #${z.game_id}` : '(neznámy)')}
+                                            {z.url && (
+                                                <a href={z.url} target="_blank" rel="noreferrer"
+                                                   className={styles.odkaz}>↗</a>
+                                            )}
+                                        </td>
+                                        <td className={styles.cislo}>{z.volani}</td>
+                                        <td className={styles.cislo}>{z.uspesnych}</td>
+                                        <td className={styles.cislo}>{z.modelov}</td>
+                                        <td className={styles.cislo}>
+                                            {Number(z.tokenov).toLocaleString('sk')}</td>
+                                        <td className={styles.cislo}>
+                                            ${Number(z.cena).toFixed(5)}</td>
+                                        <td className={styles.bunkaCas}>
+                                            {new Date(z.naposledy + 'Z').toLocaleString('sk-SK',
+                                                { day: 'numeric', month: 'numeric',
+                                                  hour: '2-digit', minute: '2-digit' })}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </details>
+            )}
+
             {/* Naklady podla modelu */}
             {data && data.po_modeloch.length > 0 && (
                 <details className={styles.historia} open>
                     <summary>Podľa modelu ({data.po_modeloch.length})</summary>
                     <div className={styles.tabulkaObal}>
-                        <table>
+                        <table className={styles.tabulka}>
                             <thead>
                                 <tr>
                                     <th>Model</th>
@@ -179,7 +230,7 @@ export default function LivescoreNaklady() {
                             <tbody>
                                 {data.po_modeloch.map(m => (
                                     <tr key={m.model}>
-                                        <td><code>{m.model}</code></td>
+                                        <td className={styles.bunkaModel}><code>{m.model}</code></td>
                                         <td className={styles.cislo}>{m.volani}</td>
                                         <td className={styles.cislo}>{m.uspesnych}</td>
                                         <td className={styles.cislo}>
@@ -199,7 +250,7 @@ export default function LivescoreNaklady() {
                 <details className={styles.historia}>
                     <summary>Jednotlivé volania ({data.volania.length})</summary>
                     <div className={styles.tabulkaObal}>
-                        <table>
+                        <table className={styles.tabulka}>
                             <thead>
                                 <tr>
                                     <th>Kedy</th>
@@ -224,7 +275,7 @@ export default function LivescoreNaklady() {
                                                 ? `${v.home_team} ${v.home_score ?? '?'}:${v.away_score ?? '?'} ${v.away_team}`
                                                 : (v.game_id ? `#${v.game_id}` : '—')}
                                         </td>
-                                        <td><code>{v.model}</code></td>
+                                        <td className={styles.bunkaModel}><code>{v.model}</code></td>
                                         <td>{v.success ? '✓' : (v.error ? '✕ ' + v.error.slice(0, 30) : '✕')}</td>
                                         <td className={styles.cislo}>{v.tokens ?? '—'}</td>
                                         <td className={styles.cislo}>
