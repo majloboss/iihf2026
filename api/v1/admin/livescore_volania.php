@@ -54,7 +54,7 @@ $st = $pdo->prepare(
             -- detaile len cislo a neda sa povedat, za co sa platilo.
             (SELECT string_agg(hc.club_name || ' — ' || ac.club_name, ', '
                                ORDER BY g.start_time, g.game_id)
-               FROM "lm2026-27".games g
+               FROM \"lm2026-27\".games g
                LEFT JOIN admin.uefa_clubs hc ON hc.club_id = g.home_team_id
                LEFT JOIN admin.uefa_clubs ac ON ac.club_id = g.away_team_id
               WHERE g.game_id = ANY(COALESCE(l.live_ids, l.game_ids))) AS zapasy_nazvy
