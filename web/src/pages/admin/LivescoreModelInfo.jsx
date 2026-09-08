@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { apiFetch } from '../../api/client';
 import { useCompetition } from '../../context/CompetitionContext';
+import VyberModelu from '../../components/VyberModelu';
 import styles from './AdminLivescore.module.css';
 
 // Zalozka Model — ktory model dnes obsluhuje livescore, co uz stal a co sa
@@ -152,35 +153,14 @@ export default function LivescoreModelInfo() {
                             {/* Vyber modelu a akcie v jednom riadku. Zapnutie rovno
                                 nastavi vybrany model — osobitne tlacidlo netreba. */}
                             <div className={styles.akcieRiadok}>
-                                {/* Pole s navrhmi, nie rozbalovaci zoznam: modelov je
-                                    vyse 300 a pisanim sa hlada rychlejsie nez scrollovanim.
-                                    <datalist> je nativny, takze funguje aj na mobile. */}
-                                <span className={styles.vyberModelu}>
-                                    <input
-                                        type="text"
-                                        list={`modely-${s.competition_id}`}
-                                        value={vyber[s.competition_id] ?? ''}
-                                        disabled={caka}
-                                        placeholder="píš názov modelu…"
-                                        onChange={e => setVyber(v => ({
-                                            ...v, [s.competition_id]: e.target.value,
-                                        }))}
-                                        aria-label="Model na dnes"
-                                    />
-                                    <datalist id={`modely-${s.competition_id}`}>
-                                        {data.modely.map(m => (
-                                            <option key={m.model_id} value={m.model_id}>
-                                                {m.is_free ? 'zdarma' : `$${m.cena_1m}/1M`}
-                                                {m.halucinacii > 0 ? ` · ⚠ ${m.halucinacii}× vymyslené` : ''}
-                                                {m.agree_rate !== null ? ` · zhoda ${m.agree_rate}%` : ''}
-                                            </option>
-                                        ))}
-                                    </datalist>
-                                    {/* Kym nazov nesedi so ziadnym modelom, ulozenie sa nepusti */}
-                                    {vyber[s.competition_id] && !znamyModel(vyber[s.competition_id]) && (
-                                        <em className={styles.neznamyModel}>neznámy model</em>
-                                    )}
-                                </span>
+                                <VyberModelu
+                                    modely={data.modely}
+                                    hodnota={vyber[s.competition_id] ?? ''}
+                                    disabled={caka}
+                                    onZmena={v => setVyber(x => ({
+                                        ...x, [s.competition_id]: v,
+                                    }))}
+                                />
 
                                 {s.zapnute ? (
                                     <>

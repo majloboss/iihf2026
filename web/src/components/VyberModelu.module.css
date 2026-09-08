@@ -1,0 +1,88 @@
+/* Pole na vyber modelu s naseptavanim. */
+
+.obal {
+  position: relative;
+  flex: 1 1 280px;
+  max-width: 480px;
+  min-width: 0;
+}
+
+.pole {
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 30px 8px 10px;   /* miesto vpravo pre krizik */
+  font: inherit;
+  font-size: 16px;              /* mensie pismo Safari na iPhone priblizi */
+  border: 1px solid #d5d9de;
+  border-radius: 6px;
+  background: #fff;
+}
+.pole:focus {
+  outline: 2px solid #1f6feb;
+  outline-offset: -1px;
+  border-color: transparent;
+}
+.pole:disabled { background: #f4f5f7; color: #9198a1; }
+
+.zmazat {
+  position: absolute;
+  right: 6px;
+  top: 20px;
+  transform: translateY(-50%);
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: #9198a1;
+}
+.zmazat:hover { background: #eef0f2; color: #1a1d21; }
+
+/* Zoznam navrhov. position:absolute, aby netlacil obsah pod sebou. */
+.zoznam {
+  position: absolute;
+  z-index: 40;
+  top: calc(100% + 2px);
+  left: 0;
+  right: 0;
+  max-height: 320px;
+  overflow-y: auto;
+  margin: 0;
+  padding: 4px 0;
+  list-style: none;
+  background: #fff;
+  border: 1px solid #d5d9de;
+  border-radius: 6px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, .12);
+}
+
+.zoznam li {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+.zoznam li.zvyraznene { background: #eef4ff; }
+
+.nazov {
+  font-family: ui-monospace, monospace;
+  font-size: .82rem;
+  color: #1a1d21;
+}
+.udaje { font-size: .72rem; color: #6b7280; }
+.varovanie { font-style: normal; color: #cf222e; }
+
+.viac {
+  cursor: default !important;
+  font-size: .72rem;
+  color: #9198a1;
+  border-top: 1px solid #f0f0f0;
+  margin-top: 4px;
+  padding-top: 6px !important;
+}
+.viac:hover { background: none !important; }

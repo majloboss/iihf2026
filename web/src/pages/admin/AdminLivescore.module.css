@@ -583,41 +583,6 @@
   margin-top: 10px;
 }
 
-/* Pole s navrhmi nezabera celu sirku — tlacidla zostavaju na tom istom riadku */
-.vyberModelu {
-  position: relative;
-  flex: 1 1 260px;
-  max-width: 460px;
-  min-width: 0;
-}
-.vyberModelu input {
-  width: 100%;
-  min-height: 40px;
-  padding: 8px 10px;
-  font: inherit;
-  font-size: 16px;          /* mensie pismo Safari na iPhone priblizi */
-  border: 1px solid #d5d9de;
-  border-radius: 6px;
-  background: #fff;
-}
-.vyberModelu input:focus {
-  outline: 2px solid #1f6feb;
-  outline-offset: -1px;
-  border-color: transparent;
-}
-
-/* Do pola sa da napisat hocico — kym nazov nesedi, ulozenie je neaktivne */
-.neznamyModel {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-style: normal;
-  font-size: .72rem;
-  color: #cf222e;
-  pointer-events: none;
-}
-
 /* Strop sa upravuje priamo v poli, nie cez vyskakovacie okno */
 .stropPole { display: flex; flex-direction: column; gap: 4px; margin: 0; }
 .stropPole > span { font-size: .78rem; font-weight: 600; color: #6b7280; }
