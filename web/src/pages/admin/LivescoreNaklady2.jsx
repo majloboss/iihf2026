@@ -268,63 +268,55 @@ export default function LivescoreNaklady2() {
                                 {cas(r.posledne)}</td>
                         </tr>
 
-                        {otvorene && (
-                            <tr className={styles.detailRiadok}>
-                                <td colSpan={10}>
-                                    {detail[kluc] === null && <p>Načítavam volania…</p>}
-                                    {detail[kluc]?.chyba && (
-                                        <p className={styles.chyba}>{detail[kluc].chyba}</p>
-                                    )}
-                                    {Array.isArray(detail[kluc]) && (
-                                        <table className={styles.detailTabulka}>
-                                            <thead>
-                                                <tr>
-                                                    <th>Čas</th><th>Stav</th>
-                                                    <th>Čo model vrátil</th>
-                                                    <th className={styles.cislo}>Zápasov</th>
-                                                    <th className={styles.cislo}>Tokeny</th>
-                                                    <th className={styles.cislo}>Cena</th>
-                                                    <th className={styles.cislo}>Trvanie</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {detail[kluc].map(v => (
-                                                    <tr key={v.id}>
-                                                        <td>{cas(v.cas)}</td>
-                                                        <td>
-                                                            {(() => {
-                                                                const st = STAVY[v.stav] ?? STAVY.chyba;
-                                                                return <span className={styles[st.trieda]}
-                                                                             title={v.chyba ?? ''}>
-                                                                    {st.text}</span>;
-                                                            })()}
-                                                        </td>
-                                                        <td className={styles.bunkaZapas}>
-                                                            {/* Skóre, ktoré volanie vrátilo. Staršie
-                                                                záznamy ho nemajú — tam ostáva zoznam
-                                                                sledovaných zápasov. */}
-                                                            {v.vysledky ?? v.zapasy ?? v.timy ?? '—'}</td>
-                                                        <td className={styles.cislo}>
-                                                            {v.zapasov ?? '—'}</td>
-                                                        <td className={styles.cislo}>
-                                                            {v.tokenov.toLocaleString('sk')}</td>
-                                                        <td className={styles.cislo}>
-                                                            ${v.cena.toFixed(6)}</td>
-                                                        <td className={styles.cislo}>
-                                                            {v.trvanie_ms !== null
-                                                                ? (v.trvanie_ms / 1000).toFixed(1) + ' s'
-                                                                : '—'}</td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
-                                    )}
-                                    {Array.isArray(detail[kluc]) && detail[kluc].length === 0 && (
-                                        <p>Žiadne volania.</p>
-                                    )}
-                                </td>
+                        {otvorene && detail[kluc] === null && (
+                            <tr className={styles.detailStav}>
+                                <td colSpan={10}>Načítavam volania…</td>
                             </tr>
                         )}
+
+                        {otvorene && detail[kluc]?.chyba && (
+                            <tr className={styles.detailStav}>
+                                <td colSpan={10} className={styles.chyba}>
+                                    {detail[kluc].chyba}</td>
+                            </tr>
+                        )}
+
+                        {otvorene && Array.isArray(detail[kluc]) && detail[kluc].length === 0 && (
+                            <tr className={styles.detailStav}>
+                                <td colSpan={10}>Žiadne volania.</td>
+                            </tr>
+                        )}
+
+                        {otvorene && Array.isArray(detail[kluc]) && detail[kluc].map(v => (
+                            <tr key={v.id} className={styles.detailRiadok}>
+                                <td data-label="Súťaž" />
+                                <td data-label="Čas" className={styles.bunkaCas}>
+                                    {cas(v.cas)}</td>
+                                <td data-label="Čo model vrátil" className={styles.bunkaZapas}>
+                                    {/* Skóre, ktoré volanie vrátilo. Staršie záznamy
+                                        ho nemajú — tam ostáva zoznam sledovaných zápasov. */}
+                                    {v.vysledky ?? v.zapasy ?? v.timy ?? '—'}</td>
+                                <td data-label="Stav">
+                                    {(() => {
+                                        const st = STAVY[v.stav] ?? STAVY.chyba;
+                                        return <span className={styles[st.trieda]}
+                                                     title={v.chyba ?? ''}>{st.text}</span>;
+                                    })()}
+                                </td>
+                                <td data-label="Zápasov" className={styles.cislo}>
+                                    {v.zapasov ?? '—'}</td>
+                                <td data-label="Trvanie" className={styles.cislo}>
+                                    {v.trvanie_ms !== null
+                                        ? (v.trvanie_ms / 1000).toFixed(1) + ' s'
+                                        : '—'}</td>
+                                <td data-label="Tokeny" className={styles.cislo}>
+                                    {v.tokenov.toLocaleString('sk')}</td>
+                                <td data-label="Cena" className={styles.cislo}>
+                                    ${v.cena.toFixed(6)}</td>
+                                <td />
+                                <td />
+                            </tr>
+                        ))}
                         </Fragment>
                       );
                     })}

@@ -780,29 +780,26 @@
   font-size: .8rem;
 }
 
+/* Detail su riadky TEJ ISTEJ tabulky, nie vnorena tabulka: vnorena ma vlastne
+   sirky stlpcov, takze cisla pod sebou nesedeli. */
 .detailRiadok > td {
-  padding: 10px 14px 14px;
   background: #f9fafb;
+  font-size: .78rem;
+  padding-top: 3px;
+  padding-bottom: 3px;
+  color: #57606a;
+}
+/* Zahlbenie prveho stlpca, aby bolo vidno, ze riadok patri pod zapas */
+.detailRiadok > td:first-child {
+  border-left: 3px solid #d5d9de;
 }
 
-.detailTabulka {
-  width: 100%;
-  border-collapse: collapse;
+.detailStav > td {
+  background: #f9fafb;
   font-size: .78rem;
-}
-.detailTabulka th {
-  text-align: left;
-  padding: 4px 8px;
   color: #6b7280;
-  font-weight: 600;
-  border-bottom: 1px solid #e5e7eb;
-  white-space: nowrap;
+  padding: 8px 14px;
 }
-.detailTabulka td {
-  padding: 4px 8px;
-  border-bottom: 1px solid #f0f1f3;
-}
-.detailTabulka tr:last-child td { border-bottom: 0; }
 
 .okZnak { color: #1a7f37; }
 
