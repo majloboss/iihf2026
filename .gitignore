@@ -1,3 +1,7 @@
+# Node zavislosti (pg, bcryptjs) instalovane v korene pre tools/*.cjs
+node_modules/
+package-lock.json
+
 web/node_modules/
 web/dist/
 api/config/db.php

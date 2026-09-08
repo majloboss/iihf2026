@@ -12,21 +12,20 @@ Legenda: ✅ hotové | 🟠 rozpracované | 🔲 TODO
 Zadanie je vecne správne. Pri overovaní v kóde vyšlo najavo päť vecí, ktoré ho
 menia alebo dopĺňajú.
 
-### 0.1 Dva rôzne livescore systémy, nie jeden
+### 0.1 Všetko ide cez OpenRouter
 
-| Súťaž | Zdroj | Platí sa za |
+IIHF dnes používa api-sports.io (`api/cron/livescore_poll.php`), ale **api-sports
+sa už nebude používať** — IIHF sa neskôr prerobí na OpenRouter rovnako ako UCL.
+
+Číselník preto pozná **len jedného poskytovateľa** a cenu za tokeny. Stĺpec
+`provider` v ňom napriek tomu je: keby raz pribudol iný poskytovateľ, nebude
+to znamenať zásah do schémy.
+
+| Súťaž | Zdroj dnes | Cieľ |
 |---|---|---|
-| IIHF 2026 | **api-sports.io** (`api/cron/livescore_poll.php`) | volania API, nie tokeny |
-| UCL 2026/27 | **OpenRouter** (`api/cron/ucl_livescore.php`) | tokeny |
-| FIFA 2026 | zatiaľ neriešené | — |
-
-Zadanie hovorí o tokenoch a cene za token, čo sedí len na OpenRouter. Aby bola
-evidencia úplná, číselník musí zvládnuť **oba typy poskytovateľov** — inak by
-náklady na IIHF v prehľade chýbali.
-
-**Riešenie:** `provider` v číselníku (`openrouter` | `api_sports`) a cena zvlášť
-za token aj za volanie. Pre api-sports sa tokeny neevidujú, cena sa počíta
-za volanie.
+| IIHF 2026 | api-sports.io | OpenRouter |
+| UCL 2026/27 | **OpenRouter** | — |
+| FIFA 2026 | zatiaľ neriešené | OpenRouter |
 
 ### 0.2 Model sa nenastavuje na súťaž, ale na súťaž a deň
 
@@ -73,6 +72,26 @@ nepoužiteľný**:
 z troch povinných údajov model vytiahol (skóre, časť hry, minúta). Dočasné chyby
 model nediskvalifikujú natrvalo.
 
+**Test je nezávislý od športu.** Hodnotia sa tri veci, ktoré má každý šport:
+
+| Údaj | Futbal | Hokej | Volejbal | Basketbal |
+|---|---|---|---|---|
+| skóre | góly | góly | sety | body |
+| časť hry | polčas | tretina | set | štvrtina |
+| minúta | minúta | minúta | (nemá) | minúta |
+
+Prompt sa modelu odovzdá s názvom športu a on vráti to isté JSON pole
+(`period`, `period_number`), len naplnené podľa športu. Minúta je bonus —
+pri volejbale ju nemá zmysel vyžadovať.
+
+### 0.6 Log musí rozlíšiť test od ostrého volania
+
+Testovacie volania sa nesmú miešať s ostrými — inak by skresľovali štatistiku
+úspešnosti aj náklady na súťaž.
+
+**Riešenie:** stĺpec `call_type` (`test` | `live`) v logu. Prehľad nákladov
+predvolene ukazuje ostré volania, testovacie na prepnutie.
+
 ---
 
 ## 1. Číselník modelov
@@ -82,13 +101,12 @@ model nediskvalifikujú natrvalo.
 | Stĺpec | Účel |
 |---|---|
 | `id` | PK |
-| `provider` | `openrouter` \| `api_sports` |
+| `provider` | zatiaľ vždy `openrouter`; pripravené na budúce rozšírenie |
 | `model_id` | `minimax/minimax-m3` — identifikátor pre volanie |
 | `name` | zobrazovaný názov |
 | `is_free` | bezplatný (mení sa v čase, obnovuje sa z cenníka) |
 | `price_input_1m` | USD za 1M vstupných tokenov |
 | `price_output_1m` | USD za 1M výstupných tokenov |
-| `price_per_call` | USD za volanie (pre api-sports, kde tokeny nie sú) |
 | `context_length` | veľkosť kontextu |
 | `is_enabled` | používať pri automatickom výbere |
 | `unavailable_reason` | prečo je vyradený (trvalá prekážka) |
@@ -120,8 +138,21 @@ je nič nastavené.
 **Dve súťaže naraz sú tým vyriešené:** kľúč je zložený, takže UCL aj IIHF môžu
 v ten istý deň bežať na inom modeli.
 
-**`daily_budget_usd` je nad rámec zadania**, ale patrí sem: bez stropu môže
-zacyklený cron minúť kredit za noc. Predvolene napríklad 1 USD na deň a súťaž.
+### Denný strop a čo sa stane pri jeho prekročení
+
+`daily_budget_usd` = **1 USD** na deň a súťaž (predvolene).
+
+| Minuté | Reakcia |
+|---|---|
+| 80 % stropu | prepnúť na **najlacnejší funkčný** model, e-mail + push adminovi |
+| 150 % stropu | **zastaviť** livescore pre daný deň, e-mail + push adminovi |
+
+Prepnutie na 80 % dáva priestor dobehnúť zápas lacnejšie namiesto toho, aby
+livescore zhaslo uprostred. Zastavenie až na 150 % počíta s tým, že prepnutý
+model ešte niečo minie.
+
+Obe udalosti sa zapíšu do `livescore_day_config.disabled_reason`, respektíve
+`chosen_by = 'budget'`, aby bolo v prehľade vidieť, prečo sa model zmenil.
 
 ## 3. Log volaní
 
@@ -131,7 +162,7 @@ Rozšírenie existujúcej `admin.livescore_log` o:
 |---|---|
 | `competition_id` | ktorej súťaže sa volanie týka |
 | `game_id` | ktorý zápas (číslo zo súťažnej schémy) |
-| `provider` | `openrouter` \| `api_sports` |
+| `provider` | zatiaľ vždy `openrouter`; pripravené na budúce rozšírenie |
 | `prompt_tokens`, `completion_tokens` | vstup a výstup zvlášť |
 | `cost_usd` | **cena v čase volania**, NUMERIC(10,6) |
 | `success` | vytiahol model povinné údaje? |
@@ -168,7 +199,15 @@ Na mobile sumarizácia ako karty, tabuľka vodorovne posuvná.
 
 ## 5. Automatický výber modelu
 
-Beží pri **prvom zápase dňa** (cron `livescore_model_test.php`).
+Beží **hodinu pred prvým zápasom dňa** (cron `livescore_model_test.php`).
+
+Hodina vopred dáva čas vyriešiť problém skôr, než sa začne hrať. V tom čase
+ale ešte nebeží vlastný zápas, preto si model musí na Flashscore **nájsť
+ľubovoľný práve prebiehajúci zápas** — na overenie schopnosti čítať feed je
+jedno, aký šport to je.
+
+Ak sa žiadny prebiehajúci zápas nenájde, test sa zopakuje pri výkope prvého
+vlastného zápasu.
 
 ### Poradie skúšania
 
@@ -192,6 +231,12 @@ Minúta je bonus — nie všetky športy ju majú.
 Umelý test klame — `nemotron` na ňom prešiel, na skutočnej úlohe zlyhal.
 Skutočný zápas overí aj to, či model rozumie formátu Flashscore feedu.
 
+### Priebežné testovanie
+
+Okrem ranného testu sa test spustí znova, keď aktuálny model **trikrát za sebou
+zlyhá**. Vtedy sa prepne na ďalší v poradí — model môže počas dňa prestať
+fungovať (vyčerpaný limit, výpadok poskytovateľa).
+
 ### Ochranné pravidlá
 
 - **Dočasné chyby** (`429`, `temporarily`, `overloaded`, `timeout`) model
@@ -208,21 +253,25 @@ z histórie, nie z jedného behu.
 
 | # | Fáza | Stav |
 |---|---|---|
-| 1 | Migrácia: `ai_models`, `livescore_day_config`, rozšírenie `livescore_log` | 🔲 |
-| 2 | Naplnenie číselníka z cenníka OpenRoutera + api-sports | 🔲 |
-| 3 | Zápis nákladov do logu pri každom volaní (UCL aj IIHF) | 🔲 |
+| 1 | Migrácia: `ai_models`, `livescore_day_config`, rozšírenie `livescore_log` | ✅ |
+| 2 | Naplnenie číselníka zo živého cenníka OpenRoutera | ✅ |
+| 3 | Zápis nákladov do logu pri každom volaní (UCL) | 🔲 |
 | 4 | API: `/v1/admin/livescore-naklady`, `/v1/admin/livescore-model` | 🔲 |
 | 5 | Admin obrazovka Náklady | 🔲 |
 | 6 | Admin obrazovka Model info + ručná zmena a vypnutie | 🔲 |
 | 7 | Automatický test a výber modelu (cron) | 🔲 |
-| 8 | Denný strop nákladov + notifikácia adminovi | 🔲 |
+| 8 | Denný strop: prepnutie na 80 %, zastavenie na 150 %, e-mail + push | 🔲 |
+| 9 | Prerobiť IIHF z api-sports na OpenRouter | 🔲 |
 
-## 7. Otvorené otázky
+## 7. Rozhodnutia
 
-1. **Strop nákladov** — aká suma na deň a súťaž? Návrh 1 USD.
-2. **Čo pri prekročení stropu** — zastaviť livescore, alebo prepnúť na
-   najlacnejší model? Návrh: prepnúť, a zastaviť až pri dvojnásobku.
-3. **api-sports v prehľade** — má sa cena za volanie počítať, alebo ho sledovať
-   len počtom volaní? (má mesačný paušál, nie platbu za volanie)
-4. **Ako často testovať** — len pri prvom zápase dňa, alebo aj keď model počas
-   dňa začne zlyhávať? Návrh: aj priebežne, po troch neúspechoch za sebou.
+| Otázka | Rozhodnutie |
+|---|---|
+| Strop nákladov | **1 USD** na deň a súťaž |
+| Pri 80 % stropu | prepnúť na najlacnejší funkčný model + e-mail a push adminovi |
+| Pri 150 % stropu | zastaviť livescore pre daný deň + e-mail a push adminovi |
+| api-sports | **nepoužíva sa**, IIHF sa prerobí na OpenRouter (fáza 9) |
+| Kedy testovať | hodinu pred prvým zápasom dňa; ak vtedy nebeží vlastný zápas, model si nájde na Flashscore ľubovoľný prebiehajúci |
+| Priebežné testovanie | áno — po troch neúspechoch za sebou sa prepne na ďalší model |
+| Rozlíšenie testov | `call_type` = `test` / `live`, testovacie sa nerátajú do nákladov súťaže |
+| Šport | test aj prompt sú nezávislé od športu (skóre / časť hry / minúta) |
