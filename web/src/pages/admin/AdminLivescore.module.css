@@ -546,3 +546,29 @@
   color: #1f6feb;
   background: rgba(31, 111, 235, .12);
 }
+
+/* Zapnute, ale bez vybraneho modelu — nie je to chyba, len caka na vyber */
+.stavCaka {
+  padding: 1px 8px;
+  border-radius: 10px;
+  font-size: .7rem;
+  font-weight: 700;
+  color: #9a6700;
+  background: rgba(154, 103, 0, .14);
+}
+.caka {
+  margin: 0 0 12px;
+  padding: 8px 12px;
+  border-left: 3px solid #9a6700;
+  background: #fff9e6;
+  font-size: .82rem;
+  color: #7a5c00;
+}
+.napoveda {
+  display: block;
+  margin-top: 2px;
+  font-style: normal;
+  font-weight: 400;
+  font-size: .75rem;
+  color: #9198a1;
+}

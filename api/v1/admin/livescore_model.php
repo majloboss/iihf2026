@@ -160,7 +160,12 @@ foreach ($sutaze as $s) {
         'nastavil'       => $cfgDen['kto'] ?? null,
         'nastavene_kedy' => $cfgDen['chosen_at'] ?? null,
 
-        'zapnute'        => $model !== null,
+        // Zapnute a "ma nastaveny model" su dva rozne stavy: livescore moze
+        // byt zapnute a este cakat na rany test, ktory model vyberie.
+        'zapnute'        => $cfgDen
+                            ? in_array($cfgDen['is_enabled'], [true,'t','1',1], true)
+                            : ($model !== null),
+        'ma_model'       => $model !== null,
         'dovod_vypnutia' => $cfgDen['disabled_reason'] ?? null,
 
         'dnes_volani'    => $volani,
@@ -197,11 +202,9 @@ $kandidati = array_map(static fn($m) => [
        FROM admin.ai_models m
       WHERE m.is_enabled AND m.unavailable_reason IS NULL
         AND (m.is_free OR (m.price_input_1m IS NOT NULL AND m.price_output_1m IS NOT NULL))
-      ORDER BY (SELECT COUNT(*) FROM admin.livescore_model_test t
-                 WHERE t.model_key = m.model_id AND t.teams_agree = FALSE) ASC,
-               COALESCE(m.agree_rate, -1) DESC,
-               COALESCE(m.success_rate, -1) DESC,
-               COALESCE(m.price_input_1m, 0) + COALESCE(m.price_output_1m, 0)
+      -- Abecedne: v rozbalovacom zozname sa model uz len hlada, vyber podla
+      -- kvality a ceny sa robi v ciselniku.
+      ORDER BY m.model_id
       LIMIT " . (isset($_GET['vsetky']) ? 1000 : 40))->fetchAll());
 
 json_ok(['den' => $den, 'sutaze' => $vysledok, 'modely' => $kandidati]);

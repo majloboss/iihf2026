@@ -76,13 +76,23 @@ export default function LivescoreModelInfo() {
                             {s.name}
                             {s.competition_id === activeCompetition?.id &&
                                 <span className={styles.aktivnaSutaz}>aktuálna</span>}
-                            {s.zapnute
-                                ? <span className={styles.stavZap}>beží</span>
-                                : <span className={styles.stavVyp}>vypnuté</span>}
+                            {!s.zapnute
+                                ? <span className={styles.stavVyp}>vypnuté</span>
+                                : s.ma_model
+                                    ? <span className={styles.stavZap}>beží</span>
+                                    : <span className={styles.stavCaka}>bez modelu</span>}
                         </h3>
 
                         {!s.zapnute && s.dovod_vypnutia && (
                             <p className={styles.dovod}>{s.dovod_vypnutia}</p>
+                        )}
+
+                        {s.zapnute && !s.ma_model && (
+                            <p className={styles.caka}>
+                                Livescore je zapnuté, ale na dnes nie je vybraný model.
+                                Vyber ho nižšie a ulož tlačidlom <strong>Nastaviť model</strong>,
+                                alebo počkaj na ranný test, ktorý ho vyberie sám.
+                            </p>
                         )}
 
                         <div className={styles.suhrn}>
@@ -133,7 +143,12 @@ export default function LivescoreModelInfo() {
 
                         <div className={styles.akcie}>
                             <label className={styles.akciaPole}>
-                                <span>Zmeniť model na dnes</span>
+                                <span>
+                                    Model na dnes
+                                    <em className={styles.napoveda}>
+                                        vyber zo zoznamu a ulož tlačidlom „Nastaviť model"
+                                    </em>
+                                </span>
                                 <select
                                     value={vyber[s.competition_id] ?? ''}
                                     disabled={caka}
@@ -161,6 +176,7 @@ export default function LivescoreModelInfo() {
                                         { competition_id: s.competition_id,
                                           model_id: vyber[s.competition_id] },
                                         `Model zmenený na ${vyber[s.competition_id]}`)}
+                                    title="Uloží model vybraný v zozname pre dnešný deň"
                                 >
                                     Nastaviť model
                                 </button>
