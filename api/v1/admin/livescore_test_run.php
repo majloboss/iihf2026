@@ -72,7 +72,22 @@ if ($method === 'GET') {
 if ($method !== 'POST') json_error('Method not allowed', 405);
 
 $body = json_decode(file_get_contents('php://input'), true) ?: [];
-$url  = trim((string)($body['url'] ?? ''));
+
+// Vyhodnotenie zhody nepotrebuje URL, preto je pred jej kontrolou.
+if (($_GET['zhoda'] ?? '') === '1') {
+    $runId = (int)($body['run_id'] ?? 0);
+    if ($runId === 0) json_error('Chýba run_id', 400);
+
+    [$skore, $zhodlo, $spolu] = ls_vyhodnot_zhodu($runId);
+
+    json_ok([
+        'najcastejsie_skore' => $skore,
+        'zhodlo_sa'          => $zhodlo,
+        's_vysledkom'        => $spolu,
+    ]);
+}
+
+$url = trim((string)($body['url'] ?? ''));
 if ($url === '') json_error('Chýba URL zápasu', 400);
 livescore_check_url($url);
 
@@ -94,8 +109,10 @@ if (($_GET['step'] ?? '') === '1') {
     $page  = livescore_fetch_page($url);
     $sport = isset($body['sport']) ? trim((string)$body['sport']) : 'neznámy';
 
+    $runId = isset($body['run_id']) ? (int)$body['run_id'] : null;
+
     $v = ls_test_model($model, $page['input'], $url, $sport);
-    ls_zapis_test($v, $url, $competitionId, $sport);
+    ls_zapis_test($v, $url, $competitionId, $sport, $runId);
 
     json_ok(['vysledok' => [
         'model'        => $v['model'],
@@ -107,6 +124,7 @@ if (($_GET['step'] ?? '') === '1') {
         'took_ms'      => $v['took_ms'],
         'total_tokens' => $v['total_tokens'],
         'cost_usd'     => round($v['cost_usd'], 6),
+        'score_text'   => $v['score_text'],
         'data'         => $v['data'],
     ]]);
 }
@@ -120,7 +138,13 @@ if (!$modely) json_error('V číselníku nie je žiadny použiteľný model', 40
 
 $page = livescore_fetch_page($url);
 
+// Beh dostane vlastne id, aby sa dala vyhodnotit zhoda medzi modelmi.
+// Zoskupovanie podla casu by bolo krehke — dva behy tesne po sebe by splynuli.
+$runId = (int)$pdo->query(
+    "SELECT COALESCE(MAX(run_id), 0) + 1 FROM admin.livescore_model_test")->fetchColumn();
+
 json_ok([
+    'run_id'      => $runId,
     'url'         => $url,
     'match_id'    => $page['match_id'] ?? null,
     'input_chars' => mb_strlen($page['input']),

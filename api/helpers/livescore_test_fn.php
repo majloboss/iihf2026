@@ -104,6 +104,7 @@ function ls_test_model(array $model, string $vstup, string $url, string $sport =
         'completion_tokens' => null,
         'total_tokens'      => null,
         'cost_usd'          => 0.0,
+        'score_text'        => null,
     ];
 
     if ($odpoved === false) {
@@ -150,13 +151,21 @@ function ls_test_model(array $model, string $vstup, string $url, string $sport =
     // Minuta je bonus — volejbal ju nema. Staci skore a cast hry.
     $vysledok['passed'] = $vysledok['got_score'] && $vysledok['got_period'];
 
+    // Skore ako text, aby sa dala porovnat zhoda medzi modelmi. Prvy ostry
+    // test ukazal, ze 11 modelov vratilo 6 roznych skore toho isteho zapasu —
+    // samotne 'passed' teda nestaci, overuje len ci model vratil cisla.
+    $vysledok['score_text'] = $vysledok['got_score']
+        ? ((int)$d['home_score'] . ':' . (int)$d['away_score'])
+        : null;
+
     return $vysledok;
 }
 
 // ------------------------------------------------------------
 // Zapise vysledok testu do logu aj do tabulky testov.
 // ------------------------------------------------------------
-function ls_zapis_test(array $v, string $url, ?int $competitionId, ?string $sport): void {
+function ls_zapis_test(array $v, string $url, ?int $competitionId, ?string $sport,
+                       ?int $runId = null): void {
     $pdo = db();
     $d   = $v['data'] ?? [];
 
@@ -214,13 +223,15 @@ function ls_zapis_test(array $v, string $url, ?int $competitionId, ?string $spor
     $pdo->prepare(
         'INSERT INTO admin.livescore_model_test
             (competition_id, model_id, model_key, test_url, sport,
+             run_id, score_text,
              got_score, got_period, got_minute, passed,
              prompt_tokens, completion_tokens, total_tokens, cost_usd, took_ms,
              error, raw)
-         VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)')
+         VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)')
         ->execute([
             $competitionId, $v['model_db_id'], mb_substr($v['model'], 0, 150),
             mb_substr($url, 0, 500), $sport !== null ? mb_substr($sport, 0, 30) : null,
+            $runId, $v['score_text'],
             $v['got_score']  ? 't' : 'f',
             $v['got_period'] ? 't' : 'f',
             $v['got_minute'] ? 't' : 'f',
@@ -238,4 +249,54 @@ function ls_zapis_test(array $v, string $url, ?int $competitionId, ?string $spor
     }
 
     ai_prepocitaj_uspesnost($v['model']);
+}
+
+// ------------------------------------------------------------
+// Vyhodnoti zhodu modelov v ramci jedneho behu.
+//
+// Najde najcastejsie skore a oznaci modely, ktore ho vratili. Nie je to dokaz
+// spravnosti — vacsina sa moze mylit — ale model osamote proti ostatnym je
+// podozrivy a nema ist do produkcie.
+//
+// Vracia [najcastejsie_skore, kolko_modelov_sa_zhodlo, spolu_s_vysledkom].
+// ------------------------------------------------------------
+function ls_vyhodnot_zhodu(int $runId): array {
+    $pdo = db();
+
+    $st = $pdo->prepare(
+        "SELECT score_text, COUNT(*) AS pocet
+           FROM admin.livescore_model_test
+          WHERE run_id = ? AND passed AND score_text IS NOT NULL
+          GROUP BY score_text
+          ORDER BY COUNT(*) DESC, score_text
+          LIMIT 1");
+    $st->execute([$runId]);
+    $vitaz = $st->fetch();
+
+    if (!$vitaz) return [null, 0, 0];
+
+    $pdo->prepare(
+        'UPDATE admin.livescore_model_test
+            SET agrees = (score_text = ?)
+          WHERE run_id = ? AND passed AND score_text IS NOT NULL')
+        ->execute([$vitaz['score_text'], $runId]);
+
+    $spolu = (int)$pdo->query(
+        "SELECT COUNT(*) FROM admin.livescore_model_test
+          WHERE run_id = " . (int)$runId . " AND passed AND score_text IS NOT NULL")
+        ->fetchColumn();
+
+    // Uspesnost v ciselniku: podiel behov, v ktorych sa model zhodol
+    // s vacsinou. Toto je spolahlivejsie kriterium nez samotne 'passed'.
+    $pdo->exec(
+        "UPDATE admin.ai_models m SET
+            agree_rate = s.podiel, updated_at = NOW()
+         FROM (SELECT model_key,
+                      ROUND(100.0 * COUNT(*) FILTER (WHERE agrees) / COUNT(*), 2) AS podiel
+                 FROM admin.livescore_model_test
+                WHERE agrees IS NOT NULL
+                GROUP BY model_key) s
+         WHERE m.model_id = s.model_key");
+
+    return [$vitaz['score_text'], (int)$vitaz['pocet'], $spolu];
 }

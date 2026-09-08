@@ -257,3 +257,26 @@
 .free   { margin-left: 8px; color: #1a7f37; font-size: .75rem; }
 .cena   { margin-left: 8px; color: #6b7280; font-size: .75rem; }
 .uspech { margin-left: 8px; color: #1f6feb; font-size: .75rem; }
+
+/* ---------- zhoda modelov na vysledku ---------- */
+.zhodaSuhrn {
+  margin: 0 0 12px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: #f7f8fa;
+  border-left: 3px solid #1f6feb;
+  font-size: .85rem;
+}
+
+/* Skore, ktore model vratil. Farba hovori, ci sa zhoduje s vacsinou —
+   test sam o sebe overuje len to, ci model vratil cisla, nie ci su spravne. */
+.skoreZhoda, .skoreInak, .skoreNeutral {
+  padding: 0 6px;
+  border-radius: 8px;
+  font-size: .72rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.skoreZhoda   { color: #1a7f37; background: rgba(26, 127, 55, .12); }
+.skoreInak    { color: #9a6700; background: rgba(154, 103, 0, .14); }
+.skoreNeutral { color: #6b7280; background: rgba(107, 114, 128, .12); }

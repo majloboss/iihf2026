@@ -28,6 +28,7 @@ export default function LivescoreTestModelov() {
     const [vysledky, setVysledky] = useState([]);
     const [chyba, setChyba]       = useState(null);
     const [rozbalene, setRozbalene] = useState(null);
+    const [zhoda, setZhoda]         = useState(null);
 
     const zastavRef = useRef(false);
 
@@ -56,6 +57,7 @@ export default function LivescoreTestModelov() {
         setVysledky([]);
         setPriprava(null);
         setRozbalene(null);
+        setZhoda(null);
         setBezi(true);
         zastavRef.current = false;
 
@@ -84,6 +86,7 @@ export default function LivescoreTestModelov() {
                             model,
                             sport,
                             competition_id: sutaz ? Number(sutaz) : null,
+                            run_id: p.run_id,
                         }),
                     });
                     setVysledky(v => zorad([...v, r.vysledok]));
@@ -94,6 +97,17 @@ export default function LivescoreTestModelov() {
                     }]));
                 }
                 setPostup(s => ({ ...s, done: s.done + 1 }));
+            }
+            // Po dobehnuti sa zisti, na akom skore sa modely zhodli. Model,
+            // ktory vratil ine skore nez vacsina, je podozrivy — test overuje
+            // len to, ci vratil cisla, nie ci su spravne.
+            if (!zastavRef.current) {
+                try {
+                    setZhoda(await apiFetch('v1/admin/livescore-test-run?zhoda=1', {
+                        method: 'POST',
+                        body: JSON.stringify({ run_id: p.run_id }),
+                    }));
+                } catch { /* zhoda je doplnok, nie podmienka */ }
             }
         } catch (e) {
             setChyba(e.message);
@@ -211,6 +225,15 @@ export default function LivescoreTestModelov() {
                         <p className={styles.bezi}>práve beží <code>{postup.teraz}</code></p>
                     )}
 
+                    {zhoda && zhoda.najcastejsie_skore && (
+                        <p className={styles.zhodaSuhrn}>
+                            Najčastejšie skóre: <strong>{zhoda.najcastejsie_skore}</strong>
+                            {' '}— zhodlo sa {zhoda.zhodlo_sa} z {zhoda.s_vysledkom} modelov.
+                            {zhoda.zhodlo_sa < zhoda.s_vysledkom / 2 &&
+                                ' Modely sa výrazne rozchádzajú, výsledok overte na Flashscore.'}
+                        </p>
+                    )}
+
                     <ul className={styles.karty}>
                         {vysledky.map(v => (
                             <li key={v.model} className={v.passed ? styles.ok : styles.zle}>
@@ -222,6 +245,14 @@ export default function LivescoreTestModelov() {
                                     <span className={styles.stred}>
                                         <code>{v.model}</code>
                                         <span className={styles.znacky}>
+                                            {v.score_text && (
+                                                <span className={
+                                                    zhoda && zhoda.najcastejsie_skore
+                                                        ? (v.score_text === zhoda.najcastejsie_skore
+                                                            ? styles.skoreZhoda : styles.skoreInak)
+                                                        : styles.skoreNeutral
+                                                }>{v.score_text}</span>
+                                            )}
                                             <Znacka ok={v.got_score}  text="skóre" />
                                             <Znacka ok={v.got_period} text="časť hry" />
                                             <Znacka ok={v.got_minute} text="minúta" />
