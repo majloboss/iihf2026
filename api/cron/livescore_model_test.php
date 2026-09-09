@@ -11,9 +11,18 @@
 // Postup vyberu:
 //   1. najde zapas, na ktorom sa da testovat (vlastny prebiehajuci, inak
 //      lubovolny prebiehajuci z Flashscore)
-//   2. skusa modely v poradi: bezplatne podla doterajsej zhody, potom
-//      platene od najlacnejsieho
-//   3. prvy, ktory vytiahne skore aj cast hry, sa nastavi na dnesny den
+//   2. skusa bezplatne modely, kym nenazbiera PAT funkcnych
+//   3. k nim prida jeden plateny ako poistku pre pripad, ze bezplatne
+//      vycerpaju denny limit poskytovatela
+//   4. zostavene poradie ulozi do admin.livescore_poradie a prvy model
+//      nastavi na dnesny den
+//
+// PRECO PORADIE A NIE JEDEN VITAZ: bezplatne modely maju denny limit
+// poziadaviek. Jediny vybrany model ho cez vecer vycerpa a livescore
+// zhasne uprostred zapasov. S poradim sa aplikacia sama prepne na dalsi.
+//
+// Rucne nastavene poradie sa PREPISE — dostupnost modelov sa meni zo dna
+// na den a test vie, co dnes naozaj funguje.
 //
 // Ked neprejde ziadny, livescore sa pre dany den vypne a admin dostane
 // spravu — lepsie nic nez nespravne skore.
@@ -57,7 +66,9 @@ function ls_uvedom_admina(string $predmet, string $telo): void {
 }
 
 const TEST_COMPETITION_ID = 5;      // UCL
-const TEST_MAX_MODELOV    = 8;      // kolko skusit, nez to vzdame
+const TEST_FREE_CIEL      = 5;      // kolko bezplatnych chceme mat v poradi
+const TEST_PLATENYCH      = 1;      // plateny na koniec ako poistka
+const TEST_MAX_SKUSOK     = 15;     // poistka proti nekonecnemu testovaniu
 const TEST_MAX_SEKUND     = 20;     // model pomalsi nez toto je na livescore nepouzitelny
 
 $pdo  = db();
@@ -142,32 +153,57 @@ echo "Vstup: " . mb_strlen($page['input']) . " znakov\n\n";
 $runId = (int)$pdo->query(
     "SELECT COALESCE(MAX(run_id), 0) + 1 FROM admin.livescore_model_test")->fetchColumn();
 
-$kandidati = ai_kandidati(TEST_MAX_MODELOV);
-$vitaz     = null;
+// Vysledkom je PORADIE, nie jeden vitaz: bezplatne modely maju denny limit
+// poziadaviek a jediny model by ho cez vecer vycerpal.
+$uspesne   = [];      // bezplatne, ktore presli
 $skusenych = 0;
 
-foreach ($kandidati as $model) {
+echo "Bezplatné modely (cieľ " . TEST_FREE_CIEL . "):\n";
+foreach (ai_kandidati_free(TEST_MAX_SKUSOK) as $model) {
+    if (count($uspesne) >= TEST_FREE_CIEL || $skusenych >= TEST_MAX_SKUSOK) break;
     $skusenych++;
+
     $v = ls_test_model($model, $page['input'], $testUrl, $sport);
     ls_zapis_test($v, $testUrl, TEST_COMPETITION_ID, $sport, $runId);
 
-    $sek = round($v['took_ms'] / 1000, 1);
+    $sek  = round($v['took_ms'] / 1000, 1);
     $stav = $v['passed'] ? 'OK' : 'zlyhal';
     echo sprintf("  %-46s %-7s %5.1f s  %s\n",
         $model['model_id'], $stav, $sek, $v['error'] ?? '');
 
     if (!$v['passed']) continue;
 
-    // Model, ktory odpoveda dlhsie nez TEST_MAX_SEKUND, je na livescore
-    // nepouzitelny — poll bezi kazdych 5 minut a cakat na neho nema zmysel.
+    // Model pomalsi nez TEST_MAX_SEKUND je na livescore nepouzitelny —
+    // poll bezi kazdych 5 minut a cakat na neho nema zmysel.
     if ($v['took_ms'] > TEST_MAX_SEKUND * 1000) {
-        echo "     (príliš pomalý, hľadám ďalej)\n";
+        echo "     (príliš pomalý, do poradia nejde)\n";
         continue;
     }
 
-    $vitaz = $model;
-    break;
+    $uspesne[] = $model;
 }
+
+// Plateny na koniec ako poistka. Testuje sa aj vtedy, ked bezplatnych je
+// dost — prave vtedy, ked vsetky vycerpaju denny limit, ma nastupit on.
+$platene = [];
+echo "\nPlatený model (poistka):\n";
+foreach (ai_kandidati_platene(3) as $model) {
+    if (count($platene) >= TEST_PLATENYCH) break;
+
+    $v = ls_test_model($model, $page['input'], $testUrl, $sport);
+    ls_zapis_test($v, $testUrl, TEST_COMPETITION_ID, $sport, $runId);
+
+    $cena = round((float)$model['price_input_1m'] + (float)$model['price_output_1m'], 4);
+    echo sprintf("  %-46s %-7s %5.1f s  $%s / 1M  %s\n",
+        $model['model_id'], $v['passed'] ? 'OK' : 'zlyhal',
+        round($v['took_ms'] / 1000, 1), $cena, $v['error'] ?? '');
+
+    if ($v['passed'] && $v['took_ms'] <= TEST_MAX_SEKUND * 1000) $platene[] = $model;
+}
+
+// Bezplatne idu prve, plateny az za nimi — plati sa az ked ine nezostava.
+$poradie = array_merge($uspesne, $platene);
+$vitaz   = $poradie[0] ?? null;
 
 // ------------------------------------------------------------
 // 5. Vyhodnotenie
@@ -185,11 +221,28 @@ if ($vitaz === null) {
     exit;
 }
 
+// Poradie sa uklada CELE a prepisuje pripadne rucne nastavenie — dostupnost
+// modelov sa meni zo dna na den a test vie, co dnes naozaj funguje.
+$ulozenych = ai_uloz_poradie(TEST_COMPETITION_ID, $poradie);
 ai_nastav_model_na_den(TEST_COMPETITION_ID, (int)$vitaz['id'], 'auto', null, $den);
-cron_beh('livescore_model_test', 'vybrany model: ' . $vitaz['model_id']);
+cron_beh('livescore_model_test',
+         sprintf('poradie %d modelov, prvy: %s', $ulozenych, $vitaz['model_id']));
 
-$cena = $vitaz['price_input_1m'] === null ? 'zdarma'
-      : '$' . round((float)$vitaz['price_input_1m'] + (float)$vitaz['price_output_1m'], 4) . ' / 1M';
+echo "Poradie na dnes ($ulozenych modelov):\n";
+foreach ($poradie as $i => $m) {
+    $zadarmo = in_array($m['is_free'], [true, 't', '1', 1], true);
+    $cena = $zadarmo ? 'zdarma'
+          : '$' . round((float)$m['price_input_1m'] + (float)$m['price_output_1m'], 4) . ' / 1M';
+    echo sprintf("  %d. %-46s %s\n", $i + 1, $m['model_id'], $cena);
+}
+echo "\nSkúšaných bezplatných: $skusenych\n";
 
-echo "Vybraný model: {$vitaz['model_id']} ($cena)\n";
-echo "Skúšaných modelov: $skusenych\n";
+// Menej nez ciel znamena, ze dostupnych bezplatnych modelov ubuda — stoji
+// za to o tom vediet skor, nez ich prestane byt dost uplne.
+if (count($uspesne) < TEST_FREE_CIEL) {
+    $sprava = sprintf('Prešlo len %d bezplatných modelov z cieľových %d (skúšaných %d). '
+                    . 'Livescore beží, ale rezerva pri vyčerpaní denných limitov je menšia.',
+                      count($uspesne), TEST_FREE_CIEL, $skusenych);
+    echo "\nUPOZORNENIE: $sprava\n";
+    ls_uvedom_admina('Livescore: málo bezplatných modelov', $sprava);
+}

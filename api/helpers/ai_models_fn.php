@@ -135,6 +135,95 @@ function ai_kandidati(int $limit = 10): array {
           LIMIT " . (int)$limit)->fetchAll();
 }
 
+// ------------------------------------------------------------
+// Kandidati na ranny test, oddelene podla ceny.
+//
+// Ranny test zostavuje PORADIE (pat bezplatnych + jeden plateny ako
+// poistka), nie jedneho vitaza. Bezplatne a platene sa preto beru zvlast:
+// bezplatne sa testuju vsetky, kym sa nenazbiera dost, plateny staci jeden
+// najlacnejsi — je to zaloha na chvilu, ked bezplatne vycerpaju denny limit.
+// ------------------------------------------------------------
+function ai_kandidati_free(int $limit = 15): array {
+    // Kontext pod 16 000 tokenov sa vynechava — livescore posiela okolo
+    // 6 500 znakov a kratsi kontext by odpoved orezal.
+    //
+    // Radi sa najprv podla USPESNOSTI, az potom podla zhody. Zhoda sa totiz
+    // pocita len z behov, v ktorych model vobec odpovedal: model s jedinym
+    // uspesnym behom moze mat agree_rate 100 % pri uspesnosti 15 %
+    // (laguna-xs, stav 9.9.2026) a vyskocil by navrch, hoci vacsinou zlyha.
+    //
+    // Netestovane modely (success_rate IS NULL) idu ZA otestovane, ale pred
+    // tie so zlou uspesnostou — zname fungujuce ma prednost pred neznamym,
+    // neznamе pred znamе zlym.
+    return db()->query(
+        "SELECT * FROM admin.ai_models
+          WHERE is_enabled AND unavailable_reason IS NULL AND is_free
+            AND (context_length IS NULL OR context_length >= 16000)
+          ORDER BY COALESCE(success_rate, 40) DESC,
+                   COALESCE(agree_rate, -1) DESC,
+                   model_id
+          LIMIT " . (int)$limit)->fetchAll();
+}
+
+function ai_kandidati_platene(int $limit = 3): array {
+    // Platene s neznamou cenou (NULL) sa preskakuju — do rozpoctu sa neda
+    // zaratat nieco, co nevieme vycislit.
+    //
+    // Cena musi byt VACSIA NEZ NULA: 'openrouter/free' je smerovac na
+    // bezplatne modely a v cenniku ma nulu, takze by vysiel ako "najlacnejsi
+    // plateny". Ako poistka by ale neplnil ucel — narazi na tie iste denne
+    // limity ako bezplatne modely, ktore ma zastupovat.
+    return db()->query(
+        "SELECT * FROM admin.ai_models
+          WHERE is_enabled AND unavailable_reason IS NULL AND NOT is_free
+            AND price_input_1m IS NOT NULL AND price_output_1m IS NOT NULL
+            AND price_input_1m + price_output_1m > 0
+            AND (context_length IS NULL OR context_length >= 16000)
+          ORDER BY price_input_1m + price_output_1m ASC, model_id
+          LIMIT " . (int)$limit)->fetchAll();
+}
+
+// ------------------------------------------------------------
+// Prepise poradie modelov pre sutaz. Vola ho ranny test.
+//
+// Cele poradie sa nahradzuje naraz — jednoduchsie a bezpecnejsie nez
+// posuvat jednotlive riadky. Rucne nastavenie tym prestava platit,
+// co je zamer: dostupnost modelov sa meni zo dna na den a test vie,
+// co dnes naozaj funguje.
+//
+// $modely su riadky ciselnika v poradi, v akom sa maju skusat.
+// ------------------------------------------------------------
+function ai_uloz_poradie(int $competitionId, array $modely): int {
+    $pdo = db();
+    $pdo->beginTransaction();
+    try {
+        $pdo->prepare('DELETE FROM admin.livescore_poradie WHERE competition_id = ?')
+            ->execute([$competitionId]);
+
+        $ins = $pdo->prepare(
+            'INSERT INTO admin.livescore_poradie (competition_id, poradie, model_id)
+             VALUES (?, ?, ?)');
+        $i = 0;
+        foreach ($modely as $m) {
+            if (empty($m['id'])) continue;
+            $ins->execute([$competitionId, ++$i, (int)$m['id']]);
+        }
+
+        // Nove poradie znamena zacat od prveho modelu.
+        $pdo->prepare(
+            "UPDATE admin.livescore_day_config
+                SET poradie_index = 1, fails_in_row = 0
+              WHERE competition_id = ? AND den = CURRENT_DATE")
+            ->execute([$competitionId]);
+
+        $pdo->commit();
+        return $i;
+    } catch (Throwable $e) {
+        $pdo->rollBack();
+        throw $e;
+    }
+}
+
 // Najlacnejsi funkcny model — pouzije sa pri prekroceni 80 % denneho stropu.
 function ai_najlacnejsi(): ?array {
     $r = db()->query(
