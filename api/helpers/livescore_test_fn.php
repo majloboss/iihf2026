@@ -64,18 +64,29 @@ PROMPT;
 // Otestuje jeden model na danom obsahu stranky.
 // Vracia pole s vysledkom, vrátane toho, co sa podarilo vytiahnut.
 // ------------------------------------------------------------
-function ls_test_model(array $model, string $vstup, string $url, string $sport = 'neznámy'): array {
+function ls_test_model(array $model, string $vstup, string $url, string $sport = 'neznámy',
+                       bool $sUvazovanim = false): array {
     $prompt = ls_test_prompt($vstup, $sport);
     $zaciatok = microtime(true);
 
-    $payload = json_encode([
+    // Uvazovanie sa VYPINA. Zvysovanie stropu (povodne 700 -> 2000) bolo len
+    // liecenie priznaku: reasoning modely ratuju do max_tokens aj vnutorne
+    // uvazovanie a minu si ho naprazdno bez ohladu na to, ako vysoko sa
+    // nastavi. Ranny test 9.9.2026 na tom padol — pat z osmich modelov
+    // hlasilo "orezanu odpoved" a livescore sa vyplo, hoci modely funguju.
+    //
+    // Odcitanie skore zo stranky je prepis, nie uloha na premyslanie.
+    // Modely bez reasoningu parameter ignoruju; tie, co ho maju povinny,
+    // volanie odmietnu a zopakuje sa bez neho (nizsie).
+    $telo = [
         'model'       => $model['model_id'],
         'messages'    => [['role' => 'user', 'content' => $prompt]],
         'temperature' => 0,
-        // 2000 staci na JSON aj na kratke uvazovanie pred nim. Pri 700 sa
-        // vacsina modelov nedostala k odpovedi — minula limit na premyslani.
         'max_tokens'  => 2000,
-    ], JSON_UNESCAPED_UNICODE);
+    ];
+    if (empty($sUvazovanim)) $telo['reasoning'] = ['enabled' => false];
+
+    $payload = json_encode($telo, JSON_UNESCAPED_UNICODE);
 
     $ch = curl_init(defined('OPENROUTER_URL') ? OPENROUTER_URL
                     : 'https://openrouter.ai/api/v1/chat/completions');
@@ -124,11 +135,22 @@ function ls_test_model(array $model, string $vstup, string $url, string $sport =
 
     $ai = json_decode($odpoved, true);
     if ($httpKod !== 200) {
-        $vysledok['error'] = $ai['error']['message'] ?? ('HTTP ' . $httpKod);
+        $chyba = $ai['error']['message'] ?? ('HTTP ' . $httpKod);
+
+        // Niektore modely maju uvazovanie POVINNE a volanie s jeho vypnutim
+        // odmietnu ("Reasoning is mandatory for this endpoint"). Nie je to
+        // chyba modelu — zopakuje sa bez toho parametra, nech dostane
+        // rovnaku sancu ako ostatne.
+        if (!$sUvazovanim && stripos($chyba, 'reasoning is mandatory') !== false) {
+            return ls_test_model($model, $vstup, $url, $sport, true);
+        }
+
+        $vysledok['error'] = $chyba;
         return $vysledok;
     }
 
     $obsah = $ai['choices'][0]['message']['content'] ?? '';
+    $obsahPovodny = $obsah;      // regex nizsie $obsah prepise
     $vysledok['prompt_tokens']     = $ai['usage']['prompt_tokens']     ?? null;
     $vysledok['completion_tokens'] = $ai['usage']['completion_tokens'] ?? null;
     $vysledok['total_tokens']      = $ai['usage']['total_tokens']      ?? null;
@@ -144,8 +166,15 @@ function ls_test_model(array $model, string $vstup, string $url, string $sport =
     $d = json_decode($obsah, true);
 
     if (!is_array($d)) {
+        // Prazdny obsah pri finish_reason 'length' znamena nieco ine nez
+        // orezanie: model minul cely strop na uvazovanie a k odpovedi sa
+        // vobec nedostal. S vypnutym uvazovanim by sa uz stat nemalo —
+        // ked sa objavi, hlaska povie presne co.
+        $uvazoval = ($ai['choices'][0]['message']['reasoning'] ?? '') !== '';
         $vysledok['error'] = $orezane
-            ? 'Odpoveď bola orezaná (model uvažoval namiesto JSON)'
+            ? (($obsahPovodny === '' && $uvazoval)
+                ? 'Model minul celý limit na uvažovanie a nestihol odpovedať'
+                : 'Odpoveď bola orezaná (model uvažoval namiesto JSON)')
             : 'Odpoveď nie je platný JSON';
         return $vysledok;
     }
