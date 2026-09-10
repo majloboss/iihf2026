@@ -65,6 +65,48 @@ function ls_uvedom_admina(string $predmet, string $telo): void {
     }
 }
 
+// Verejny feed Flashscore so vsetkymi dnesnymi zapasmi. Stranka
+// flashscore.com zapasy v HTML nema — dotahuje ich javascriptom, takze
+// zoznam sa musi brat odtialto.
+const FS_FEED = 'https://local-global.flashscore.ninja/2/x/feed/f_1_0_1_en_1';
+
+// ------------------------------------------------------------
+// Najde lubovolny PRAVE BEZIACI zapas na Flashscore.
+//
+// Test musi bezat na zapase, ktory sa naozaj hra — inak nie je co odcitat
+// a kazdy model "zlyha" bez ohladu na to, ci funguje.
+//
+// Feed ma vlastny format: zaznamy oddelene ~AA÷, polia znakom ¬.
+// AB÷2 znamena prave bezuci zapas, AE/AF su nazvy timov.
+// ------------------------------------------------------------
+function ls_najdi_bezuci_zapas(): ?string {
+    $ch = curl_init(FS_FEED);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_TIMEOUT        => 25,
+        CURLOPT_USERAGENT      => 'Mozilla/5.0',
+        CURLOPT_HTTPHEADER     => ['x-fsign: SW9D1eZo'],
+    ]);
+    $data = curl_exec($ch);
+    $kod  = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    if ($kod !== 200 || !$data) return null;
+
+    foreach (array_slice(explode('~AA÷', $data), 1) as $zaznam) {
+        if (!preg_match('/AB÷2/', $zaznam)) continue;      // 2 = prave bezi
+        $id = explode('¬', $zaznam)[0];
+        if (!preg_match('/^[A-Za-z0-9]{6,10}$/', $id)) continue;
+
+        preg_match('/AE÷([^¬]+)/', $zaznam, $d);
+        preg_match('/AF÷([^¬]+)/', $zaznam, $h);
+        echo sprintf("  bežiaci zápas: %s — %s
+", $d[1] ?? '?', $h[1] ?? '?');
+
+        return 'https://www.flashscore.com/match/' . $id . '/#/match-summary';
+    }
+    return null;
+}
+
 const TEST_COMPETITION_ID = 5;      // UCL
 const TEST_FREE_CIEL      = 5;      // kolko bezplatnych chceme mat v poradi
 const TEST_PLATENYCH      = 1;      // plateny na koniec ako poistka
@@ -130,15 +172,14 @@ $testUrl = $st->fetchColumn();
 $sport   = 'futbal';
 
 if (!$testUrl) {
-    // Ziadny vlastny zapas nebezi — vezme sa prvy dnesny. Model sa aspon
-    // overi na skutocnej stranke, aj ked sa este nehra.
-    $st = $pdo->prepare(
-        "SELECT flashscore_url FROM \"lm2026-27\".games
-          WHERE (start_time AT TIME ZONE 'UTC') AT TIME ZONE 'Europe/Bratislava' >= ?::date
-            AND flashscore_url IS NOT NULL AND flashscore_url <> ''
-          ORDER BY start_time LIMIT 1");
-    $st->execute([$den]);
-    $testUrl = $st->fetchColumn();
+    // Ziadny NAS zapas prave nebezi — vezme sa lubovolny prave bezuci zapas
+    // z Flashscore.
+    //
+    // PRECO NIE PRVY DNESNY: na zapase, ktory sa este nezacal, nie je co
+    // odcitat — nema skore ani minutu. Model "zlyha" aj ked funguje spravne
+    // a livescore sa zbytocne vypne. Presne to sa stalo 10.9.2026: test
+    // bezal o 15:45 na zapase s vykopom o 18:45.
+    $testUrl = ls_najdi_bezuci_zapas();
 }
 
 if (!$testUrl) { cron_beh('livescore_model_test', 'niet zapasu na test'); exit("Nenašiel sa zápas, na ktorom testovať.\n"); }
