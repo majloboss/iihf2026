@@ -7,6 +7,19 @@ const isDev = (process.env.VITE_API_URL || '').includes('dev_');
 export default defineConfig({
   plugins: [
     react(),
+
+    // Na dev a produkcii je otvorena ta ista appka a v zalozkach prehliadaca
+    // sa nedali rozoznat. Dev verzia preto dostane favicon so zelenym
+    // pozadim — rovnakou zelenou, aku ma dev PWA ikona.
+    //
+    // index.html ma favicon natvrdo, takze sa prepisuje az pri builde.
+    // Vyrobit dev variantu: python tools/gen_favicon_dev.py
+    {
+      name: 'dev-favicon',
+      transformIndexHtml(html) {
+        return isDev ? html.replace('/favicon.png', '/favicon-dev.png') : html;
+      },
+    },
     VitePWA({
       strategies: 'injectManifest',
       srcDir: 'src',
