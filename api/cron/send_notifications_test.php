@@ -50,7 +50,11 @@ foreach ($ziadosti as $z) {
               . ($jeTest
                   ? "Táto správa prišla z TESTOVACEJ verzie (dev_betclub).\n\nBetClub"
                   : 'BetClub');
-        try { send_mail($z['email'], $subject, $body); }
+        // send_mail_logged, nie send_mail: skusobna sprava ma byt v
+        // admin.mail_log ako kazda ina. Bez zaznamu sa neda zistit, ci
+        // odisla — a prave to sa stalo 14.9.2026, ked pouzivatel hlasil,
+        // ze sprava nedosla, a v logu nebolo po nej ani stopy.
+        try { send_mail_logged($pdo, $z['email'], $subject, $body); }
         catch (Throwable $e) { error_log("test notif email uid=$uid: " . $e->getMessage()); }
     }
 
