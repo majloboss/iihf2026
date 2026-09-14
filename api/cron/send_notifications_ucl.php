@@ -170,7 +170,6 @@ function ucl_upcoming_games(PDO $pdo, int $uid, int $min, string $logType): arra
                hc.club_name AS team1, ac.club_name AS team2
           FROM "lm2026-27".games g
           LEFT JOIN admin.competition_phases ph ON ph.id = g.phase_id
-      LEFT JOIN admin.competition_phases ph ON ph.id = g.phase_id
           JOIN admin.uefa_clubs hc ON hc.club_id = g.home_team_id
           JOIN admin.uefa_clubs ac ON ac.club_id = g.away_team_id
          WHERE g.result_approved = FALSE
