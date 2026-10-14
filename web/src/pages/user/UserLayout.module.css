@@ -202,14 +202,14 @@
     }
 
     .bottomNavAlternative img:not(.profileNavImg) {
-        filter: grayscale(1) invert(1) contrast(3);
-        mix-blend-mode: screen;
-        opacity: 0.82;
+        filter: none;
+        mix-blend-mode: normal;
+        opacity: 0.78;
     }
 
     .bottomNavAlternative a.active img:not(.profileNavImg) {
-        filter: grayscale(1) invert(1) sepia(1) saturate(5) hue-rotate(350deg)
-                brightness(1.1) contrast(2) drop-shadow(0 0 5px rgba(255,184,92,0.9));
+        filter: sepia(1) saturate(2.5) hue-rotate(350deg) brightness(1.15)
+                drop-shadow(0 0 5px rgba(255,184,92,0.9));
         opacity: 1;
     }
 

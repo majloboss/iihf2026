@@ -125,39 +125,39 @@ export default function UserLayout({ children }) {
             </main>
             <nav className={`${styles.bottomNav} ${isDev ? styles.bottomNavAlternative : ''}`}>
                 <NavLink to="/dashboard" className={({ isActive }) => isActive ? styles.active : ''}>
-                    <img src="/menu_prehlad.png" alt="" style={{width:30,height:30,objectFit:'contain'}} />
+                    <img src={bottomIcon('prehlad')} alt="" style={{width:30,height:30,objectFit:'contain'}} />
                     <span className={styles.bottomNavLabel}>Prehľad</span>
                 </NavLink>
                 <NavLink to="/games"     className={({ isActive }) => isActive ? styles.active : ''}>
-                    <img src="/menu_zapasy.png" alt="" style={{width:30,height:30,objectFit:'contain'}} />
+                    <img src={bottomIcon('zapasy')} alt="" style={{width:30,height:30,objectFit:'contain'}} />
                     <span className={styles.bottomNavLabel}>Zápasy</span>
                 </NavLink>
                 <NavLink to="/tabulky"   className={({ isActive }) => isActive ? styles.active : ''}>
-                    <img src="/menu_tabulky.png" alt="" style={{width:30,height:30,objectFit:'contain'}} />
+                    <img src={bottomIcon('tabulky')} alt="" style={{width:30,height:30,objectFit:'contain'}} />
                     <span className={styles.bottomNavLabel}>Tabuľky</span>
                 </NavLink>
                 <NavLink to="/profile" className={({ isActive }) => [styles.profileNav, isActive ? styles.active : ''].join(' ')}>
                     <div className={styles.profileNavAvatar}>
                         {profile?.avatar
                             ? <img src={profile.avatar} alt="" className={styles.profileNavImg} />
-                            : <img src="/menu_profil.png" alt="" style={{width:30,height:30,objectFit:'contain'}} />
+                            : <img src={bottomIcon('profil')} alt="" style={{width:30,height:30,objectFit:'contain'}} />
                         }
                     </div>
                     <span className={styles.bottomNavLabel}>Profil</span>
                 </NavLink>
                 <NavLink to="/standings" className={({ isActive }) => isActive ? styles.active : ''}>
-                    <img src="/menu_skupiny.png" alt="" style={{width:30,height:30,objectFit:'contain'}} />
+                    <img src={bottomIcon('skupiny')} alt="" style={{width:30,height:30,objectFit:'contain'}} />
                     <span className={styles.bottomNavLabel}>Skupiny</span>
                 </NavLink>
                 <NavLink to="/spravy"    className={({ isActive }) => isActive ? styles.active : ''}>
                     <span className={styles.iconWrap}>
-                        <img src="/menu_spravy.png" alt="" style={{width:30,height:30,objectFit:'contain'}} />
+                        <img src={bottomIcon('spravy')} alt="" style={{width:30,height:30,objectFit:'contain'}} />
                         {unread > 0 && <span className={styles.badge}>{unread > 9 ? '9+' : unread}</span>}
                     </span>
                     <span className={styles.bottomNavLabel}>Správy</span>
                 </NavLink>
                 <NavLink to="/pravidla"  className={({ isActive }) => isActive ? styles.active : ''}>
-                    <img src="/menu_pravidla.png" alt="" style={{width:30,height:30,objectFit:'contain'}} />
+                    <img src={bottomIcon('pravidla')} alt="" style={{width:30,height:30,objectFit:'contain'}} />
                     <span className={styles.bottomNavLabel}>Pravidlá</span>
                 </NavLink>
             </nav>
