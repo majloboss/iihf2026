@@ -352,6 +352,8 @@
     color: #1a3a6b;
 }
 .tipInput:focus { border-color: #1a3a6b; }
+.tipInputChanged,
+.tipInputChanged:focus { border-color: #dc3545; }
 
 .tipSep { font-size: 1.4rem; font-weight: 700; color: #aaa; }
 

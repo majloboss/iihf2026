@@ -39,6 +39,8 @@ function TipModal({ game, onClose, onSaved }) {
     const [saving, setSaving] = useState(false);
     const [err, setErr]     = useState('');
     const [done, setDone]   = useState(false);
+    const changed1 = v1 !== (game.home_score_tip != null ? String(game.home_score_tip) : '');
+    const changed2 = v2 !== (game.away_score_tip != null ? String(game.away_score_tip) : '');
 
     const dateStr = new Date(game.start_time + 'Z').toLocaleString('sk-SK',
         { weekday:'short', day:'numeric', month:'numeric', hour:'2-digit', minute:'2-digit' });
@@ -80,9 +82,9 @@ function TipModal({ game, onClose, onSaved }) {
                                     <div className={styles.tipTeamLabel}>
                                         <Flag code={game.home_code} compId={2} className={styles.modalFlag} />{game.home_code}
                                     </div>
-                                    <input type="number" min="0" max="20" value={v1} onChange={e => setV1(e.target.value)} className={styles.tipInput} inputMode="numeric" />
+                                    <input type="number" min="0" max="20" value={v1} onChange={e => setV1(e.target.value)} className={`${styles.tipInput} ${changed1 ? styles.tipInputChanged : ''}`} inputMode="numeric" />
                                     <span className={styles.tipSep}>:</span>
-                                    <input type="number" min="0" max="20" value={v2} onChange={e => setV2(e.target.value)} className={styles.tipInput} inputMode="numeric" />
+                                    <input type="number" min="0" max="20" value={v2} onChange={e => setV2(e.target.value)} className={`${styles.tipInput} ${changed2 ? styles.tipInputChanged : ''}`} inputMode="numeric" />
                                     <div className={`${styles.tipTeamLabel} ${styles.tipTeamRight}`}>
                                         {game.away_code}<Flag code={game.away_code} compId={2} className={styles.modalFlag} />
                                     </div>

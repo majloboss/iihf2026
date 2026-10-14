@@ -110,6 +110,8 @@ function TipInput({ game, onSaved }) {
     const [v2, setV2]         = useState(game.away_score_tip != null ? String(game.away_score_tip) : '');
     const [saving, setSaving] = useState(false);
     const [err, setErr]       = useState('');
+    const changed1 = v1 !== (game.home_score_tip != null ? String(game.home_score_tip) : '');
+    const changed2 = v2 !== (game.away_score_tip != null ? String(game.away_score_tip) : '');
 
     const start  = new Date(game.start_time + 'Z');
     const canTip = game.tips_open && game.home_code && game.away_code
@@ -139,9 +141,11 @@ function TipInput({ game, onSaved }) {
 
     return (
         <div className={styles.tipForm}>
-            <input type="number" min="0" max="20" value={v1} onChange={e => setV1(e.target.value)} className={styles.tipScore} />
+            <input type="number" min="0" max="20" value={v1} onChange={e => setV1(e.target.value)}
+                   className={`${styles.tipScore} ${changed1 ? styles.tipScoreChanged : ''}`} />
             <span>:</span>
-            <input type="number" min="0" max="20" value={v2} onChange={e => setV2(e.target.value)} className={styles.tipScore} />
+            <input type="number" min="0" max="20" value={v2} onChange={e => setV2(e.target.value)}
+                   className={`${styles.tipScore} ${changed2 ? styles.tipScoreChanged : ''}`} />
             <button onClick={save} disabled={saving} className={styles.btnTip}>
                 {saving ? '…' : (game.home_score_tip != null ? 'Zmeniť' : 'Tipovať')}
             </button>
