@@ -18,9 +18,7 @@ const dayKey = s => {
     const p = n => String(n).padStart(2, '0');
     return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
 };
-const timeFmtRaw = new Intl.DateTimeFormat('sk-SK', { hour: '2-digit', minute: '2-digit' });
 const dayFmtRaw = new Intl.DateTimeFormat('sk-SK', { weekday: 'short', day: 'numeric', month: 'numeric' });
-const timeFmt = s => { const d = asDate(s); return isValidDate(d) ? timeFmtRaw.format(d) : '—'; };
 const dayFmt = s => { const d = asDate(s); return isValidDate(d) ? dayFmtRaw.format(d) : '—'; };
 // Dnešok v tvare kľúča hracieho dňa — kalendár ho zvýrazní.
 const dnesK = new Date().toLocaleDateString('sv-SE');
@@ -239,18 +237,7 @@ export default function UclGames() {
                         // Zapas uz zacal, ale vysledok este nie je schvaleny.
                         const jeLive = started && !g.result_approved;
                         return (
-                            <div key={g.game_id} className={styles.card}
-                                 style={{ padding: 12, marginBottom: 6 }}>
-                                {/* Dátum sa opakuje aj v karte: pri skrolovaní hlavička
-                                    dňa zmizne a bez neho sa človek stratí. */}
-                                <UclZapas g={g}
-                                    termin={<>
-                                        <div style={{ whiteSpace: 'nowrap' }}>{dayFmt(g.start_time)}</div>
-                                        <div style={{ whiteSpace: 'nowrap' }}>{timeFmt(g.start_time)}</div>
-                                        <div style={{ color: '#999' }}>
-                                            {kolo(g)}
-                                        </div>
-                                    </>}
+                            <UclZapas key={g.game_id} g={g}
                                     stred={
                                         <span style={{ display: 'flex', flexDirection: 'column',
                                                        alignItems: 'center', gap: 3 }}>
@@ -263,6 +250,7 @@ export default function UclGames() {
                                         <button onClick={() => save(g)} disabled={saving === g.game_id}>
                                             {saving === g.game_id ? '…' : 'OK'}
                                         </button>)}
+                                    footer={started && <UclGroupTips game={g} />}
                                     size={28}>
                                     {!known
                                         ? <span style={{ gridColumn: '1 / 4', textAlign: 'center',
@@ -291,9 +279,6 @@ export default function UclGames() {
                                                 </span>
                                               </>}
                                 </UclZapas>
-
-                                {started && <UclGroupTips game={g} />}
-                            </div>
                         );
                     })}
                 </div>

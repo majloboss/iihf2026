@@ -9,27 +9,6 @@ import { useCompetition } from '../../context/CompetitionContext';
 import UclZapas from '../../components/UclZapas';
 import UclGroupTips from './UclGroupTips';
 
-// start_time je naive UTC, preto ho tak treba aj interpretovať.
-const dayFmtRaw = new Intl.DateTimeFormat('sk-SK', {
-    weekday: 'short', day: 'numeric', month: 'numeric',
-});
-const timeFmtRaw = new Intl.DateTimeFormat('sk-SK', { hour: '2-digit', minute: '2-digit' });
-
-// Neplatný dátum by vo format() vyhodil výnimku a zhodil stránku.
-const naDatum = value => {
-    const d = new Date(String(value).replace(' ', 'T') + 'Z');
-    return Number.isNaN(d.getTime()) ? null : d;
-};
-const dayFmt  = value => { const d = naDatum(value); return d ? dayFmtRaw.format(d) : '—'; };
-const timeFmt = value => { const d = naDatum(value); return d ? timeFmtRaw.format(d) : '—'; };
-
-
-
-// Krátke označenie fázy, rovnaké ako v zozname zápasov.
-// Skratka kola z číselníka; kým nebeží migrácia 075, príde z API `navrh_kolo`
-// — tá istá hodnota, akú migrácia priradí.
-const shortPhase = g => g.match_stat_code ?? g.navrh_kolo ?? '';
-
 // Karta zápasu: dátum vľavo, dvojica v strede, pod ňou tip a štadión.
 //
 // Všetko zdieľa jednu mriežku, takže `vs`, dvojbodka medzi tipmi aj štadión
@@ -222,14 +201,7 @@ export default function UclDashboard() {
                             ? 'Prebiehajúce zápasy' : 'Začínajú o chvíľu'}
                     </h3>
                     {live.map(g => (
-                        <div key={g.game_id} style={{ background: '#fff', border: '1px solid #f2c2c2', borderRadius: 10,
-                                                      padding: 12, marginBottom: 8 }}>
-                            <UclZapas g={g}
-                                   termin={<>
-                                       <div style={{ whiteSpace: 'nowrap' }}>{dayFmt(g.start_time)}</div>
-                                       <div style={{ whiteSpace: 'nowrap' }}>{timeFmt(g.start_time)}</div>
-                                       <div style={{ color: '#999' }}>{shortPhase(g)}</div>
-                                   </>}
+                        <UclZapas key={g.game_id} g={g}
                                    stred={
                                        <span style={{ display: 'flex', flexDirection: 'column',
                                                       alignItems: 'center', gap: 3 }}>
@@ -241,7 +213,8 @@ export default function UclDashboard() {
                                            <strong style={{ color: '#dc3545' }}>
                                                {scoreText(g) ?? 'vs'}
                                            </strong>
-                                       </span>}>
+                                       </span>}
+                                   footer={<UclGroupTips game={g} />}>
                                 <span style={{ gridColumn: '1 / 4', textAlign: 'center',
                                                fontSize: '0.82rem' }}>
                                     {g.home_score_tip !== null
@@ -249,8 +222,6 @@ export default function UclDashboard() {
                                         : <span style={{ color: '#999' }}>netipoval si</span>}
                                 </span>
                             </UclZapas>
-                            <UclGroupTips game={g} />
-                        </div>
                     ))}
                 </>
             )}
@@ -259,14 +230,7 @@ export default function UclDashboard() {
                 <>
                     <h3 style={{ marginTop: 20 }}>Netipované — dnes a zajtra</h3>
                     {untipped.map(g => (
-                        <div key={g.game_id} style={{ background: '#fffbf0', border: '1px solid #ffe0a3', borderRadius: 10,
-                                                      padding: 12, marginBottom: 8 }}>
-                            <UclZapas g={g}
-                                   termin={<>
-                                       <div style={{ whiteSpace: 'nowrap' }}>{dayFmt(g.start_time)}</div>
-                                       <div style={{ whiteSpace: 'nowrap' }}>{timeFmt(g.start_time)}</div>
-                                       <div style={{ color: '#999' }}>{shortPhase(g)}</div>
-                                   </>}
+                        <UclZapas key={g.game_id} g={g}
                                    stred={<span style={{ color: '#bbb' }}>vs</span>}
                                    akcia={
                                        <button onClick={() => save(g)} disabled={saving === g.game_id}>
@@ -286,7 +250,6 @@ export default function UclDashboard() {
                                                                        borderWidth: isDraftChanged(g, 'away') ? '3px' : undefined }} aria-label="Tip hostia" />
                                 </span>
                             </UclZapas>
-                        </div>
                     ))}
                 </>
             )}
@@ -301,14 +264,7 @@ export default function UclDashboard() {
                 </p>
             )}
             {upcomingRest.map(g => (
-                <div key={g.game_id} style={{ background: '#fff', border: '1px solid #e9ecef', borderRadius: 10,
-                                              padding: 12, marginBottom: 8 }}>
-                    <UclZapas g={g}
-                                   termin={<>
-                                       <div style={{ whiteSpace: 'nowrap' }}>{dayFmt(g.start_time)}</div>
-                                       <div style={{ whiteSpace: 'nowrap' }}>{timeFmt(g.start_time)}</div>
-                                       <div style={{ color: '#999' }}>{shortPhase(g)}</div>
-                                   </>}
+                <UclZapas key={g.game_id} g={g}
                            stred={<span style={{ color: '#bbb' }}>vs</span>}
                            akcia={canTip(g) && (
                                <button onClick={() => save(g)} disabled={saving === g.game_id}>
@@ -340,22 +296,14 @@ export default function UclDashboard() {
                                     : 'tipovanie zatiaľ nie je otvorené'}
                             </span>
                         )}
-                    </UclZapas>
-                </div>
+                </UclZapas>
             ))}
 
             {played.length > 0 && (
                 <>
                     <h3 style={{ marginTop: 24 }}>Posledné vyhodnotené</h3>
                     {played.map(g => (
-                        <div key={g.game_id} style={{ background: '#fff', border: '1px solid #e9ecef', borderRadius: 10,
-                                                      padding: 12, marginBottom: 8 }}>
-                            <UclZapas g={g}
-                                   termin={<>
-                                       <div style={{ whiteSpace: 'nowrap' }}>{dayFmt(g.start_time)}</div>
-                                       <div style={{ whiteSpace: 'nowrap' }}>{timeFmt(g.start_time)}</div>
-                                       <div style={{ color: '#999' }}>{shortPhase(g)}</div>
-                                   </>}
+                        <UclZapas key={g.game_id} g={g}
                                    stred={<strong style={{ color: '#1a3a6b' }}>{scoreText(g)}</strong>}>
                                 <span style={{ gridColumn: '1 / 4', textAlign: 'center',
                                                fontSize: '0.82rem' }}>
@@ -363,7 +311,6 @@ export default function UclDashboard() {
                                     {g.points_earned !== null && <> · <strong style={{ color: '#28a745' }}>{g.points_earned} b.</strong></>}
                                 </span>
                             </UclZapas>
-                        </div>
                     ))}
                 </>
             )}
