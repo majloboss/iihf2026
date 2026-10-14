@@ -46,7 +46,7 @@ export default function UclGroupTips({ game }) {
 
                     {groups && groups.map(grp => (
                         <div key={grp.group_id} style={{ marginBottom: 10 }}>
-                            <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#666', marginBottom: 2 }}>
+                            <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#111', marginBottom: 2 }}>
                                 {grp.group_name}
                             </div>
                             {/* Pevne sirky stlpcov: bez nich sa tabulka roztiahne podla
@@ -62,13 +62,19 @@ export default function UclGroupTips({ game }) {
                                     {grp.members.map(m => {
                                         const livePts = isLive ? calcLiveUclPoints(m.tip1, m.tip2, game) : null;
                                         const pts = m.points ?? livePts;
+                                        const scoreHome = game.home_score_regular ?? game.ls_home;
+                                        const scoreAway = game.away_score_regular ?? game.ls_away;
+                                        const exactTip = m.tip1 != null && m.tip2 != null
+                                            && scoreHome != null && scoreAway != null
+                                            && Number(m.tip1) === Number(scoreHome)
+                                            && Number(m.tip2) === Number(scoreAway);
                                         return (
                                             <tr key={m.user_id}
-                                                style={{ background: m.is_me ? '#e8eef8' : 'transparent',
+                                                style={{ background: m.is_me ? '#dcecff' : 'transparent',
                                                          fontWeight: m.is_me ? 700 : 400 }}>
-                                                <td style={{ padding: '3px 6px', overflow: 'hidden',
+                                                <td style={{ padding: '3px 6px 3px 14px', overflow: 'hidden',
                                                              textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                                    {m.username}{m.is_me ? ' (ty)' : ''}
+                                                    {m.username}
                                                 </td>
                                                 <td style={{ padding: '3px 6px', textAlign: 'right',
                                                              fontVariantNumeric: 'tabular-nums' }}>
@@ -78,7 +84,9 @@ export default function UclGroupTips({ game }) {
                                                 </td>
                                                 <td style={{ padding: '3px 6px', textAlign: 'right',
                                                              fontVariantNumeric: 'tabular-nums',
-                                                             color: livePts != null && m.points == null ? '#e67e22' : '#28a745' }}>
+                                                             color: pts == null ? '#666'
+                                                                 : exactTip ? '#198754'
+                                                                 : pts > 0 ? '#e67e22' : '#dc3545' }}>
                                                     {pts != null ? `+${pts}b` : ''}
                                                 </td>
                                             </tr>
