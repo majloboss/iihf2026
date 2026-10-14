@@ -48,9 +48,9 @@ p { margin: 0; }
     .liveBadge { animation: none; }
 }
 
-/* Zápas je rozdelený na sivú hlavičku a bielu oblasť tipov skupín. */
+/* Jemný prechod pokračuje z hlavičky cez tipy skupín celou kartou. */
 .uclGameCard {
-    background: #fff;
+    background: linear-gradient(180deg, #e1e2e4 0%, #ececee 48%, #f5f6f7 100%);
     border: 1px solid #e9ecef;
     border-radius: 10px;
     margin-bottom: 8px;
@@ -64,9 +64,9 @@ p { margin: 0; }
     min-height: 96px;
     padding: 8px;
     background:
-        linear-gradient(90deg, #dedfe1 0, #e4e5e7 calc(var(--ucl-date-fill) - 18px),
+        linear-gradient(90deg, rgba(210, 212, 215, 0.82) 0, rgba(224, 225, 227, 0.78) calc(var(--ucl-date-fill) - 18px),
                         rgba(237, 238, 240, 0) var(--ucl-date-fill)),
-        linear-gradient(110deg, #ededed 0%, #f1f1f1 48%, #f8f8f8 100%);
+        linear-gradient(110deg, rgba(237, 237, 238, 0.5) 0%, rgba(241, 241, 242, 0.34) 48%, rgba(248, 248, 249, 0.16) 100%);
 }
 .uclZapasTermin {
     display: flex;
@@ -85,7 +85,7 @@ p { margin: 0; }
 }
 .uclZapasFooter {
     padding: 3px 12px 4px;
-    background-image: linear-gradient(90deg, transparent, #dedfe1 10%, #dedfe1 90%, transparent);
+    background-image: linear-gradient(90deg, transparent, rgba(164, 168, 174, 0.3) 10%, rgba(164, 168, 174, 0.3) 90%, transparent);
     background-repeat: no-repeat;
     background-position: top;
     background-size: 100% 1px;
