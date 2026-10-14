@@ -77,6 +77,8 @@ function TipModal({ game, onClose, onSaved }) {
     const [saving, setSaving] = useState(false);
     const [err, setErr]     = useState('');
     const [done, setDone]   = useState(false);
+    const changed1 = v1 !== (game.tip1 != null ? String(game.tip1) : '');
+    const changed2 = v2 !== (game.tip2 != null ? String(game.tip2) : '');
 
     const dateStr = new Date(game.starts_at).toLocaleString('sk-SK',
         { weekday: 'short', day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' });
@@ -108,14 +110,14 @@ function TipModal({ game, onClose, onSaved }) {
                                 <input
                                     type="number" min="0" max="20"
                                     value={v1} onChange={e => setV1(e.target.value)}
-                                    className={styles.tipInput}
+                                    className={`${styles.tipInput} ${changed1 ? styles.tipInputChanged : ''}`}
                                     inputMode="numeric"
                                 />
                                 <span className={styles.tipSep}>:</span>
                                 <input
                                     type="number" min="0" max="20"
                                     value={v2} onChange={e => setV2(e.target.value)}
-                                    className={styles.tipInput}
+                                    className={`${styles.tipInput} ${changed2 ? styles.tipInputChanged : ''}`}
                                     inputMode="numeric"
                                 />
                                 <div className={`${styles.tipTeamLabel} ${styles.tipTeamRight}`}>

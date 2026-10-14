@@ -177,6 +177,7 @@
     font-size: 1rem;
     font-weight: 600;
 }
+.tipScoreChanged { border-color: #dc3545; }
 .tipScore::-webkit-outer-spin-button,
 .tipScore::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 

@@ -183,6 +183,10 @@ export default function UclDashboard() {
         const v = side === 'home' ? g.home_score_tip : g.away_score_tip;
         return v === null || v === undefined ? '' : String(v);
     };
+    const isDraftChanged = (g, side) => {
+        const saved = side === 'home' ? g.home_score_tip : g.away_score_tip;
+        return draftOf(g, side) !== (saved == null ? '' : String(saved));
+    };
     const setDraft = (id, side, value) =>
         setDrafts(cur => ({ ...cur, [id]: { ...cur[id], [side]: value.replace(/[^0-9]/g, '').slice(0, 2) } }));
 
@@ -270,12 +274,14 @@ export default function UclDashboard() {
                                        </button>}>
                                 <span style={{ gridColumn: 1, justifySelf: 'end' }}>
                                     <input value={draftOf(g, 'home')} onChange={e => setDraft(g.game_id, 'home', e.target.value)}
-                                           inputMode="numeric" style={{ width: 34, padding: '4px 0', textAlign: 'center' }} aria-label="Tip domáci" />
+                                           inputMode="numeric" style={{ width: 34, padding: '4px 0', textAlign: 'center',
+                                                                       borderColor: isDraftChanged(g, 'home') ? '#dc3545' : undefined }} aria-label="Tip domáci" />
                                 </span>
                                 <span style={{ gridColumn: 2, textAlign: 'center' }}>:</span>
                                 <span style={{ gridColumn: 3, justifySelf: 'start' }}>
                                     <input value={draftOf(g, 'away')} onChange={e => setDraft(g.game_id, 'away', e.target.value)}
-                                           inputMode="numeric" style={{ width: 34, padding: '4px 0', textAlign: 'center' }} aria-label="Tip hostia" />
+                                           inputMode="numeric" style={{ width: 34, padding: '4px 0', textAlign: 'center',
+                                                                       borderColor: isDraftChanged(g, 'away') ? '#dc3545' : undefined }} aria-label="Tip hostia" />
                                 </span>
                             </UclZapas>
                         </div>
@@ -312,12 +318,14 @@ export default function UclDashboard() {
                             <>
                                 <span style={{ gridColumn: 1, justifySelf: 'end' }}>
                                     <input value={draftOf(g, 'home')} onChange={e => setDraft(g.game_id, 'home', e.target.value)}
-                                           inputMode="numeric" style={{ width: 34, padding: '4px 0', textAlign: 'center' }} aria-label="Tip domáci" />
+                                           inputMode="numeric" style={{ width: 34, padding: '4px 0', textAlign: 'center',
+                                                                       borderColor: isDraftChanged(g, 'home') ? '#dc3545' : undefined }} aria-label="Tip domáci" />
                                 </span>
                                 <span style={{ gridColumn: 2, textAlign: 'center' }}>:</span>
                                 <span style={{ gridColumn: 3, justifySelf: 'start' }}>
                                     <input value={draftOf(g, 'away')} onChange={e => setDraft(g.game_id, 'away', e.target.value)}
-                                           inputMode="numeric" style={{ width: 34, padding: '4px 0', textAlign: 'center' }} aria-label="Tip hostia" />
+                                           inputMode="numeric" style={{ width: 34, padding: '4px 0', textAlign: 'center',
+                                                                       borderColor: isDraftChanged(g, 'away') ? '#dc3545' : undefined }} aria-label="Tip hostia" />
                                 </span>
                             </>
                         ) : (
