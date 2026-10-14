@@ -50,23 +50,21 @@ p { margin: 0; }
 
 /* Jemný prechod pokračuje z hlavičky cez tipy skupín celou kartou. */
 .uclGameCard {
-    background: linear-gradient(180deg, #e1e2e4 0%, #ececee 48%, #f5f6f7 100%);
+    background:
+        linear-gradient(to bottom right, rgba(214, 216, 219, 0.72) 0%, rgba(231, 232, 234, 0.42) 38%, rgba(245, 246, 247, 0.08) 78%),
+        linear-gradient(180deg, #e7e8ea 0%, #f5f6f7 100%);
     border: 1px solid #e9ecef;
     border-radius: 10px;
     margin-bottom: 8px;
     overflow: hidden;
 }
 .uclZapas {
-    --ucl-date-fill: 162px;
     display: flex;
     align-items: stretch;
     gap: 12px;
     min-height: 96px;
     padding: 8px;
-    background:
-        linear-gradient(90deg, rgba(210, 212, 215, 0.82) 0, rgba(224, 225, 227, 0.78) calc(var(--ucl-date-fill) - 18px),
-                        rgba(237, 238, 240, 0) var(--ucl-date-fill)),
-        linear-gradient(110deg, rgba(237, 237, 238, 0.5) 0%, rgba(241, 241, 242, 0.34) 48%, rgba(248, 248, 249, 0.16) 100%);
+    background: transparent;
 }
 .uclZapasTermin {
     display: flex;
@@ -112,7 +110,7 @@ p { margin: 0; }
 }
 
 @media (max-width: 900px) {
-    .uclZapas { --ucl-date-fill: 76px; gap: 4px; }
+    .uclZapas { gap: 4px; }
     .uclZapasTermin {
         flex-basis: 54px;
         width: 54px;
