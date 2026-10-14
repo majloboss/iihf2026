@@ -43,12 +43,13 @@ export default function UclZapas({ g, stred, akcia, children, footer, size = 24 
                      style={{ flex: 1, minWidth: 0, display: 'grid',
                               gridTemplateColumns: 'var(--ucl-klub) auto var(--ucl-klub) var(--ucl-akcia)',
                               alignItems: 'stretch', columnGap: 8, rowGap: 6 }}>
-                    <span style={{ gridColumn: 1, display: 'flex', justifyContent: 'flex-end' }}>
+                    <span style={{ gridColumn: 1, display: 'flex', width: '100%', minWidth: 0,
+                                    justifyContent: 'flex-end' }}>
                         <UclClub name={g.home_name} logo={g.home_logo} country={g.home_country}
                                  countryCode={g.home_country_code} flag={g.home_flag} align="right" size={size} />
                     </span>
                     <span style={{ gridColumn: 2, alignSelf: 'center', textAlign: 'center' }}>{stred}</span>
-                    <span style={{ gridColumn: 3 }}>
+                    <span style={{ gridColumn: 3, width: '100%', minWidth: 0 }}>
                         <UclClub name={g.away_name} logo={g.away_logo} country={g.away_country}
                                  countryCode={g.away_country_code} flag={g.away_flag} size={size} />
                     </span>
