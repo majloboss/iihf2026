@@ -250,7 +250,7 @@ export default function UclGames() {
                                         <button onClick={() => save(g)} disabled={saving === g.game_id}>
                                             {saving === g.game_id ? '…' : 'OK'}
                                         </button>)}
-                                    footer={started && <UclGroupTips game={g} />}
+                                    footer={<UclGroupTips game={g} />}
                                     size={28}>
                                     {!known
                                         ? <span style={{ gridColumn: '1 / 4', textAlign: 'center',
