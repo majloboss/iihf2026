@@ -232,6 +232,7 @@ export default function UclDashboard() {
                     {untipped.map(g => (
                         <UclZapas key={g.game_id} g={g}
                                    stred={<span style={{ color: '#bbb' }}>vs</span>}
+                                   footer={<UclGroupTips game={g} />}
                                    akcia={
                                        <button onClick={() => save(g)} disabled={saving === g.game_id}>
                                            {saving === g.game_id ? '…' : 'OK'}
@@ -266,6 +267,7 @@ export default function UclDashboard() {
             {upcomingRest.map(g => (
                 <UclZapas key={g.game_id} g={g}
                            stred={<span style={{ color: '#bbb' }}>vs</span>}
+                           footer={<UclGroupTips game={g} />}
                            akcia={canTip(g) && (
                                <button onClick={() => save(g)} disabled={saving === g.game_id}>
                                    {saving === g.game_id ? '…' : 'OK'}
@@ -304,7 +306,8 @@ export default function UclDashboard() {
                     <h3 style={{ marginTop: 24 }}>Posledné vyhodnotené</h3>
                     {played.map(g => (
                         <UclZapas key={g.game_id} g={g}
-                                   stred={<strong style={{ color: '#1a3a6b' }}>{scoreText(g)}</strong>}>
+                                   stred={<strong style={{ color: '#1a3a6b' }}>{scoreText(g)}</strong>}
+                                   footer={<UclGroupTips game={g} />}>
                                 <span style={{ gridColumn: '1 / 4', textAlign: 'center',
                                                fontSize: '0.82rem' }}>
                                     Tip: <strong>{g.home_score_tip}:{g.away_score_tip}</strong>
