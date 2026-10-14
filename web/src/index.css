@@ -57,12 +57,16 @@ p { margin: 0; }
     overflow: hidden;
 }
 .uclZapas {
+    --ucl-date-fill: 162px;
     display: flex;
     align-items: stretch;
     gap: 12px;
     min-height: 96px;
     padding: 8px;
-    background: linear-gradient(110deg, #ededed 0%, #f1f1f1 48%, #f8f8f8 100%);
+    background:
+        linear-gradient(90deg, #dedfe1 0, #e4e5e7 calc(var(--ucl-date-fill) - 18px),
+                        rgba(237, 238, 240, 0) var(--ucl-date-fill)),
+        linear-gradient(110deg, #ededed 0%, #f1f1f1 48%, #f8f8f8 100%);
 }
 .uclZapasTermin {
     display: flex;
@@ -73,8 +77,7 @@ p { margin: 0; }
     box-sizing: border-box;
     width: 134px;
     padding: 12px;
-    border-radius: 6px;
-    background: linear-gradient(105deg, #dedfe1 0%, #e4e5e7 62%, rgba(237, 238, 240, 0) 100%);
+    background: transparent;
     color: #333;
     font-size: 0.78rem;
     font-weight: 600;
@@ -109,7 +112,7 @@ p { margin: 0; }
 }
 
 @media (max-width: 700px) {
-    .uclZapas { gap: 4px; }
+    .uclZapas { --ucl-date-fill: 76px; gap: 4px; }
     .uclZapasTermin {
         flex-basis: 54px;
         width: 54px;
