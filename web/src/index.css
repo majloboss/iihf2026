@@ -107,3 +107,14 @@ p { margin: 0; }
     /* Na mobile menšie písmo, aby sa dlhý názov zmestil na dva riadky. */
     .uclKlubNazov { font-size: 0.7em; }
 }
+
+@media (max-width: 700px) {
+    .uclZapas { gap: 4px; }
+    .uclZapasTermin {
+        flex-basis: 54px;
+        width: 54px;
+        padding: 4px;
+        font-size: 0.6rem;
+        line-height: 1.2;
+    }
+}
