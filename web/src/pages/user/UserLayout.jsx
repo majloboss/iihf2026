@@ -14,6 +14,8 @@ export default function UserLayout({ children }) {
     const [unread, setUnread]   = useState(0);
     const { activeCompetition, competitionEmoji, competitions, switchCompetition } = useCompetition();
     const [prepinam, setPrepinam] = useState(false);
+    const isDev = (import.meta.env.VITE_API_URL ?? '').includes('dev_');
+    const bottomIcon = name => isDev ? `/menu_nav_${name}.png` : `/menu_${name}.png`;
 
     useEffect(() => {
         apiFetch('v1/profile').then(setProfile).catch(() => {});
@@ -121,7 +123,7 @@ export default function UserLayout({ children }) {
                     priamo ako children, lebo ich obsluhuje vlastný router. */}
                 {children ?? <Outlet />}
             </main>
-            <nav className={styles.bottomNav}>
+            <nav className={`${styles.bottomNav} ${isDev ? styles.bottomNavAlternative : ''}`}>
                 <NavLink to="/dashboard" className={({ isActive }) => isActive ? styles.active : ''}>
                     <img src="/menu_prehlad.png" alt="" style={{width:30,height:30,objectFit:'contain'}} />
                     <span className={styles.bottomNavLabel}>Prehľad</span>

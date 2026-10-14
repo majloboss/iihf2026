@@ -190,6 +190,27 @@
     .bottomNav a:hover  { background: rgba(255,255,255,0.08); }
     .bottomNav a.active { color: #fff; background: rgba(255,255,255,0.15); }
 
+    .bottomNavAlternative {
+        background: #142e55;
+        border-top-color: rgba(255,255,255,0.22);
+    }
+
+    .bottomNavAlternative a.active {
+        background: rgba(151,202,255,0.2);
+        box-shadow: inset 0 0 14px rgba(129,185,255,0.2);
+    }
+
+    .bottomNavAlternative img:not(.profileNavImg) {
+        filter: grayscale(1) invert(1) contrast(4);
+        mix-blend-mode: screen;
+        opacity: 0.9;
+    }
+
+    .bottomNavAlternative a.active img:not(.profileNavImg) {
+        filter: grayscale(1) invert(1) contrast(4) drop-shadow(0 0 4px rgba(255,255,255,0.9));
+        opacity: 1;
+    }
+
     /* 7 položiek: 3 vľavo (Prehľad, Zápasy, Tabuľky) + Profil (stred) + 3 vpravo
        (Skupiny, Správy, Pravidlá). Symetria → všetky rovnaký flex, Profil presne v strede. */
     .bottomNav a { flex: 1; }
