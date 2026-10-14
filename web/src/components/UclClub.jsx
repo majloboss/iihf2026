@@ -9,7 +9,9 @@ function ClubText({ name, country, countryCode, flag, right }) {
         // riadky), štát stojí v spodnom. Pásma majú v rámci karty rovnakú výšku,
         // takže štáty oboch klubov vyjdú do jednej roviny a text je zároveň
         // vycentrovaný voči logu.
-        <span style={{ display: 'grid', gridTemplateRows: '1fr auto', minWidth: 0,
+        <span className="uclClubText"
+              style={{ display: 'grid', gridTemplateRows: '1fr auto', minWidth: 0,
+                       flex: '1 1 0%',
                        height: '100%',
                        justifyItems: right ? 'end' : 'start' }}>
             <span className="uclKlubNazov"
@@ -41,9 +43,11 @@ export default function UclClub({ name, logo, country, countryCode, flag, align,
     return (
         // minWidth: 0 drží klub v šírke stĺpca — bez neho by dlhý názov stĺpec
         // roztiahol a stred mriežky by sa posunul.
-        <span style={{ display: 'flex', alignItems: 'stretch', gap: 5, height: '100%',
-                       minWidth: 0,
-                       justifyContent: right ? 'flex-end' : 'flex-start' }}>
+        <span className="uclClub"
+              style={{ display: 'flex', alignItems: 'stretch', gap: 5, height: '100%',
+                   width: '100%',
+                   minWidth: 0,
+                   justifyContent: right ? 'flex-end' : 'flex-start' }}>
             {right && <ClubText name={name} country={country} countryCode={countryCode} flag={flag} right />}
             {logo
                 ? <img src={`/logos/ucl2026/${logo}`} alt=""
