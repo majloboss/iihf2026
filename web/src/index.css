@@ -97,6 +97,10 @@ p { margin: 0; }
                    justify-content: start; }
 .uclKlubNazov { font-size: 1em; }
 
+@media (min-width: 901px) {
+    .uclZapasMriezka { justify-content: space-between; }
+}
+
 @media (max-width: 560px) {
     .uclZapas { gap: 6px; }
     /* Kluby si na mobile vezmú celý zvyšok šírky — s pevnými 210 px zostávala
