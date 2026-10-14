@@ -91,10 +91,10 @@ function TipInput({ game, onSaved }) {
     return (
         <div className={styles.tipForm}>
             <input type="number" min="0" max="20" value={v1} onChange={e => setV1(e.target.value)}
-                   className={`${styles.tipScore} ${changed1 ? styles.tipScoreChanged : ''}`} />
+                   className={styles.tipScore} style={{ borderColor: changed1 ? '#dc3545' : '#dee2e6', borderWidth: changed1 ? '2px' : '1px' }} />
             <span>:</span>
             <input type="number" min="0" max="20" value={v2} onChange={e => setV2(e.target.value)}
-                   className={`${styles.tipScore} ${changed2 ? styles.tipScoreChanged : ''}`} />
+                   className={styles.tipScore} style={{ borderColor: changed2 ? '#dc3545' : '#dee2e6', borderWidth: changed2 ? '2px' : '1px' }} />
             <button onClick={save} disabled={saving} className={styles.btnTip}>{saving ? '…' : (game.tip1 != null ? 'Zmeniť' : 'Tipovať')}</button>
             {err && <span className={styles.tipErr}>{err}</span>}
         </div>
