@@ -4,7 +4,7 @@ import { asDate, isValidDate } from '../utils/tipWindow';
 
 const weekdayFmt = new Intl.DateTimeFormat('sk-SK', { weekday: 'long' });
 const dateFmt = new Intl.DateTimeFormat('sk-SK', {
-    day: 'numeric', month: 'numeric', year: 'numeric',
+    day: 'numeric', month: 'numeric',
 });
 const timeFmt = new Intl.DateTimeFormat('sk-SK', { hour: '2-digit', minute: '2-digit' });
 
