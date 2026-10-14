@@ -62,7 +62,7 @@ p { margin: 0; }
     gap: 12px;
     min-height: 96px;
     padding: 8px;
-    background: #ededed;
+    background: linear-gradient(110deg, #ededed 0%, #f1f1f1 48%, #f8f8f8 100%);
 }
 .uclZapasTermin {
     display: flex;
@@ -73,15 +73,19 @@ p { margin: 0; }
     box-sizing: border-box;
     width: 134px;
     padding: 12px;
-    background: #dedede;
+    border-radius: 6px;
+    background: linear-gradient(105deg, #dedfe1 0%, #e4e5e7 62%, rgba(237, 238, 240, 0) 100%);
     color: #333;
     font-size: 0.78rem;
     font-weight: 600;
     line-height: 1.3;
 }
 .uclZapasFooter {
-    border-top: 1px solid #d9d9d9;
-    padding: 2px 12px 4px;
+    padding: 3px 12px 4px;
+    background-image: linear-gradient(90deg, transparent, #dedfe1 10%, #dedfe1 90%, transparent);
+    background-repeat: no-repeat;
+    background-position: top;
+    background-size: 100% 1px;
 }
 
 /* Posledný stĺpec má pevnú šírku, aby sa dvojica neposunula pri zápasoch
