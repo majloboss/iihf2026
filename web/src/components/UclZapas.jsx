@@ -41,7 +41,7 @@ export default function UclZapas({ g, stred, akcia, children, footer, size = 24 
                     stoja presne nad sebou. */}
                 <div className="uclZapasMriezka"
                      style={{ flex: 1, minWidth: 0, display: 'grid',
-                              gridTemplateColumns: 'var(--ucl-klub) auto var(--ucl-klub) var(--ucl-akcia)',
+                              gridTemplateColumns: 'var(--ucl-klub) var(--ucl-stred, auto) var(--ucl-klub) var(--ucl-akcia)',
                               alignItems: 'stretch', columnGap: 8, rowGap: 6 }}>
                     <span style={{ gridColumn: 1, display: 'flex', width: '100%', minWidth: 0,
                                     justifyContent: 'flex-end' }}>
