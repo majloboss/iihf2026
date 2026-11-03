@@ -71,6 +71,21 @@ function livescore_bulk_input(array $games, array $wanted, bool $withDetails = f
         // nom v detaile DB nie je — tam ho doplni model.
         $st = livescore_status($state);
         if ($st !== null) $extra[$id]['status'] = $st;
+
+        // Skore, zaciatok a koniec su vo feede priamo — model ich len opisuje.
+        // Pri deviatich zapasoch naraz si ich vymyslal: 3.11.2026 dal
+        // zapasom pred vykopom 1:1 a "zacal", co by uzavrelo tipovanie.
+        $ac = (string)($f['AC'] ?? '');
+        $ab = (string)($f['AB'] ?? '');
+        $koniec = $ac === '3' || $ab === '3';
+        $extra[$id]['feed'] = [
+            'home_score'  => is_numeric($f['AG'] ?? null) ? (int)$f['AG'] : null,
+            'away_score'  => is_numeric($f['AH'] ?? null) ? (int)$f['AH'] : null,
+            'started'     => $koniec || $ab === '2' || ($ac !== '' && $ac !== '1'),
+            'finished'    => $koniec,
+            'minute'      => $m['minute'],
+            'minute_note' => $m['note'],
+        ];
         $row = implode('¬', $parts);
 
         // Priebeh zapasu (goly, karty) je len v detailnom feede a vracia cely
@@ -230,7 +245,7 @@ Odpovedz rovno JSON polom. Nepíš žiadny úvod, vysvetlenie ani úvahu —
 prvý znak odpovede musí byť [ a posledný ].
 
 Význam polí:
-  AA = identifikátor zápasu (vráť ho v poli "id")
+  AA = identifikátor zápasu (v poli "id" vráť len hodnotu, bez „AA÷“)
   AE = domáci tím, AF = hosťujúci tím
   AG = góly domácich, AH = góly hostí
   AC = stav: 1 nezačal, 12 prvý polčas, 38 polčasová prestávka,
@@ -290,13 +305,42 @@ function livescore_bulk_check(array $wantedIds, string $model): array {
                 'raw' => mb_substr($res['content'], 0, 400), 'games' => []];
     }
 
+    // Zaloha, ked id nesedi: zapas podla domaceho timu
+    $podlaDomacich = [];
+    foreach ($wantedIds as $wid) {
+        if (isset($feed['games'][$wid]['AE'])) {
+            $podlaDomacich[mb_strtolower(trim($feed['games'][$wid]['AE']))] = $wid;
+        }
+    }
+
     // Indexovanie podla id, aby sa vysledok dal priradit k zapasu v DB.
     // Karty a poznamku spocital server — model ich neurcuje, lebo ich
     // formuloval zakazdym inak a obcas priradil gol nespravnemu timu.
     $out = [];
     foreach ($data as $g) {
         if (!is_array($g) || empty($g['id'])) continue;
-        $id = $g['id'];
+        // Model obcas vrati id aj s nazvom pola ("AA÷SGSUoDnR"). 3.11.2026 tak
+        // nesedel ani jeden zapas a livescore cely vecer nic nezapisal.
+        $id = preg_replace('/^.*÷/u', '', trim((string)$g['id']));
+        if (!isset($prep['extra'][$id]['feed'])) {
+            $id = $podlaDomacich[mb_strtolower(trim((string)($g['home_team'] ?? '')))] ?? $id;
+        }
+        $g['id'] = $id;
+        if (isset($prep['extra'][$id]['feed'])) {
+            $fd = $prep['extra'][$id]['feed'];
+            $g['started']     = $fd['started'];
+            $g['finished']    = $fd['finished'];
+            $g['minute']      = $fd['minute'];
+            $g['minute_note'] = $fd['minute_note'];
+            if (!$fd['started']) {
+                $g['home_score'] = null;
+                $g['away_score'] = null;
+                $g['status']     = 'Naplánovaný';
+            } else {
+                if ($fd['home_score'] !== null) $g['home_score'] = $fd['home_score'];
+                if ($fd['away_score'] !== null) $g['away_score'] = $fd['away_score'];
+            }
+        }
         if (isset($prep['extra'][$id])) {
             if (isset($prep['extra'][$id]['cards'])) {
                 $g = array_merge($g, $prep['extra'][$id]['cards']);
@@ -313,6 +357,8 @@ function livescore_bulk_check(array $wantedIds, string $model): array {
                 $g['status'] = $prep['extra'][$id]['status'];
             }
         }
+        // Po konci DB v detaile chyba a model kolisal medzi Koniec/2. polcas
+        if (!empty($prep['extra'][$id]['feed']['finished'])) $g['status'] = 'Koniec';
         $out[$id] = $g;
     }
     return ['ok' => true, 'error' => null, 'games' => $out,
