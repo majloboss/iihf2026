@@ -361,6 +361,17 @@ function livescore_bulk_check(array $wantedIds, string $model): array {
         if (!empty($prep['extra'][$id]['feed']['finished'])) $g['status'] = 'Koniec';
         $out[$id] = $g;
     }
+
+    // Odpoved bez jedineho sledovaneho zapasu je zlyhanie, nie uspech —
+    // inak by sa livescore neprepol na dalsi model a zostal by na tom,
+    // ktory nic nevracia (3.11.2026 nemotron-nano cely vecer "uspesne").
+    if (!array_intersect_key($out, $prep['extra'])) {
+        return ['ok' => false, 'games' => [], 'usage' => $res['usage'],
+                'error' => 'Model nevrátil ani jeden zo sledovaných zápasov ('
+                         . $prep['found'] . ')',
+                'raw' => mb_substr($res['content'], 0, 400)];
+    }
+
     return ['ok' => true, 'error' => null, 'games' => $out,
             'missing' => $prep['missing'], 'total_feed' => $feed['total'],
             'usage' => $res['usage']];
