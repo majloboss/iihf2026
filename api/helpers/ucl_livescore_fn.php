@@ -34,10 +34,12 @@ function ucl_livescore_games(PDO $pdo): array {
  */
 function ucl_livescore_refresh(PDO $pdo, array $games): array {
     $watch = [];
+    $vykop = [];   // game_id => cas vykopu z rozpisu (unix)
     foreach ($games as $g) {
         if (empty($g['flashscore_url']) || $g['result_approved']) continue;
         $id = livescore_match_id($g['flashscore_url']);
         if ($id !== null) $watch[$id] = $g['game_id'];
+        $vykop[$g['game_id']] = strtotime($g['start_time'] . ' UTC');
     }
 
     if (!$watch) {
@@ -55,7 +57,8 @@ function ucl_livescore_refresh(PDO $pdo, array $games): array {
            SET ls_home = ?, ls_away = ?, ls_status = ?, ls_updated_at = NOW(),
                home_score_halftime = COALESCE(?, home_score_halftime),
                away_score_halftime = COALESCE(?, away_score_halftime),
-               tips_open = CASE WHEN ? THEN FALSE ELSE tips_open END,
+               tips_open = CASE WHEN ? AND start_time <= (NOW() AT TIME ZONE 'UTC')
+                                THEN FALSE ELSE tips_open END,
                updated_at = NOW()
          WHERE game_id = ?');
 
@@ -74,6 +77,11 @@ function ucl_livescore_refresh(PDO $pdo, array $games): array {
     foreach ($res['games'] as $id => $d) {
         if (!isset($watch[$id]) || !is_array($d)) continue;
         $gameId = $watch[$id];
+
+        // Pred vykopom z rozpisu sa zapas nezapisuje, nech feed alebo model
+        // hlasi cokolvek. 3.11.2026 model ohlasil zapasy o 21:00 ako zacate
+        // 1:1 a livescore im o 19:51 zavrelo tipovanie.
+        if (!empty($vykop[$gameId]) && time() < $vykop[$gameId]) continue;
 
         $home = is_numeric($d['home_score'] ?? null) ? (int)$d['home_score'] : null;
         $away = is_numeric($d['away_score'] ?? null) ? (int)$d['away_score'] : null;

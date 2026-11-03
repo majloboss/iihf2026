@@ -285,6 +285,7 @@ Poradie migrácie:
 - Zápasy môžu byť vytvorené pred žrebom s prázdnymi tímami
 - Ďalší krok: import potvrdených tímov a vyžrebovaných zápasov, potom UCL API/UI routing
 - ✅ Livescore: skóre, začiatok, koniec a minúta priamo z feedu Flashscore, id zápasu bez prefixu `AA÷`; odpoveď bez jediného sledovaného zápasu = zlyhanie (po 3× prepne na ďalší model) (3.11.2026 model vracal `AA÷id` a nezačatým zápasom vymýšľal 1:1 — nezapísalo sa nič)
+- 🟠 Livescore pred výkopom z rozpisu zápas nezapisuje a tipovanie nezavrie (poistka po 3.11.2026, keď zavrelo tipovanie zápasom o 21:00)
 
 ---
 
