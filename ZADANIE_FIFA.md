@@ -285,6 +285,7 @@ Poradie migrácie:
 - Zápasy môžu byť vytvorené pred žrebom s prázdnymi tímami
 - Ďalší krok: import potvrdených tímov a vyžrebovaných zápasov, potom UCL API/UI routing
 - ✅ Livescore: skóre, začiatok, koniec a minúta priamo z feedu Flashscore, id zápasu bez prefixu `AA÷`; odpoveď bez jediného sledovaného zápasu = zlyhanie (po 3× prepne na ďalší model) (3.11.2026 model vracal `AA÷id` a nezačatým zápasom vymýšľal 1:1 — nezapísalo sa nič)
+- ✅ Livescore: poistka — zápas pred výkopom z rozpisu sa nezapisuje a nezatvára tipovanie; skóre a stav všetkých sledovaných zápasov idú z feedu aj keď model vynechá zápas alebo zlyhá (modelu idú len bežiace, keď nebeží nič, model sa nevolá); cron vypíše dôvod pri „0 z N“ (4.11.2026 nemotron-nano vrátil len zápasy o 21:00, AEK–Real a Fenerbahçe–Liverpool sa nezapísali)
 
 ---
 

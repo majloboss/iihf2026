@@ -50,14 +50,19 @@ try {
         exit("$cas — CHYBA: {$res['error']}\n");
     }
 
+    // Bez dovodu sa "0 z 9" nedalo vysvetlit (4.11.2026)
+    $dovod = $res['model_error'] ?? $res['note'] ?? null;
     cron_beh('ucl_livescore',
-             "aktualizovanych {$res['updated']} z {$res['watched']}");
+             "aktualizovanych {$res['updated']} z {$res['watched']}"
+             . ($dovod ? " — $dovod" : ''));
 
     echo "$cas — aktualizovanych {$res['updated']} z {$res['watched']} sledovanych\n";
     foreach ($res['games'] as $g) {
         echo sprintf("  #%d %s  %s  %s\n", $g['game_id'], $g['teams'],
                      $g['score'] ?? '-:-', $g['status'] ?: '');
     }
+    if (!empty($res['note']))        echo "  {$res['note']}\n";
+    if (!empty($res['model_error'])) echo "  model zlyhal (skore z feedu): {$res['model_error']}\n";
     if (!empty($res['missing'])) {
         echo '  vo feede chybali: ' . implode(', ', $res['missing']) . "\n";
     }
