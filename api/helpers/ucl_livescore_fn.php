@@ -49,7 +49,11 @@ function ucl_livescore_refresh(PDO $pdo, array $games): array {
 
     $model = defined('OPENROUTER_MODEL') ? OPENROUTER_MODEL : 'minimax/minimax-m3:free';
     $res = livescore_bulk_check(array_keys($watch), $model);
-    if (!$res['ok']) return ['error' => $res['error'] ?? 'neznáma chyba'];
+    // Zlyhany model nevadi, ked su zapasy z feedu — skore sa zapise aj tak
+    // a chyba sa len ohlasi. Bez zapasov je to skutocne zlyhanie.
+    if (!$res['ok'] && empty($res['games'])) {
+        return ['error' => $res['error'] ?? 'neznáma chyba'];
+    }
 
     // Polcasove skore sa prepise len ked ho livescore pozna — inak zostane povodne.
     $upd = $pdo->prepare('
@@ -135,6 +139,8 @@ function ucl_livescore_refresh(PDO $pdo, array $games): array {
         'total_feed' => $res['total_feed'] ?? null,
         'usage'      => $res['usage'] ?? null,
         'games'      => $log,
+        'model_error' => $res['ok'] ? null : ($res['error'] ?? 'neznáma chyba'),
+        'note'       => $res['note'] ?? null,
     ];
 }
 

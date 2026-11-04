@@ -46,6 +46,7 @@ function livescore_bulk_fetch(): array {
 // $wanted je pole id zapasov (AA) — zvycajne z flashscore_url v DB.
 function livescore_bulk_input(array $games, array $wanted, bool $withDetails = false): array {
     $rows = [];
+    $byId = [];    // id => riadok, aby sa modelu dali poslat len beziace
     $missing = [];
     $extra = [];   // poznamky, karty a polcas, ktore sklada server
     foreach ($wanted as $id) {
@@ -102,8 +103,9 @@ function livescore_bulk_input(array $games, array $wanted, bool $withDetails = f
             }
         }
         $rows[] = $row;
+        $byId[$id] = $row;
     }
-    return ['input' => implode("\n", $rows), 'missing' => $missing,
+    return ['input' => implode("\n", $rows), 'rows' => $byId, 'missing' => $missing,
             'found' => count($rows), 'extra' => $extra];
 }
 
@@ -291,43 +293,16 @@ function livescore_bulk_check(array $wantedIds, string $model): array {
                 'note' => 'Žiadny zo sledovaných zápasov dnes vo feede nie je'];
     }
 
-    // Odpoved rastie s poctom zapasov — jeden zabera zhruba 160 tokenov.
-    $maxTokens = min(1200 + $prep['found'] * 250, 12000);
-    $res = livescore_ask_model_raw(livescore_bulk_prompt($prep['input']), $model, $maxTokens);
-    if ($res['error'] !== null) return ['ok' => false, 'error' => $res['error'], 'games' => []];
-
-    $data = $res['data'];
-    if (!is_array($data)) {
-        // Najcastejsia pricina je orezana odpoved — hlaska to ma povedat.
-        $hint = str_ends_with(trim($res['content']), '}') ? '' : ' (odpoveď vyzerá nedokončene)';
-        return ['ok' => false,
-                'error' => 'Model nevrátil pole zápasov' . $hint,
-                'raw' => mb_substr($res['content'], 0, 400), 'games' => []];
-    }
-
-    // Zaloha, ked id nesedi: zapas podla domaceho timu
-    $podlaDomacich = [];
-    foreach ($wantedIds as $wid) {
-        if (isset($feed['games'][$wid]['AE'])) {
-            $podlaDomacich[mb_strtolower(trim($feed['games'][$wid]['AE']))] = $wid;
-        }
-    }
-
-    // Indexovanie podla id, aby sa vysledok dal priradit k zapasu v DB.
-    // Karty a poznamku spocital server — model ich neurcuje, lebo ich
-    // formuloval zakazdym inak a obcas priradil gol nespravnemu timu.
-    $out = [];
-    foreach ($data as $g) {
-        if (!is_array($g) || empty($g['id'])) continue;
-        // Model obcas vrati id aj s nazvom pola ("AA÷SGSUoDnR"). 3.11.2026 tak
-        // nesedel ani jeden zapas a livescore cely vecer nic nezapisal.
-        $id = preg_replace('/^.*÷/u', '', trim((string)$g['id']));
-        if (!isset($prep['extra'][$id]['feed'])) {
-            $id = $podlaDomacich[mb_strtolower(trim((string)($g['home_team'] ?? '')))] ?? $id;
-        }
+    // Skore, stav, zaciatok aj koniec su vo feede — zapas sa da zostavit aj
+    // bez modelu. 4.11.2026 model (nemotron-nano) vratil len zapasy pred
+    // vykopom, dva beziace vynechal a livescore cely vecer nic nezapisal,
+    // hoci volania boli "uspesne". Model preto uz nerozhoduje, ktore zapasy
+    // sa zapisu: dostane len beziace a jeho odpoved len doplni.
+    $doplnit = static function (array $g, string $id) use ($prep): array {
         $g['id'] = $id;
-        if (isset($prep['extra'][$id]['feed'])) {
-            $fd = $prep['extra'][$id]['feed'];
+        $x = $prep['extra'][$id] ?? [];
+        if (isset($x['feed'])) {
+            $fd = $x['feed'];
             $g['started']     = $fd['started'];
             $g['finished']    = $fd['finished'];
             $g['minute']      = $fd['minute'];
@@ -341,35 +316,93 @@ function livescore_bulk_check(array $wantedIds, string $model): array {
                 if ($fd['away_score'] !== null) $g['away_score'] = $fd['away_score'];
             }
         }
-        if (isset($prep['extra'][$id])) {
-            if (isset($prep['extra'][$id]['cards'])) {
-                $g = array_merge($g, $prep['extra'][$id]['cards']);
-            }
-            if (array_key_exists('notes', $prep['extra'][$id])) {
-                $g['notes'] = $prep['extra'][$id]['notes'] ?: null;
-            }
-            if (array_key_exists('halftime', $prep['extra'][$id])) {
-                $ht = $prep['extra'][$id]['halftime'];
-                $g['home_score_halftime'] = $ht[0] ?? null;
-                $g['away_score_halftime'] = $ht[1] ?? null;
-            }
-            if (isset($prep['extra'][$id]['status'])) {
-                $g['status'] = $prep['extra'][$id]['status'];
-            }
+        if (isset($x['cards'])) $g = array_merge($g, $x['cards']);
+        if (array_key_exists('notes', $x)) $g['notes'] = $x['notes'] ?: null;
+        if (array_key_exists('halftime', $x)) {
+            $g['home_score_halftime'] = $x['halftime'][0] ?? null;
+            $g['away_score_halftime'] = $x['halftime'][1] ?? null;
         }
+        if (isset($x['status'])) $g['status'] = $x['status'];
         // Po konci DB v detaile chyba a model kolisal medzi Koniec/2. polcas
-        if (!empty($prep['extra'][$id]['feed']['finished'])) $g['status'] = 'Koniec';
-        $out[$id] = $g;
+        if (!empty($x['feed']['finished'])) $g['status'] = 'Koniec';
+        return $g;
+    };
+
+    // Zaklad z feedu pre kazdy najdeny zapas
+    $out = [];
+    $live = [];
+    foreach ($prep['extra'] as $id => $x) {
+        if (!isset($x['feed'])) continue;
+        $f = $feed['games'][$id] ?? [];
+        $out[$id] = $doplnit(['home_team' => $f['AE'] ?? null, 'away_team' => $f['AF'] ?? null,
+                              'status' => ''], (string)$id);
+        if ($out[$id]['status'] === '' && $x['feed']['started']) $out[$id]['status'] = 'prebieha';
+        if ($x['feed']['started'] && !$x['feed']['finished']) $live[] = (string)$id;
     }
 
-    // Odpoved bez jedineho sledovaneho zapasu je zlyhanie, nie uspech —
-    // inak by sa livescore neprepol na dalsi model a zostal by na tom,
-    // ktory nic nevracia (3.11.2026 nemotron-nano cely vecer "uspesne").
-    if (!array_intersect_key($out, $prep['extra'])) {
-        return ['ok' => false, 'games' => [], 'usage' => $res['usage'],
-                'error' => 'Model nevrátil ani jeden zo sledovaných zápasov ('
-                         . $prep['found'] . ')',
-                'raw' => mb_substr($res['content'], 0, 400)];
+    // Nic nebezi — model netreba, vsetko je vo feede
+    if (!$live) {
+        return ['ok' => true, 'error' => null, 'games' => $out, 'usage' => null,
+                'missing' => $prep['missing'], 'total_feed' => $feed['total'],
+                'note' => 'Žiadny zápas práve nebeží — bez modelu'];
+    }
+
+    $input = implode("\n", array_intersect_key($prep['rows'], array_flip($live)));
+
+    // Odpoved rastie s poctom zapasov — jeden zabera zhruba 160 tokenov.
+    $maxTokens = min(1200 + count($live) * 250, 12000);
+    $res = livescore_ask_model_raw(livescore_bulk_prompt($input), $model, $maxTokens);
+
+    // Zlyhanie modelu sa hlasi (kvoli prepnutiu na dalsi model), ale zapasy
+    // z feedu sa vratia aj tak.
+    $zlyhanie = static function (string $error, string $raw = '') use ($out, $prep, $feed, $res) {
+        return ['ok' => false, 'error' => $error, 'games' => $out,
+                'usage' => $res['usage'] ?? null, 'raw' => mb_substr($raw, 0, 400),
+                'missing' => $prep['missing'], 'total_feed' => $feed['total']];
+    };
+    if ($res['error'] !== null) return $zlyhanie($res['error']);
+
+    $data = $res['data'];
+    if (!is_array($data)) {
+        // Najcastejsia pricina je orezana odpoved — hlaska to ma povedat.
+        $hint = str_ends_with(trim($res['content']), '}') ? '' : ' (odpoveď vyzerá nedokončene)';
+        return $zlyhanie('Model nevrátil pole zápasov' . $hint, $res['content']);
+    }
+
+    // Zaloha, ked id nesedi: zapas podla domaceho timu
+    $podlaDomacich = [];
+    foreach ($live as $wid) {
+        if (isset($feed['games'][$wid]['AE'])) {
+            $podlaDomacich[mb_strtolower(trim($feed['games'][$wid]['AE']))] = $wid;
+        }
+    }
+
+    // Model len doplni beziace zapasy (napr. stav, ked ho detail nema).
+    // Karty a poznamku spocital server — model ich neurcuje, lebo ich
+    // formuloval zakazdym inak a obcas priradil gol nespravnemu timu.
+    $trafene = 0;
+    foreach ($data as $g) {
+        if (!is_array($g) || empty($g['id'])) continue;
+        // Model obcas vrati id aj s nazvom pola ("AA÷SGSUoDnR"). 3.11.2026 tak
+        // nesedel ani jeden zapas a livescore cely vecer nic nezapisal.
+        $id = preg_replace('/^.*÷/u', '', trim((string)$g['id']));
+        if (!in_array($id, $live, true)) {
+            $id = $podlaDomacich[mb_strtolower(trim((string)($g['home_team'] ?? '')))] ?? $id;
+        }
+        if (!in_array($id, $live, true)) continue;
+        $trafene++;
+        $zaklad = $out[$id];
+        $g = $doplnit($g, $id);
+        if (trim((string)($g['status'] ?? '')) === '') $g['status'] = $zaklad['status'];
+        $out[$id] = $g + $zaklad;
+    }
+
+    // Odpoved bez jedineho beziaceho zapasu je zlyhanie modelu, nie uspech —
+    // inak by sa livescore neprepol na dalsi model (3.11.2026 nemotron-nano
+    // cely vecer "uspesne"). Skore z feedu sa zapise aj tak.
+    if ($trafene === 0) {
+        return $zlyhanie('Model nevrátil ani jeden z bežiacich zápasov (' . count($live) . ')',
+                         $res['content']);
     }
 
     return ['ok' => true, 'error' => null, 'games' => $out,
