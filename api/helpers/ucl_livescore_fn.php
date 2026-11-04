@@ -94,7 +94,7 @@ function ucl_livescore_refresh(PDO $pdo, array $games): array {
            SET ls_home = ?, ls_away = ?, ls_status = ?, ls_updated_at = NOW(),
                home_score_halftime = COALESCE(?, home_score_halftime),
                away_score_halftime = COALESCE(?, away_score_halftime),
-               tips_open = CASE WHEN ? AND start_time <= (NOW() AT TIME ZONE 'UTC')
+               tips_open = CASE WHEN ? AND start_time <= (NOW() AT TIME ZONE \'UTC\')
                                 THEN FALSE ELSE tips_open END,
                updated_at = NOW()
          WHERE game_id = ?');
